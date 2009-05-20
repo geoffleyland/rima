@@ -52,7 +52,7 @@ dist:
 	rm -rf $(PACKAGE)-$(VERSION)
 	markdown.lua doc.txt
 	rm -f $(PACKAGE)-$(VERSION).tar.gz
-	find * | grep -v "\.svn" | grep -v "build" | grep -v "\.DS_Store" | grep -v "\.so" | grep -v "coin" | grep -v "lpsolve" > dist.files
+	find * | grep -v "\.svn" | grep -v "\.DS_Store" | grep -v "build" > dist.files
 	mkdir -p $(PACKAGE)-$(VERSION)
 	cpio -p $(PACKAGE)-$(VERSION) < dist.files
 	tar czvf $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
