@@ -1,0 +1,480 @@
+# Rima - A Tool for Math Programming
+
+Rima's principal (ie only so far) author is Geoff Leyland of [Incremental](http://www.incremental.co.nz/).
+You can email me at <rima@incremental.co.nz>.
+
+Rima has no website of its own yet.
+
+## Introduction
+
+### What's this?
+
+Rima is a library for modelling math programming problems in [Lua](http://www.lua.org/).
+Specifically, it offers a way of describing optimisation problems properly, and passing those problems to optimisation libraries for solution.
+At the moment it binds to three solvers:
+
++ [CLP](https://projects.coin-or.org/Clp) for linear problems
++ [CBC](https://projects.coin-or.org/Cbc) for mixed-integer linear problems
++ [lpsolve](http://sourceforge.net/projects/lpsolve) for mixed-integer problems
+
+CLP and CBC are both part of the [COIN](http://www.coin-or.org/) project.
+
+
+### How do I build and install it?
+
+#### Prerequisites
+
+##### Lua
+
+You'll need to have Lua 5.1 installed and working (which should be easy).  Instructions and binaries are [here](http://www.lua.org/download.html).
+There may be an even easier way to get it for your platform:
+
++ Linux: you can almost certainly `apt-get install lua`
++ OS X: if have [MacPorts](http://www.macports.org/) installed you can `port install lua` (there must be a similar command for [Fink](http://www.finkproject.org/))
++ Windows: there's [Lua for Windows](http://luaforwindows.luaforge.net/) which is a binary installer of Lua and a lot of supporting packages
+
+##### Solvers
+
+If you want to solve any optimisation problems
+(you could just play with Rima's late-bound symbolic maths stuff, but I don't think it'll keep you amused for long),
+you'll need to install one of the solvers.
+
+[lpsolve](http://sourceforge.net/projects/lpsolve) is probably easier to get running - it compiles to one shared library.
+The download contains makefiles, build scripts and project files for most platforms.
+You'll need version 5.5.
+
+The COIN solvers take a bit more work, and build several shared libraries.
+I think the right way to install them is to check out the latest stable version of CBC from COIN's [Subversion server](https://projects.coin-or.org/svn/Cbc/stable/) and proceed from there.
+I took a bit of a more tortuous route, and use the COIN trunk.
+
+#### Building and installing Rima
+
+There's a makefile in this distribution with, at this stage, I'm afraid you'll almost certainly have to modify yourself.
+It works for me on OS X, and I'd appreciate it if you let me know what works on your setup.
+
+Ideally you'll just
+
+    make
+    make test
+    sudo make install
+
+The default target for the makefile, the test target and the install target all try to build and test all three solvers:
+you'll probably want to modify the makefile to only use one.
+
+
+## Using Rima
+
+Using Rima is illustrated to some exent in the tests in the source files (which are not well commented),
+and in the examples in the examples directory (which have more, hopefully better comments).
+
+To get started, either start Lua with `lua -lrima`, or write a Lua script that starts by requiring Rima (`require"rima"`).
+The examples that follow should work if you start a Lua console with `lua -lrima` and paste the example onto the console.
+
+### Defining Equations With Rima
+
+#### Defining References
+
+In order to write an equation, you'll first need to define some variables.
+Rima's variables exist within Rima scopes, rather than as Lua variables,
+so in order to use them in Lua, we define references to the variables:
+
+    x = rima.R"x"
+
+`rima.R` creates a new reference to a variable named `x` (which we don't have to define until later).
+If you wish to define more than one variable at a time, you can:
+
+    x, y = rima.R"x, y"
+
+Note that unlike most other math modelling languages, Rima doesn't distinguish between *variables* (which are to be solved for)
+and *parameters* (which are expected to be defined before the model is solved).
+Rima works out what it does and doesn't know just before it solves,
+and then solves for the unknowns if it can, and complains if it can't.
+
+#### Writing an Equation
+
+Writing an equation (or *expression*) in Rima is as you'd expect:
+
+    x, y = rima.R"x, y"
+    e = x + y
+    print(e)
+
+which prints `x + y`.
+
+If you want to use any functions from the math library, though, you'll have to use the Rima versions:
+    =rima.sin(rima.R"x")                                --> sin(x)
+
+("`=<expression>`" is equivalent to "`print(<expression>)`" when used on the Lua console)
+
+You can treat expressions just like variables:
+
+    x, y = rima.R"x, y"
+    e = x * y
+    =e * x * y                                          --> x*y*x*y
+
+That results of `e * x * y` could be simplified.
+Rima will do that when it evaluates the expression.
+
+#### Evaluating an Expression
+
+You can use the function `rima.E` to evaluate an expression.
+It takes as arguments the expression to evaluate and a table of values of variables.
+
+    x, y = rima.R"x, y"
+    =rima.E(x + y, { x=1, y=2 })                        --> 3
+
+The first argument is the expression you want to evaluate,
+and the second (optional) argument is a tables of values of the variables in the expression.
+
+Rima doesn't mind if some variables aren't defined:
+
+    =rima.E(rima.R"x" * rima.sin(rima.R"y"), { x=5 })   --> 5*sin(y)
+
+And sometimes it doesn't matter if they're defined or not:
+
+    x, y = rima.R"x, y"
+    =rima.E(x * y * y / y^2 - x)                        --> 0
+
+The result of evaluating an expression is just an expression, so you can always evaluate it later:
+
+    x, y = rima.R"x, y"
+    e = rima.E(x + y, { x=7 })
+    print(e)                                            --> 7 + y
+    =rima.E(e, { y=13 })                                --> 20
+
+Rima will simplify expressions when it evaluates.
+Taking the example above:
+
+    x, y = rima.R"x, y"
+    e = x * y
+    =rima.E(e * x * y, {})                              --> x^2*y^2
+
+The values in the table of values don't have to be literals,
+they can be references to other variables, and even expressions:
+
+    x, y = rima.R"x, y"
+    =rima.E(x, { x=y^2, y=5 })                          --> 25
+
+
+#### Variable Types
+
+If you don't want to define a variable, you might still want to say something about its type -
+bounds on the variable, and whether it's an integer on binary variable.
+Rima will pass any of that information onto a solver later.
+
+The available variable types are
+
++ `rima.free()`: real, no bounds, you can set upper and lower bounds with arguments: `rima.free(0.5, 3.7)`
++ `rima.positive()`, `rima.negative()`: real, by default positive and negative.  You can also set bounds.
++ `rima.integer()`: integer, by default positive.  Once again, you can set bounds.
++ `rima.binary()`: integer, 0 or 1.  You can't change the bounds.
+
+You'll see below in the section on functions that defining a variable as `free` can be useful,
+even though it's effectively the same as the not defining the variable at all.
+
+
+#### Subscripting
+
+You can subscript references just like normal variables - the reference will just remember the subscript for later.
+You don't have to declare the reference as a a structure or array to do this (though this might change when Rima gets a working type system).
+Again, Rima isn't fussy about what is and isn't defined.
+
+    x, y = rima.R"x, y"
+    =rima.E(x[1] + x[2] * y.a + y.b, { x={ 2 }, y={ a=5 } })
+                                                        --> 2 + 5*x[2] + y[b]
+
+(The last term in the output should probably be `y["b"]`, quoting the `b`)
+
+
+#### Functions
+
+You can define functions in Rima, but remember they're data, rather than part of an expression:
+
+    f, x, y = rima.R"f, x, y"
+    =rima.E(f(2, 3), { f=rima.func({x, y}, y^x) })      --> 9
+
+The syntax for creating a function is `rima.func` because `function` is a reserved word in Lua.
+The first argument is the list of arguments to the function, and the second is the expression that makes up the body of the function.
+
+Functions "return" the result of evaluating their expression - which could well be an expression:
+
+    f, x, y = rima.R"f, x, y"
+    =rima.E(f(x), { f=rima.func({y}, rima.sin(y)) })    --> sin(x)
+
+Function arguments can also be expressions:
+
+    f, x, y = rima.R"f, x, y"
+    =rima.E(f(x^3), { f=rima.func({y}, y*y) })          --> x^6
+
+If a function uses a variable that's not an argument, it'll look for it in the defined variables:
+
+    f, x, y, a = rima.R"f, x, y, a"
+    F = rima.func({x}, x * y)
+    =rima.E(f(a), { f=F, a=2, y=3 })                    --> 6
+
+You can define local variables for a function by passing them as the third argument to `rima.func`:
+
+    f, x, y = rima.R"f, x, y"
+    S = { f=rima.func({x}, x * y, { y=5 }) }
+    =rima.E(f(2), S)                                    -> 10
+
+Local variables live in a different scope from the `global` variables we've seen until now:
+
+    f, x, y = rima.R"f, x, y"
+    F = rima.func({x}, x * y, { y=5 })
+    =rima.E(x * f(y), { x=10, y=20, f=F })              --> 1000
+
+That example's a bit hard to follow, if we don't define `x` and `y` in the global scope, we'd expect `x * f(y)` to be `x * y * 5`:
+
+    f, x, y = rima.R"f, x, y"
+    F = rima.func({x}, x * y, { y=5 })
+    =rima.E(x * f(y), { f=F })                          --> 5*x*y
+
+where the `x` and the `y` are in the global scope.
+Remembering that the return value of an expression is another expression:
+
+    f, x, y = rima.R"f, x, y"
+    F = rima.func({x}, x * y, { y=5 })
+    e = rima.E(x * f(y), { f=F })
+    print(e)                                           --> 5*x*y
+    =rima.E(e, { x=2, y=3 })                           --> 30
+
+This illustrates, to some extent, why we define *references* and not *variables* with `rima.R`.
+In the above examples, there are two sets of `x` and `y`: those defined in the global *scope*
+and those defined in the function *scope*, but we refer to them with the same reference -
+a reference is just a name for a variable.
+
+I realise the double meaning of x is confusing,
+and I'm open to suggestions to clear things up that don't get too wordy.
+
+If you don't fully define function local variables, you can run into trouble:
+
+    f, x, y = rima.R"f, x, y"
+    F = rima.func({x}, x * y, { y=rima.free() })
+    e = rima.E(f(x), { f=F })
+    print(e)                                            --> x*y
+
+Which *looks* ok, but the `y` is now *bound* to the function's local `y`, which is no longer available:
+
+    =rima.E(e, { x=2, y=3 })
+    -- error while evaluating 'x*y':
+         the reference 'y' is bound to a scope that is not available
+
+(There are ways to fool this mechanism at the moment, and it's not handled well, but we'll get there eventually...)
+
+You can call a rima function like a regular Lua function.
+I can't think of a reason to do this at the moment, and keep in mind that the result might be an expression rather than a number:
+
+    y = rima.R"y"
+    F = rima.func({y}, y^2)
+    =F(5)                                               --> 25
+
+#### Scopes
+
+The variable values we've passed to `rima.E` have been standard Lua tables,
+but before using them, Rima converts them into a `scope`.
+A `scope` is pretty much like a Lua table, but they can handle type information as well as values:
+
+    S = rima.scope.new()
+    S.a = 5
+    S.b = rima.free()
+    S.b = rima.positive()                               -- ok, positive is a subset of free
+    S.b = rima.free(-1, 10)
+    -- cannot set 'b' to '-1 <= a <= 10, b real': violates existing constraint '0 <= b <= inf, b real'
+    S.b = -100
+    -- cannot set 'b' to '-100': violates existing constraint '0 <= b <= inf, b real'
+    S.b = 6                                             -- ok, 6 is positive
+
+There's shorthand for creating scopes:
+
+    S = rima.scope.create{ ["a, b, c"]=rima.integer(), ["x, y"]=rima.free() }
+
+The value returned from indexing a scope is a reference if the scope member is not fully defined, and the value if it is:
+
+    S = rima.scope.create{ a=5, b=rima.free() }
+    =S.a, S.b                                           --> 5 b
+    B = S.b
+    rima.E(B, S)                                        --> b
+    S.b = 6
+    =rima.E(B, S)                                       --> 6
+
+Scopes are write-once for values:
+
+    S = rima.scope.create{ a=rima.positive() }
+    S.a = 5                                             -- ok
+    S.a = 6
+    -- cannot set 'a' to '6': existing definition as '5'
+
+You can create children of scopes: they inherit values from their parent, and you can set values in them:
+
+    S = rima.scope.create{ one=1, a=rima.integer() }
+    S1 = rima.scope.spawn(S)
+    S2 = rima.scope.spawn(S)
+    =S.one, S1.one, S2.one                              --> 1 1 1
+    S1.a = 1.5
+    -- cannot set 'a' to '1.5': violates existing constraint '0 <= a <= inf, a integer'
+    S1.a = 3
+    =S.a, S1.a, S2.a                                    --> a 3 a
+
+
+#### Sums
+
+Rima can sum over tables, although at first, the syntax appears cumbersome:
+
+    A, a = rima.R"A, a"
+    S = rima.scope.create{ A={1, 2, 3} }
+    =rima.E(rima.sum(rima.alias(A, "a"), A[a]), S)      --> 6
+
+The first to second-to-last arguments to `rima.sum` tell rima what sets to sum over,
+the last argument is the expression to sum.
+`rima.alias(A, "a")` tells the sum that we want to sum over the set A,
+and we want to call our index variable a.
+It's kind of equivalent to `for a in ipairs(A) do`.
+
+Why the complication?  Often we want to sum several variables over the same index:
+
+    Q, x, y = rima.R"Q, x, y"
+    S = rima.scope.create{ Q={"one", "two", "three"}, x={4, 5, 6}, y={7, 8, 9} }
+    =rima.E(rima.sum(Q, x[Q]*y[Q]), S)                  --> 122
+
+(Note that we didn't use `rima.alias` this time.
+In the scope of the sum expression `Q` means the current index of the set `Q`).
+Summing over a set is also the only way rima can work out what to do with undefined variables:
+
+    Q, x = rima.R"Q, x"
+    S = rima.scope.create{ Q={"one", "two", "three"} }
+    =rima.E(rima.sum(Q, x[Q]), S)                       --> x[one] + x[three] + x[two]
+
+At the moment, summing is the *only* thing you can do over a set,
+and you can't do conditional sums.
+We'll get there eventually...
+
+
+#### Tabulation
+
+Sometimes there's not much difference between indexing a variable and calling a function.
+Rima's `tabulate` function allows you to make the link:
+
+    Q, x, y = rima.R"Q, x, y"
+    e = rima.sum(Q, x[Q])
+    S = rima.scope.create{ Q={4, 5, 6} }
+    S.x = rima.tabulate(rima.value(y)^2, y)
+    =rima.E(e, S)                                       --> 77
+
+`rima.tabulate' takes the expression to evaluate is it's first argument,
+and the names of its arguments (the indexes on the subscript expression) as subsequent
+arguments.
+
+(As as aside, if you're getting confused as to all the different ways of expressing argument lists here,
+so am I.  Once I work out what's best - I think probably something like the approach used in `rima.func` -
+I'll change to that)
+
+Keep in mind that the arguments passed to tabulate are *indexes* into a table.
+Indexes are not normal variables.
+You can get the value of the set element pointed to by index with `rima.value`
+(this is only really useful if the value is a number)
+and the index of the element with `rima.ord`.
+
+Note that rima always iterates through sets with ipairs, not pairs, so indexes are always numbers,
+and you can't expect to see any non-array members of the table defining the set.
+
+
+### Optimisation with Rima
+
+Rima's expressions can be used to express constraints and objectives in
+Linear and Mixed-Integer Programs, which can then be solved with one of the solvers
+Rima has bindings for.
+
+Examples of solving LPs can be found in the examples directory.
+
+The way a problem is constructed is likely to change, often, as Rima evolves.
+
+Because Rima expressions are symbolic, and because references are can be bound to data
+at any time (particularly late), you can express your problem in a very concise form,
+and use the same problem description (or *formulation*) on many sets of data.
+
+#### Constructing a Model
+
+Formulations are constructed in a reasonably standard manner for Lua objects:
+
+    f = rima.formulation:new()
+
+Constraints are added with `formulation:add`:
+
+    x, y = rima.R"x, y"
+    f:add(x + 2*y, "<=", 3)
+    f:add(2*x + y, "<=", 3)
+
+And the objective is set with `formulation:set_objective`:
+
+    f:set_objective(x + y, "maximise")
+
+The string setting the objective direction is not case-sensitive, and can be
+maximise, maximize, minimise or minimize.
+
+A formulation has a scope attached to it.  You can set variables in it with `set`:
+
+    f:set{ ["x, y"] = rima.positive() }
+
+A formulation can write itself:
+
+    f:write()
+    
+    -- Maximise:
+    --   x + y
+    -- Subject to:
+    --   x + 2*y <= 3
+    --   2*x + y <= 3
+
+
+#### Solving a Model
+
+And you can solve a formulation using a solver:
+
+    r = f:solve("lpsolve")
+
+The result, `r` in this case is a table with three elements: `objective`, `variables` and `constraints`.
+
+`r.objective` is the optimal objective value:
+
+    =r.objective                                        --> 2
+
+`r.variables` is a table mimicking the structure of the undefined variables in the problem scope.
+Each entry in variables is a table with two values: `p` (primal) the optimal value of the variable
+and `d` the optimal dual (or reduced cost):
+
+    =r.variables.x.p, r.variables.y.p                   --> 1 1
+    =r.variables.x.d, r.variables.y.d                   --> 0 0
+
+Constraints can't be named yet, so `r.constraints' is a numerically-indexed table with the constraint values and their duals:
+
+    =r.constraints[1].p, r.constraints[2].p             --> 3 3
+    =r.constraints[1].d, r.constraints[2].d             --> 0.3333 0.3333
+
+#### Model Instances
+
+`formulation:instance()` creates a new model with the old model as a parent.
+The new model has the same set of constraints and the same objective as the parent model,
+but its scope is a child of the parent model's scope.
+
+For examples of how this can be used for a rough stab at model composition, see
+`examples/whiskas.lua` and `examples/minimax.lua`.
+
+
+## History
+
++ 0.01 (20 May 2009)
+    + Initial release.  Just enough works.
+
+## Future
+
++ Rima once had really good test coverage.  It'd be nice to get that back.
++ It'd be nice to have a parser for expressions that wasn't constrained by Lua syntax.
++ LuaDoc on the API (I'd have to define the API first)
++ LuaRocks package.
++ Lots of work on model composition.
++ A type system.
++ Set operations.
++ Conditional sums.
++ Support for solver options.
++ Support for resolves, adding constraints and variables.
++ It'd be nice to compile expressions (especially with a JIT!)
