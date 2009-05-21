@@ -165,20 +165,6 @@ function expression.eval(e, S)
 end
 
 
-function expression.evaluate(e, S)
-  local fname, usage =
-    "rima.expression:evaluate",
-    "evaluate(S:scope)"
-  tools.check_arg_type(S, "S", {scope, "scope"}, usage, frame)
-  local status, r = pcall(function() return expression.eval(e, S) end)
-  if status then
-    return r
-  else
-    error(("error while evaluating '%s':\n  %s"):format(rima.tostring(e), r:gsub("\n", "\n  ")), 0)
-  end
-end
-
-
 -- Getting a linear form -------------------------------------------------------
 
 function expression._linearise(l, S)
@@ -328,7 +314,7 @@ function test1(show_passes)
   -- variables
   local a = rima.R"a"
   equal(T, "ref(a)", {a, nil, "dump"})
-  T:expect_ok(function() expression.evaluate(a, S) end)
+  T:expect_ok(function() rima.E(a, S) end)
   equal(T, "a", {a, S, "eval"})
   S.a = rima.free()
   equal(T, "a", {a, S, "eval"})

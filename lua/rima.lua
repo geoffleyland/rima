@@ -4,6 +4,7 @@
 local coroutine = require("coroutine")
 local table = require("table")
 local ipairs, global_tostring, type, unpack = ipairs, tostring, type, unpack
+local error, pcall = error, pcall
 local setmetatable = setmetatable
 local require = require
 
@@ -32,13 +33,26 @@ function R(names, type)
   return unpack(results)
 end
 
+
 function E(e, S)
+  local fname, usage =
+    "rima.E",
+    "E(e:expression, S:nil, table or scope)"
+
+  tools.check_arg_types(S, "S", {"nil", "table", {scope, "scope"}}, usage, frame)
+
   if not S then
     S = scope.new()
   elseif not object.isa(S, scope) then
     S = scope.create(S)
   end
-  return expression.evaluate(e, S)
+
+  local status, r = pcall(function() return expression.eval(e, S) end)
+  if status then
+    return r
+  else
+    error(("error while evaluating '%s':\n  %s"):format(rima.tostring(e), r:gsub("\n", "\n  ")), 0)
+  end
 end
 
 -- Private functionality -------------------------------------------------------
@@ -220,7 +234,7 @@ function set.prepare(S, sets)
       n = proxy.O(a).name
     end
     S2[n] = types.undefined_t:new()
-    local e = expression.evaluate(r, S)
+    local e = E(r, S)
     if e and not object.isa(e, ref) and not object.isa(e, expression) then
       defined_sets[#defined_sets+1] = alias(e, n)
     else

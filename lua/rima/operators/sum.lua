@@ -12,8 +12,6 @@ local ref = rima.ref
 local expression = rima.expression
 local scope = rima.scope
 
-local print = print
-
 module(...)
 
 -- Subscripts ------------------------------------------------------------------
@@ -137,7 +135,6 @@ function test(show_passes)
   do -- this is really a tabulate test!
     local Q, x, y, z = rima.R"Q, x, y"
     local e = rima.sum(Q, x[Q])
-    print(e)
     local S = rima.scope.create{ Q={4, 5, 6} }
     S.x = rima.tabulate(rima.value(y)^2, y)
     T:equal_strings(rima.E(e, S), 77)

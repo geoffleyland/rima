@@ -120,7 +120,7 @@ function formulation:write(values, f)
 
   -- Write the objective
   if self.objective then
-    local o = expression.evaluate(self.objective, S)
+    local o = rima.E(self.objective, S)
     f:write(("%s:\n  %s\n"):format((self.sense == "minimise" and "Minimise") or "Maximise", tostring(o)))
   else
     f:write("No objective defined\n")

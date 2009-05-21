@@ -271,7 +271,6 @@ function test(show_passes)
   do
     local S = rima.scope.create{ a={ "x", "y" }, b = 2}
     T:equal_strings(expression.eval(a[b], S), "y")
-    T:equal_strings(expression.evaluate(a[b], S), "y")
   end
 
   do
