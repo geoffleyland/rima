@@ -49,6 +49,11 @@ function ref:new(r)
   return proxy:new(object.new(ref, { name=r.name, address=r.address or {}, type=r.type, scope=r.scope }), ref_proxy_mt)
 end
 
+function ref.is_simple(r)
+  r = proxy.O(r)
+  return (r.scope or #r.address > 0) and false or true
+end
+
 
 -- String Representation -------------------------------------------------------
 

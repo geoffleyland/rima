@@ -3,6 +3,7 @@
 
 local error, ipairs = error, ipairs
 
+local tools = require("rima.tools")
 local tests = require("rima.tests")
 local value = require("rima.values.value")
 local expression = require("rima.expression")
@@ -17,12 +18,31 @@ local function_v = value:new(_M, "function_v")
 
 function function_v:new(inputs, expression, S, ...)
   local fname, usage =
-    "rima.values.function_v:new",
-    "new(inputs, outputs, expression)"
+    "function_v:now",
+    "new(inputs, expression, table or scope)"
+
+  tools.check_arg_types(S, "S", {"nil", "table", {rima.scope, "scope"}}, usage, frame)
 
   if S and not isa(S, rima.scope) then S = rima.scope.create(S) end
 
-  return value.new(self, { inputs=inputs, expression=expression, S=S, outputs={...} })
+  local new_inputs = {}
+  for i, v in ipairs(inputs) do
+    if type(v) == "string" then
+      new_inputs[i] = rima.R(v)
+    elseif isa(v, rima.ref) then
+      if rima.ref.is_simple(v) then
+        new_inputs[i] = v
+      else
+        error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
+          format(tostring(v), type(v)), 0)
+      end
+    else
+      error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s))"):
+        format(tostring(v), type(v)), 0)
+    end
+  end
+
+  return value.new(self, { inputs=new_inputs, expression=expression, S=S, outputs={...} })
 end
 
 function rima.func(inputs, expression, S)
@@ -96,9 +116,9 @@ end
 function test(show_passes)
   local T = tests.series:new(_M, show_passes)
 
-  T:test(isa(function_v:new(), function_v), "isa(function_v:new(), function_v)")
-  T:test(isa(function_v:new(), value), "isa(function_v:new(), value)")
-  T:equal_strings(type(function_v:new()), "function_v", "type(function_v:new()) == 'function_v'")
+  T:test(isa(function_v:new({"a"}, 3), function_v), "isa(function_v:new(), function_v)")
+  T:test(isa(function_v:new({"a"}, 3), value), "isa(function_v:new(), value)")
+  T:equal_strings(type(function_v:new({"a"}, 3)), "function_v", "type(function_v:new()) == 'function_v'")
 
   local a, b, c, x = rima.R"a, b, c, x"
 
@@ -137,7 +157,7 @@ function test(show_passes)
   end
 
   do
-    local f = function_v:new({a, b}, 1 + a, nil, b^2)
+    local f = function_v:new({a, "b"}, 1 + a, nil, b^2)
     local S = rima.scope.create{ ["a, b"] = rima.free() }
     T:equal_strings(f, "function(a, b) return 1 + a", "function description")
     T:equal_strings(f:call(S, {2 + x, 5, {x}}), 28)
@@ -146,7 +166,7 @@ function test(show_passes)
 
   do
     local f = rima.R"f"
-    local S = rima.scope.create{ f = function_v:new({a, b}, 1 + a, nil, b^2) }
+    local S = rima.scope.create{ f = function_v:new({"a", b}, 1 + a, nil, b^2) }
     local e = 1 + f(1 + x, 3, {x})
     T:equal_strings(expression.eval(e, S), 12)
   end
