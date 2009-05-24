@@ -11,8 +11,8 @@ module(...)
 function test(show_passes)
   local T = tests.series:new(_M, show_passes)
 
---  T:run(values.value.test)
   T:run(values.function_v.test)
+  T:run(values.tabulate.test)
 
   return T:close()
 end

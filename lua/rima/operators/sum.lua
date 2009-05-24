@@ -132,14 +132,6 @@ function test(show_passes)
     T:equal_strings(expression.eval(rima.sum(rima.alias(X, "x"), z * rima.value(x)), S), 15*z)
   end
   
-  do -- this is really a tabulate test!
-    local Q, x, y, z = rima.R"Q, x, y"
-    local e = rima.sum(Q, x[Q])
-    local S = rima.scope.create{ Q={4, 5, 6} }
-    S.x = rima.tabulate(rima.value(y)^2, y)
-    T:equal_strings(rima.E(e, S), 77)
-  end
-
   return T:close()
 end
 

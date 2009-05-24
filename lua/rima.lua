@@ -51,7 +51,7 @@ function E(e, S)
   if status then
     return r
   else
-    error(("error while evaluating '%s':\n  %s"):format(rima.tostring(e), r:gsub("\n", "\n  ")), 0)
+    error(("error while evaluating '%s':\n  %s"):format(tostring(e), r:gsub("\n", "\n  ")), 0)
   end
 end
 
@@ -132,35 +132,6 @@ end
 
 function ord(e)
   return expression:new(ord_op, e)
-end
-
-
--- Tabulate --------------------------------------------------------------------
-
-local tabulate_type = object:new({}, "tabulate")
-function tabulate_type:new(e, ...)
-  return object.new(self, { expression=e, indexes={...}})
-end
-
-function tabulate_type:__tostring()
-  return "tabulate("..tostring(self.expression)..", "..table.concat(imap(tostring, self.indexes), ", ")..")"
-end
-
-function tabulate_type:handle_address(S, a)
-  if #a ~= #self.indexes then
-    error(("the tabulation needs %d indexes, got %d"):format(#self.indexes, #a), 0)
-  end
-  S2 = scope.spawn(S, nil, {overwrite=true})
-
-  for i, j in ipairs(self.indexes) do
-    S2[tostring(j)] = expression.eval(a[i], S)
-  end
-
-  return expression.eval(self.expression, S2)
-end
-
-function tabulate(e, ...)
-  return tabulate_type:new(e, ...)
 end
 
 
