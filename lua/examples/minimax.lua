@@ -77,7 +77,7 @@ local r = Z:solve("clp",
   xmax = 10,
   points = 10,
   terms = 4,
-  f = rima.func({x}, rima.exp(x) * rima.sin(x)),
+  f = rima.F({x}, rima.exp(x) * rima.sin(x)),
 })
 io.write(("\nMinimax Polynomial with CLP\n  max error:\t% 10.2f\n"):format(r.objective))
 for k, v in pairs(r.variables.w) do io.write(("  w[%d]:\t% 10.2f\t(% 10.2f)\n"):format(k, v.p, v.d)) end

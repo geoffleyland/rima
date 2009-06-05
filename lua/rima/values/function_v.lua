@@ -45,7 +45,7 @@ function function_v:new(inputs, expression, S, ...)
   return value.new(self, { inputs=new_inputs, expression=expression, S=S, outputs={...} })
 end
 
-function rima.func(inputs, expression, S)
+function rima.F(inputs, expression, S)
   return function_v:new(inputs, expression, S)
 end
 
@@ -173,12 +173,12 @@ function test(show_passes)
 
   do
     local f, x, y = rima.R"f, x, y"
-    T:equal_strings(rima.E(f(x), { f=rima.func({y}, rima.sin(y)) }), "sin(x)")
+    T:equal_strings(rima.E(f(x), { f=rima.F({y}, rima.sin(y)) }), "sin(x)")
   end
 
   do
     local y = rima.R"y"
-    T:equal_strings(rima.func({y}, y^2)(5), 25)
+    T:equal_strings(rima.F({y}, y^2)(5), 25)
   end
 
   -- more tests in expression
