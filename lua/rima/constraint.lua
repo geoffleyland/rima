@@ -35,7 +35,7 @@ end
 
 function constraint:linearise(S)
   local caller_base_scope, defined_sets =
-    rima.set.prepare(S, self.sets)
+    rima.iteration.prepare(S, self.sets)
 
   assert(#defined_sets == #self.sets, "Some of the constraint's indices are undefined")
 
@@ -43,7 +43,7 @@ function constraint:linearise(S)
   local e = self.lhs - self.rhs
 
   local function list()
-    for caller_scope in rima.set.iterate_all(caller_base_scope, defined_sets) do
+    for caller_scope in rima.iteration.iterate_all(caller_base_scope, defined_sets) do
       local constant, lhs = expression.linearise(e, caller_scope)
       coroutine.yield(lhs, self.type, -constant)
     end
@@ -56,10 +56,10 @@ end
 
 function constraint:tostring(S)
   local caller_base_scope, defined_sets, undefined_sets =
-    rima.set.prepare(S, self.sets)
+    rima.iteration.prepare(S, self.sets)
 
   local function list()
-    for caller_scope in rima.set.iterate_all(caller_base_scope, defined_sets) do
+    for caller_scope in rima.iteration.iterate_all(caller_base_scope, defined_sets) do
       local lhs = rima.tostring(expression.eval(self.lhs, caller_scope))
       local rhs = rima.tostring(expression.eval(self.rhs, caller_scope))
       local s = lhs.." "..self.type.." "..rhs

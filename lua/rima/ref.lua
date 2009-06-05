@@ -140,7 +140,7 @@ function ref.eval(r, S, args)
         return v
       end
       for _, i in ipairs(new_address) do
-        if object.isa(i, rima.element) then
+        if object.isa(i, rima.iteration.element) then
           v = v[1] and v[i.index] or v[i.key]
         else
           v = v[i]

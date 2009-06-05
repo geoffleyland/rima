@@ -41,7 +41,7 @@ function sum:eval(S, args)
   local sets, e = args[1], args[2]
 
   local caller_base_scope, defined_sets, undefined_sets =
-    rima.set.prepare(S, sets)
+    rima.iteration.prepare(S, sets)
 
   -- if nothing's defined, do nothing but evaluate the underlying expression in the current context
   if not defined_sets[1] then
@@ -49,7 +49,7 @@ function sum:eval(S, args)
   end
 
   local add_args = {}
-  for caller_scope in rima.set.iterate_all(caller_base_scope, defined_sets) do
+  for caller_scope in rima.iteration.iterate_all(caller_base_scope, defined_sets) do
     add_args[#add_args+1] = { 1, expression.eval(e, caller_scope) }
   end
 
