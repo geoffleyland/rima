@@ -197,11 +197,12 @@ You can define functions in Rima, but remember they're data, rather than part of
 
 The syntax for creating a function is `rima.func` because `function` is a reserved word in Lua.
 The first argument is the list of arguments to the function, and the second is the expression that makes up the body of the function.
+The list of arguments can contain references or just strings.
 
 Functions "return" the result of evaluating their expression - which could well be an expression:
 
     f, x, y = rima.R"f, x, y"
-    =rima.E(f(x), { f=rima.func({y}, rima.sin(y)) })    --> sin(x)
+    =rima.E(f(x), { f=rima.func({"y"}, rima.sin(y)) })    --> sin(x)
 
 Function arguments can also be expressions:
 
