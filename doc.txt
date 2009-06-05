@@ -33,6 +33,9 @@ There may be an even easier way to get it for your platform:
 + OS X: if have [MacPorts](http://www.macports.org/) installed you can `port install lua` (there must be a similar command for [Fink](http://www.finkproject.org/))
 + Windows: there's [Lua for Windows](http://luaforwindows.luaforge.net/) which is a binary installer of Lua and a lot of supporting packages
 
+You might want to get LuaJIT instead, which is considerably faster on x86 platforms.
+It's available [here](http://luajit.org/)
+
 ##### Solvers
 
 If you want to solve any optimisation problems
@@ -146,7 +149,7 @@ Taking the example above:
 
     x, y = rima.R"x, y"
     e = x * y
-    =rima.E(e * x * y, {})                              --> x^2*y^2
+    =rima.E(e * x * y)                                  --> x^2*y^2
 
 The values in the table of values don't have to be literals,
 they can be references to other variables, and even expressions:
