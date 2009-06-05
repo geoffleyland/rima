@@ -1,11 +1,12 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
+local debug = require("debug")
 local coroutine = require("coroutine")
 local table = require("table")
 local global_tostring, type, unpack = tostring, type, unpack
 local ipairs, pairs = ipairs, pairs
-local error, pcall = error, pcall
+local error, xpcall = error, xpcall
 local getmetatable, setmetatable = getmetatable, setmetatable
 local require = require
 
@@ -48,7 +49,7 @@ function E(e, S)
     S = scope.create(S)
   end
 
-  local status, r = pcall(function() return expression.eval(e, S) end)
+  local status, r = xpcall(function() return expression.eval(e, S) end, debug.traceback)
   if status then
     return r
   else
