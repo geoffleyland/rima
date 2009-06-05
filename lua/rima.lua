@@ -3,9 +3,10 @@
 
 local coroutine = require("coroutine")
 local table = require("table")
-local ipairs, global_tostring, type, unpack = ipairs, tostring, type, unpack
+local global_tostring, type, unpack = tostring, type, unpack
+local ipairs, pairs = ipairs, pairs
 local error, pcall = error, pcall
-local setmetatable = setmetatable
+local getmetatable, setmetatable = getmetatable, setmetatable
 local require = require
 
 module(...)
@@ -146,7 +147,7 @@ function range_type:__tostring()
   return "range("..self.low..", "..self.high..")"
 end
 
-function range_type:iterate()
+function range_type:__iterate()
   return coroutine.wrap(
     function()
       local i = 1 
@@ -176,15 +177,22 @@ end
 set = {}
 
 function set.iterate(s, S)
-  s = expression.eval(s, S)
+  local z = expression.eval(s.exp, S)
   
-  if type(s) == "table" and s.iterate then
-    return s:iterate()
+  local m = getmetatable(z)
+  local i = m and m.__iterate or nil
+  if i then
+    return coroutine.wrap(
+      function()
+        for e in i(z) do
+          coroutine.yield({[s.name]=e})
+        end
+      end)
   else
     return coroutine.wrap(
       function()
-        for i, v in ipairs(s) do
-          coroutine.yield(element:new(s, i, v))
+        for i, v in ipairs(z) do
+          coroutine.yield({[s.name]=element:new(z, i, v)})
         end
       end)
   end
@@ -198,11 +206,14 @@ function set.prepare(S, sets)
   for i, a in ipairs(sets) do
     local r, n
     if object.isa(a, alias_type) then
-      r = a.exp
-      n = a.name
+      r, n = a.exp, a.name
+    elseif object.isa(a, ref) then
+      r, n = a, proxy.O(a).name
+    elseif type(a) == "string" then
+      r, n = R(a), a
     else
-      r = a
-      n = proxy.O(a).name
+      error(("Bad set iterator #d to set.prepare: expected a string, alias or reference, got '%s' (%s)"):
+        format(i, tostring(a), type(a)), 0)
     end
     S2[n] = types.undefined_t:new()
     local e = E(r, S)
@@ -216,6 +227,7 @@ function set.prepare(S, sets)
   return S2, defined_sets, undefined_sets
 end
 
+
 function set.iterate_all(S, sets)
   local S2 = scope.spawn(S, nil, {rewrite=true})
 
@@ -224,9 +236,10 @@ function set.iterate_all(S, sets)
     if i > #sets then
       coroutine.yield(S2)
     else
-      local s = sets[i]
-      for element in set.iterate(s.exp, S) do
-        S2[s.name] = element
+      for variables in set.iterate(sets[i], S) do
+        for k, v in pairs(variables) do
+          S2[k] = v
+        end
         z(i+1)
       end
     end
