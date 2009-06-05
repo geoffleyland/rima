@@ -1,8 +1,9 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local rawget, old_type = rawget, type
+local rawget, rawtype = rawget, type
 local getmetatable, setmetatable = getmetatable, setmetatable
+local error = error
 
 local tests = require("rima.tests")
 
@@ -21,6 +22,10 @@ function object:new(o, typename)
 end
 
 function object.isa(o, mt)
+  if rawtype(mt) ~= "table" then
+    error(("bad argument #2 to 'rima.object.isa' (table expected, got %s)"):format(rawtype(mt)), 0)
+  end
+
   repeat
      o = getmetatable(o)
      if o == mt then return true end
@@ -30,12 +35,12 @@ end
 
 function object.type(o)
   function z(p)
-    if old_type(p) == "table" then
+    if rawtype(p) == "table" then
       local t = rawget(p, "__typename")
       if t then return t end
     end
     local q = getmetatable(p)
-    return p == q and old_type(o) or z(q)
+    return p == q and rawtype(o) or z(q)
   end
   return z(o)
 end
