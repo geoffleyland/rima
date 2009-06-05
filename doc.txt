@@ -360,16 +360,11 @@ Rima's `tabulate` function allows you to make the link:
     Q, x, y = rima.R"Q, x, y"
     e = rima.sum(Q, x[Q])
     S = rima.scope.create{ Q={4, 5, 6} }
-    S.x = rima.tabulate(rima.value(y)^2, y)
+    S.x = rima.tabulate({y}, rima.value(y)^2)
     =rima.E(e, S)                                       --> 77
 
-`rima.tabulate' takes the expression to evaluate is it's first argument,
-and the names of its arguments (the indexes on the subscript expression) as subsequent
-arguments.
-
-(As as aside, if you're getting confused as to all the different ways of expressing argument lists here,
-so am I.  Once I work out what's best - I think probably something like the approach used in `rima.func` -
-I'll change to that)
+`rima.tabulate' takes names of its arguments (the indexes on the subscript expression) as its first argument
+and the expression to evaluate as its second.
 
 Keep in mind that the arguments passed to tabulate are *indexes* into a table.
 Indexes are not normal variables.
