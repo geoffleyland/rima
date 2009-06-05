@@ -325,10 +325,11 @@ Rima can sum over tables, although at first, the syntax appears cumbersome:
 
     A, a = rima.R"A, a"
     S = rima.scope.create{ A={1, 2, 3} }
-    =rima.E(rima.sum(rima.alias(A, "a"), A[a]), S)      --> 6
+    =rima.E(rima.sum({rima.alias(A, "a")}, A[a]), S)    --> 6
 
-The first to second-to-last arguments to `rima.sum` tell rima what sets to sum over,
-the last argument is the expression to sum.
+The first  argument to `rima.sum` is a list of sets to sum over,
+like function arguments, these can be strings, references or *aliases*,
+the second argument is the expression to sum.
 `rima.alias(A, "a")` tells the sum that we want to sum over the set A,
 and we want to call our index variable a.
 It's kind of equivalent to `for a in ipairs(A) do`.
@@ -337,7 +338,7 @@ Why the complication?  Often we want to sum several variables over the same inde
 
     Q, x, y = rima.R"Q, x, y"
     S = rima.scope.create{ Q={"one", "two", "three"}, x={4, 5, 6}, y={7, 8, 9} }
-    =rima.E(rima.sum(Q, x[Q]*y[Q]), S)                  --> 122
+    =rima.E(rima.sum({Q}, x[Q]*y[Q]), S)                --> 122
 
 (Note that we didn't use `rima.alias` this time.
 In the scope of the sum expression `Q` means the current index of the set `Q`).
@@ -345,7 +346,7 @@ Summing over a set is also the only way rima can work out what to do with undefi
 
     Q, x = rima.R"Q, x"
     S = rima.scope.create{ Q={"one", "two", "three"} }
-    =rima.E(rima.sum(Q, x[Q]), S)                       --> x[one] + x[three] + x[two]
+    =rima.E(rima.sum({"Q"}, x[Q]), S)                   --> x[one] + x[three] + x[two]
 
 At the moment, summing is the *only* thing you can do over a set,
 and you can't do conditional sums.

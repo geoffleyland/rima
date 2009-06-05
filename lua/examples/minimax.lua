@@ -21,11 +21,11 @@ local e = rima.R"e"                     -- positive and negative Errors at each 
 -- Curve fit formulation
 local curve_fit = rima.formulation:new()
 curve_fit:add(
-  rima.sum(rima.alias(T, "t"), w[t] * y[t][p]) +
-  rima.sum(rima.alias(Q, "q"), rima.value(q) * e[q][p]), "==",
+  rima.sum({rima.alias(T, "t")}, w[t] * y[t][p]) +
+  rima.sum({rima.alias(Q, "q")}, rima.value(q) * e[q][p]), "==",
   s[p], rima.alias(P, "p"))
 curve_fit:add(max_error, ">=", e[q][p], rima.alias(Q, "q"), rima.alias(P, "p"))
-curve_fit:add(sum_error, "==", rima.sum(rima.alias(Q, "q"), rima.alias(P, "p"), e[q][p]))
+curve_fit:add(sum_error, "==", rima.sum({rima.alias(Q, "q"), rima.alias(P, "p")}, e[q][p]))
 curve_fit:set{ ["max_error, sum_error, e"]=rima.positive(), w = rima.free(), Q = {-1, 1} }
 
 -- Write the formulation
