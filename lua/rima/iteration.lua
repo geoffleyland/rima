@@ -113,51 +113,70 @@ end
 
 -- Iteration -------------------------------------------------------------------
 
-function iterate(s, S)
-  local z = expression.eval(s.exp, S)
-  
+ref_iterator = object:new(ref_iterator, "iterator")
+
+function ref_iterator:__iterate(S)
+  local z = expression.eval(self.exp, S)
+
   local m = getmetatable(z)
   local i = m and m.__iterate or nil
   if i then
     return coroutine.wrap(
       function()
         for e in i(z) do
-          coroutine.yield({[s.name]=e})
+          coroutine.yield({[self.name]=e})
         end
       end)
   else
     return coroutine.wrap(
       function()
         for i, v in ipairs(z) do
-          coroutine.yield({[s.name]=element:new(z, i, v)})
+          coroutine.yield({[self.name]=element:new(z, i, v)})
         end
       end)
   end
 end
 
+function ref_iterator:__tostring()
+  local name, set = self.name, rima.tostring(self.exp)
+  if name == set then
+    return name
+  else
+    return name.." in "..set
+  end
+end
+
+function ref_iterator:defined(S)
+  self.exp = rima.E(self.exp, S)
+  local e = self.exp
+  return e and not object.isa(e, rima.ref) and not object.isa(e, expression)
+end
 
 function prepare(S, sets)
   S2 = scope.spawn(S, nil, {overwrite=true})
 
   local defined_sets, undefined_sets = {}, {} 
   for i, a in ipairs(sets) do
-    local r, n
+    local iterator
     if object.isa(a, alias_type) then
-      r, n = a.exp, a.name
+      iterator = ref_iterator:new{exp=a.exp, name=a.name}
     elseif object.isa(a, rima.ref) then
-      r, n = a, proxy.O(a).name
+      iterator = ref_iterator:new{exp=a, name=proxy.O(a).name}
     elseif type(a) == "string" then
-      r, n = rima.R(a), a
+      iterator = ref_iterator:new{exp=rima.R(a), name=a}
     else
-      error(("Bad set iterator #d to set.prepare: expected a string, alias or reference, got '%s' (%s)"):
-        format(i, tostring(a), type(a)), 0)
+      local mt = getmetatable(a)
+      if mt and mt.__iterate then
+        iterator = a
+      else
+        error(("Bad set iterator #d to set.prepare: expected a string, alias, reference or something iterable, got '%s' (%s)"):
+          format(i, tostring(a), type(a)), 0)
+      end
     end
-    S2[n] = types.undefined_t:new()
-    local e = rima.E(r, S)
-    if e and not object.isa(e, rima.ref) and not object.isa(e, expression) then
-      defined_sets[#defined_sets+1] = rima.alias(e, n)
+    if iterator:defined(S) then
+      defined_sets[#defined_sets+1] = iterator
     else
-      undefined_sets[#undefined_sets+1] = rima.alias(e, n)
+      undefined_sets[#undefined_sets+1] = iterator
     end
   end
   
@@ -173,7 +192,7 @@ function iterate_all(S, sets)
     if i > #sets then
       coroutine.yield(S2)
     else
-      for variables in iterate(sets[i], S) do
+      for variables in sets[i]:__iterate(S) do
         for k, v in pairs(variables) do
           S2[k] = v
         end

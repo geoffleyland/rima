@@ -117,13 +117,13 @@ function test(show_passes)
   do 
     local X, x, y, z = rima.R"X, x, y, z"
     local S = rima.scope.create{ X = rima.range(1, y) }
-    T:equal_strings(expression.dump(expression.eval(rima.sum({rima.alias(X, "x")}, rima.value(x)), S)), "sum({alias(x in range(1, y))}, value(ref(x)))")
+    T:equal_strings(expression.dump(expression.eval(rima.sum({rima.alias(X, "x")}, rima.value(x)), S)), "sum({iterator(x in range(1, y))}, value(ref(x)))")
     T:equal_strings(expression.eval(rima.sum({rima.alias(X, "x")}, rima.value(x)), S), "sum({x in range(1, y)}, value(x))")
     S.y = 5
     T:equal_strings(expression.eval(rima.sum({rima.alias(X, "x")}, rima.value(x)), S), 15)
     T:equal_strings(expression.eval(rima.sum({rima.alias(X, "x")}, z * rima.value(x)), S), 15*z)
   end
-  
+
   return T:close()
 end
 
