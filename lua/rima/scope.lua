@@ -53,7 +53,7 @@ local getmetatable, setmetatable = getmetatable, setmetatable
 
 local object = require("rima.object")
 local proxy = require("rima.proxy")
-local tools = require("rima.tools")
+local args = require("rima.args")
 local tests = require("rima.tests")
 local types = require("rima.types")
 local rima = rima
@@ -93,7 +93,7 @@ function scope.set_parent(S, parent)
   local fname, usage =
     "rima.scope.set_parent",
     "new(parent, overwrite)"
-  tools.check_arg_types(parent, "parent", {"nil", {scope, "scope"}}, usage, fname) 
+  args.check_types(parent, "parent", {"nil", {scope, "scope"}}, usage, fname) 
 
   S = proxy.O(S)
   if S.parent then
@@ -188,7 +188,7 @@ function scope_proxy_mt.__newindex(S, name, value)
   local fname, usage =
     "rima.scope:__newindex",
     "__newindex(name: string, value: type or value)"
-  tools.check_arg_type(name, "name", "string", usage, fname) 
+  args.check_type(name, "name", "string", usage, fname) 
 
   check(S, name, value)
   local values = proxy.O(S).values
@@ -207,7 +207,7 @@ function scope.set(S, values)
   local fname, usage =
     "rima.scope:set",
     "set(values: {string = type or value, ...})"
-  tools.check_arg_type(values, "values", "table", usage, fname)
+  args.check_type(values, "values", "table", usage, fname)
   for k, v in pairs(values) do
     for n in k:gmatch("[%a_][%w_]*") do
       S[n] = v

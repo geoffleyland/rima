@@ -4,7 +4,7 @@
 require("tests.series_test")
 require("tests.object")
 require("tests.proxy")
-require("tests.tools")
+require("tests.args")
 
 --------------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ function test(show_passes)
   T:run(tests.series_test.test)
   T:run(tests.object.test)
   T:run(tests.proxy.test)
-  T:run(tests.tools.test)
+  T:run(tests.args.test)
 
   return T:close()
 end

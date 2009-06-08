@@ -22,7 +22,7 @@ of the reference somewhere tricky.  This is a giant pain in the ass.
 local rima = require("rima")
 local object = require("rima.object")
 local proxy = require("rima.proxy")
-local tools = require("rima.tools")
+local args = require("rima.args")
 local tests = require("rima.tests")
 local types = require("rima.scope")
 local types = require("rima.types")
@@ -38,11 +38,11 @@ ref_proxy_mt = setmetatable({}, ref)
 
 function ref:new(r)
   local fname, usage = "rima.ref:new", "new(r: {name, address, type, scope})"
-  tools.check_arg_type(r, "r", "table", usage, fname)
-  tools.check_arg_type(r.name, "r.name", "string", usage, fname)
-  tools.check_arg_types(r.type, "r.type", {"nil", {rima.types.undefined_t, "type"}}, usage, fname)
-  tools.check_arg_types(r.scope, "r.scope", {"nil", {rima.scope, "scope" }}, usage, fname)
-  tools.check_arg_types(r.address, "r.address", {"nil", "table"}, usage, fname)
+  args.check_type(r, "r", "table", usage, fname)
+  args.check_type(r.name, "r.name", "string", usage, fname)
+  args.check_types(r.type, "r.type", {"nil", {rima.types.undefined_t, "type"}}, usage, fname)
+  args.check_types(r.scope, "r.scope", {"nil", {rima.scope, "scope" }}, usage, fname)
+  args.check_types(r.address, "r.address", {"nil", "table"}, usage, fname)
 
   r.type = r.type or rima.types.undefined_t:new()
 

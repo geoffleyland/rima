@@ -9,7 +9,6 @@ local setmetatable = setmetatable
 local rima = require("rima")
 local object = require("rima.object")
 local proxy = require("rima.proxy")
-local tools = require("rima.tools")
 local tests = require("rima.tests")
 local types = require("rima.types")
 local operators = require("rima.operators")

@@ -5,7 +5,7 @@ local error = error
 local math = require("math")
 
 local tests = require("rima.tests")
-local tools = require("rima.tools")
+local args = require("rima.args")
 local undefined_t = require("rima.types.undefined_t")
 local types = rima.types
 local rima = rima
@@ -24,8 +24,8 @@ function number_t:new(lower, upper, integer)
   lower, upper = lower or -math.huge, upper or math.huge
   integer = (integer and true) or false
 
-  tools.check_arg_type(lower, "lower_bound", "number", usage, fname)
-  tools.check_arg_type(upper, "upper_bound", "number", usage, fname)
+  args.check_type(lower, "lower_bound", "number", usage, fname)
+  args.check_type(upper, "upper_bound", "number", usage, fname)
 
 --  lower, upper = rima.eval(lower), rima.eval(upper)
 

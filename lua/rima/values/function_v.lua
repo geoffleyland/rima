@@ -3,7 +3,7 @@
 
 local error, ipairs = error, ipairs
 
-local tools = require("rima.tools")
+local args = require("rima.args")
 local tests = require("rima.tests")
 local value = require("rima.values.value")
 local expression = require("rima.expression")
@@ -21,7 +21,7 @@ function function_v:new(inputs, expression, S, ...)
     "function_v:now",
     "new(inputs, expression, table or scope)"
 
-  tools.check_arg_types(S, "S", {"nil", "table", {rima.scope, "scope"}}, usage, frame)
+  args.check_types(S, "S", {"nil", "table", {rima.scope, "scope"}}, usage, frame)
 
   if S and not isa(S, rima.scope) then S = rima.scope.create(S) end
 
