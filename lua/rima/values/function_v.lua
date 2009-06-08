@@ -9,6 +9,7 @@ local value = require("rima.values.value")
 local expression = require("rima.expression")
 local operators = require("rima.operators")
 require("rima.private")
+require("rima.public")
 local rima = rima
 
 module(...)
@@ -44,10 +45,6 @@ function function_v:new(inputs, expression, S, ...)
   end
 
   return value.new(self, { inputs=new_inputs, expression=expression, S=S, outputs={...} })
-end
-
-function rima.F(inputs, expression, S)
-  return function_v:new(inputs, expression, S)
 end
 
 
