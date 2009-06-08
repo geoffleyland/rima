@@ -7,6 +7,7 @@ local math = require("math")
 local tests = require("rima.tests")
 local args = require("rima.args")
 local undefined_t = require("rima.types.undefined_t")
+require("rima.private")
 local types = rima.types
 local rima = rima
 

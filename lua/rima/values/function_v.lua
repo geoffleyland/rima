@@ -8,6 +8,7 @@ local tests = require("rima.tests")
 local value = require("rima.values.value")
 local expression = require("rima.expression")
 local operators = require("rima.operators")
+require("rima.private")
 local rima = rima
 
 module(...)

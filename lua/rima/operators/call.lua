@@ -7,6 +7,7 @@ local rima = require("rima")
 local proxy = require("rima.proxy")
 local tests = require("rima.tests")
 local scope = require("rima.scope")
+require("rima.private")
 local expression = rima.expression
 
 module(...)

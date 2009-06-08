@@ -26,6 +26,7 @@ local args = require("rima.args")
 local tests = require("rima.tests")
 local types = require("rima.scope")
 local types = require("rima.types")
+require("rima.private")
 local expression = rima.expression
 local scope = rima.scope
 

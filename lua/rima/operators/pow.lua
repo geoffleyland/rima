@@ -6,6 +6,7 @@ local error = error
 local rima = require("rima")
 local tests = require("rima.tests")
 local types = require("rima.types")
+require("rima.private")
 local expression = rima.expression
 
 module(...)

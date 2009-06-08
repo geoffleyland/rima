@@ -13,6 +13,7 @@ local tests = require("rima.tests")
 local types = require("rima.types")
 local operators = require("rima.operators")
 local scope = require("rima.scope")
+require("rima.private")
 local ref = rima.ref
 
 module(...)

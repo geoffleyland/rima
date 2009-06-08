@@ -8,6 +8,7 @@ local ipairs = ipairs
 local rima = require("rima")
 local tests = require("rima.tests")
 local operators = require("rima.operators")
+require("rima.private")
 local ref = rima.ref
 local expression = rima.expression
 local scope = rima.scope

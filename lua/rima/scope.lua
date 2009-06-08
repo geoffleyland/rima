@@ -56,6 +56,7 @@ local proxy = require("rima.proxy")
 local args = require("rima.args")
 local tests = require("rima.tests")
 local types = require("rima.types")
+require("rima.private")
 local rima = rima
 
 module(...)

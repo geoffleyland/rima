@@ -2,10 +2,7 @@
 -- see license.txt for license information
 
 local debug = require("debug")
-local global_tostring, type, unpack = tostring, type, unpack
-local ipairs = ipairs
-local error, xpcall = error, xpcall
-local require = require
+local error, require, unpack, xpcall = error, require, unpack, xpcall
 
 module(...)
 
@@ -53,24 +50,6 @@ function E(e, S)
   else
     error(("error while evaluating '%s':\n  %s"):format(tostring(e), r:gsub("\n", "\n  ")), 0)
   end
-end
-
--- Private functionality -------------------------------------------------------
-
-number_format = "%.4g"
-function tostring(x)
-  if type(x) == "number" then
-    return number_format:format(x)
-  else
-    return global_tostring(x)
-  end
-end
-
-
-function imap(f, t)
-  local r = {}
-  for i, v in ipairs(t) do r[i] = f(v) end
-  return r
 end
 
 

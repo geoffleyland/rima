@@ -1,14 +1,12 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
---local assert, tostring = assert, tostring
-local ipairs = ipairs
 local coroutine = require("coroutine")
-
-local assert = assert
+local assert, ipairs = assert, ipairs
 
 local tests = require("rima.tests")
 local object = require("rima.object")
+require("rima.private")
 local rima = rima
 local expression = rima.expression
 

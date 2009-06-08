@@ -10,6 +10,7 @@ local proxy = require("rima.proxy")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
 local types = require("rima.types")
+require("rima.private")
 local rima = rima
 
 module(...)
