@@ -5,7 +5,7 @@ local error, ipairs = error, ipairs
 
 local args = require("rima.args")
 local tests = require("rima.tests")
-local value = require("rima.values.value")
+local object = require("rima.object")
 local expression = require("rima.expression")
 local operators = require("rima.operators")
 require("rima.private")
@@ -16,7 +16,7 @@ module(...)
 
 -- Function type ---------------------------------------------------------------
 
-local function_v = value:new(_M, "function_v")
+local function_v = object:new(_M, "function_v")
 
 function function_v:new(inputs, expression, S, ...)
   local fname, usage =
@@ -44,7 +44,7 @@ function function_v:new(inputs, expression, S, ...)
     end
   end
 
-  return value.new(self, { inputs=new_inputs, expression=expression, S=S, outputs={...} })
+  return object.new(self, { inputs=new_inputs, expression=expression, S=S, outputs={...} })
 end
 
 
@@ -115,7 +115,6 @@ function test(show_passes)
   local T = tests.series:new(_M, show_passes)
 
   T:test(isa(function_v:new({"a"}, 3), function_v), "isa(function_v:new(), function_v)")
-  T:test(isa(function_v:new({"a"}, 3), value), "isa(function_v:new(), value)")
   T:equal_strings(type(function_v:new({"a"}, 3)), "function_v", "type(function_v:new()) == 'function_v'")
 
   local a, b, c, x = rima.R"a, b, c, x"
