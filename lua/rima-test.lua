@@ -3,6 +3,7 @@
 
 require("tests.series_test")
 require("tests.object")
+require("tests.proxy")
 
 --------------------------------------------------------------------------------
 
@@ -11,6 +12,7 @@ function test(show_passes)
 
   T:run(tests.series_test.test)
   T:run(tests.object.test)
+  T:run(tests.proxy.test)
 
   return T:close()
 end
