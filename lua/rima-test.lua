@@ -5,6 +5,7 @@ require("tests.series_test")
 require("tests.object")
 require("tests.proxy")
 require("tests.args")
+require("tests.types")
 
 --------------------------------------------------------------------------------
 
@@ -15,6 +16,7 @@ function test(show_passes)
   T:run(tests.object.test)
   T:run(tests.proxy.test)
   T:run(tests.args.test)
+  T:run(tests.types.test)
 
   return T:close()
 end
