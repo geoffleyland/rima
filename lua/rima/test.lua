@@ -3,7 +3,6 @@
 
 require("rima")
 local tests = require("rima.tests")
-require("rima.tools")
 require("rima.values.test")
 require("rima.types.test")
 require("rima.scope")
@@ -18,7 +17,6 @@ function test()
   local T = tests.series:new(_M, false)
 
   T:run(rima.tests.test)
-  T:run(rima.tools.test)
   T:run(rima.values.test.test)
   T:run(rima.types.test.test)
   T:run(rima.scope.test)
