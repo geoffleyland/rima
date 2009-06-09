@@ -13,6 +13,7 @@ test_names =
   "args",
   "types.undefined_t",
   "types.number_t",
+  "scope",
 }
 
 

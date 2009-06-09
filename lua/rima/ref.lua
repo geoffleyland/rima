@@ -3,7 +3,7 @@
 
 local table = require("table")
 local error, pcall = error, pcall
-local ipairs, rawget, type, unpack = ipairs, rawget, type, unpack
+local ipairs, rawget, require, type, unpack = ipairs, rawget, require, type, unpack
 local getmetatable, setmetatable = getmetatable, setmetatable
 
 --[[
@@ -19,18 +19,18 @@ Because we wish to be able to index references, we have to hide the real working
 of the reference somewhere tricky.  This is a giant pain in the ass.
 --]]
 
-local rima = require("rima")
 local object = require("rima.object")
 local proxy = require("rima.proxy")
 local args = require("rima.args")
 local tests = require("rima.tests")
-local types = require("rima.scope")
 local types = require("rima.types")
 require("rima.private")
+local rima = rima
 local expression = rima.expression
-local scope = rima.scope
 
 module(...)
+
+local scope = require("rima.scope")
 
 -- References to values --------------------------------------------------------
 
