@@ -3,7 +3,7 @@
 
 local type = type
 
-local series = require("tests.series")
+local series = require("test.series")
 local undefined_t = require("rima.types.undefined_t")
 local object = require("rima.object")
 

@@ -1,7 +1,7 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local series = require("tests.series")
+local series = require("test.series")
 local number_t = require("rima.types.number_t")
 local object = require("rima.object")
 local rima = rima

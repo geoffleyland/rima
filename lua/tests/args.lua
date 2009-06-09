@@ -3,7 +3,7 @@
 
 local setmetatable, type = setmetatable, type
 
-local series = require("tests.series")
+local series = require("test.series")
 local args = require("rima.args")
 
 module(...)

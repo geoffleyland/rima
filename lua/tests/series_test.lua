@@ -3,7 +3,7 @@
 
 local assert, error = assert, error
 
-local series = require("tests.series")
+local series = require("test.series")
 
 module(...)
 
