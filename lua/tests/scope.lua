@@ -2,9 +2,9 @@
 -- see license.txt for license information
 
 local series = require("tests.series")
-local scope = require("rima.scope")
 local object = require("rima.object")
 local types = require("rima.types")
+local scope = require("rima.scope")
 local rima = rima
 
 module(...)

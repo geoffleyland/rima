@@ -3,20 +3,21 @@
 
 local table = require("table")
 local error, pcall = error, pcall
-local ipairs, pairs, rawget, old_type = ipairs, pairs, rawget, type
-local setmetatable = setmetatable
+local ipairs, pairs = ipairs, pairs
+local rawget, require, setmetatable, rawtype = rawget, require, setmetatable, type
 
-local rima = require("rima")
 local object = require("rima.object")
 local proxy = require("rima.proxy")
 local tests = require("rima.tests")
 local types = require("rima.types")
-local operators = require("rima.operators")
 local scope = require("rima.scope")
 require("rima.private")
-local ref = rima.ref
+local rima = rima
 
 module(...)
+
+local ref = require("rima.ref")
+local operators = require("rima.operators")
 
 -- Constructor -----------------------------------------------------------------
 
@@ -44,7 +45,7 @@ end
 
 --[[
 function expression:check()
-  local m = old_type(self.op) == "table" and self.op.check
+  local m = rawtype(self.op) == "table" and self.op.check
   if m then
     return m(self.op, self.args)
   else
@@ -62,10 +63,10 @@ function expression.result_type_match(a, t)
 end
 
 function expression.result_type(a)
-  if old_type(a) == "table" then
+  if rawtype(a) == "table" then
     local op, args = a.op, a.args
-    if op and old_type(args) == "table" then    -- this is an expression
-      local m = old_type(op) == "table" and op.result_type
+    if op and rawtype(args) == "table" then    -- this is an expression
+      local m = rawtype(op) == "table" and op.result_type
       if m then                                 -- the operator can handle itself
         return m(op, args)
       elseif #args == 0 then                    -- looks like a literal
@@ -85,7 +86,7 @@ end
 -- We want to avoid trying to index non-tables and directly indexing
 -- references (which will lie and say they have everything)
 local function get_field(e, f)
-  return old_type(e) == "table" and e[f]
+  return rawtype(e) == "table" and e[f]
 end
 
 function expression.operator(e)

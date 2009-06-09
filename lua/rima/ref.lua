@@ -22,15 +22,14 @@ of the reference somewhere tricky.  This is a giant pain in the ass.
 local object = require("rima.object")
 local proxy = require("rima.proxy")
 local args = require("rima.args")
-local tests = require("rima.tests")
-local types = require("rima.types")
+local undefined_t = require("rima.types.undefined_t")
 require("rima.private")
 local rima = rima
-local expression = rima.expression
 
 module(...)
 
 local scope = require("rima.scope")
+local expression = require("rima.expression")
 
 -- References to values --------------------------------------------------------
 
@@ -41,11 +40,11 @@ function ref:new(r)
   local fname, usage = "rima.ref:new", "new(r: {name, address, type, scope})"
   args.check_type(r, "r", "table", usage, fname)
   args.check_type(r.name, "r.name", "string", usage, fname)
-  args.check_types(r.type, "r.type", {"nil", {rima.types.undefined_t, "type"}}, usage, fname)
-  args.check_types(r.scope, "r.scope", {"nil", {rima.scope, "scope" }}, usage, fname)
+  args.check_types(r.type, "r.type", {"nil", {undefined_t, "type"}}, usage, fname)
+  args.check_types(r.scope, "r.scope", {"nil", {scope, "scope" }}, usage, fname)
   args.check_types(r.address, "r.address", {"nil", "table"}, usage, fname)
 
-  r.type = r.type or rima.types.undefined_t:new()
+  r.type = r.type or undefined_t:new()
 
   return proxy:new(object.new(ref, { name=r.name, address=r.address or {}, type=r.type, scope=r.scope }), ref_proxy_mt)
 end
@@ -116,7 +115,7 @@ function ref.eval(r, S, args)
       format(R.name, rima.tostring(e), v:gsub("\n", "\n  ")), 0)
   end
 
-  if object.isa(v, types.undefined_t) then
+  if object.isa(v, undefined_t) then
     if not v:includes(R.type) and not R.type:includes(v) then
       error(("the type of '%s' (%s) and the type of the reference (%s) are mutually exclusive"):
         format(R.name, v:describe(R.name), R.type:describe(R.name)), 0)
@@ -236,84 +235,6 @@ function ref_proxy_mt.__index(r, i)
   return ref:new{name=r.name, address=address, type=r.type, scope=r.scope}
 end
 
-
--- Tests -----------------------------------------------------------------------
-
-function test(show_passes)
-  local T = tests.series:new(_M, show_passes)
-
-  T:test(object.isa(ref:new{name="a"}, ref), "isa(ref:new(), ref)")
-
-  local function check_strings(v, s, d)
-    T:equal_strings(v, s, "tostring(ref)")
-    T:equal_strings(ref.describe(v), d, "ref:describe()")
-  end
-
-  check_strings(ref:new{name="a"}, "a", "a undefined")
-  check_strings(ref:new{name="b", type=rima.free()}, "b", "-inf <= b <= inf, b real")  
-  check_strings(ref:new{name="c", type=rima.positive()}, "c", "0 <= c <= inf, c real")  
-  check_strings(ref:new{name="d", type=rima.negative()}, "d", "-inf <= d <= 0, d real")  
-  check_strings(ref:new{name="e", type=rima.integer()}, "e", "0 <= e <= inf, e integer")  
-  check_strings(ref:new{name="f", type=rima.binary()}, "f", "f binary")  
-
-  local S = rima.scope.create{ a = rima.free(1, 10), b = 1, c = "c" }
-
-  T:expect_ok(function() ref.eval(ref:new{name="z"}, S) end, "z undefined")
-  T:equal_strings(ref.eval(ref:new{name="z"}, S), "z", "undefined remains an unbound variable")
-  T:expect_error(function() ref.eval(ref:new{name="a", type=rima.free(11, 20)}, S) end,
-    "the type of 'a' %(1 <= a <= 10, a real%) and the type of the reference %(11 <= a <= 20, a real%) are mutually exclusive")
-  T:expect_error(function() ref.eval(ref:new{name="b", type=rima.free(11, 20)}, S) end,
-    "'b' %(1%) is not of type '11 <= b <= 20, b real'")
-  T:equal_strings(ref.eval(ref:new{name="a"}, S), "a")
-  T:equal_strings(ref.eval(ref:new{name="b", rima.binary()}, S), 1)
-
-
-  -- index tests
-  local a, b, c = rima.R"a, b, c"
-  T:equal_strings(expression.dump(a[b]), "ref(a[ref(b)])")
-  T:equal_strings(a[b], "a[b]")
-  T:equal_strings(a[b][c], "a[b, c]")
-
-  do
-    local S = rima.scope.create{ a={ "x", "y" }, b = 2}
-    T:equal_strings(expression.eval(a[b], S), "y")
-  end
-
-  do
-    local S = rima.scope.create{ a=rima.types.undefined_t:new(), b = 2}
-    T:equal_strings(expression.dump(a[b]), "ref(a[ref(b)])")
-    T:equal_strings(expression.dump(expression.eval(a[b], S)), "ref(a[number(2)])")
-    local e = expression.eval(a[b], S)
-    T:equal_strings(expression.dump(e), "ref(a[number(2)])")
-    S2 = scope.spawn(S, {a = { "x" }})
-    T:equal_strings(expression.dump(expression.eval(e, S2)), "ref(a[number(2)])")
-    S2.a[2] = "yes"
-    T:equal_strings(expression.dump(expression.eval(e, S2)), "string(yes)")    
-
-    S3 = scope.spawn(S, {a = { b="x" }})
-    T:equal_strings(expression.dump(expression.eval(a.b, S)), "ref(a[string(b)])")
-    T:equal_strings(expression.dump(expression.eval(a.b, S3)), "string(x)")
-  end
-
-  do
-    local x, y, N = rima.R"x,y,N"
-    local S = rima.scope.create{ N={ {1, 2}, {3, 4} } }
-    T:equal_strings(expression.dump(N[x][y]), "ref(N[ref(x), ref(y)])")
-    T:equal_strings(expression.eval(N[x][y], S), "N[x, y]")
-    S.x = 2
-    T:equal_strings(expression.eval(N[x][y], S), "N[2, y]")
-    T:equal_strings(expression.eval(N[y][x], S), "N[y, 2]")
-    S.y = 1
-    T:equal_strings(expression.eval(N[x][y], S), 3)
-    T:equal_strings(expression.eval(N[y][x], S), 2)
-  end
-
-  -- tests for references to references
-  -- tests for references to functions
-  -- tests for references to expressions
-
-  return T:close()
-end
 
 -- EOF -------------------------------------------------------------------------
 

@@ -14,6 +14,7 @@ test_names =
   "types.undefined_t",
   "types.number_t",
   "scope",
+  "ref",
 }
 
 
