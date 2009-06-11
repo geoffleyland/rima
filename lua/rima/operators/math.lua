@@ -1,10 +1,12 @@
-local assert, type = assert, type
-local ipairs = ipairs
-local math = require("math")
+-- Copyright (c) 2009 Incremental IP Limited
+-- see license.txt for license information
 
-local rima = require("rima")
+local math = require("math")
+local assert, ipairs, type = assert, ipairs, type
+
 local object = require("rima.object")
-local tests = require("rima.tests")
+local expression = require("rima.expression")
+local rima = rima
 
 module(...)
 
@@ -19,11 +21,11 @@ local math_functions =
 }
 
 local function eval(op, S, args)
-  local r = rima.expression.eval(args[1], S)
+  local r = expression.eval(args[1], S)
   if type(r) == "number" then
     return op.func(r)
   else
-    return rima.expression:new(op, r)
+    return expression:new(op, r)
   end
 end
 
@@ -35,32 +37,13 @@ local function make_math_function(name)
     if type(e) == "number" then
       return f(e)
     else
-      return rima.expression:new(op, e)
+      return expression:new(op, e)
     end
   end
 end
 
 for _, name in ipairs(math_functions) do
   make_math_function(name)
-end
-
-
--- Tests -----------------------------------------------------------------------
-
-function test(show_passes)
-  local T = tests.series:new(_M, show_passes)
-
-  local a, b  = rima.R"a, b"
-
-  T:equal_strings(rima.exp(1), math.exp(1))
-
-  T:equal_strings(rima.expression.dump(rima.exp(a)), "exp(ref(a))")
-  local S = rima.scope.new()
-  T:equal_strings(rima.expression.eval(rima.exp(a), S), "exp(a)")
-  S.a = 4
-  T:equal_strings(rima.expression.eval(rima.sqrt(a), S), 2)
-
-  return T:close()
 end
 
 

@@ -2,15 +2,17 @@
 -- see license.txt for license information
 
 local debug = require("debug")
-local error, getfenv, unpack, xpcall = error, getfenv, unpack, xpcall
+local error, getfenv, require, unpack, xpcall = error, getfenv, require, unpack, xpcall
+
+module(...)
 
 local args = require("rima.args")
 local object = require("rima.object")
 local ref = require("rima.ref")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
+local function_v = require("rima.values.function_v")
 
-module(...)
 local rima = getfenv(0).rima
 
 -- Module functionality --------------------------------------------------------
@@ -41,13 +43,13 @@ function rima.E(e, S)
   if status then
     return r
   else
-    error(("error while evaluating '%s':\n  %s"): format(tostring(e), r:gsub("\n", "\n  ")), 0)
+    error(("error while evaluating '%s':\n  %s"): format(rima.tostring(e), r:gsub("\n", "\n  ")), 0)
   end
 end
 
 
 function rima.F(inputs, expression, S)
-  return rima.values.function_v:new(inputs, expression, S)
+  return function_v:new(inputs, expression, S)
 end
 
 

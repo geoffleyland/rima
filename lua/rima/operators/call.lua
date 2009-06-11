@@ -3,18 +3,18 @@
 
 local error, ipairs, unpack, pcall = error, ipairs, unpack, pcall
 
-local rima = require("rima")
-local proxy = require("rima.proxy")
-local tests = require("rima.tests")
+local object = require("rima.object")
 local scope = require("rima.scope")
+local ref = require("rima.ref")
+local expression = require("rima.expression")
 require("rima.private")
-local expression = rima.expression
+local rima = rima
 
 module(...)
 
 -- Addition --------------------------------------------------------------------
 
-local call = rima.object:new(_M, "call")
+local call = object:new(_M, "call")
 
 
 -- Argument Checking -----------------------------------------------------------
@@ -39,7 +39,7 @@ end
 
 function call:eval(S, args)
   local e = expression.eval(args[1], S)
-  if isa(e, rima.ref) or isa(e, expression) then
+  if isa(e, ref) or isa(e, expression) then
     return expression:new(call, e, unpack(args, 2))
   else
     local status, r
@@ -58,38 +58,6 @@ function call:eval(S, args)
     end
     return r
   end
-end
-
-
--- Tests -----------------------------------------------------------------------
-
-function test(show_passes)
-  local T = tests.series:new(_M, show_passes)
-
-  T:test(isa(call:new(), call), "isa(call:new(), call)")
-  T:equal_strings(type(call:new()), "call", "type(call:new()) == 'call'")
-
-  local S = rima.scope.create{ a = rima.free(), b = rima.free(), x = rima.free() }
-
-  T:equal_strings(expression.dump(S.a(S.b)), "call(ref(a), ref(b))")
-  T:equal_strings(S.a(S.b), "a(b)")
-
-  -- The a here ISN'T in the global scope, it's in the function scope
-  S.f = rima.values.function_v:new({rima.R"a"}, 2 * rima.R"a")
-
-  local c = rima.R"f"(3 + S.x)
-  T:equal_strings(c, "f(3 + x)")
-
-  T:equal_strings(expression.dump(c), "call(ref(f), +(1*number(3), 1*ref(x)))")
-  T:equal_strings(expression.eval(c, S), "2*(3 + x)")
-  S.x = 5
-  T:equal_strings(expression.eval(c, S), 16)
-
-  local c2 = expression:new(call, rima.R"f")
-  T:expect_error(function() expression.eval(c2, S) end,
-    "error while evaluating 'f%(%)':\n  the function needs to be called with at least")
-
-  return T:close()
 end
 
 

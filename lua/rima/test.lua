@@ -4,7 +4,6 @@
 require("rima")
 local tests = require("rima.tests")
 require("rima.values.test")
-require("rima.operators.test")
 local rima = rima
 
 module(...)
@@ -16,7 +15,6 @@ function test()
 
   T:run(rima.tests.test)
   T:run(rima.values.test.test)
-  T:run(rima.operators.test.test)
   T:run(rima.constraint.test)
 
   return T:close()

@@ -5,15 +5,13 @@ local math, table = require("math"), require("table")
 local error, require, unpack = error, require, unpack
 local ipairs, pairs = ipairs, pairs
 
-local rima = require("rima")
 local proxy = require("rima.proxy")
-local tests = require("rima.tests")
-local types = require("rima.types")
-local operators = require("rima.operators")
 require("rima.private")
+local rima = rima
 
 module(...)
 
+local mul = require("rima.operators.mul")
 local expression = require("rima.expression")
 
 -- Addition --------------------------------------------------------------------
@@ -112,7 +110,7 @@ function add:eval(S, raw_args)
           constant = constant + e * c
         elseif e.op == add then                 -- if the term is another sum, hoist its terms
           sum(e, c)
-        elseif e.op == operators.mul then       -- if the term is a multiplication, try to hoist any constant
+        elseif e.op == mul then                 -- if the term is a multiplication, try to hoist any constant
           local new_c, new_e = extract_constant(e)
           if new_c then                         -- if we did hoist a constant, re-simplify the resulting expression
             simplify(c * new_c, new_e)
@@ -173,59 +171,6 @@ function extract_constant(e)
   else                                          -- there's no constant to extract
     return nil
   end
-end
-
-
--- Tests -----------------------------------------------------------------------
-
-function test(show_passes)
-  local T = tests.series:new(_M, show_passes)
-
-  T:test(isa(add:new(), add), "isa(add, add:new())")
-  T:equal_strings(type(add:new()), "add", "type(add:new()) == 'add'")
-
---  T:expect_ok(function() add:check({}) end)
---  T:expect_ok(function() add:check({{1, 2}}) end) 
-
-  T:equal_strings(add:dump({{1, 1}}), "+(1*number(1))")
-  T:equal_strings(add:_tostring({{1, 1}}), "1")
-  T:equal_strings(add:dump({{1, 2}, {3, 4}}), "+(1*number(2), 3*number(4))")
-  T:equal_strings(add:_tostring({{1, 2}, {3, 4}}), "2 + 12")
-  T:equal_strings(add:_tostring({{-1, 2}, {3, 4}}), "-2 + 12")
-  T:equal_strings(add:_tostring({{-1, 2}, {-3, 4}}), "-2 - 12")
-
-  local S = rima.scope.new()
-  T:equal_strings(add:eval(S, {{1, 2}}), 2)
-  T:equal_strings(add:eval(S, {{1, 2}, {3, 4}}), 14)
-  T:equal_strings(add:eval(S, {{1, 2}, {3, 4}, {5, 6}}), 44)
-  T:equal_strings(add:eval(S, {{1, 2}, {3, 4}, {-5, 6}}), -16)
-  T:equal_strings(add:eval(S, {{1, 2}, {3, 4}, {5, -6}}), -16)
-
-  local a, b = rima.R"a,b"
-  rima.scope.set(S, { a = 5, b = rima.positive() })
-  T:equal_strings(add:dump({{1, a}}), "+(1*ref(a))")
-  T:equal_strings(add:eval(S, {{1, a}}), 5)
-  T:equal_strings(add:eval(S, {{1, a}, {2, a}}), 15)
-
-  T:equal_strings(2 + (3 + b), "2 + 3 + b")
-  T:equal_strings(2 - (3 + b), "2 - (3 + b)")
-
-  T:equal_strings(expression.eval(b - b, S), 0)
-  T:equal_strings(expression.eval(b + b, S), "2*b")
-  T:equal_strings(expression.eval(2 + (3 + b), S), "5 + b")
-  T:equal_strings(expression.eval(2 - (3 + b), S), "-1 - b")
-
-  T:equal_strings(expression.eval(2 + (3 + a), S), 10)
-  T:equal_strings(expression.eval(2 - (3 + a), S), -6)
-  T:equal_strings(expression.eval(-a, S), -5)
-  T:equal_strings(expression.eval(2 + (3 + b), S), "5 + b")
-
-  T:equal_strings(expression.dump(add:eval(S, {{2, S.b}})), "+(2*ref(b))")
-  T:equal_strings(expression.dump(add:eval(S, {{1, S.b}})), "ref(b)", "checking we simplify identity")
-
-  -- Tests including mul are in rima.expression
-
-  return T:close()
 end
 
 

@@ -3,10 +3,9 @@
 
 local error, require = error, require
 
-local rima = require("rima")
-local tests = require("rima.tests")
-local types = require("rima.types")
+--local types = require("rima.types")
 require("rima.private")
+local rima = rima
 
 module(...)
 
@@ -71,42 +70,6 @@ function pow:eval(S, args)
   end
 
   return base ^ exponent
-end
-
-
--- Tests -----------------------------------------------------------------------
-
-function test(show_passes)
-  local T = tests.series:new(_M, show_passes)
-
-  T:test(isa(pow:new(), pow), "isa(pow, pow:new())")
-  T:equal_strings(type(pow:new()), "pow", "type(pow:new()) == 'pow'")
-
---  T:expect_error(function() pow:check(1) end, "expecting a table for 'args', got 'number'") 
---  T:expect_error(function() pow:check({}) end,
---    "expecting expressions for base and exponent, got 'nil' %(nil%) and 'nil' %(nil%)")
---  T:expect_ok(function() pow:check({1, 2}) end) 
---  T:expect_error(function() pow:check({{1, 2}}) end,
---    "expecting expressions for base and exponent, got 'table: [^']+' %(table%) and 'nil' %(nil%)") 
---  T:expect_error(function() pow:check({"hello"}) end,
---    "expecting expressions for base and exponent, got 'hello' %(string%) and 'nil' %(nil%)") 
-
-  local a, b = rima.R"a, b"
-  local S = rima.scope.create{ a = 5 }
-  T:equal_strings(expression.dump(a^2), "^(ref(a), number(2))")
-  T:equal_strings(expression.eval(a^2, S), 25)
-  T:equal_strings(expression.dump(2^a), "^(number(2), ref(a))")
-  T:equal_strings(expression.eval(2^a, S), 32)
-
-  -- Identities
-  T:equal_strings(expression.eval(0^b, S), 0)
-  T:equal_strings(expression.eval(1^b, S), 1)
-  T:equal_strings(expression.eval(b^0, S), 1)
-  T:equal_strings(expression.dump(expression.eval(b^1, S)), "ref(b)")
-
-  -- Tests including add and mul are in rima.expression
-
-  return T:close()
 end
 
 

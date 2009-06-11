@@ -1,18 +1,19 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local error, ipairs = error, ipairs
+local error, ipairs, require = error, ipairs, require
 
 local args = require("rima.args")
 local tests = require("rima.tests")
 local object = require("rima.object")
-local expression = require("rima.expression")
 local operators = require("rima.operators")
 require("rima.private")
-require("rima.public")
 local rima = rima
 
 module(...)
+
+local expression = require("rima.expression")
+require("rima.public")
 
 -- Function type ---------------------------------------------------------------
 

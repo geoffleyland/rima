@@ -5,15 +5,14 @@ local math, table = require("math"), require("table")
 local error, require, unpack = error, require, unpack
 local ipairs, pairs = ipairs, pairs
 
-local rima = require("rima")
 local proxy = require("rima.proxy")
-local tests = require("rima.tests")
-local types = require("rima.types")
-local operators = require("rima.operators")
 require("rima.private")
+local rima = rima
 
 module(...)
 
+local add = require("rima.operators.add")
+local pow = require("rima.operators.pow")
 local expression = require("rima.expression")
 
 -- Multiplication --------------------------------------------------------------
@@ -114,11 +113,11 @@ function mul:eval(S, raw_args)
           coeff = coeff * math.pow(e, exp)
         elseif e.op == mul then                 -- if the term is another product, hoist its terms
           prod(e, exp)
-        elseif e.op == operators.add and        -- if the term is a sum with a single term, hoist it
+        elseif e.op == add and                  -- if the term is a sum with a single term, hoist it
                #e == 1 then
           coeff = coeff * math.pow(e[1][1], exp)
           simplify(exp, e[1][2])
-        elseif e.op == operators.pow and        -- if the term is an exponentiation to a constant power, hoist it
+        elseif e.op == pow and                  -- if the term is an exponentiation to a constant power, hoist it
           type(e[2]) == "number" then
           simplify(exp * e[2], e[1])
         else                                    -- if there's nothing else to do, add the term
@@ -157,62 +156,6 @@ function mul:eval(S, raw_args)
     end
     return expression:new(mul, unpack(new_args))
   end
-end
-
-
--- Tests -----------------------------------------------------------------------
-
-function test(show_passes)
-  local T = tests.series:new(_M, show_passes)
-
-  T:test(isa(mul:new(), mul), "isa(mul:new(), mul)")
-  T:equal_strings(type(mul:new()), "mul", "type(mul:new()) == 'mul'")
-
---  T:expect_ok(function() mul:check({}) end)
---  T:expect_ok(function() mul:check({{1, 2}}) end) 
-
-  T:equal_strings(mul:dump({{1, 1}}), "*(number(1)^1)")
-  T:equal_strings(mul:_tostring({{1, 1}}), "1")
-  T:equal_strings(mul:dump({{1, 2}, {3, 4}}), "*(number(2)^1, number(4)^3)")
-  T:equal_strings(mul:_tostring({{1, 2}, {3, 4}}), "2*4^3")
-  T:equal_strings(mul:_tostring({{-1, 2}, {3, 4}}), "1/2*4^3")
-  T:equal_strings(mul:_tostring({{-1, 2}, {-3, 4}}), "1/2/4^3")
-
-  local S = rima.scope.new()
-  T:equal_strings(mul:eval(S, {{1, 2}}), 2)
-  T:equal_strings(mul:eval(S, {{1, 2}, {3, 4}}), 128)
-  T:equal_strings(mul:eval(S, {{2, 2}, {1, 4}, {1, 6}}), 96)
-  T:equal_strings(mul:eval(S, {{2, 2}, {1, 4}, {-1, 6}}), 8/3)
-  T:equal_strings(mul:eval(S, {{2, 2}, {1, 4}, {1, -6}}), -96)
-
-  local a, b = rima.R"a,b"
-  rima.scope.set(S, {a = 5, b = rima.positive()})
-  T:equal_strings(mul:dump({{1, a}}), "*(ref(a)^1)")
-  T:equal_strings(mul:eval(S, {{1, a}}), 5)
-  T:equal_strings(mul:eval(S, {{1, a}, {2, a}}), 125)
-
-  T:equal_strings(2 * (3 * b), "2*3*b")
-  T:equal_strings(2 / (3 * b), "2/(3*b)")
-
-  T:equal_strings(expression.eval(b / b, S), 1)
-  T:equal_strings(expression.eval(b * b, S), "b^2")
-  T:equal_strings(expression.eval(2 * (3 * b), S), "6*b")
-  T:equal_strings(expression.eval(2 / (3 * b), S), "0.6667/b")
-
-  T:equal_strings(expression.eval(2 * (3 * a), S), 30)
-  T:equal_strings(expression.eval(2 / (3 * a), S), 2/15)
-
-  T:equal_strings(expression.dump(mul:eval(S, {{2, b}})), "*(ref(b)^2)")
-  T:equal_strings(expression.dump(mul:eval(S, {{1, b}})), "ref(b)", "checking we simplify identity")
-  T:equal_strings(expression.dump(expression.eval(1 * b, S)), "ref(b)", "checking we simplify identity")
-  T:equal_strings(expression.dump(expression.eval(2 * b / 2, S)), "ref(b)", "checking we simplify identity")
-
-  T:equal_strings(mul:eval(S, {{0, S.b}}), 1, "checking we simplify 0")
-  T:equal_strings(expression.eval(0 * S.b, S), 0, "checking we simplify 0")
-
-  -- Tests including add and pow are in rima.expression
-
-  return T:close()
 end
 
 
