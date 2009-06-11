@@ -10,7 +10,7 @@ local show_passes = false
 
 for _, v in ipairs{...} do
   if v == "show_passes" then
-    patterns = true
+    show_passes = true
   else
     patterns[#patterns+1] = v
   end

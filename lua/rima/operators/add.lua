@@ -2,7 +2,7 @@
 -- see license.txt for license information
 
 local math, table = require("math"), require("table")
-local error, unpack = error, unpack
+local error, require, unpack = error, require, unpack
 local ipairs, pairs = ipairs, pairs
 
 local rima = require("rima")
@@ -11,9 +11,10 @@ local tests = require("rima.tests")
 local types = require("rima.types")
 local operators = require("rima.operators")
 require("rima.private")
-local expression = rima.expression
 
 module(...)
+
+local expression = require("rima.expression")
 
 -- Addition --------------------------------------------------------------------
 

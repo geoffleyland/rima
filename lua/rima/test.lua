@@ -16,9 +16,7 @@ function test()
 
   T:run(rima.tests.test)
   T:run(rima.values.test.test)
-  T:run(rima.expression.test1)
   T:run(rima.operators.test.test)
-  T:run(rima.expression.test2)
   T:run(rima.constraint.test)
 
   return T:close()
