@@ -1,7 +1,7 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local require = require
+local ipairs, require = ipairs, require
 
 local lfs = require("lfs")
 local series = require("test.series")
