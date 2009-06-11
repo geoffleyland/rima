@@ -3,7 +3,6 @@
 
 local error, require = error, require
 
---local types = require("rima.types")
 require("rima.private")
 local rima = rima
 

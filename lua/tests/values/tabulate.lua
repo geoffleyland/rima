@@ -2,8 +2,8 @@
 -- see license.txt for license information
 
 local series = require("test.series")
-require("rima.values.tabulate")
 local scope = require("rima.scope")
+require("rima.public")
 local rima = rima
 
 module(...)

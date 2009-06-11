@@ -2,14 +2,15 @@
 -- see license.txt for license information
 
 local table = require("table")
-local assert, ipairs, tostring = assert, ipairs, tostring
+local ipairs, require, tostring = ipairs, require, tostring
 
 local object = require("rima.object")
-local add = require("rima.operators.add")
-local expression = require("rima.expression")
 local rima = rima
 
 module(...)
+
+local add = require("rima.operators.add")
+local expression = require("rima.expression")
 
 -- Subscripts ------------------------------------------------------------------
 

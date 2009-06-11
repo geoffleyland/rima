@@ -1,16 +1,17 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local error, ipairs, unpack, pcall = error, ipairs, unpack, pcall
+local error, ipairs, pcall, require, unpack = error, ipairs, pcall, require, unpack
 
 local object = require("rima.object")
-local scope = require("rima.scope")
-local ref = require("rima.ref")
-local expression = require("rima.expression")
 require("rima.private")
 local rima = rima
 
 module(...)
+
+local scope = require("rima.scope")
+local ref = require("rima.ref")
+local expression = require("rima.expression")
 
 -- Addition --------------------------------------------------------------------
 

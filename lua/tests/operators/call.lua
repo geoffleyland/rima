@@ -6,6 +6,7 @@ local call = require("rima.operators.call")
 local object = require("rima.object")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
+require("rima.public")
 local rima = rima
 
 module(...)

@@ -5,6 +5,7 @@ local series = require("test.series")
 local pow = require("rima.operators.pow")
 local object = require("rima.object")
 local expression = require("rima.expression")
+require("rima.public")
 local rima = rima
 
 module(...)
