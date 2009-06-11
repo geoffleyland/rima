@@ -5,8 +5,6 @@ local series = require("test.series")
 local function_v = require("rima.values.function_v")
 local object = require("rima.object")
 local scope = require("rima.scope")
---local expression = require("rima.expression")
---require("rima.types.number_t")
 local rima = rima
 
 module(...)

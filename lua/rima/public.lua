@@ -12,6 +12,7 @@ local ref = require("rima.ref")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
 local function_v = require("rima.values.function_v")
+local tabulate_type = require("rima.values.tabulate")
 
 local rima = getfenv(0).rima
 
@@ -52,6 +53,9 @@ function rima.F(inputs, expression, S)
   return function_v:new(inputs, expression, S)
 end
 
+function rima.tabulate(indexes, e)
+  return tabulate_type:new(indexes, e)
+end
 
 -- EOF -------------------------------------------------------------------------
 

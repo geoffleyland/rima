@@ -3,7 +3,6 @@
 
 require("rima")
 local tests = require("rima.tests")
-require("rima.values.test")
 local rima = rima
 
 module(...)
@@ -14,7 +13,6 @@ function test()
   local T = tests.series:new(_M, false)
 
   T:run(rima.tests.test)
-  T:run(rima.values.test.test)
   T:run(rima.constraint.test)
 
   return T:close()

@@ -4,12 +4,10 @@
 local table = require("table")
 local error, ipairs, tostring = error, ipairs, tostring
 
-
-local rima = require("rima")
-local tests = require("rima.tests")
 local object = require("rima.object")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
+local rima = rima
 
 module(...)
 
@@ -54,31 +52,6 @@ function tabulate_type:handle_address(S, a)
   end
 
   return expression.eval(self.expression, S2)
-end
-
-function rima.tabulate(indexes, e)
-  return tabulate_type:new(indexes, e)
-end
-
-
--- Tests -----------------------------------------------------------------------
-
-function test(show_passes)
-  local T = tests.series:new(_M, show_passes)
-
-  local t
-  
-  T:expect_ok(function() t = rima.tabulate({"a", "b", "c"}, 3) end, "constructing tabulate")
-
-  do
-    local Q, x, y, z = rima.R"Q, x, y"
-    local e = rima.sum({Q}, x[Q])
-    local S = rima.scope.create{ Q={4, 5, 6} }
-    S.x = rima.tabulate({y}, rima.value(y)^2)
-    T:equal_strings(rima.E(e, S), 77)
-  end
-
-  return T:close()
 end
 
 
