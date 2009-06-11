@@ -25,6 +25,8 @@ function test(show_passes)
   T:test(not object.isa({}, object), "isa({}, object)")
   T:test(not object.isa(object:new(), subobj), "isa(object:new(), subobj)")
   
+  T:expect_error(function() object.isa({}, "thing") end,
+    "bad argument #2 to 'rima%.object%.isa' %(table expected, got string%)")
   
   T:check_equal(object.type(s), "subobj", "type(s) == 'subobj'")
   T:check_equal(object.type(1), "number", "type(1) == 'number'")
