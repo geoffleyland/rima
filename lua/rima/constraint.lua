@@ -4,7 +4,6 @@
 local coroutine = require("coroutine")
 local assert, ipairs = assert, ipairs
 
-local tests = require("rima.tests")
 local object = require("rima.object")
 require("rima.private")
 local rima = rima
@@ -78,22 +77,6 @@ function constraint:__tostring()
   local lhs, rhs = rima.tostring(self.lhs), rima.tostring(self.rhs)
   local s = lhs.." "..self.type.." "..rhs
   return s
-end
-
-
--- Tests -----------------------------------------------------------------------
-
-function test(show_passes)
-  local T = tests.series:new(_M, show_passes)
-
-  local a, b = rima.R"a,b"
-  local S = rima.scope.create{ ["a,b"]=rima.free() }
-
-  local c
-  T:expect_ok(function() c = constraint:new(a + b, "==", b) end)
-  T:equal_strings(rima.tostring(c), "a + b == b")
-
-  return T:close()
 end
 
 
