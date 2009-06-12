@@ -5,6 +5,7 @@ local series = require("test.series")
 local object = require("rima.object")
 local types = require("rima.types")
 local scope = require("rima.scope")
+local ref = require("rima.ref")
 local rima = rima
 
 module(...)
@@ -111,12 +112,26 @@ function test(show_passes)
     S1 = scope.new()
     S2 = scope.spawn(S1)
     S3 = scope.spawn(S2, nil, {overwrite=true})
+    T:check_equal(scope.has_parent(S1), false)
+    T:check_equal(scope.has_parent(S2), true)
     S2.a = 5
     S3.a = 7
     T:check_equal(scope.lookup(S1, "a"), nil)
     T:check_equal(scope.lookup(S2, "a"), 5)
     T:check_equal(scope.lookup(S3, "a"), 7)
     T:check_equal(scope.lookup(S3, "a", S1), 5)  
+    S1.b = rima.integer()
+    local b = S3.b
+    T:expect_error(function() ref.eval(b, S2) end,
+      "the reference 'b' is bound to a scope that is not available")
+  end
+
+  do
+    local S = scope.create{a=1, ["b, c"]=2, d=4}
+    T:check_equal(S.a, 1)
+    T:check_equal(S.b, 2)
+    T:check_equal(S.c, 2)
+    T:check_equal(S.d, 4)
   end
 
   return T:close()
