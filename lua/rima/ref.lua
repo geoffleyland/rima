@@ -52,7 +52,7 @@ end
 
 function ref.is_simple(r)
   r = proxy.O(r)
-  return (r.scope or #r.address > 0) and false or true
+  return (not r.scope and #r.address == 0) and true or false
 end
 
 

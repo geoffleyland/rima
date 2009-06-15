@@ -84,6 +84,16 @@ function test(show_passes)
     T:check_equal(rima.E(N[y][x], S), 2)
   end
 
+  do
+    local a = rima.R"a"
+    local S = rima.scope.create{ a = rima.free() }
+    
+    T:check_equal(ref.is_simple(a), true)
+    T:check_equal(ref.is_simple(a.b), false)
+    T:check_equal(ref.is_simple(a[2]), false)
+    T:check_equal(ref.is_simple(ref.eval(a, S)), false)
+  end
+
   -- tests for references to references
   -- tests for references to functions
   -- tests for references to expressions
