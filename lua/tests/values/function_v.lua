@@ -17,7 +17,30 @@ function test(show_passes)
   T:test(object.isa(function_v:new({"a"}, 3), function_v), "isa(function_v:new(), function_v)")
   T:check_equal(object.type(function_v:new({"a"}, 3)), "function_v", "type(function_v:new()) == 'function_v'")
 
+  T:expect_error(function() function_v:new({1}, 1) end,
+    "expected string or simple reference, got '1' %(number%)")
+  do
+    local a = rima.R"a"
+    T:expect_error(function() function_v:new({a[1]}, 1) end,
+      "expected string or simple reference, got 'a%[1%]' %(ref%)")
+    local S = scope.create{ b=rima.free() }
+    T:expect_error(function() function_v:new({S.b}, 1) end,
+      "expected string or simple reference, got 'b' %(ref%)")
+  end
+
+
   local a, b, c, x = rima.R"a, b, c, x"
+
+  do
+    local f = rima.R"f"
+    local S = scope.create{ f = function_v:new({a}, 3) }
+    T:expect_error(function() rima.E(f(), S) end,
+      "the function needs to be called with at least 1 arguments, got 0")
+    T:expect_error(function() rima.E(f(1, 2), S) end,
+      "the function needs to be called with 1 arguments, got 2")
+    T:expect_error(function() rima.E(f(1, 2, 3), S) end,
+      "the function needs to be called with 1 arguments, got 3")
+  end
 
   do
     local f = function_v:new({a}, 3)
@@ -27,7 +50,7 @@ function test(show_passes)
   end
   
   do
-    local f = function_v:new({a}, 3 + a)
+    local f = function_v:new({"a"}, 3 + a)
     local S = scope.create{ x = rima.free() }
     T:check_equal(f, "function(a) return 3 + a", "function description")
     T:check_equal(f:call(S, {x}), "3 + x")

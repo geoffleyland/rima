@@ -36,11 +36,11 @@ function function_v:new(inputs, expression, S, ...)
         new_inputs[i] = v
       else
         error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
-          format(i, tostring(v), type(v)), 0)
+          format(i, rima.tostring(v), type(v)), 0)
       end
     else
-      error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s))"):
-        format(i, tostring(v), type(v)), 0)
+      error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
+        format(i, rima.tostring(v), type(v)), 0)
     end
   end
 
