@@ -29,7 +29,7 @@ function tabulate_type:new(indexes, e)
           format(i, tostring(v), type(v)), 0)
       end
     else
-      error(("bad index #%d to tabulate: expected string or simple reference, got '%s' (%s))"):
+      error(("bad index #%d to tabulate: expected string or simple reference, got '%s' (%s)"):
         format(i, tostring(v), type(v)), 0)
     end
   end
