@@ -6,6 +6,7 @@ local object = require("rima.object")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
 local ref = require("rima.ref")
+local iteration = require("rima.iteration")
 require("rima.public")
 local rima = rima
 
@@ -92,7 +93,65 @@ function test(show_passes)
     T:check_equal(ref.is_simple(a.b), false)
     T:check_equal(ref.is_simple(a[2]), false)
     T:check_equal(ref.is_simple(ref.eval(a, S)), false)
+    
+    T:expect_ok(function() ref.eval(a, S, { }) end)
+    T:expect_error(function() ref.eval(a, S, { 5 }) end,
+      "can't evaluate the reference 'a' with arguments")
   end
+  
+  do
+    local a, b, c = rima.R"a, b, c"
+    local S = rima.scope.create{ a = b + c, b = 1, c = function() end }
+    T:expect_error(function() rima.E(a, S) end, "error while evaluating 'a'")
+  end
+
+  do
+    local a = rima.R"a, b, c"
+    local S1 = rima.scope.create{ a = b, b = 17 }
+    T:check_equal(rima.E(a, S1), 17)
+    local S2 = rima.scope.create{ a = b - c, b = 1 }
+    T:check_equal(rima.E(a, S2), "1 - c")
+  end
+
+  do
+    local a, b, i = rima.R"a, b, i"
+    local S = rima.scope.create{ a = { { 5 } }, b = rima.tabulate({i}, a[1][i]) }
+    T:check_equal(rima.E(a[1][1], S), 5)
+    T:check_equal(rima.E(b[1], S), 5)
+    T:expect_error(function() rima.E(b[1][1], S) end, "error while evaluating 'b%[1, 1%]")
+  end
+
+  do
+    local a, b, i = rima.R"a, b, i"
+    local S = rima.scope.create{ a = { 5 }, b = { c=3 }, i = iteration.element:new({}, 1, "c") }
+    T:check_equal(rima.E(a[i] * b[i], S), 15)
+  end
+  
+  do
+    local a, b = rima.R"a, b"
+    local t = { b = { x = { y = 3}, z = 10 } }
+    ref.set(a.b.c, t, 10)
+    T:check_equal(t.a.b.c, 10)
+    T:expect_error(function() ref.set(b.z.b, t, 5) end, "error setting 'b%[z, b%]' to 5: field is not a table %(10%)")
+    T:expect_error(function() ref.set(b.x.y, t, 5) end, "error setting 'b%[x, y%]' to 5: field already exists %(3%)")
+  end   
+
+  do
+    local x, y = rima.R"x, y"
+    local S = rima.scope.create{ x = 2, y = 3 }
+    T:check_equal(rima.E(x + y, S), 5)
+    T:check_equal(rima.E(x - y, S), -1)
+    T:check_equal(rima.E(-x + y, S), 1)
+    T:check_equal(rima.E(x * y, S), 6)
+    T:check_equal(rima.E(x / y, S), 2/3)
+    T:check_equal(rima.E(x ^ y, S), 8)
+  end   
+
+  do
+    local f, x, y = rima.R"f, x, y"
+    local S = rima.scope.create{ x = 2, f = rima.F({y}, y + 5) }
+    T:check_equal(rima.E(f(x), S), 7)
+  end   
 
   -- tests for references to references
   -- tests for references to functions
