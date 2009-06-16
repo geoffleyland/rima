@@ -2,18 +2,19 @@
 -- see license.txt for license information
 
 local coroutine = require("coroutine")
-local type = type
 local ipairs, pairs = ipairs, pairs
-local getmetatable = getmetatable
+local getmetatable, require, type = getmetatable, require, type
+
 local object = require("rima.object")
 local proxy = require("rima.proxy")
-local expression = require("rima.expression")
-local scope = require("rima.scope")
 local types = require("rima.types")
 require("rima.private")
 local rima = rima
 
 module(...)
+
+local scope = require("rima.scope")
+local expression = require("rima.expression")
 
 -- Aliases ---------------------------------------------------------------------
 
