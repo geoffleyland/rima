@@ -88,12 +88,6 @@ local function get_field(e, f)
   return rawtype(e) == "table" and e[f]
 end
 
-function expression.operator(e)
-  e = proxy.O(e)
-  local op = get_field(e, "op")
-  return type(op and op or e)
-end
-
 
 -- String representation -------------------------------------------------------
 

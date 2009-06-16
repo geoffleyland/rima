@@ -61,7 +61,7 @@ function add:_tostring(args)
 
     -- If the coefficient's not 1, make a sub-expression with a multiplication
     local ac = math.abs(c)
-    e = ac == 1 and e or ac * e
+    e = ac == 1 and e or mul:simplify({{1, ac}, {1, e}})
 
     -- If the constant's not 1 then we need to parenthise (almost) like a multiplication
     s = s..expression.parenthise(e, (c == 1 and 5) or 4)

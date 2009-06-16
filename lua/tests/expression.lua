@@ -60,19 +60,35 @@ function test(show_passes)
   S.a = 5
   equal(T, 5, {a, S, "eval"})
 
+  -- dump and tostring
+  T:check_equal(expression.dump(1), "number(1)")
+  T:check_equal(expression.dump(expression:new(function() end, 1)), "function(number(1))")
+  T:check_equal(expression.__tostring(1), "1")
+  T:check_equal(expression:new(function() end, 1), "function(1)")
+
+  -- eval
+  T:expect_error(function() expression.eval(expression:new({}), {}) end,
+    "unable to evaluate 'table%(%)': the operator can't be evaluated")
+
   -- tests with add, mul and pow
   do
     local a, b = rima.R"a, b"
     local S = rima.scope.create{ ["a,b"]=rima.free() }
     equal(T, "+(1*number(3), 4*ref(a))", {3 + 4 * a, S, "eval", "dump"})
-    equal(T, "3 + 4*a", {3 + 4 * a, S, "eval"})
+    equal(T, "3 - 4*a", {4 * -a + 3, S, "eval"})
     equal(T, "+(1*number(3), 4**(ref(a)^1, ref(b)^1))", {3 + 4 * a * b, S, "eval", "dump"})
-    equal(T, "3 + 4*a*b", {3 + 4 * a * b, S, "eval"})
+    equal(T, "3 - 4*a*b", {3 - 4 * a * b, S, "eval"})
 
     equal(T, "*(number(6)^1, ref(a)^1)", {3 * (a + a), S, "eval", "dump"})
     equal(T, "6*a", {3 * (a + a), S, "eval"})
     equal(T, "+(1*number(1), 6*ref(a))", {1 + 3 * (a + a), S, "eval", "dump"})
     equal(T, "1 + 6*a", {1 + 3 * (a + a), S, "eval"})
+
+    equal(T, "*(number(1.5)^1, ref(a)^-1)", {3 / (a + a), S, "eval", "dump"})
+    equal(T, "1.5/a", {3 / (a + a), S, "eval"})
+    equal(T, "+(1*number(1), 1.5**(ref(a)^-1))", {1 + 3 / (a + a), S, "eval", "dump"})
+    equal(T, "1 + 1.5/a", {1 + 3 / (a + a), S, "eval"})
+
 
     equal(T, "*(number(3)^1, ^(ref(a), number(2))^1)", {3 * a^2, nil, "dump"})
     equal(T, "*(number(3)^1, ref(a)^2)", {3 * a^2, S, "eval", "dump"})
@@ -92,15 +108,25 @@ function test(show_passes)
     equal(T, "5*(3 + (5*c)^2)", {5 * d, S, "eval"})
   end
 
+  -- references to functions
+  do
+    local f, x, y = rima.R"f, x, y"
+    local S = rima.scope.create{ x = 2, f = rima.F({y}, y + 5) }
+    T:check_equal(rima.E(f(x), S), 7)
+  end
 
   -- linearisation
-  local a, b = rima.R"a, b"
-  local S = rima.scope.create{ ["a,b"] = rima.free() }
+  local a, b, c = rima.R"a, b, c"
+  local S = rima.scope.create{ ["a,b"] = rima.free(), c=rima.types.undefined_t:new() }
 
   T:expect_ok(function() expression.linearise(a, S) end)
   T:expect_ok(function() expression.linearise(1 + a, S) end)
   T:expect_error(function() expression.linearise(1 + (3 + a^2), S) end,
     "error while linearising '1 %+ 3 %+ a^2'.-linear form: 4 %+ a^2.-term 2 %(a^2%) is not linear")
+  T:expect_error(function() expression.linearise(1 + c, S) end,
+    "error while linearising '1 %+ c'.-linear form: 1 %+ c.-expecting a number type for 'c', got 'c undefined'")
+  T:expect_error(function() expression.linearise(a * b, S) end,
+    "error while linearising 'a%*b'.-linear form: a%*b.-the expression does not evaluate to a sum of terms")
 
   local function check_nonlinear(e, S)
     T:expect_error(function() expression.linearise(e, S) end, "error while linearising")
@@ -148,6 +174,7 @@ function test(show_passes)
     end
   end
 
+  check_linear(1, 1, {}, S)
   check_linear(1 + a*5, 1, {a=5}, S)
   check_nonlinear(1 + a*b, S)
   check_linear(1 + a*b, 1, {a=5}, scope.spawn(S, {b=5}))
