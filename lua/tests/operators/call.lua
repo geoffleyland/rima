@@ -1,6 +1,7 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
+local string = require("string")
 local series = require("test.series")
 local call = require("rima.operators.call")
 local object = require("rima.object")
@@ -23,6 +24,7 @@ function test(show_passes)
 
   T:check_equal(expression.dump(S.a(S.b)), "call(ref(a), ref(b))")
   T:check_equal(S.a(S.b), "a(b)")
+  T:check_equal(rima.E(S.a(S.b), S), "a(b)")
 
   -- The a here ISN'T in the global scope, it's in the function scope
   S.f = rima.F({rima.R"a"}, 2 * rima.R"a")
@@ -38,6 +40,12 @@ function test(show_passes)
   local c2 = expression:new(call, rima.R"f")
   T:expect_error(function() expression.eval(c2, S) end,
     "error while evaluating 'f%(%)':\n  the function needs to be called with at least")
+
+  do
+    local f, a, b = rima.R"f, a, b"
+    local S = scope.create{ f = string.sub, a = "hello", b = 2 }
+    T:check_equal(expression.eval(f(a, b), S), "ello")  
+  end
 
   return T:close()
 end
