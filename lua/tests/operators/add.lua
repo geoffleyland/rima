@@ -36,7 +36,7 @@ function test(show_passes)
   T:check_equal(add:eval(S, {{1, 2}, {3, 4}, {-5, 6}}), -16)
   T:check_equal(add:eval(S, {{1, 2}, {3, 4}, {5, -6}}), -16)
 
-  local a, b = rima.R"a,b"
+  local a, b, c = rima.R"a,b,c"
   rima.scope.set(S, { a = 5, b = rima.positive() })
   T:check_equal(add:dump({{1, a}}), "+(1*ref(a))")
   T:check_equal(add:eval(S, {{1, a}}), 5)
@@ -54,6 +54,10 @@ function test(show_passes)
   T:check_equal(rima.E(2 - (3 + a), S), -6)
   T:check_equal(rima.E(-a, S), -5)
   T:check_equal(rima.E(2 + (3 + b), S), "5 + b")
+
+  T:check_equal(expression.dump(rima.E(2 + 3*b, S)), "+(1*number(2), 3*ref(b))")
+  T:check_equal(expression.dump(rima.E(2 + b*c, S)), "+(1*number(2), 1**(ref(b)^1, ref(c)^1))")
+  T:check_equal(expression.dump(rima.E(2 + 5*b*c, S)), "+(1*number(2), 5**(ref(b)^1, ref(c)^1))")
 
   T:check_equal(expression.dump(add:eval(S, {{2, S.b}})), "+(2*ref(b))")
   T:check_equal(expression.dump(add:eval(S, {{1, S.b}})), "ref(b)", "checking we simplify identity")
