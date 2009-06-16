@@ -31,6 +31,8 @@ function test(show_passes)
   local a, b = rima.R"a, b"
   local S = rima.scope.create{ a = 5 }
   T:check_equal(expression.dump(a^2), "^(ref(a), number(2))")
+  T:check_equal(a^2, "a^2")
+  T:check_equal(a^b, "a^b")
   T:check_equal(expression.eval(a^2, S), 25)
   T:check_equal(expression.dump(2^a), "^(number(2), ref(a))")
   T:check_equal(expression.eval(2^a, S), 32)
