@@ -34,6 +34,7 @@ function test(show_passes)
   do
     local x, k, v = rima.R"x, k, v"
     local S = rima.scope.create{ x = { 10, 20, 30 } }
+    T:check_equal(rima.sum({rima.pairs(x, k, v)}, k + v), "sum({k, v in x}, k + v)")
     T:check_equal(rima.E(rima.sum({rima.pairs(x, k, v)}, k + v), S), 66)
   end
 
