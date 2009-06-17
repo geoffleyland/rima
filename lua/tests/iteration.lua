@@ -4,10 +4,6 @@
 local series = require("test.series")
 local object = require("rima.object")
 require("rima.iteration")
---local scope = require("rima.scope")
---local expression = require("rima.expression")
---local ref = require("rima.ref")
---local iteration = require("rima.iteration")
 require("rima.public")
 local rima = rima
 
@@ -34,6 +30,12 @@ function test(show_passes)
   T:check_equal(rima.E(rima.sum({rima.alias(R, "y")}, rima.value(y)), S), "sum({y in range(1, r)}, value(y))")
   S.r = 10
   T:check_equal(rima.E(rima.sum({rima.alias(R, "y")}, rima.value(y)), S), 55)
+
+  do
+    local x, k, v = rima.R"x, k, v"
+    local S = rima.scope.create{ x = { 10, 20, 30 } }
+    T:check_equal(rima.E(rima.sum({rima.pairs(x, k, v)}, k + v), S), 66)
+  end
 
   return T:close()
 end

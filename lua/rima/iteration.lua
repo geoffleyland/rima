@@ -2,6 +2,7 @@
 -- see license.txt for license information
 
 local coroutine = require("coroutine")
+local tostring, type = tostring, type
 local ipairs, pairs = ipairs, pairs
 local getmetatable, require, type = getmetatable, require, type
 
@@ -206,6 +207,47 @@ function iterate_all(S, sets)
   return coroutine.wrap(z)
 end
 
+
+-- Pairs -----------------------------------------------------------------------
+
+pairs_type = object:new({}, "pairs")
+function pairs_type:new(exp, key, value)
+  return object.new(self, { exp=exp, key_name=key, value_name=value })
+end
+
+function pairs_type:__tostring() 
+  local s = tostring(self.key_name)
+  if self.value_name and self.value_name ~= "_" then
+    s = s..", "..tostring(self.value_name)
+  end
+  s = s.." in "..tostring(self.exp)
+  return s
+end
+
+function pairs_type:__iterate(S)
+  local z = expression.eval(self.exp, S)
+  local key_name, value_name = tostring(self.key_name), tostring(self.value_name)
+  
+  return coroutine.wrap(
+    function()
+      for k, v in ipairs(z) do
+        local r = {}
+        if key_name ~= "_" then r[key_name] = k end
+        if value_name ~= "_" then r[value_name] = v end
+        coroutine.yield(r)
+      end
+    end)
+end
+
+function pairs_type:defined(S)
+  self.exp = rima.E(self.exp, S)
+  local e = self.exp
+  return e and not object.isa(e, rima.ref) and not object.isa(e, expression)
+end
+
+function rima.pairs(exp, key, value)
+  return pairs_type:new(exp, key, value)
+end
 
 -- EOF -------------------------------------------------------------------------
 
