@@ -4,7 +4,7 @@
 local coroutine = require("coroutine")
 local tostring, type = tostring, type
 local ipairs, pairs = ipairs, pairs
-local getmetatable, require, type = getmetatable, require, type
+local error, getmetatable, require, type = error, getmetatable, require, type
 
 local object = require("rima.object")
 local proxy = require("rima.proxy")
@@ -24,6 +24,7 @@ function alias_type:new(exp, name)
   return object.new(self, { exp=exp, name=name })
 end
 
+
 function alias_type:__tostring()
   local name, set = self.name, rima.tostring(self.exp)
   if name == set then
@@ -32,6 +33,7 @@ function alias_type:__tostring()
     return name.." in "..set
   end
 end
+
 
 function rima.alias(exp, name)
   return alias_type:new(exp, name)
@@ -44,6 +46,7 @@ element = object:new({}, "element")
 function element:new(set, index, key)
   return object.new(self, {set=set, index=index, key=key})
 end
+
 
 function element:__tostring()
   return self.key
@@ -85,9 +88,11 @@ function range_type:new(l, h)
   return object.new(self, { low = l, high = h} )
 end
 
+
 function range_type:__tostring()
   return "range("..self.low..", "..self.high..")"
 end
+
 
 function range_type:__iterate()
   return coroutine.wrap(
@@ -100,6 +105,7 @@ function range_type:__iterate()
     end)
 end
 
+
 local range_op = object:new({}, "range")
 function range_op:eval(S, args)
   local l, h = expression.eval(args[1], S), expression.eval(args[2], S)
@@ -110,17 +116,44 @@ function range_op:eval(S, args)
   end
 end
 
+
 function rima.range(l, h)
   return expression:new(range_op, l, h)
 end
 
+
 -- Iteration -------------------------------------------------------------------
 
-ref_iterator = object:new(ref_iterator, "iterator")
+ref_iterator = object:new({}, "iterator")
 
-function ref_iterator:__iterate(S)
-  local z = expression.eval(self.exp, S)
 
+function ref_iterator:__tostring()
+  local name, set = self.name, rima.tostring(self.exp)
+  if name == set then
+    return name
+  else
+    return name.." in "..set
+  end
+end
+
+
+function ref_iterator:eval(S)
+  return ref_iterator:new{ exp=rima.E(self.exp, S), name=self.name }
+end
+
+
+function ref_iterator:defined()
+  return expression.defined(self.exp)
+end
+
+
+function ref_iterator:names()
+  return { self.name }
+end
+
+
+function ref_iterator:__iterate()
+  local z = self.exp
   local m = getmetatable(z)
   local i = m and m.__iterate or nil
   if i then
@@ -140,66 +173,68 @@ function ref_iterator:__iterate(S)
   end
 end
 
-function ref_iterator:__tostring()
-  local name, set = self.name, rima.tostring(self.exp)
-  if name == set then
-    return name
-  else
-    return name.." in "..set
-  end
-end
 
-function ref_iterator:defined(S)
-  self.exp = rima.E(self.exp, S)
-  local e = self.exp
-  return e and not object.isa(e, rima.ref) and not object.isa(e, expression)
-end
+-- Set list --------------------------------------------------------------------
 
-function prepare(S, sets)
-  S2 = scope.spawn(S, nil, {overwrite=true})
-
-  local defined_sets, undefined_sets = {}, {} 
-  for i, a in ipairs(sets) do
-    local iterator
-    if object.isa(a, alias_type) then
-      iterator = ref_iterator:new{exp=a.exp, name=a.name}
-    elseif object.isa(a, rima.ref) then
-      iterator = ref_iterator:new{exp=a, name=proxy.O(a).name}
-    elseif type(a) == "string" then
-      iterator = ref_iterator:new{exp=rima.R(a), name=a}
+set_list = object:new({}, "set_list")
+function set_list:new(sets)
+  local clean_sets = {}
+  for i, s in ipairs(sets) do
+    if object.isa(s, alias_type) then
+      clean_sets[i] = ref_iterator:new{exp=s.exp, name=s.name}
+    elseif object.isa(s, rima.ref) then
+      clean_sets[i] = ref_iterator:new{exp=s, name=proxy.O(s).name}
+    elseif type(s) == "string" then
+      clean_sets[i] = ref_iterator:new{exp=rima.R(s), name=s}
     else
-      local mt = getmetatable(a)
+      local mt = getmetatable(s)
       if mt and mt.__iterate then
-        iterator = a
+        clean_sets[i] = s
       else
-        error(("Bad set iterator #d to set.prepare: expected a string, alias, reference or something iterable, got '%s' (%s)"):
-          format(i, tostring(a), type(a)), 0)
+        error(("Bad set #%d to set_list:new: expected a string, alias, reference or something iterable, got '%s' (%s)"):
+          format(i, tostring(s), type(s)), 0)
       end
     end
-    if iterator:defined(S) then
-      defined_sets[#defined_sets+1] = iterator
-    else
-      undefined_sets[#undefined_sets+1] = iterator
-    end
   end
-  
-  return S2, defined_sets, undefined_sets
+  return object.new(self, clean_sets)
 end
 
 
-function iterate_all(S, sets)
-  local S2 = scope.spawn(S, nil, {rewrite=true})
+function set_list:dump()
+  return "{"..rima.concat(self, ", ", expression.dump).."}"
+end
 
-  local function z(i)
+
+function set_list:__tostring()
+  return "{"..rima.concat(self, ", ", rima.tostring).."}"
+end
+
+
+function set_list:iterate(S)
+  local undefined_sets = {}
+
+  local function z(Sn, i)
+    Sn = Sn or S
     i = i or 1
-    if i > #sets then
-      coroutine.yield(S2)
+    if not self[i] then
+      coroutine.yield(Sn, set_list:new(undefined_sets))
     else
-      for variables in sets[i]:__iterate(S) do
-        for k, v in pairs(variables) do
-          S2[k] = v
+      local iterator = self[i]:eval(Sn)
+      if iterator:defined() then
+        for variables in iterator:__iterate() do
+          local S2 = scope.spawn(Sn, nil, {overwrite=true, rewrite=true})
+          for k, v in pairs(variables) do
+            S2[k] = v
+          end
+          z(S2, i+1)
         end
-        z(i+1)
+      else
+        undefined_sets[#undefined_sets+1] = rima.E(iterator, Sn)
+        local S2 = scope.spawn(Sn, nil, {overwrite=true, rewrite=true})
+        for _, n in ipairs(iterator:names()) do          scope.hide(S2, n)
+        end
+        z(S2, i+1)
+        undefined_sets[#undefined_sets] = nil
       end
     end
   end
@@ -211,26 +246,48 @@ end
 -- Pairs -----------------------------------------------------------------------
 
 pairs_type = object:new({}, "pairs")
-function pairs_type:new(exp, key, value)
-  return object.new(self, { exp=exp, key_name=key, value_name=value })
+function pairs_type:new(exp, key, value, iterator)
+  return object.new(self, { exp=exp, key_name=key, value_name=value, iterator=iterator })
 end
+
 
 function pairs_type:__tostring() 
   local s = tostring(self.key_name)
   if self.value_name and self.value_name ~= "_" then
     s = s..", "..tostring(self.value_name)
   end
-  s = s.." in "..tostring(self.exp)
+  if self.iterator == pairs then
+    s = s.." in pairs("..tostring(self.exp)..")"
+  else
+    s = s.." in ipairs("..tostring(self.exp)..")"
+  end
   return s
 end
 
-function pairs_type:__iterate(S)
-  local z = expression.eval(self.exp, S)
+
+function pairs_type:eval(S)
+  return pairs_type:new(rima.E(self.exp, S), self.key_name, self.value_name, self.iterator)
+end
+
+
+function pairs_type:defined()
+  return expression.defined(self.exp)
+end
+
+
+function pairs_type:names()
+  local r = {}
+  if key_name ~= "_" then r[#r+1] = key_name end
+  if value_name ~= "_" then r[#r+1] = value_name end
+end
+
+function pairs_type:__iterate()
   local key_name, value_name = tostring(self.key_name), tostring(self.value_name)
+  local z, iterator = self.exp, self.iterator
   
   return coroutine.wrap(
     function()
-      for k, v in ipairs(z) do
+      for k, v in iterator(z) do
         local r = {}
         if key_name ~= "_" then r[key_name] = k end
         if value_name ~= "_" then r[value_name] = v end
@@ -239,15 +296,16 @@ function pairs_type:__iterate(S)
     end)
 end
 
-function pairs_type:defined(S)
-  self.exp = rima.E(self.exp, S)
-  local e = self.exp
-  return e and not object.isa(e, rima.ref) and not object.isa(e, expression)
-end
 
 function rima.pairs(exp, key, value)
-  return pairs_type:new(exp, key, value)
+  return pairs_type:new(exp, key, value, pairs)
 end
+
+
+function rima.ipairs(exp, key, value)
+  return pairs_type:new(exp, key, value, ipairs)
+end
+
 
 -- EOF -------------------------------------------------------------------------
 

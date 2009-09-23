@@ -18,7 +18,7 @@ local constraint = object:new(_M, "constraint")
 function constraint:new(lhs, rel, rhs, ...)
   assert(rel == "==" or rel == ">=" or rel == "<=")
 
-  o = { type=rel, lhs=lhs, rhs=rhs, sets={...} }
+  o = { type=rel, lhs=lhs, rhs=rhs, sets=rima.iteration.set_list:new{...} }
 
   return object.new(self, o)
 end
@@ -31,17 +31,14 @@ end
 --]]
 
 function constraint:linearise(S)
-  local caller_base_scope, defined_sets =
-    rima.iteration.prepare(S, self.sets)
-
-  assert(#defined_sets == #self.sets, "Some of the constraint's indices are undefined")
-
---  local e = expression.evaluate(self.lhs - self.rhs, caller_base_scope)
   local e = self.lhs - self.rhs
 
   local function list()
-    for caller_scope in rima.iteration.iterate_all(caller_base_scope, defined_sets) do
-      local constant, lhs = expression.linearise(e, caller_scope)
+    for S2, undefined in self.sets:iterate(S) do
+      if undefined[1] then
+        error("Some of the constraint's indices are undefined")
+      end
+      local constant, lhs = expression.linearise(e, S2)
       coroutine.yield(lhs, self.type, -constant)
     end
   end
@@ -52,20 +49,13 @@ end
 
 
 function constraint:tostring(S)
-  local caller_base_scope, defined_sets, undefined_sets =
-    rima.iteration.prepare(S, self.sets)
 
   local function list()
-    for caller_scope in rima.iteration.iterate_all(caller_base_scope, defined_sets) do
-      local lhs = rima.tostring(expression.eval(self.lhs, caller_scope))
-      local rhs = rima.tostring(expression.eval(self.rhs, caller_scope))
+    for S2, undefined in self.sets:iterate(S) do
+      local lhs = rima.tostring(expression.eval(self.lhs, S2))
+      local rhs = rima.tostring(expression.eval(self.rhs, S2))
       local s = lhs.." "..self.type.." "..rhs
-      for i, z in ipairs(undefined_sets) do
-        if i == 1 then s = s.." for all "
-        else s = s..", "
-        end
-       s = s..rima.tostring(z)
-      end
+      if undefined[1] then s = s.." for all "..rima.tostring(undefined) end
       coroutine.yield(s)
     end
   end

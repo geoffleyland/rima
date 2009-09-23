@@ -1,8 +1,7 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local table = require("table")
-local ipairs, require, tostring = ipairs, require, tostring
+local ipairs, pairs, require, tostring = ipairs, pairs, require, tostring
 
 local object = require("rima.object")
 local rima = rima
@@ -25,39 +24,66 @@ end
 
 function sum:dump(args)
   local sets, e = args[1], args[2]
-  return "sum({"..table.concat(rima.imap(expression.dump, sets), ", ").."}, "..expression.dump(e)..")"
+  return "sum({"..rima.concat(sets, ", ", expression.dump).."}, "..expression.dump(e)..")"
 end
 
 function sum:_tostring(args)
   local sets, e = args[1], args[2]
-  return "sum({"..table.concat(rima.imap(rima.tostring, sets), ", ").."}, "..rima.tostring(e)..")"
+  return "sum({"..rima.concat(sets, ", ", rima.tostring).."}, "..rima.tostring(e)..")"
 end
 
 -- Evaluation ------------------------------------------------------------------
 
+
 function sum:eval(S, args)
-  local sets, e = args[1], args[2]
+  local sets, e = rima.iteration.set_list:new(args[1]), args[2]
+  local defined_terms, undefined_terms = {}, {}
 
-  local caller_base_scope, defined_sets, undefined_sets =
-    rima.iteration.prepare(S, sets)
-
-  -- if nothing's defined, do nothing but evaluate the underlying expression in the current context
-  if not defined_sets[1] then
-    return expression:new(sum, undefined_sets, expression.eval(e, caller_base_scope))
+  -- Iterate through all the elements of the sets, collecting defined and
+  -- undefined terms
+  for S2, undefined in sets:iterate(S) do
+    local z = expression.eval(e, S2)
+    if undefined[1] then
+      -- Undefined terms are stored in groups based on the undefined sum
+      -- indices (so we can group them back into sums over the same indices)
+      local name = rima.concat(undefined, ",", rima.tostring)
+      local terms
+      local udn = undefined_terms[name]
+      if not udn then
+        terms = {}
+        undefined_terms[name] = { iterators=undefined, terms=terms }
+      else
+        terms = udn.terms
+      end
+      terms[#terms+1] = { 1, z }
+    else
+      -- Defined terms are just stored in a list
+      defined_terms[#defined_terms+1] = { 1, z }
+    end
   end
 
-  local add_args = {}
-  for caller_scope in rima.iteration.iterate_all(caller_base_scope, defined_sets) do
-    add_args[#add_args+1] = { 1, expression.eval(e, caller_scope) }
+  local total_terms = {}
+
+  -- Run through all the undefined terms, rebuilding the sums
+  for n, t in pairs(undefined_terms) do
+    local z
+    if #t.terms > 1 then
+      z = expression:new_table(add, t.terms)
+    else
+      z = t.terms[1][2]
+    end
+    total_terms[#total_terms+1] = {1, expression:new(sum, t.iterators, z) }
   end
 
-  -- add up the accumulated terms
-  local a = expression.eval(expression:new_table(add, add_args), caller_base_scope)
+  -- Add the defined terms onto the end
+  for _, t in ipairs(defined_terms) do
+    total_terms[#total_terms+1] = t
+  end
 
-  if undefined_sets[1] then                     -- if there are undefined sets remaining, return a sum over them
-    return expression:new(sum, undefined_sets, a)
-  else                                          -- otherwise, just return the sum of the terms
-    return a
+  if #total_terms == 1 then
+    return total_terms[1][2]
+  else
+    return expression.eval(expression:new_table(add, total_terms), S)
   end
 end
 
