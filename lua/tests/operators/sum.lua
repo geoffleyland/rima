@@ -63,13 +63,29 @@ function test(show_passes)
   end
 
   do 
+    local S = rima.scope.new()
+    local x, Q, R, r = rima.R"x, Q, R, r"
+    local xx = { x = 1, y = 2, z = 3}
+    local QQ = {"a", "b"}
+    local RR = { a = { "x", "y" }, b = { "y", "z" } }
+    T:check_equal(rima.E(rima.sum({Q, rima.alias(R[Q], "r")}, x[r]), S), "sum({Q, r in R[Q]}, x[r])")
+    T:check_equal(rima.E(rima.sum({Q, rima.alias(R[Q], "r")}, x[r]), scope.spawn(S, {Q=QQ})), "sum({r in R[a]}, x[r]) + sum({r in R[b]}, x[r])")
+    T:check_equal(rima.E(rima.sum({Q, rima.alias(R[Q], "r")}, x[r]), scope.spawn(S, {R=RR})), "sum({Q, r in R[Q]}, x[r])")
+    T:check_equal(rima.E(rima.sum({Q, rima.alias(R[Q], "r")}, x[r]), scope.spawn(S, {Q=QQ,R=RR})), "x[x] + 2*x[y] + x[z]")
+    T:check_equal(rima.E(rima.sum({Q, rima.alias(R[Q], "r")}, x[r]), scope.spawn(S, {Q=QQ,R=RR,x=xx})), 8)
+    T:check_equal(rima.E(rima.sum({Q, R[Q]}, x[R]), S), "sum({Q, R in R[Q]}, x[R])")
+    T:check_equal(rima.E(rima.sum({Q, R[Q]}, x[R]), scope.spawn(S, {Q=QQ,R=RR,x=xx})), 8)
+  end
+
+
+  do 
     local X, x, y, z = rima.R"X, x, y, z"
     local S = rima.scope.create{ X = rima.range(1, y) }
-    T:check_equal(expression.dump(rima.E(rima.sum({rima.alias(X, "x")}, rima.value(x)), S)), "sum({iterator(x in range(1, y))}, value(ref(x)))")
-    T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, rima.value(x)), S), "sum({x in range(1, y)}, value(x))")
+    T:check_equal(expression.dump(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S)), "sum({iterator(x in range(1, y))}, ref(x[string(key)]))")
+    T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S), "sum({x in range(1, y)}, x[key])")
     S.y = 5
-    T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, rima.value(x)), S), 15)
-    T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, z * rima.value(x)), S), 15*z)
+    T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S), 15)
+    T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, z * x.key), S), 15*z)
   end
 
   return T:close()

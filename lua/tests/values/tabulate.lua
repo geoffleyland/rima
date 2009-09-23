@@ -26,7 +26,7 @@ function test(show_passes)
     local Q, x, y, z = rima.R"Q, x, y"
     local e = rima.sum({Q}, x[Q])
     local S = scope.create{ Q={4, 5, 6} }
-    S.x = rima.tabulate({y}, rima.value(y)^2)
+    S.x = rima.tabulate({y}, y.key^2)
     T:check_equal(rima.E(e, S), 77)
     T:expect_error(function() rima.E(x, S) end, "the tabulation needs 1 indexes, got 0")
     T:expect_error(function() rima.E(x[1][2], S) end, "the tabulation needs 1 indexes, got 2")

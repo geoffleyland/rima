@@ -52,34 +52,6 @@ function element:__tostring()
   return self.key
 end
 
-value_op = object:new({}, "value")
-function value_op:eval(S, args)
-  local e = expression.eval(args[1], S)
-  if object.type(e) == "element" then
-    return e.key
-  else
-    return expression:new(value_op, e)
-  end
-end
-
-function rima.value(e)
-  return expression:new(value_op, e)
-end
-
-ord_op = object:new({}, "ord")
-function ord_op:eval(S, args)
-  local e = expression.eval(args[1], S)
-  if object.type(e) == "element" then
-    return e.index
-  else
-    return expression:new(ord_op, e)
-  end
-end
-
-function rima.ord(e)
-  return expression:new(ord_op, e)
-end
-
 
 -- Ranges ----------------------------------------------------------------------
 
