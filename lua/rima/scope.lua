@@ -115,11 +115,15 @@ function scope.find(s, name)
   -- Return values from our own hidden table
   S = proxy.O(s)
   local c = S.values[name]
-  if c then return c, s end
-  
+  if c then
+    -- but not hidden values
+    if not c.hidden then
+      return c, s
+    end
+  elseif S.parent then
   -- or look for them in a parent
-  if S.parent then return scope.find(S.parent, name) end
-  return nil
+    return scope.find(S.parent, name)
+  end
 end
 
 
@@ -130,7 +134,6 @@ function scope_proxy_mt.__index(S, name)
     -- return a bound variable with the top type (perhaps should be all?) or the value
     return object.isa(cc, undefined_t) and ref:new{name=name, type=cc, scope=S} or cc
   end
-  return nil
 end
 
 
@@ -199,6 +202,19 @@ function scope_proxy_mt.__newindex(S, name, value)
     values[name] = c
   end
   c[#c+1] = value
+end
+
+
+-- Hide ------------------------------------------------------------------------
+
+function scope.hide(S, name)
+  local values = proxy.O(S).values
+  local c = values[name]
+  if not c then
+    c = {}
+    values[name] = c
+  end
+  c.hidden = true
 end
 
 
