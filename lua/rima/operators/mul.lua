@@ -42,8 +42,8 @@ end
 
 function mul:dump(args)
   return "*("..
-    table.concat(rima.imap(
-      function(a) return expression.dump(a[2]).."^"..rima.tostring(a[1]) end, args), ", ")..
+    rima.concat(args, ", ",
+      function(a) return expression.dump(a[2]).."^"..rima.tostring(a[1]) end)..
     ")"
 end
 

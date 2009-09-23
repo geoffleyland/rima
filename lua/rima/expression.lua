@@ -99,7 +99,7 @@ function expression.dump(e)
     if m then                                 -- the operator can handle itself
       return m(op, e)
     else
-      return object.type(op).."("..table.concat(rima.imap(dump, e), ", ")..")"
+      return object.type(op).."("..rima.concat(e, ", ", dump)..")"
     end
   else                                        -- it's a literal
     local m = get_field(e, "dump")
@@ -116,7 +116,7 @@ function expression.__tostring(e)
     if m then                                 -- the operator can handle itself
       return m(op, e)
     else
-      return object.type(op).."(".. table.concat(rima.imap(rima.tostring, e), ", ")..")"
+      return object.type(op).."(".. rima.concat(e, ", ", rima.tostring)..")"
     end
   else                                        -- it's a literal
     local m = get_field(e, "_tostring")

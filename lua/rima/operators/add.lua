@@ -39,8 +39,8 @@ end
 
 function add:dump(args)
   return "+("..
-    table.concat(rima.imap(
-      function(a) return rima.tostring(a[1]).."*"..expression.dump(a[2]) end, args), ", ")..
+    rima.concat(args, ", ",
+      function(a) return rima.tostring(a[1]).."*"..expression.dump(a[2]) end)..
     ")"
 end
 

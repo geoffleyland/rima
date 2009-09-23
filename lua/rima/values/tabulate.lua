@@ -1,7 +1,6 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local table = require("table")
 local error, ipairs, tostring = error, ipairs, tostring
 
 local object = require("rima.object")
@@ -38,7 +37,7 @@ function tabulate_type:new(indexes, e)
 end
 
 function tabulate_type:__tostring()
-  return "tabulate({"..table.concat(rima.imap(tostring, self.indexes), ", ").."}, "..tostring(self.expression)..")"
+  return "tabulate({"..rima.concat(self.indexes, ", ", tostring).."}, "..tostring(self.expression)..")"
 end
 
 function tabulate_type:handle_address(S, a)

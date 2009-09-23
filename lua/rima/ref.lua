@@ -1,7 +1,6 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local table = require("table")
 local error, pcall = error, pcall
 local ipairs, rawget, require, type, unpack = ipairs, rawget, require, type, unpack
 local getmetatable, setmetatable = getmetatable, setmetatable
@@ -64,7 +63,7 @@ function ref.dump(r)
   local s = "ref("..r.name
   local a = r.address
   if a and a[1] then
-    s = s.."["..table.concat(rima.imap(expression.dump, a), ", ").."]"
+    s = s.."["..rima.concat(a, ", ", expression.dump).."]"
   end
   return s..")"
 end
@@ -75,7 +74,7 @@ function ref.__tostring(r)
   local s = r.name
   local a = r.address
   if a and a[1] then
-    s = s.."["..table.concat(rima.imap(rima.tostring, a), ", ").."]"
+    s = s.."["..rima.concat(a, ", ", rima.tostring).."]"
   end
   return s
 end
