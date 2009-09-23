@@ -27,6 +27,11 @@ function rima.R(names, type)
 end
 
 
+function rima.D(e)
+  return expression.defined(e)
+end
+
+
 function rima.E(e, S)
   local fname, usage =
     "rima.E",
@@ -52,6 +57,7 @@ end
 function rima.F(inputs, expression, S)
   return function_v:new(inputs, expression, S)
 end
+
 
 function rima.tabulate(indexes, e)
   return tabulate_type:new(indexes, e)

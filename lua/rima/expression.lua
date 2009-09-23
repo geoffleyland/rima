@@ -1,7 +1,6 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local table = require("table")
 local error, pcall = error, pcall
 local ipairs, pairs = ipairs, pairs
 local rawget, require, setmetatable, rawtype = rawget, require, setmetatable, type
@@ -138,6 +137,13 @@ function expression.parenthise(e, parent_precedence)
     end
   end
   return s
+end
+
+
+-- Status ----------------------------------------------------------------------
+
+function expression.defined(e)
+  return e and not isa(e, ref) and not isa(e, expression)
 end
 
 
