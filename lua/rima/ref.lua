@@ -30,6 +30,7 @@ module(...)
 local scope = require("rima.scope")
 local expression = require("rima.expression")
 local iteration = require("rima.iteration")
+local address = require("rima.address")
 
 -- References to values --------------------------------------------------------
 
@@ -42,16 +43,16 @@ function ref:new(r)
   args.check_type(r.name, "r.name", "string", usage, fname)
   args.check_types(r.type, "r.type", {"nil", {undefined_t, "type"}}, usage, fname)
   args.check_types(r.scope, "r.scope", {"nil", {scope, "scope" }}, usage, fname)
-  args.check_types(r.address, "r.address", {"nil", "table"}, usage, fname)
+  args.check_types(r.address, "r.address", {"nil", "table", "address"}, usage, fname)
 
   r.type = r.type or undefined_t:new()
 
-  return proxy:new(object.new(ref, { name=r.name, address=r.address or {}, type=r.type, scope=r.scope }), ref_proxy_mt)
+  return proxy:new(object.new(ref, { name=r.name, address=address:new(r.address), type=r.type, scope=r.scope }), ref_proxy_mt)
 end
 
 function ref.is_simple(r)
   r = proxy.O(r)
-  return (not r.scope and #r.address == 0) and true or false
+  return (not r.scope and r.address[1] == nil) and true or false
 end
 
 
@@ -60,23 +61,13 @@ end
 function ref.dump(r)
   -- possibly have a way of showing that a variable is bound?
   r = proxy.O(r)
-  local s = "ref("..r.name
-  local a = r.address
-  if a and a[1] then
-    s = s.."["..rima.concat(a, ", ", expression.dump).."]"
-  end
-  return s..")"
+  return "ref("..r.name..r.address:dump()..")"
 end
 
 function ref.__tostring(r)
   -- possibly have a way of showing that a variable is bound?
   r = proxy.O(r)
-  local s = r.name
-  local a = r.address
-  if a and a[1] then
-    s = s.."["..rima.concat(a, ", ", rima.tostring).."]"
-  end
-  return s
+  return r.name..rima.tostring(r.address)
 end
 
 ref_proxy_mt.__tostring = ref.__tostring
@@ -97,10 +88,7 @@ function ref.eval(r, S, args)
   end
 
   -- evaluate the address of the ref if there is one
-  local new_address = {}
-  for i, a in ipairs(R.address) do
-    new_address[i] = expression.eval(a, S)
-  end
+  local new_address = R.address:eval(S)
   
   -- look the ref up in the scope
   local e, found_scope = scope.lookup(S, R.name, R.scope)
@@ -229,10 +217,7 @@ end
 --]]
 function ref_proxy_mt.__index(r, i)
   r = proxy.O(r)
-  local address = {}
-  for j, a in ipairs(r.address) do address[j] = a end
-  address[#address+1] = i
-  return ref:new{name=r.name, address=address, type=r.type, scope=r.scope}
+  return ref:new{name=r.name, address=r.address+i, type=r.type, scope=r.scope}
 end
 
 
