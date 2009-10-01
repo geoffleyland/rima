@@ -35,7 +35,7 @@ end
 
 
 function object.type(o)
-  function z(p)
+  local function z(p)
     if rawtype(p) == "table" then
       local t = rawget(p, "__typename")
       if t then return t end
