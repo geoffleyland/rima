@@ -235,21 +235,17 @@ end
 
 -- Iterating -------------------------------------------------------------------
 
-function scope._iterate(S)
+function scope.iterate(S, t)
+  t = t or {}
   local s = proxy.O(S)
   for k, v in pairs(s.values) do
-    coroutine.yield(k, v[#v])
+    t[k] = t[k] or v[#v]
   end
   if s.parent then
-    _iterate(s.parent)
+    iterate(s.parent, t)
   end
-end
-
-function scope.iterate(S)
-  local function z()
-    _iterate(S)
-  end
-  return coroutine.wrap(z)
+  return coroutine.wrap(
+    function() for k, v in pairs(t) do coroutine.yield(k, v) end end)
 end
 
 
