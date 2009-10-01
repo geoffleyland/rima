@@ -59,7 +59,7 @@ function test(show_passes)
   T:expect_ok(function() S.c = rima.integer(3, 5) end, "c is not set in parent")
 
   local r = {}
-  for k, v in scope.iterate(S_no_overwrite) do
+  for k, v in scope.iterate(S) do
     r[k] = v
   end
   T:check_equal(r.a, 3)
