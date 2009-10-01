@@ -13,19 +13,28 @@ module(...)
 local function run_one(T, path, show_passes, patterns)
   path = path:gsub("/", "."):gsub("%.lua$", "")
 
-  local run = false
+  local to_run = 1
+  local run = 0
   if not patterns or #patterns == 0 then
-    run = true
+    to_run = 0
   else
     for _, p in ipairs(patterns) do
-      if path:match(p) then
-        run = true
-        break
+      if p:sub(1,1) == "-" then
+        to_run = 0
+        if path:match(p:sub(2)) then
+          run = -1
+          break
+        end
+      else
+        if path:match(p) then
+          run = 1
+          break
+        end
       end
     end
   end
 
-  if run then
+  if run >= to_run then
     local m = require(path)
     T:run(m.test)
   end
