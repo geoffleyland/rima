@@ -57,8 +57,7 @@ function test(show_passes)
   equal(T, "a", {a, S, "eval"})
   S.a = rima.free()
   equal(T, "a", {a, S, "eval"})
-  S.a = 5
-  equal(T, 5, {a, S, "eval"})
+  equal(T, 5, {a, scope.spawn(S, { a=5 }), "eval"})
 
   -- dump and tostring
   T:check_equal(expression.dump(1), "number(1)")

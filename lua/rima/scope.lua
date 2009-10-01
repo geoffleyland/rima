@@ -65,6 +65,7 @@ local ref = require("rima.ref")
 
 local scope = object:new(_M, "scope")
 scope_proxy_mt = setmetatable({}, scope)
+scope.hidden = {}
 
 function scope.new(S)
   S = S or {}
@@ -72,11 +73,13 @@ function scope.new(S)
   return proxy:new(object.new(scope, S), scope_proxy_mt)
 end
 
+
 function scope.create(values)
   local S = new()
   set(S, values)
   return S
 end
+
 
 function scope.spawn(S, values, options)
   options = options or {}
@@ -86,9 +89,11 @@ function scope.spawn(S, values, options)
   return S2
 end
 
+
 function scope.has_parent(S)
   return proxy.O(S).parent and true or false
 end
+
 
 function scope.set_parent(S, parent)
   local fname, usage =
@@ -104,6 +109,7 @@ function scope.set_parent(S, parent)
   S.overwrite = true
 end
 
+
 function scope.clear_parent(S)
   proxy.O(S).parent = nil
 end
@@ -113,11 +119,11 @@ end
 
 function scope.find(s, name)
   -- Return values from our own hidden table
-  S = proxy.O(s)
+  local S = proxy.O(s)
   local c = S.values[name]
   if c then
     -- but not hidden values
-    if not c.hidden then
+    if c ~= scope.hidden then
       return c, s
     end
   elseif S.parent then
@@ -130,14 +136,13 @@ end
 function scope_proxy_mt.__index(S, name)
   local c = scope.find(S, name)
   if c then
-    local cc = c[#c]
     -- return a bound variable with the top type (perhaps should be all?) or the value
-    return object.isa(cc, undefined_t) and ref:new{name=name, type=cc, scope=S} or cc
+    return object.isa(c, undefined_t) and ref:new{name=name, type=c, scope=S} or c
   end
 end
 
 
-function scope.lookup(S, name, bound_scope)
+function scope.find_bound_scope(S, bound_scope, name)
   -- If the variable is bound to a scope, then go looking for it through parents
   -- taking care of overwritable (function) scopes
   local top = S
@@ -151,13 +156,17 @@ function scope.lookup(S, name, bound_scope)
       end
     end
   end
-  -- S is the bound scope, and top is the highest non-function child of that scope
-  local c, s = scope.find(top, name)
-  return c and c[#c] or nil, s
+  return top
 end
 
 
-function scope.check(S, name, value)
+function scope.lookup(S, name, bound_scope)
+  return scope.find(find_bound_scope(S, bound_scope, name), name)
+end
+
+
+function scope.check(S, name, value, is_parent)
+  is_parent = is_parent or false
   local s = proxy.O(S)
   local c = s.values[name]
 
@@ -170,23 +179,22 @@ function scope.check(S, name, value)
   end
 
   if c then
-    if not s.rewrite and not object.isa(c[#c], undefined_t) then
-      error(("cannot set '%s' to '%s': existing definition as '%s'"):
-            format(name, describe(value, name), describe(c[#c], name)), 0)
-    elseif object.isa(c[#c], undefined_t) then
-      for _, v in ipairs(c) do
-        if not v:includes(value) then
-          error(("cannot set '%s' to '%s': violates existing constraint '%s'"):
-                format(name, describe(value, name), describe(v, name)), 0)
-        end
+    if is_parent and object.isa(c, undefined_t) then
+      if not c:includes(value) then
+        error(("cannot set '%s' to '%s': violates existing constraint '%s'"):
+              format(name, describe(value, name), describe(c, name)), 0)
       end
+    elseif is_parent or not s.rewrite then
+      error(("cannot set '%s' to '%s': existing definition as '%s'"):
+            format(name, describe(value, name), describe(c, name)), 0)
     end
   end
 
   if s.parent and not s.overwrite then
-    check(s.parent, name, value)
+    check(s.parent, name, value, true)
   end
 end
+
 
 function scope_proxy_mt.__newindex(S, name, value)
   local fname, usage =
@@ -195,26 +203,14 @@ function scope_proxy_mt.__newindex(S, name, value)
   args.check_type(name, "name", "string", usage, fname) 
 
   check(S, name, value)
-  local values = proxy.O(S).values
-  local c = values[name]
-  if not c then
-    c = {}
-    values[name] = c
-  end
-  c[#c+1] = value
+  proxy.O(S).values[name] = value
 end
 
 
 -- Hide ------------------------------------------------------------------------
 
 function scope.hide(S, name)
-  local values = proxy.O(S).values
-  local c = values[name]
-  if not c then
-    c = {}
-    values[name] = c
-  end
-  c.hidden = true
+  proxy.O(S).values[name] = scope.hidden
 end
 
 
@@ -239,7 +235,7 @@ function scope.iterate(S, t)
   t = t or {}
   local s = proxy.O(S)
   for k, v in pairs(s.values) do
-    t[k] = t[k] or v[#v]
+    t[k] = t[k] or v
   end
   if s.parent then
     iterate(s.parent, t)

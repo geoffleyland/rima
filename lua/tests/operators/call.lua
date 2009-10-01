@@ -34,8 +34,7 @@ function test(show_passes)
 
   T:check_equal(expression.dump(c), "call(ref(f), +(1*number(3), 1*ref(x)))")
   T:check_equal(expression.eval(c, S), "2*(3 + x)")
-  S.x = 5
-  T:check_equal(expression.eval(c, S), 16)
+  T:check_equal(expression.eval(c, scope.spawn(S, { x=5 })), 16)
 
   local c2 = expression:new(call, rima.R"f")
   T:expect_error(function() expression.eval(c2, S) end,

@@ -55,8 +55,7 @@ function test(show_passes)
     T:check_equal(f, "function(a) return 3 + a", "function description")
     T:check_equal(f:call(S, {x}), "3 + x")
     T:check_equal(f:call(S, {5}), 8)
-    S.x = 10
-    T:check_equal(f:call(S, {x}), 13)
+    T:check_equal(f:call(scope.spawn(S, {x=10}), {x}), 13)
   end
 
   do
@@ -67,13 +66,13 @@ function test(show_passes)
     T:check_equal(f:call(S, {5}), "5 + b")
     T:check_equal(f:call(S, {1 + a}), "1 + a + b")
     T:check_equal(f:call(S, {1 + b}), "1 + 2*b")
-    S.b = 20
-    T:check_equal(f:call(S, {x}), "20 + x")
-    T:check_equal(f:call(S, {5}), 25)
-    S.x = 100
-    T:check_equal(f:call(S, {x}), 120)
-    S.a = 1000
-    T:check_equal(f:call(S, {x}), 120)
+    local S2 = scope.spawn(S, {b=20})
+    T:check_equal(f:call(S2, {x}), "20 + x")
+    T:check_equal(f:call(S2, {5}), 25)
+    S2.x = 100
+    T:check_equal(f:call(S2, {x}), 120)
+    S2.a = 1000
+    T:check_equal(f:call(S2, {x}), 120)
   end
 
   do
