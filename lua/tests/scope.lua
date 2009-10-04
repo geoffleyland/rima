@@ -130,7 +130,7 @@ function test(show_passes)
     T:check_equal(scope.lookup(S3, "a", S1), 5)  
     S1.b = rima.integer()
     local b = S3.b
-    T:expect_error(function() ref.eval(b, S2) end,
+    T:expect_error(function() rima.E(b, S2) end,
       "the reference 'b' is bound to a scope that is not available")
   end
 

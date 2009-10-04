@@ -17,6 +17,7 @@ module(...)
 function test(show_passes)
   local T = series:new(_M, show_passes)
   
+  local E = expression.eval
   local D = expression.dump
 
   T:test(object.isa(ref:new{name="a"}, ref), "isa(ref:new(), ref)")
@@ -35,14 +36,14 @@ function test(show_passes)
 
   local S = rima.scope.create{ a = rima.free(1, 10), b = 1, c = "c" }
 
-  T:expect_ok(function() ref.eval(ref:new{name="z"}, S) end, "z undefined")
-  T:check_equal(ref.eval(ref:new{name="z"}, S), "z", "undefined remains an unbound variable")
-  T:expect_error(function() ref.eval(ref:new{name="a", type=rima.free(11, 20)}, S) end,
+  T:expect_ok(function() E(ref:new{name="z"}, S) end, "z undefined")
+  T:check_equal(E(ref:new{name="z"}, S), "z", "undefined remains an unbound variable")
+  T:expect_error(function() E(ref:new{name="a", type=rima.free(11, 20)}, S) end,
     "the type of 'a' %(1 <= a <= 10, a real%) and the type of the reference %(11 <= a <= 20, a real%) are mutually exclusive")
-  T:expect_error(function() ref.eval(ref:new{name="b", type=rima.free(11, 20)}, S) end,
+  T:expect_error(function() E(ref:new{name="b", type=rima.free(11, 20)}, S) end,
     "'b' %(1%) is not of type '11 <= b <= 20, b real'")
-  T:check_equal(ref.eval(ref:new{name="a"}, S), "a")
-  T:check_equal(ref.eval(ref:new{name="b", rima.binary()}, S), 1)
+  T:check_equal(E(ref:new{name="a"}, S), "a")
+  T:check_equal(E(ref:new{name="b", rima.binary()}, S), 1)
 
 
   -- index tests
@@ -92,7 +93,7 @@ function test(show_passes)
     T:check_equal(ref.is_simple(a), true)
     T:check_equal(ref.is_simple(a.b), false)
     T:check_equal(ref.is_simple(a[2]), false)
-    T:check_equal(ref.is_simple(ref.eval(a, S)), false)
+    T:check_equal(ref.is_simple(E(a, S)), false)
   end
 
   do
