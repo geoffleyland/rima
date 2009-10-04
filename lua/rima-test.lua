@@ -16,6 +16,11 @@ for _, v in ipairs{...} do
   end
 end
 
-test.directory.test("rima", "tests", show_passes, patterns)
+if test.directory.test("rima", "tests", show_passes, patterns) then
+  io.stderr:write("All tests completed successfully")
+  os.exit(0)
+else
+  os.exit(1)
+end
 
 -- EOF -------------------------------------------------------------------------
