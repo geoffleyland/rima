@@ -169,41 +169,13 @@ end
 
 -- Operators -------------------------------------------------------------------
 
-function ref.__add(a, b)
-  return expression.__add(a, b)
-end
-
-function ref.__sub(a, b)
-  return expression.__sub(a, b)
-end
-
-function ref.__unm(a)
-  return expression.__unm(a)
-end
-
-function ref.__mul(a, b)
-  return expression.__mul(a, b)
-end
-
-function ref.__div(a, b)
-  return expression.__div(a, b)
-end
-
-function ref.__pow(a, b)
-  return expression.__pow(a, b)
-end
-
-function ref.__call(...)
-  return expression.__call(...)
-end
-
-ref.proxy_mt.__add = ref.__add
-ref.proxy_mt.__sub = ref.__sub
-ref.proxy_mt.__unm = ref.__unm
-ref.proxy_mt.__mul = ref.__mul
-ref.proxy_mt.__div = ref.__div
-ref.proxy_mt.__pow = ref.__pow
-ref.proxy_mt.__call = ref.__call
+ref.proxy_mt.__add = expression.proxy_mt.__add
+ref.proxy_mt.__sub = expression.proxy_mt.__sub
+ref.proxy_mt.__unm = expression.proxy_mt.__unm
+ref.proxy_mt.__mul = expression.proxy_mt.__mul
+ref.proxy_mt.__div = expression.proxy_mt.__div
+ref.proxy_mt.__pow = expression.proxy_mt.__pow
+ref.proxy_mt.__call = expression.proxy_mt.__call
 
 --[[
 function ref_proxy_mt.__index(r, i)

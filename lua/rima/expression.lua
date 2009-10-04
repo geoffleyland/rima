@@ -165,41 +165,34 @@ end
 
 -- Overloaded operators --------------------------------------------------------
 
-function expression.__add(a, b)
+function expression.proxy_mt.__add(a, b)
   return expression:new(operators.add, {1, a}, {1, b})
 end
 
-function expression.__sub(a, b)
+function expression.proxy_mt.__sub(a, b)
   return expression:new(operators.add, {1, a}, {-1, b})
 end
 
-function expression.__unm(a)
+function expression.proxy_mt.__unm(a)
   return expression:new(operators.add, {-1, a})
 end
 
-function expression.__mul(a, b, c)
+function expression.proxy_mt.__mul(a, b, c)
   return expression:new(operators.mul, {1, a}, {1, b})
 end
 
-function expression.__div(a, b)
+function expression.proxy_mt.__div(a, b)
   return expression:new(operators.mul, {1, a}, {-1, b})
 end
 
-function expression.__pow(a, b)
+function expression.proxy_mt.__pow(a, b)
   return expression:new(operators.pow, a, b)
 end
 
-function expression.__call(...)
+function expression.proxy_mt.__call(...)
   return expression:new(operators.call, ...)
 end
 
-expression.proxy_mt.__add = expression.__add
-expression.proxy_mt.__sub = expression.__sub
-expression.proxy_mt.__unm = expression.__unm
-expression.proxy_mt.__mul = expression.__mul
-expression.proxy_mt.__div = expression.__div
-expression.proxy_mt.__pow = expression.__pow
-expression.proxy_mt.__call = expression.__call
 
 --[[
 function expression_proxy_mt.__index(...)
