@@ -35,7 +35,7 @@ local address = require("rima.address")
 -- References to values --------------------------------------------------------
 
 local ref = object:new(_M, "ref")
-ref_proxy_mt = setmetatable({}, ref)
+ref.proxy_mt = setmetatable({}, ref)
 
 function ref:new(r)
   local fname, usage = "rima.ref:new", "new(r: {name, address, type, scope})"
@@ -47,7 +47,7 @@ function ref:new(r)
 
   r.type = r.type or undefined_t:new()
 
-  return proxy:new(object.new(ref, { name=r.name, address=address:new(r.address), type=r.type, scope=r.scope }), ref_proxy_mt)
+  return proxy:new(object.new(ref, { name=r.name, address=address:new(r.address), type=r.type, scope=r.scope }), ref.proxy_mt)
 end
 
 function ref.is_simple(r)
@@ -70,7 +70,7 @@ function ref.__tostring(r)
   return r.name..rima.tostring(r.address)
 end
 
-ref_proxy_mt.__tostring = ref.__tostring
+ref.proxy_mt.__tostring = ref.__tostring
 
 function ref.describe(r)
   r = proxy.O(r)
@@ -197,13 +197,13 @@ function ref.__call(...)
   return expression.__call(...)
 end
 
-ref_proxy_mt.__add = ref.__add
-ref_proxy_mt.__sub = ref.__sub
-ref_proxy_mt.__unm = ref.__unm
-ref_proxy_mt.__mul = ref.__mul
-ref_proxy_mt.__div = ref.__div
-ref_proxy_mt.__pow = ref.__pow
-ref_proxy_mt.__call = ref.__call
+ref.proxy_mt.__add = ref.__add
+ref.proxy_mt.__sub = ref.__sub
+ref.proxy_mt.__unm = ref.__unm
+ref.proxy_mt.__mul = ref.__mul
+ref.proxy_mt.__div = ref.__div
+ref.proxy_mt.__pow = ref.__pow
+ref.proxy_mt.__call = ref.__call
 
 --[[
 function ref_proxy_mt.__index(r, i)
@@ -211,7 +211,7 @@ function ref_proxy_mt.__index(r, i)
 end
 
 --]]
-function ref_proxy_mt.__index(r, i)
+function ref.proxy_mt.__index(r, i)
   r = proxy.O(r)
   return ref:new{name=r.name, address=r.address+i, type=r.type, scope=r.scope}
 end

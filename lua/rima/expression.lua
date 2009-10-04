@@ -17,14 +17,14 @@ local operators = require("rima.operators")
 -- Constructor -----------------------------------------------------------------
 
 local expression = object:new(_M, "expression")
-expression_proxy_mt = setmetatable({}, expression)
+expression.proxy_mt = setmetatable({}, expression)
 
 function expression:new(x, ...)
   local e = {...}
   e.op = x
 
 --  e:check()
-  return proxy:new(object.new(self, e), expression_proxy_mt)
+  return proxy:new(object.new(self, e), expression.proxy_mt)
 end
 
 function expression:new_table(x, t)
@@ -32,7 +32,7 @@ function expression:new_table(x, t)
   for i, a in ipairs(t) do e[i] = a end
 
 --  e:check()
-  return proxy:new(object.new(self, e), expression_proxy_mt)
+  return proxy:new(object.new(self, e), expression.proxy_mt)
 end
 
 
@@ -119,7 +119,7 @@ function expression.__tostring(e)
     return m and m(e) or rima.tostring(e)
   end
 end
-expression_proxy_mt.__tostring = expression.__tostring
+expression.proxy_mt.__tostring = expression.__tostring
 
 
 function expression.parenthise(e, parent_precedence)
@@ -193,13 +193,13 @@ function expression.__call(...)
   return expression:new(operators.call, ...)
 end
 
-expression_proxy_mt.__add = expression.__add
-expression_proxy_mt.__sub = expression.__sub
-expression_proxy_mt.__unm = expression.__unm
-expression_proxy_mt.__mul = expression.__mul
-expression_proxy_mt.__div = expression.__div
-expression_proxy_mt.__pow = expression.__pow
-expression_proxy_mt.__call = expression.__call
+expression.proxy_mt.__add = expression.__add
+expression.proxy_mt.__sub = expression.__sub
+expression.proxy_mt.__unm = expression.__unm
+expression.proxy_mt.__mul = expression.__mul
+expression.proxy_mt.__div = expression.__div
+expression.proxy_mt.__pow = expression.__pow
+expression.proxy_mt.__call = expression.__call
 
 --[[
 function expression_proxy_mt.__index(...)
