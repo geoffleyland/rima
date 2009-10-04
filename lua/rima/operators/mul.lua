@@ -88,10 +88,10 @@ function mul:eval(S, raw_args)
   for i, a in ipairs(raw_args) do
     args[i] = { a[1], expression.eval(a[2], S) }
   end
-  return self:simplify(args)
+  return simplify(args)
 end
 
-function mul:simplify(args)
+function mul.simplify(args)
   local coeff, terms = 1, {}
   
   local function add_term(exp, e)
