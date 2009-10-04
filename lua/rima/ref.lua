@@ -80,12 +80,8 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function ref.eval(r, S, args)
+function ref.eval(r, S)
   local R = proxy.O(r)
-
-  if args and args[1] then
-    error(("can't evaluate the reference '%s' with arguments"):format(R.name), 0)
-  end
 
   -- evaluate the address of the ref if there is one
   local new_address = R.address:eval(S)

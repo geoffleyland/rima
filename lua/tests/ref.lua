@@ -93,12 +93,8 @@ function test(show_passes)
     T:check_equal(ref.is_simple(a.b), false)
     T:check_equal(ref.is_simple(a[2]), false)
     T:check_equal(ref.is_simple(ref.eval(a, S)), false)
-    
-    T:expect_ok(function() ref.eval(a, S, { }) end)
-    T:expect_error(function() ref.eval(a, S, { 5 }) end,
-      "can't evaluate the reference 'a' with arguments")
   end
-  
+
   do
     local a, b, c = rima.R"a, b, c"
     local S = rima.scope.create{ a = b + c, b = 1, c = function() end }
