@@ -37,7 +37,7 @@ function rima.E(e, S)
     "rima.E",
     "E(e:expression, S:nil, table or scope)"
 
-  args.check_types(S, "S", {"nil", "table", {scope, "scope"}}, usage, frame)
+  args.check_types(S, "S", {"nil", "table", {scope, "scope"}}, usage, fname)
 
   if not S then
     S = scope.new()
