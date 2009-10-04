@@ -13,6 +13,7 @@ local expression = require("rima.expression")
 local scope = require("rima.scope")
 local function_v = require("rima.values.function_v")
 local tabulate_type = require("rima.values.tabulate")
+local linearise = require("rima.linearise")
 
 local rima = getfenv(0).rima
 
@@ -62,6 +63,19 @@ end
 function rima.tabulate(indexes, e)
   return tabulate_type:new(indexes, e)
 end
+
+
+function rima.linearise(e, S)
+  local l = expression.eval(0 + e, S)
+  local status, constant, terms = xpcall(function() return linearise.linearise(l, S) end, debug.traceback)
+  if not status then
+    error(("error while linearising '%s':\n  linear form: %s\n  error:\n    %s"):
+      format(rima.tostring(e), rima.tostring(l), constant:gsub("\n", "\n    ")), 0)
+  else
+    return constant, terms
+  end
+end
+
 
 -- EOF -------------------------------------------------------------------------
 

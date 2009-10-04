@@ -188,7 +188,7 @@ end
 function formulation:sparse_form(S)
 
   -- Get the objective and constraints in {a=1, b=2}... form
-  local constant, objective = expression.linearise(self.objective, S)
+  local constant, objective = rima.linearise(self.objective, S)
   local constraints = {}
   for _, c in ipairs(self.constraints) do
     for terms, type, rhs in c:linearise(S) do

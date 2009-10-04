@@ -38,7 +38,7 @@ function constraint:linearise(S)
       if undefined[1] then
         error("Some of the constraint's indices are undefined")
       end
-      local constant, lhs = expression.linearise(e, S2)
+      local constant, lhs = rima.linearise(e, S2)
       coroutine.yield(lhs, self.type, -constant)
     end
   end
