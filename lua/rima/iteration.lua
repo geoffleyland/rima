@@ -16,6 +16,7 @@ module(...)
 
 local scope = require("rima.scope")
 local expression = require("rima.expression")
+local ref = require("rima.ref")
 
 -- Aliases ---------------------------------------------------------------------
 
@@ -154,7 +155,7 @@ function set_list:new(sets)
   for i, s in ipairs(sets) do
     if object.isa(s, alias_type) then
       clean_sets[i] = ref_iterator:new{exp=s.exp, name=s.name}
-    elseif object.isa(s, rima.ref) then
+    elseif object.isa(s, ref) then
       clean_sets[i] = ref_iterator:new{exp=s, name=proxy.O(s).name}
     elseif type(s) == "string" then
       clean_sets[i] = ref_iterator:new{exp=rima.R(s), name=s}
