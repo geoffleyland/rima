@@ -17,7 +17,7 @@ for _, v in ipairs{...} do
 end
 
 if test.directory.test("rima", "tests", show_passes, patterns) then
-  io.stderr:write("All tests completed successfully")
+  io.stderr:write("All tests completed successfully\n")
   os.exit(0)
 else
   os.exit(1)
