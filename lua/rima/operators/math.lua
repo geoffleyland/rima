@@ -20,18 +20,19 @@ local math_functions =
   "sqrt",
 }
 
-local function eval(op, S, args)
-  local r = expression.eval(args[1], S)
-  if type(r) == "number" then
-    return op.func(r)
-  else
-    return expression:new(op, r)
-  end
-end
 
 local function make_math_function(name)
   local f = assert(math[name], "The math function does not exist")
-  local op = object:new({ precedence = 0, func = f, eval=eval }, name) 
+  local op = object:new({ precedence=0 }, name) 
+
+  op.eval = function(op, S, args)
+    local r = expression.eval(args[1], S)
+    if type(r) == "number" then
+      return f(r)
+    else
+      return expression:new(op, r)
+    end
+  end
 
   rima[name] = function(e)
     if type(e) == "number" then
@@ -41,6 +42,7 @@ local function make_math_function(name)
     end
   end
 end
+
 
 for _, name in ipairs(math_functions) do
   make_math_function(name)
