@@ -111,7 +111,7 @@ function ref.eval(r, S, args)
       -- update the address and bind the reference to the scope if it doesn't already have one
       return ref:new{name=R.name, address=new_address, type=R.type, scope=R.scope or found_scope}
     end
-  elseif object.isa(v, expression) then
+  elseif object.isa(v, expression) or object.isa(v, ref) then
     return v
   else
     if not R.type:includes(v) then
