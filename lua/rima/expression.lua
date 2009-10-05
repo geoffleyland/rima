@@ -123,8 +123,7 @@ end
 
 function expression.defined(e)
   local mt = getmetatable(e)
-  local f = mt and rawget(mt, "__eval")
-  if f then return false else return true end
+  return not mt or not rawget(mt, "__eval")
 end
 
 
