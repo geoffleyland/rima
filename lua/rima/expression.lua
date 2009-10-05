@@ -104,7 +104,7 @@ function expression.dump(e)
 end
 
 
-function expression.__tostring(e)
+function expression.proxy_mt.__tostring(e)
   e = proxy.O(e)
   local op = get_field(e, "op")
   if op then                                  -- it's an expression or lookalike
@@ -119,13 +119,12 @@ function expression.__tostring(e)
     return m and m(e) or rima.tostring(e)
   end
 end
-expression.proxy_mt.__tostring = expression.__tostring
 
 
 function expression.parenthise(e, parent_precedence)
-  e = proxy.O(e)
   parent_precedence = parent_precedence or 1
   local s = rima.tostring(e)
+  e = proxy.O(e)
   local op = get_field(e, "op")
   if op then                                    -- this is an expression
     local precedence = get_field(op, "precedence") or 1
@@ -147,18 +146,18 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function expression.eval(e, S)
-  e = proxy.O(e)
-  local op = get_field(e, "op")
+  local E = proxy.O(e)
+  local op = get_field(E, "op")
   if op then                                  -- it's an expression or lookalike
     local m = get_field(op, "eval")
     if m then                                 -- the operator can handle itself
-      return m(op, S, e)
+      return m(op, S, E)
     else
       error(("unable to evaluate '%s': the operator can't be evaluated"):format(rima.tostring(e)), 0)
     end
   else                                        -- it's a literal
-    local m = get_field(e, "eval")
-    return m and m(e, S) or e
+    local m = get_field(E, "eval")
+    return m and m(E, S) or e
   end
 end
 
