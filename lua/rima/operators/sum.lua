@@ -21,15 +21,11 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function sum.__dump(args)
+function sum.__repr(args, format)
   local sets, e = args[1], args[2]
-  return "sum({"..rima.concat(sets, ", ", expression.dump).."}, "..expression.dump(e)..")"
+  return "sum({"..expression.concat(sets, format).."}, "..rima.repr(e, format)..")"
 end
 
-function sum.__rima_tostring(args)
-  local sets, e = args[1], args[2]
-  return "sum({"..rima.concat(sets, ", ", rima.tostring).."}, "..rima.tostring(e)..")"
-end
 
 -- Evaluation ------------------------------------------------------------------
 
@@ -45,7 +41,7 @@ function sum.__eval(args, S)
     if undefined[1] then
       -- Undefined terms are stored in groups based on the undefined sum
       -- indices (so we can group them back into sums over the same indices)
-      local name = rima.concat(undefined, ",", rima.tostring)
+      local name = rima.concat(undefined, ",", rima.repr)
       local terms
       local udn = undefined_terms[name]
       if not udn then

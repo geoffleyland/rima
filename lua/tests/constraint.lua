@@ -20,7 +20,7 @@ function test(show_passes)
 
   local c
   T:expect_ok(function() c = constraint:new(a + b, "==", b) end)
-  T:check_equal(rima.tostring(c), "a + b == b")
+  T:check_equal(rima.repr(c), "a + b == b")
 
   return T:close()
 end

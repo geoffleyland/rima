@@ -51,6 +51,7 @@ function test(show_passes)
   local a = rima.R"a"
   equal(T, "ref(a)", {a, nil, "dump"})
   T:expect_ok(function() rima.E(a, S) end)
+  equal(T, "ref(a)", {a, S, "dump"})
   equal(T, "a", {a, S, "eval"})
   S.a = rima.free()
   equal(T, "a", {a, S, "eval"})

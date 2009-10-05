@@ -21,7 +21,7 @@ function linearise(l, S)
   local fail = false
 
   local function add_variable(n, v, coeff)
-    local s = rima.tostring(n)
+    local s = rima.repr(n)
     if terms[s] then
       error(("the reference '%s' appears more than once"):format(s), 0)
     end
@@ -44,17 +44,17 @@ function linearise(l, S)
       if object.type(x) == "number" then
         if i ~= 1 then
           error(("term %d is constant (%s).  Only the first term should be constant"):
-            format(i, rima.tostring(x)), 0)
+            format(i, rima.repr(x)), 0)
         end
         if constant ~= 0 then
           error(("term %d is constant (%s), and so is an earlier term.  There can only be one constant in the expression"):
-            format(i, rima.tostring(x)), 0)
+            format(i, rima.repr(x)), 0)
         end
         constant = c * x
       elseif object.type(x) == "ref" then
         add_variable(x, x, c)
       else
-        error(("term %d (%s) is not linear"):format(i, rima.tostring(x)), 0)
+        error(("term %d (%s) is not linear"):format(i, rima.repr(x)), 0)
       end
     end
   else

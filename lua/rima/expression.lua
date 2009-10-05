@@ -3,7 +3,7 @@
 
 local error = error
 local ipairs, pairs = ipairs, pairs
-local require, rawtype = require, type
+local require, rawtype, tostring = require, type, tostring
 local getmetatable, setmetatable = getmetatable, setmetatable
 local rawget, rawset = rawget, rawset
 
@@ -82,34 +82,54 @@ end
 
 -- String representation -------------------------------------------------------
 
-function expression.dump(e)
-  local mt = getmetatable(e)
-  if mt then
-    local f = rawget(mt, "__dump")
-    if f then
-      return f(proxy.O(e))
-    elseif mt.__is_proxy then
-      return object.type(mt).."("..rima.concat(proxy.O(e), ", ", dump)..")"
-    end
-  end
-  return object.type(e).."("..rima.tostring(e)..")"
+local number_format = "%.4g"
+function expression.set_number_format(f)
+  number_format = f
 end
 
 
-function expression.proxy_mt.__tostring(e)
-  local mt = getmetatable(e)
-  local f = rawget(mt, "__rima_tostring")
-  if f then
-    return f(proxy.O(e), S)
+function expression.concat(t, format)
+  return rima.concat(t, ", ", function(i) return repr(i, format) end)
+end
+
+
+expression.proxy_mt.__repr = {}
+
+function expression.simple_repr(e, format)
+  if rawtype(e) == "number" then
+    local nf = (format and format.numbers) or number_format
+    return nf:format(e)
   else
-    return object.type(mt).."(".. rima.concat(proxy.O(e), ", ", rima.tostring)..")"
+    return tostring(e)
   end
 end
 
+function expression.repr(e, format)
+  local mt = getmetatable(e)
+  local f = mt and rawget(mt, "__repr")
+  if f then
+    if f == proxy_mt.__repr then
+      return object.type(mt).."("..concat(proxy.O(e), format)..")"
+    else
+      return f(proxy.O(e), format)
+    end
+  elseif format and format.dump then
+    return object.type(e).."("..simple_repr(e)..")"
+  else
+    return simple_repr(e)
+  end
+end
+expression.proxy_mt.__tostring = repr
 
-function expression.parenthise(e, parent_precedence)
+
+function expression.dump(e)
+  return repr(e, { dump=true })
+end
+
+
+function expression.parenthise(e, format, parent_precedence)
   parent_precedence = parent_precedence or 1
-  local s = rima.tostring(e)
+  local s = repr(e, format)
   local mt = getmetatable(e)
   local precedence = (mt and mt.precedence) or 0
   if precedence > parent_precedence then

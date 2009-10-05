@@ -121,7 +121,7 @@ function formulation:write(values, f)
   -- Write the objective
   if self.objective then
     local o = rima.E(self.objective, S)
-    f:write(("%s:\n  %s\n"):format((self.sense == "minimise" and "Minimise") or "Maximise", tostring(o)))
+    f:write(("%s:\n  %s\n"):format((self.sense == "minimise" and "Minimise") or "Maximise", rima.repr(o)))
   else
     f:write("No objective defined\n")
   end
@@ -207,7 +207,7 @@ function formulation:sparse_form(S)
   -- Check all the variables in the objective appear in the constraints
   for name in pairs(objective) do
     if not variables[name] then
-      error(("The variable '%s' is not involved in any constraint, but is in the objective\n"):format(tostring(name)))
+      error(("The variable '%s' is not involved in any constraint, but is in the objective\n"):format(rima.repr(name)))
     end
   end
 

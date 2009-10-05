@@ -17,18 +17,9 @@ local address = object:new(_M, "address")
 
 -- string representation -------------------------------------------------------
 
-function address:dump()
+function address:__repr(format)
   if self[1] then
-    return "["..rima.concat(self, ", ", expression.dump).."]"
-  else
-    return ""
-  end
-end
-
-
-function address:__tostring()
-  if self[1] then
-    return "["..rima.concat(self, ", ", rima.tostring).."]"
+    return "["..expression.concat(self, format).."]"
   else
     return ""
   end

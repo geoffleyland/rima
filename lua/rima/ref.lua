@@ -58,17 +58,23 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function ref.proxy_mt.__dump(r)
-  -- possibly have a way of showing that a variable is bound?
-  return "ref("..r.name..r.address:dump()..")"
-end
+function ref.proxy_mt.__repr(r, format)
+  local R = proxy.O(r)
 
-
-function ref.proxy_mt.__tostring(r)
-  -- possibly have a way of showing that a variable is bound?
-  r = proxy.O(r)
-  return r.name..rima.tostring(r.address)
+  local name
+  if R.scope and format and format.scopes then
+    name = R.name.."@"..rima.repr(R.scope, format)
+  else
+    name = R.name
+  end
+  
+  if format and format.dump then
+    return "ref("..name..rima.repr(R.address, format)..")"
+  else
+    return name..rima.repr(R.address, format)
+  end
 end
+ref.proxy_mt.__tostring = ref.proxy_mt.__repr
 
 
 function ref.describe(r)
@@ -93,7 +99,7 @@ function ref.proxy_mt.__eval(r, S)
   local status, v = pcall(function() return expression.eval(e, S) end)
   if not status then
     error(("error evaluating '%s' as '%s':\n  %s"):
-      format(r.name, rima.tostring(e), v:gsub("\n", "\n  ")), 0)
+      format(r.name, rima.repr(e), v:gsub("\n", "\n  ")), 0)
   end
 
   if object.isa(v, undefined_t) then
@@ -109,14 +115,14 @@ function ref.proxy_mt.__eval(r, S)
   else
     if not r.type:includes(v) then
       error(("'%s' (%s) is not of type '%s'"):
-        format(r.name, rima.tostring(v), r.type:describe(r.name)), 0)
+        format(r.name, rima.repr(v), r.type:describe(r.name)), 0)
     else
       v = proxy.O(v)
       if type(v) == "table" and v.handle_address then
         local status, v = pcall(function() return v:handle_address(S, new_address) end)
         if not status then
           error(("error evaluating '%s' as '%s':\n  %s"):
-            format(r.name, rima.tostring(e), v:gsub("\n", "\n  ")), 0)
+            format(r.name, rima.repr(e), v:gsub("\n", "\n  ")), 0)
         end
         return v
       end
@@ -149,13 +155,13 @@ function ref.set(r, t, v)
     if #address == i then
       if cv then
         error(("error setting '%s' to %s: field already exists (%s)"):
-          format(rima.tostring(r), rima.tostring(v), rima.tostring(cv)), 0)
+          format(rima.repr(r), rima.repr(v), rima.repr(cv)), 0)
       end
       t[name] = v
     else
       if cv and type(cv) ~= "table" then
         error(("error setting '%s' to %s: field is not a table (%s)"):
-          format(rima.tostring(r), rima.tostring(v), rima.tostring(cv)), 0)
+          format(rima.repr(r), rima.repr(v), rima.repr(cv)), 0)
       end
       if not cv then t[name] = {} end
       s(t[name], address[i+1], i+1)

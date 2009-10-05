@@ -12,9 +12,10 @@ local undefined_t = object:new(_M, "undefined_t")
 
 -- String representation -------------------------------------------------------
 
-function undefined_t:__tostring()
+function undefined_t:__repr(format)
   return "undefined"
 end
+__tostring = __repr
 
 
 function undefined_t:describe(s)

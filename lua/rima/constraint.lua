@@ -52,10 +52,10 @@ function constraint:tostring(S)
 
   local function list()
     for S2, undefined in self.sets:iterate(S) do
-      local lhs = rima.tostring(expression.eval(self.lhs, S2))
-      local rhs = rima.tostring(expression.eval(self.rhs, S2))
+      local lhs = rima.repr(expression.eval(self.lhs, S2))
+      local rhs = rima.repr(expression.eval(self.rhs, S2))
       local s = lhs.." "..self.type.." "..rhs
-      if undefined[1] then s = s.." for all "..rima.tostring(undefined) end
+      if undefined[1] then s = s.." for all "..rima.repr(undefined) end
       coroutine.yield(s)
     end
   end
@@ -64,7 +64,7 @@ function constraint:tostring(S)
 end
 
 function constraint:__tostring()
-  local lhs, rhs = rima.tostring(self.lhs), rima.tostring(self.rhs)
+  local lhs, rhs = rima.repr(self.lhs), rima.repr(self.rhs)
   local s = lhs.." "..self.type.." "..rhs
   return s
 end

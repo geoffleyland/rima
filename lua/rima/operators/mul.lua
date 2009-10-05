@@ -29,7 +29,7 @@ function mul:check(args)
   for i, a in ipairs(args) do
     if not expression.result_type_match(a[2], types.number_t) then
       error(("argument #d to mul (%s) is not in %s"):
-        format(i, rima.tostring(a[2]), rima.tostring(types.number_t)), 0)
+        format(i, rima.repr(a[2]), rima.repr(types.number_t)), 0)
     end
   end
 end
@@ -41,14 +41,14 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function mul.__dump(args)
-  return "*("..
-    rima.concat(args, ", ",
-      function(a) return expression.dump(a[2]).."^"..rima.tostring(a[1]) end)..
-    ")"
-end
+function mul.__repr(args, format)
+  if format and format.dump then
+    return "*("..
+      rima.concat(args, ", ",
+        function(a) return rima.repr(a[2], format).."^"..expression.simple_repr(a[1], format) end)..
+      ")"
+  end
 
-function mul.__rima_tostring(args)
   local s = ""
   for i, a in ipairs(args) do
     local c, e = a[1], a[2]
@@ -63,12 +63,12 @@ function mul.__rima_tostring(args)
     end
     
     -- If the constant's not 1 then we need to parenthise (almost) like an exponentiation
-    s = s..expression.parenthise(e, (c == 1 and 3) or 2)
+    s = s..expression.parenthise(e, format, (c == 1 and 3) or 2)
 
     -- If the constant's not 1, write the constant
     local ac = math.abs(c)
     if ac ~= 1 then
-      s = s.."^"..rima.tostring(ac)
+      s = s.."^"..rima.repr(ac, format)
     end
   end
   return s
@@ -96,7 +96,7 @@ function mul.simplify(args)
   local coeff, terms = 1, {}
   
   local function add_term(exp, e)
-    local s = rima.tostring(e)
+    local s = rima.repr(e)
     local t = terms[s]
     if t then
       t.exponent = t.exponent + exp

@@ -174,7 +174,7 @@ function scope.check(S, name, value, is_parent)
     if object.isa(v, undefined_t) then
       return v:describe(name)
     else
-      return rima.tostring(v)
+      return rima.repr(v)
     end
   end
 

@@ -2,7 +2,6 @@
 -- see license.txt for license information
 
 local coroutine = require("coroutine")
-local tostring, type = tostring, type
 local ipairs, pairs = ipairs, pairs
 local error, getmetatable, require, type = error, getmetatable, require, type
 
@@ -26,14 +25,21 @@ function alias_type:new(exp, name)
 end
 
 
-function alias_type:__tostring()
-  local name, set = self.name, rima.tostring(self.exp)
+function alias_type:__repr(format)
+  local name, set = self.name, rima.repr(self.exp, format)
+  local a
   if name == set then
-    return name
+    a = name
   else
-    return name.." in "..set
+    a = name.." in "..set
+  end
+  if format and format.dump then
+    return ("alias(%s)"):format(a)
+  else
+    return a
   end
 end
+alias_type.__tostring = alias_type.__repr
 
 
 function rima.alias(exp, name)
@@ -49,9 +55,10 @@ function element:new(set, index, key)
 end
 
 
-function element:__tostring()
+function element:__repr(format)
   return self.key
 end
+element.__tostring = element.__repr
 
 
 -- Ranges ----------------------------------------------------------------------
@@ -62,9 +69,10 @@ function range_type:new(l, h)
 end
 
 
-function range_type:__tostring()
-  return "range("..self.low..", "..self.high..")"
+function range_type:__repr(format)
+  return ("range(%s, %s)"):format(rima.repr(low, format), rima.repr(high, format))
 end
+range_type.__tostring = range_type.__repr
 
 
 function range_type:__iterate()
@@ -100,14 +108,21 @@ end
 ref_iterator = object:new({}, "iterator")
 
 
-function ref_iterator:__tostring()
-  local name, set = self.name, rima.tostring(self.exp)
+function ref_iterator:__repr(format)
+  local name, set = self.name, rima.repr(self.exp, format)
+  local a
   if name == set then
-    return name
+    a = name
   else
-    return name.." in "..set
+    a = name.." in "..set
+  end
+  if format and format.dump then
+    return ("iterator(%s)"):format(a)
+  else
+    return a
   end
 end
+ref_iterator.__tostring = ref_iterator.__repr
 
 
 function ref_iterator:eval(S)
@@ -165,7 +180,7 @@ function set_list:new(sets)
         clean_sets[i] = s
       else
         error(("Bad set #%d to set_list:new: expected a string, alias, reference or something iterable, got '%s' (%s)"):
-          format(i, tostring(s), type(s)), 0)
+          format(i, rima.repr(s), type(s)), 0)
       end
     end
   end
@@ -173,14 +188,10 @@ function set_list:new(sets)
 end
 
 
-function set_list:__dump()
-  return "{"..rima.concat(self, ", ", expression.dump).."}"
+function set_list:__repr(format)
+  return "{"..expression.concat(self, format).."}"
 end
-
-
-function set_list:__tostring()
-  return "{"..rima.concat(self, ", ", rima.tostring).."}"
-end
+set_list.__tostring = set_list.__repr
 
 
 function set_list:iterate(S)
@@ -224,18 +235,16 @@ function pairs_type:new(exp, key, value, iterator)
 end
 
 
-function pairs_type:__tostring() 
-  local s = tostring(self.key_name)
+function pairs_type:__repr(format) 
+  local vars = rima.repr(self.key_name, format)
   if self.value_name and self.value_name ~= "_" then
-    s = s..", "..tostring(self.value_name)
+    vars = vars..", "..rima.repr(self.value_name, format)
   end
-  if self.iterator == pairs then
-    s = s.." in pairs("..tostring(self.exp)..")"
-  else
-    s = s.." in ipairs("..tostring(self.exp)..")"
-  end
-  return s
+  local iterator = (self.iterator == pairs and "pairs") or "ipairs"
+  
+  return ("%s in %s(%s)"):format(vars, iterator, rima.repr(self.exp, format))
 end
+pairs_type.__tostring = pairs_type.__repr
 
 
 function pairs_type:eval(S)
@@ -255,7 +264,7 @@ function pairs_type:names()
 end
 
 function pairs_type:__iterate()
-  local key_name, value_name = tostring(self.key_name), tostring(self.value_name)
+  local key_name, value_name = rima.repr(self.key_name), rima.repr(self.value_name)
   local z, iterator = self.exp, self.iterator
   
   return coroutine.wrap(

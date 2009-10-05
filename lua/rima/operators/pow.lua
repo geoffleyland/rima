@@ -20,11 +20,11 @@ local pow = rima.object:new(_M, "pow")
 function pow:check(a)
   if not expression.result_type_match(a[1], types.number_t) then
     error(("base (%s) of power expression '%s' is not in %s"):
-      format(rima.tostring(a[1]), _tostring(args), rima.tostring(types.number_t)), 0)
+      format(rima.repr(a[1]), __repr(args), rima.repr(types.number_t)), 0)
   end
   if not expression.result_type_match(a[2], types.number_t) then
     error(("base (%s) of power expression '%s' is not in %s"):
-      format(rima.tostring(a[2]), _tostring(args), rima.tostring(types.number_t)), 0)
+      format(rima.repr(a[2]), __repr(args), rima.repr(types.number_t)), 0)
   end
 end
 
@@ -36,14 +36,17 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function pow.__dump(args)
+function pow.__repr(args, format)
   local base, exponent = args[1], args[2]
-  return "^("..expression.dump(base)..", "..expression.dump(exponent)..")"
-end
+  local repr = rima.repr
+  local paren = expression.parenthise
+  local prec = pow.precedence
 
-function pow.__rima_tostring(args)
-  local base, exponent = args[1], args[2]
-  return expression.parenthise(base, args.precedence).."^"..expression.parenthise(exponent, args.precedence)
+  if format and format.dump then
+    return "^("..repr(base, format)..", "..repr(exponent, format)..")"
+  else
+    return paren(base, format, prec).."^"..paren(exponent, format, prec)
+  end
 end
 
 

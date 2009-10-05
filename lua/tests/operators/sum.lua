@@ -23,13 +23,13 @@ function test(show_passes)
   local x, y, Q, q, R, r = rima.R"x,y,Q,q,R,r"
 
   T:check_equal(expression.dump(rima.sum({rima.alias(Q, "q")}, x)),
-    "sum({alias(q in Q)}, ref(x))")
+    "sum({alias(q in ref(Q))}, ref(x))")
   T:check_equal(rima.sum({rima.alias(Q, "q")}, x), "sum({q in Q}, x)")
   T:check_equal(expression.dump(rima.sum({rima.alias(Q, "q")}, x[q])),
-    "sum({alias(q in Q)}, ref(x[ref(q)]))")
+    "sum({alias(q in ref(Q))}, ref(x[ref(q)]))")
   T:check_equal(rima.sum({rima.alias(Q, "q")}, x[q]), "sum({q in Q}, x[q])")
   T:check_equal(expression.dump(rima.sum({rima.alias(Q, "q"), R}, x[q][R])),
-    "sum({alias(q in Q), ref(R)}, ref(x[ref(q), ref(R)]))")
+    "sum({alias(q in ref(Q)), ref(R)}, ref(x[ref(q), ref(R)]))")
   T:check_equal(rima.sum({rima.alias(Q, "q"), "R"}, x[q][R]), "sum({q in Q, R}, x[q, R])")
 
   local S = rima.scope.new()
@@ -81,7 +81,7 @@ function test(show_passes)
   do 
     local X, x, y, z = rima.R"X, x, y, z"
     local S = rima.scope.create{ X = rima.range(1, y) }
-    T:check_equal(expression.dump(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S)), "sum({iterator(x in range(1, y))}, ref(x[string(key)]))")
+    T:check_equal(expression.dump(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S)), "sum({iterator(x in range(number(1), ref(y)))}, ref(x[string(key)]))")
     T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S), "sum({x in range(1, y)}, x[key])")
     S.y = 5
     T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S), 15)

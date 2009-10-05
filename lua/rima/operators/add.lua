@@ -27,7 +27,7 @@ function add:check(args)
   for i, a in ipairs(args) do
     if not expression.result_type_match(a[2], rima.free()) then
       error(("argument %d (%s, '%s') to add expression '%s' is not in %s"):
-        format(i, rima.tostring(a[2]), type(a[2]), self:_tostring(args), rima.tostring(rima.free())), 0)
+        format(i, rima.repr(a[2]), type(a[2]), self.__repr(args), rima.repr(rima.free())), 0)
     end
   end
 end
@@ -38,15 +38,14 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function add.__dump(args)
-  return "+("..
-    rima.concat(args, ", ",
-      function(a) return rima.tostring(a[1]).."*"..expression.dump(a[2]) end)..
-    ")"
-end
+function add.__repr(args, format)
+  if format and format.dump then
+    return "+("..
+      rima.concat(args, ", ",
+        function(a) return expression.simple_repr(a[1], format).."*"..rima.repr(a[2], format) end)..
+      ")"
+  end
 
-
-function add.__rima_tostring(args)
   local s = ""
   for i, a in ipairs(args) do
     local c, e = a[1], a[2]
@@ -65,7 +64,7 @@ function add.__rima_tostring(args)
     e = ac == 1 and e or mul.simplify({{1, ac}, {1, e}})
 
     -- If the constant's not 1 then we need to parenthise (almost) like a multiplication
-    s = s..expression.parenthise(e, (c == 1 and 5) or 4)
+    s = s..expression.parenthise(e, format, (c == 1 and 5) or 4)
   end
   return s
 end
@@ -89,7 +88,7 @@ function add.__eval(raw_args, S)
   local constant, terms = 0, {}
   
   local function add_term(c, e)
-    local s = rima.tostring(e)
+    local s = rima.repr(e)
     local t = terms[s]
     if t then
       t.coeff = t.coeff + c

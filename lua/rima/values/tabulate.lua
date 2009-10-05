@@ -36,9 +36,10 @@ function tabulate_type:new(indexes, e)
   return object.new(self, { expression=e, indexes=new_indexes})
 end
 
-function tabulate_type:__tostring()
-  return "tabulate({"..rima.concat(self.indexes, ", ", tostring).."}, "..tostring(self.expression)..")"
+function tabulate_type:__repr(format)
+  return ("tabulate({%s}, %s)"):format(expression.concat(self.indexes, format), rima.repr(self.expression, format))
 end
+__tostring = __repr
 
 function tabulate_type:handle_address(S, a)
   if #a ~= #self.indexes then

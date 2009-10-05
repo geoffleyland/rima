@@ -36,11 +36,11 @@ function function_v:new(inputs, expression, S, ...)
         new_inputs[i] = v
       else
         error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
-          format(i, rima.tostring(v), type(v)), 0)
+          format(i, rima.repr(v), type(v)), 0)
       end
     else
       error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
-        format(i, rima.tostring(v), type(v)), 0)
+        format(i, rima.repr(v), type(v)), 0)
     end
   end
 
@@ -50,13 +50,9 @@ end
 
 -- String representation -------------------------------------------------------
 
-function function_v:__tostring()
-  local s = "function("
-  for i, a in ipairs(self.inputs) do
-    if i > 1 then s = s..", " end
-    s = s..rima.tostring(a)
-  end
-  s = s..") return "..rima.tostring(self.expression)
+function function_v:__repr(format)
+  return ("function(%s) return %s"):
+    format(expression.concat(self.inputs, format), rima.repr(self.expression))
 --[[
   if self.outputs[1] then
     s = s.." where {"
@@ -67,8 +63,8 @@ function function_v:__tostring()
     s = s.."}"
   end
 --]]
-  return s
 end
+__tostring = __repr
 
 function function_v:call(S, args)
   if not args then return self end
@@ -93,11 +89,11 @@ function function_v:call(S, args)
   local function_scope = rima.scope.spawn(self.S or S, nil, {overwrite=true})
 
   for i, a in ipairs(outputs) do
-    caller_scope[rima.tostring(a)] = expression:new(call, function_v:new({}, self.outputs[i], function_scope))
+    caller_scope[rima.repr(a)] = expression:new(call, function_v:new({}, self.outputs[i], function_scope))
   end
 
   for i, a in ipairs(self.inputs) do
-    function_scope[rima.tostring(a)] = expression:new(call, function_v:new({}, args[i], caller_scope))
+    function_scope[rima.repr(a)] = expression:new(call, function_v:new({}, args[i], caller_scope))
   end
 
   return expression.eval(self.expression, function_scope)

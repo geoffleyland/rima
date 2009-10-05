@@ -50,10 +50,13 @@ function rima.E(e, S)
   if status then
     return r
   else
-    error(("error while evaluating '%s':\n  %s"): format(rima.tostring(e), r:gsub("\n", "\n  ")), 0)
+    error(("error while evaluating '%s':\n  %s"): format(rima.repr(e), r:gsub("\n", "\n  ")), 0)
   end
 end
 
+
+rima.set_number_format = expression.set_number_format
+rima.repr = expression.repr
 
 function rima.F(inputs, expression, S)
   return function_v:new(inputs, expression, S)
@@ -70,7 +73,7 @@ function rima.linearise(e, S)
   local status, constant, terms = xpcall(function() return linearise.linearise(l, S) end, debug.traceback)
   if not status then
     error(("error while linearising '%s':\n  linear form: %s\n  error:\n    %s"):
-      format(rima.tostring(e), rima.tostring(l), constant:gsub("\n", "\n    ")), 0)
+      format(rima.repr(e), rima.repr(l), constant:gsub("\n", "\n    ")), 0)
   else
     return constant, terms
   end

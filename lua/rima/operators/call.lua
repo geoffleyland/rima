@@ -24,13 +24,12 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function call.__rima_tostring(args)
-  local s = expression.parenthise(args[1], 0).."("
-  for i = 2, #args do
-    if i > 2 then s = s..", " end
-    s = s..rima.tostring(args[i])
+function call.__repr(args, format)
+  if format and format.dump then
+    return "call("..expression.concat(args, format)..")"
+  else
+    return expression.parenthise(args[1], format, 0).."("..expression.concat({unpack(args, 2)}, format)..")"
   end
-  return s..")"
 end
 
 
@@ -53,7 +52,7 @@ function call.__eval(args, S)
 
     if not status then
       error(("error while evaluating '%s':\n  %s"):
-        format(__rima_tostring(args), r:gsub("\n", "\n  ")), 0)
+        format(__repr(args), r:gsub("\n", "\n  ")), 0)
     end
     return r
   end
