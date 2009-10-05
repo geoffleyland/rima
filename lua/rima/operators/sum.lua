@@ -1,15 +1,14 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local ipairs, pairs, require, tostring = ipairs, pairs, require, tostring
+local ipairs, pairs, tostring = ipairs, pairs, tostring
 
 local object = require("rima.object")
+local expression = require("rima.expression")
+local add = require("rima.operators.add")
 local rima = rima
 
 module(...)
-
-local add = require("rima.operators.add")
-local expression = require("rima.expression")
 
 -- Subscripts ------------------------------------------------------------------
 

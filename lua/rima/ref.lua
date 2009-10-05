@@ -21,6 +21,7 @@ of the reference somewhere tricky.  This is a giant pain in the ass.
 local object = require("rima.object")
 local proxy = require("rima.proxy")
 local args = require("rima.args")
+local expression = require("rima.expression")
 local undefined_t = require("rima.types.undefined_t")
 require("rima.private")
 local rima = rima
@@ -28,7 +29,6 @@ local rima = rima
 module(...)
 
 local scope = require("rima.scope")
-local expression = require("rima.expression")
 local iteration = require("rima.iteration")
 local address = require("rima.address")
 

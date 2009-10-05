@@ -5,10 +5,6 @@ local require = require
 
 module(...)
 
--- Forward declarations ---------------------------------------------------------
-
-expression = {}
-
 -- Subpackages ------------------------------------------------------------------
 
 require("rima.ref")

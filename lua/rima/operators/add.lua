@@ -7,13 +7,13 @@ local ipairs, pairs = ipairs, pairs
 local getmetatable = getmetatable
 
 local proxy = require("rima.proxy")
+local expression = require("rima.expression")
 require("rima.private")
 local rima = rima
 
 module(...)
 
 local mul = require("rima.operators.mul")
-local expression = require("rima.expression")
 
 -- Addition --------------------------------------------------------------------
 

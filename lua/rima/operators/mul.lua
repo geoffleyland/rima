@@ -8,6 +8,7 @@ local getmetatable = getmetatable
 
 local object = require("rima.object")
 local proxy = require("rima.proxy")
+local expression = require("rima.expression")
 require("rima.private")
 local rima = rima
 
@@ -15,7 +16,6 @@ module(...)
 
 local add = require("rima.operators.add")
 local pow = require("rima.operators.pow")
-local expression = require("rima.expression")
 
 -- Multiplication --------------------------------------------------------------
 

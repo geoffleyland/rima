@@ -1,14 +1,14 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local error, require = error, require
+local error = error
 
+local expression = require("rima.expression")
 require("rima.private")
 local rima = rima
 
 module(...)
 
-local expression = require("rima.expression")
 
 -- Exponentiation --------------------------------------------------------------
 

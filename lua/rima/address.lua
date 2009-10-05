@@ -1,15 +1,14 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local ipairs, require = ipairs, require
+local ipairs = ipairs
 
 local object = require("rima.object")
+local expression = require("rima.expression")
 require("rima.private")
 local rima = rima
 
 module(...)
-
-local expression = require("rima.expression")
 
 --------------------------------------------------------------------------------
 
