@@ -80,45 +80,43 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function ref.proxy_mt.__eval(r, S)
-  local R = proxy.O(r)
-
   -- evaluate the address of the ref if there is one
-  local new_address = R.address:eval(S)
+  local new_address = r.address:eval(S)
   
   -- look the ref up in the scope
-  local e, found_scope = scope.lookup(S, R.name, R.scope)
+  local e, found_scope = scope.lookup(S, r.name, r.scope)
   if not e then                                 -- remain unbound
-    return ref:new{name=R.name, address=new_address, type=R.type, scope=R.scope}
+    return ref:new{name=r.name, address=new_address, type=r.type, scope=r.scope}
   end
 
   -- evaluate the result of the lookup - it might be an expression, or another ref
   local status, v = pcall(function() return expression.eval(e, S) end)
   if not status then
     error(("error evaluating '%s' as '%s':\n  %s"):
-      format(R.name, rima.tostring(e), v:gsub("\n", "\n  ")), 0)
+      format(r.name, rima.tostring(e), v:gsub("\n", "\n  ")), 0)
   end
 
   if object.isa(v, undefined_t) then
-    if not v:includes(R.type) and not R.type:includes(v) then
+    if not v:includes(r.type) and not r.type:includes(v) then
       error(("the type of '%s' (%s) and the type of the reference (%s) are mutually exclusive"):
-        format(R.name, v:describe(R.name), R.type:describe(R.name)), 0)
+        format(r.name, v:describe(r.name), r.type:describe(r.name)), 0)
     else
       -- update the address and bind the reference to the scope if it doesn't already have one
-      return ref:new{name=R.name, address=new_address, type=R.type, scope=R.scope or found_scope}
+      return ref:new{name=r.name, address=new_address, type=r.type, scope=r.scope or found_scope}
     end
   elseif not expression.defined(v) then
     return v
   else
-    if not R.type:includes(v) then
+    if not r.type:includes(v) then
       error(("'%s' (%s) is not of type '%s'"):
-        format(R.name, rima.tostring(v), R.type:describe(R.name)), 0)
+        format(r.name, rima.tostring(v), r.type:describe(r.name)), 0)
     else
       v = proxy.O(v)
       if type(v) == "table" and v.handle_address then
         local status, v = pcall(function() return v:handle_address(S, new_address) end)
         if not status then
           error(("error evaluating '%s' as '%s':\n  %s"):
-            format(R.name, rima.tostring(e), v:gsub("\n", "\n  ")), 0)
+            format(r.name, rima.tostring(e), v:gsub("\n", "\n  ")), 0)
         end
         return v
       end
@@ -129,7 +127,7 @@ function ref.proxy_mt.__eval(r, S)
           v = v[i]
         end
         if not v then
-          return ref:new{name=R.name, address=new_address, type=R.type, scope=R.scope or found_scope}
+          return ref:new{name=r.name, address=new_address, type=r.type, scope=r.scope or found_scope}
         end
       end
     end
