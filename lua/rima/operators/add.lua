@@ -105,13 +105,13 @@ function add:eval(S, raw_args)
 
       -- Simplify a single term
       local function simplify(c, e)
-        e = proxy.O(e)
+        local E = proxy.O(e)
         if type(e) == "number" then             -- if the term evaluated to a number, then add it to the constant
           constant = constant + e * c
-        elseif e.op == add then                 -- if the term is another sum, hoist its terms
-          sum(e, c)
-        elseif e.op == mul then                 -- if the term is a multiplication, try to hoist any constant
-          local new_c, new_e = extract_constant(e)
+        elseif E.op == add then                 -- if the term is another sum, hoist its terms
+          sum(E, c)
+        elseif E.op == mul then                 -- if the term is a multiplication, try to hoist any constant
+          local new_c, new_e = extract_constant(E)
           if new_c then                         -- if we did hoist a constant, re-simplify the resulting expression
             simplify(c * new_c, new_e)
           else                                  -- otherwise just add it

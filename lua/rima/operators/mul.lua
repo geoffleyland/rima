@@ -112,18 +112,18 @@ function mul.simplify(args)
 
       -- Simplify a single term
       local function simplify(exp, e)
-        e = proxy.O(e)
+        local E = proxy.O(e)
         if type(e) == "number" then             -- if the term evaluated to a number, then multiply the coefficient by it
           coeff = coeff * math.pow(e, exp)
-        elseif e.op == mul then                 -- if the term is another product, hoist its terms
-          prod(e, exp)
-        elseif e.op == add and                  -- if the term is a sum with a single term, hoist it
-               #e == 1 then
-          coeff = coeff * math.pow(e[1][1], exp)
-          simplify(exp, e[1][2])
-        elseif e.op == pow and                  -- if the term is an exponentiation to a constant power, hoist it
-          type(e[2]) == "number" then
-          simplify(exp * e[2], e[1])
+        elseif E.op == mul then                 -- if the term is another product, hoist its terms
+          prod(E, exp)
+        elseif E.op == add and                  -- if the term is a sum with a single term, hoist it
+               #E == 1 then
+          coeff = coeff * math.pow(E[1][1], exp)
+          simplify(exp, E[1][2])
+        elseif E.op == pow and                  -- if the term is an exponentiation to a constant power, hoist it
+          type(E[2]) == "number" then
+          simplify(exp * E[2], E[1])
         else                                    -- if there's nothing else to do, add the term
           add_term(exp, e)
         end
