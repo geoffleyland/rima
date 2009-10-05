@@ -142,9 +142,9 @@ end
 -- Setting ---------------------------------------------------------------------
 
 function ref.set(r, t, v)
-  local r = proxy.O(r)
-  local name = r.name
-  local address = r.address
+  local R = proxy.O(r)
+  local name = R.name
+  local address = R.address
 
   function s(t, name, i)
     if object.type(name) == "element" then name = name.key end
