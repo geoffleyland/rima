@@ -97,12 +97,6 @@ function test(show_passes)
   end
 
   do
-    local a, b, c = rima.R"a, b, c"
-    local S = rima.scope.create{ a = b + c, b = 1, c = function() end }
-    T:expect_error(function() rima.E(a, S) end, "error while evaluating 'a'")
-  end
-
-  do
     local a = rima.R"a, b, c"
     local S1 = rima.scope.create{ a = b, b = 17 }
     T:check_equal(rima.E(a, S1), 17)

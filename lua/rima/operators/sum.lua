@@ -22,12 +22,12 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function sum:dump(args)
+function sum.__dump(args)
   local sets, e = args[1], args[2]
   return "sum({"..rima.concat(sets, ", ", expression.dump).."}, "..expression.dump(e)..")"
 end
 
-function sum:_tostring(args)
+function sum.__rima_tostring(args)
   local sets, e = args[1], args[2]
   return "sum({"..rima.concat(sets, ", ", rima.tostring).."}, "..rima.tostring(e)..")"
 end
@@ -35,7 +35,7 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 
-function sum:eval(S, args)
+function sum.__eval(args, S)
   local sets, e = rima.iteration.set_list:new(args[1]), args[2]
   local defined_terms, undefined_terms = {}, {}
 

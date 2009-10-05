@@ -2,6 +2,7 @@
 -- see license.txt for license information
 
 local error, ipairs, require = error, ipairs, require
+local getmetatable = getmetatable
 
 local object = require("rima.object")
 local proxy = require("rima.proxy")
@@ -16,7 +17,6 @@ local operators = require("rima.operators")
 -- Getting a linear form -------------------------------------------------------
 
 function linearise(l, S)
-  l = proxy.O(l)
   local constant, terms = 0, {}
   local fail = false
 
@@ -37,8 +37,8 @@ function linearise(l, S)
     constant = l
   elseif object.type(l) == "ref" then
     add_variable(l, l, 1)
-  elseif l.op == operators.add then
-    for i, a in ipairs(l) do
+  elseif getmetatable(l) == operators.add then
+    for i, a in ipairs(proxy.O(l)) do
       a = proxy.O(a)
       local c, x = a[1], a[2]
       if object.type(x) == "number" then

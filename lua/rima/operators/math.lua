@@ -25,7 +25,7 @@ local function make_math_function(name)
   local f = assert(math[name], "The math function does not exist")
   local op = object:new({ precedence=0 }, name) 
 
-  op.eval = function(op, S, args)
+  op.__eval = function(args, S)
     local r = expression.eval(args[1], S)
     if type(r) == "number" then
       return f(r)

@@ -4,6 +4,7 @@
 local math, table = require("math"), require("table")
 local error, require, unpack = error, require, unpack
 local ipairs, pairs = ipairs, pairs
+local getmetatable = getmetatable
 
 local object = require("rima.object")
 local proxy = require("rima.proxy")
@@ -40,14 +41,14 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function mul:dump(args)
+function mul.__dump(args)
   return "*("..
     rima.concat(args, ", ",
       function(a) return expression.dump(a[2]).."^"..rima.tostring(a[1]) end)..
     ")"
 end
 
-function mul:_tostring(args)
+function mul.__rima_tostring(args)
   local s = ""
   for i, a in ipairs(args) do
     local c, e = a[1], a[2]
@@ -76,7 +77,7 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function mul:eval(S, raw_args)
+function mul.__eval(raw_args, S)
   -- Multiply all the arguments, keeping track of the product of any exponents,
   -- and of all remaining unresolved terms
   -- If any subexpressions are products, we dive into them, if any are
@@ -113,15 +114,16 @@ function mul.simplify(args)
       -- Simplify a single term
       local function simplify(exp, e)
         local E = proxy.O(e)
+        local mt = getmetatable(e)
         if type(e) == "number" then             -- if the term evaluated to a number, then multiply the coefficient by it
           coeff = coeff * math.pow(e, exp)
-        elseif E.op == mul then                 -- if the term is another product, hoist its terms
+        elseif mt == mul then                   -- if the term is another product, hoist its terms
           prod(E, exp)
-        elseif E.op == add and                  -- if the term is a sum with a single term, hoist it
+        elseif mt == add and                    -- if the term is a sum with a single term, hoist it
                #E == 1 then
           coeff = coeff * math.pow(E[1][1], exp)
           simplify(exp, E[1][2])
-        elseif E.op == pow and                  -- if the term is an exponentiation to a constant power, hoist it
+        elseif mt == pow and                    -- if the term is an exponentiation to a constant power, hoist it
           type(E[2]) == "number" then
           simplify(exp * E[2], E[1])
         else                                    -- if there's nothing else to do, add the term

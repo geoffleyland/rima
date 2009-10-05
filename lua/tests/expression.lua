@@ -58,13 +58,10 @@ function test(show_passes)
 
   -- dump and tostring
   T:check_equal(expression.dump(1), "number(1)")
-  T:check_equal(expression.dump(expression:new(function() end, 1)), "function(number(1))")
-  T:check_equal(expression.proxy_mt.__tostring(1), "1")
-  T:check_equal(expression:new(function() end, 1), "function(1)")
 
   -- eval
-  T:expect_error(function() expression.eval(expression:new({}), {}) end,
-    "unable to evaluate 'table%(%)': the operator can't be evaluated")
+  T:expect_ok(function() expression.eval(expression:new({}), {}) end)
+  T:check_equal(expression.eval(expression:new({}), {}), "table()")
 
   -- tests with add, mul and pow
   do

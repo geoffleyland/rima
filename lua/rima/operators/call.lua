@@ -26,7 +26,7 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function call:_tostring(args)
+function call.__rima_tostring(args)
   local s = expression.parenthise(args[1], 0).."("
   for i = 2, #args do
     if i > 2 then s = s..", " end
@@ -38,7 +38,7 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function call:eval(S, args)
+function call.__eval(args, S)
   local e = expression.eval(args[1], S)
   if isa(e, ref) or isa(e, expression) then
     return expression:new(call, e, unpack(args, 2))
@@ -55,7 +55,7 @@ function call:eval(S, args)
 
     if not status then
       error(("error while evaluating '%s':\n  %s"):
-        format(self:_tostring(args), r:gsub("\n", "\n  ")), 0)
+        format(__rima_tostring(args), r:gsub("\n", "\n  ")), 0)
     end
     return r
   end

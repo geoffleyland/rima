@@ -2,8 +2,10 @@
 -- see license.txt for license information
 
 local error = error
-local ipairs = ipairs
-local require, setmetatable, rawtype = require, setmetatable, type
+local ipairs, pairs = ipairs, pairs
+local require, rawtype = require, type
+local getmetatable, setmetatable = getmetatable, setmetatable
+local rawget, rawset = rawget, rawset
 
 local object = require("rima.object")
 local proxy = require("rima.proxy")
@@ -11,7 +13,6 @@ local rima = rima
 
 module(...)
 
-local ref = require("rima.ref")
 local operators = require("rima.operators")
 
 -- Constructor -----------------------------------------------------------------
@@ -19,20 +20,20 @@ local operators = require("rima.operators")
 local expression = object:new(_M, "expression")
 expression.proxy_mt = setmetatable({}, expression)
 
+
 function expression:new(x, ...)
   local e = {...}
-  e.op = x
-
+  for k, v in pairs(self.proxy_mt) do if not(x[k]) then rawset(x, k, v) end end
 --  e:check()
-  return proxy:new(object.new(self, e), expression.proxy_mt)
+  return proxy:new(object.new(self, e), x)
 end
 
 function expression:new_table(x, t)
-  local e = { op=x }
+  local e = {}
   for i, a in ipairs(t) do e[i] = a end
-
+  for k, v in pairs(self.proxy_mt) do if not(x[k]) then rawset(x, k, v) end end
 --  e:check()
-  return proxy:new(object.new(self, e), expression.proxy_mt)
+  return proxy:new(object.new(self, e), x)
 end
 
 
@@ -78,45 +79,30 @@ function expression.result_type(a)
 end
 --]]
 
--- We want to avoid trying to index non-tables and directly indexing
--- references (which will lie and say they have everything)
-local function get_field(e, f)
-  return rawtype(e) == "table" and e[f]
-end
-
 
 -- String representation -------------------------------------------------------
 
 function expression.dump(e)
-  e = proxy.O(e)
-  local op = get_field(e, "op")
-  if op then                                  -- it's an expression or lookalike
-    local m = get_field(op, "dump")
-    if m then                                 -- the operator can handle itself
-      return m(op, e)
-    else
-      return object.type(op).."("..rima.concat(e, ", ", dump)..")"
+  local mt = getmetatable(e)
+  if mt then
+    local f = rawget(mt, "__dump")
+    if f then
+      return f(proxy.O(e))
+    elseif mt.__is_proxy then
+      return object.type(mt).."("..rima.concat(proxy.O(e), ", ", dump)..")"
     end
-  else                                        -- it's a literal
-    local m = get_field(e, "dump")
-    return m and m(e) or object.type(e).."("..rima.tostring(e)..")"
   end
+  return object.type(e).."("..rima.tostring(e)..")"
 end
 
 
 function expression.proxy_mt.__tostring(e)
-  e = proxy.O(e)
-  local op = get_field(e, "op")
-  if op then                                  -- it's an expression or lookalike
-    local m = get_field(op, "_tostring")
-    if m then                                 -- the operator can handle itself
-      return m(op, e)
-    else
-      return object.type(op).."(".. rima.concat(e, ", ", rima.tostring)..")"
-    end
-  else                                        -- it's a literal
-    local m = get_field(e, "_tostring")
-    return m and m(e) or rima.tostring(e)
+  local mt = getmetatable(e)
+  local f = rawget(mt, "__rima_tostring")
+  if f then
+    return f(proxy.O(e), S)
+  else
+    return object.type(mt).."(".. rima.concat(proxy.O(e), ", ", rima.tostring)..")"
   end
 end
 
@@ -124,13 +110,10 @@ end
 function expression.parenthise(e, parent_precedence)
   parent_precedence = parent_precedence or 1
   local s = rima.tostring(e)
-  e = proxy.O(e)
-  local op = get_field(e, "op")
-  if op then                                    -- this is an expression
-    local precedence = get_field(op, "precedence") or 1
-    if precedence > parent_precedence then
-      s = "("..s..")"
-    end
+  local mt = getmetatable(e)
+  local precedence = (mt and mt.precedence) or 0
+  if precedence > parent_precedence then
+    s = "("..s..")"
   end
   return s
 end
@@ -139,26 +122,18 @@ end
 -- Status ----------------------------------------------------------------------
 
 function expression.defined(e)
-  return e and not isa(e, ref) and not isa(e, expression)
+  local mt = getmetatable(e)
+  local f = mt and rawget(mt, "__eval")
+  if f then return false else return true end
 end
 
 
 -- Evaluation ------------------------------------------------------------------
 
 function expression.eval(e, S)
-  local E = proxy.O(e)
-  local op = get_field(E, "op")
-  if op then                                  -- it's an expression or lookalike
-    local m = get_field(op, "eval")
-    if m then                                 -- the operator can handle itself
-      return m(op, S, E)
-    else
-      error(("unable to evaluate '%s': the operator can't be evaluated"):format(rima.tostring(e)), 0)
-    end
-  else                                        -- it's a literal
-    local m = get_field(E, "eval")
-    return m and m(E, S) or e
-  end
+  local mt = getmetatable(e)
+  local f = mt and rawget(mt, "__eval")
+  return (f and f(proxy.O(e), S)) or e
 end
 
 

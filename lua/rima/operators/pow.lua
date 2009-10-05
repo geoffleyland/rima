@@ -36,20 +36,20 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function pow:dump(args)
+function pow.__dump(args)
   local base, exponent = args[1], args[2]
   return "^("..expression.dump(base)..", "..expression.dump(exponent)..")"
 end
 
-function pow:_tostring(args)
+function pow.__rima_tostring(args)
   local base, exponent = args[1], args[2]
-  return expression.parenthise(base, self.precedence).."^"..expression.parenthise(exponent, self.precedence)
+  return expression.parenthise(base, args.precedence).."^"..expression.parenthise(exponent, args.precedence)
 end
 
 
 -- Evaluation ------------------------------------------------------------------
 
-function pow:eval(S, args)
+function pow.__eval(args, S)
   local base, exponent = expression.eval(args[1], S), expression.eval(args[2], S)
   
   if type(exponent) == "number" then

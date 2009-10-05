@@ -58,19 +58,18 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function ref.dump(r)
+function ref.proxy_mt.__dump(r)
   -- possibly have a way of showing that a variable is bound?
-  r = proxy.O(r)
   return "ref("..r.name..r.address:dump()..")"
 end
 
-function ref.__tostring(r)
+
+function ref.proxy_mt.__tostring(r)
   -- possibly have a way of showing that a variable is bound?
   r = proxy.O(r)
   return r.name..rima.tostring(r.address)
 end
 
-ref.proxy_mt.__tostring = ref.__tostring
 
 function ref.describe(r)
   r = proxy.O(r)
@@ -80,7 +79,7 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function ref.eval(r, S)
+function ref.proxy_mt.__eval(r, S)
   local R = proxy.O(r)
 
   -- evaluate the address of the ref if there is one

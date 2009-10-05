@@ -80,7 +80,7 @@ end
 
 
 local range_op = object:new({}, "range")
-function range_op:eval(S, args)
+function range_op.__eval(args, S)
   local l, h = expression.eval(args[1], S), expression.eval(args[2], S)
   if type(l) == "number" and type(h) == "number" then
     return range_type:new(l, h)
@@ -173,7 +173,7 @@ function set_list:new(sets)
 end
 
 
-function set_list:dump()
+function set_list:__dump()
   return "{"..rima.concat(self, ", ", expression.dump).."}"
 end
 

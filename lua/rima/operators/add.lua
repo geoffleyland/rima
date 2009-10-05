@@ -4,6 +4,7 @@
 local math, table = require("math"), require("table")
 local error, require, unpack = error, require, unpack
 local ipairs, pairs = ipairs, pairs
+local getmetatable = getmetatable
 
 local proxy = require("rima.proxy")
 require("rima.private")
@@ -37,7 +38,7 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function add:dump(args)
+function add.__dump(args)
   return "+("..
     rima.concat(args, ", ",
       function(a) return rima.tostring(a[1]).."*"..expression.dump(a[2]) end)..
@@ -45,7 +46,7 @@ function add:dump(args)
 end
 
 
-function add:_tostring(args)
+function add.__rima_tostring(args)
   local s = ""
   for i, a in ipairs(args) do
     local c, e = a[1], a[2]
@@ -72,7 +73,7 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function add:eval(S, raw_args)
+function add.__eval(raw_args, S)
   -- Sum all the arguments, keeping track of the sum of any constants,
   -- and of all remaining unresolved terms.
   -- If any subexpressions are sums, we dive into them, and if any are
@@ -106,12 +107,13 @@ function add:eval(S, raw_args)
       -- Simplify a single term
       local function simplify(c, e)
         local E = proxy.O(e)
+        local mt = getmetatable(e)
         if type(e) == "number" then             -- if the term evaluated to a number, then add it to the constant
           constant = constant + e * c
-        elseif E.op == add then                 -- if the term is another sum, hoist its terms
+        elseif mt == add then                   -- if the term is another sum, hoist its terms
           sum(E, c)
-        elseif E.op == mul then                 -- if the term is a multiplication, try to hoist any constant
-          local new_c, new_e = extract_constant(E)
+        elseif mt == mul then                   -- if the term is a multiplication, try to hoist any constant
+          local new_c, new_e = extract_constant(E, mt)
           if new_c then                         -- if we did hoist a constant, re-simplify the resulting expression
             simplify(c * new_c, new_e)
           else                                  -- otherwise just add it
@@ -155,7 +157,7 @@ end
 
 
 -- Extract the constant from an add or mul (if there is one)
-function extract_constant(e)
+function extract_constant(e, mt)
   if type(e[1][2]) == "number" then
     local constant = e[1][2]
     local new_args = {}
@@ -166,7 +168,7 @@ function extract_constant(e)
       -- there's a constant and only one other argument with a coefficient/exponent of 1 - hoist the other argument
       return constant, new_args[1][2]
     else
-      return constant, expression:new_table(e.op, new_args)
+      return constant, expression:new_table(mt, new_args)
     end
   else                                          -- there's no constant to extract
     return nil
