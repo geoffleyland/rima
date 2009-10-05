@@ -1,10 +1,12 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local pairs = pairs
+local ipairs, pairs = ipairs, pairs
+local table = require("table")
 
 local series = require("test.series")
 local scope = require("rima.scope")
+local expression = require("rima.expression")
 require("rima.public")
 local rima = rima
 
@@ -54,7 +56,7 @@ function test(show_passes)
     if not pass then
       local s = ""
       s = s..("error linearising %s:\n"):format(rima.tostring(e))
-      s = s..("  Evaluated to %s\n"): format(rima.tostring(e:evaluate(S)))
+      s = s..("  Evaluated to %s\n"): format(rima.tostring(expression.eval(e, S)))
       s = s..("  Constant: %.4g %s %.4g\n"):format(expected_constant,
         (expected_constant==got_constant and "==") or "~=", got_constant)
       local all = {}
