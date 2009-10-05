@@ -15,6 +15,8 @@ module(...)
 local address = object:new(_M, "address")
 
 
+-- string representation -------------------------------------------------------
+
 function address:dump()
   if self[1] then
     return "["..rima.concat(self, ", ", expression.dump).."]"
@@ -33,10 +35,14 @@ function address:__tostring()
 end
 
 
-function address:eval(S)
+-- evaluation ------------------------------------------------------------------
+
+function address:__eval(S)
   return address:new(rima.imap(function(a) return expression.eval(a, S) end, self))
 end
 
+
+-- lengthening and shortening --------------------------------------------------
 
 function address:__add(b)
   local z = {}

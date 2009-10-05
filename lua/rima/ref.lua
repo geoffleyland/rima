@@ -81,7 +81,7 @@ end
 
 function ref.proxy_mt.__eval(r, S)
   -- evaluate the address of the ref if there is one
-  local new_address = r.address:eval(S)
+  local new_address = expression.eval(r.address, S)
   
   -- look the ref up in the scope
   local e, found_scope = scope.lookup(S, r.name, r.scope)
