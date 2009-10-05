@@ -1,17 +1,15 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local error, ipairs, pcall, require, unpack = error, ipairs, pcall, require, unpack
+local error, ipairs, pcall, unpack = error, ipairs, pcall, unpack
 
 local object = require("rima.object")
+local expression = require("rima.expression")
 require("rima.private")
 local rima = rima
 
 module(...)
 
-local scope = require("rima.scope")
-local ref = require("rima.ref")
-local expression = require("rima.expression")
 
 -- Addition --------------------------------------------------------------------
 
@@ -40,7 +38,7 @@ end
 
 function call.__eval(args, S)
   local e = expression.eval(args[1], S)
-  if isa(e, ref) or isa(e, expression) then
+  if not expression.defined(e) then
     return expression:new(call, e, unpack(args, 2))
   else
     local status, r
