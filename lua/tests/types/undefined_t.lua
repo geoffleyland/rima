@@ -16,7 +16,7 @@ function test(show_passes)
 
   T:test(object.isa(undefined_t:new(), undefined_t), "isa(undefined_t:new(), undefined_t)")
   T:check_equal(object.type(undefined_t:new()), 'undefined_t', "type(undefined_t:new()) == 'undefined_t'")
-  T:check_equal(undefined_t:new(), 'undefined', "tostring(undefined_t:new()) == 'undefined'")
+  T:check_equal(undefined_t:new(), 'undefined', "repr(undefined_t:new()) == 'undefined'")
 
   T:check_equal(undefined_t:new():describe("a"), 'a undefined', "undefined:describe()'")
   T:check_equal(undefined_t:new():describe("b"), 'b undefined', "undefined:describe()'")

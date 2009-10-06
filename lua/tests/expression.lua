@@ -57,7 +57,7 @@ function test(show_passes)
   equal(T, "a", {a, S, "eval"})
   equal(T, 5, {a, scope.spawn(S, { a=5 }), "eval"})
 
-  -- dump and tostring
+  -- repr
   T:check_equal(expression.dump(1), "number(1)")
 
   -- eval

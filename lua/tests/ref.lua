@@ -24,7 +24,7 @@ function test(show_passes)
   T:test(object.isa(ref:new{name="a"}, ref), "isa(ref:new(), ref)")
 
   local function check_strings(v, s, d)
-    T:check_equal(v, s, "tostring(ref)")
+    T:check_equal(v, s, "repr(ref)")
     T:check_equal(ref.describe(v), d, "ref:describe()")
   end
 

@@ -58,7 +58,7 @@ function function_v:__repr(format)
     s = s.." where {"
     for i, a in ipairs(self.outputs) do
       if i > 1 then s = s..", " end
-      s = s..a.name.." = "..rima.tostring(self.S:_value(a.name))
+      s = s..a.name.." = "..rima.repr(self.S:_value(a.name))
     end
     s = s.."}"
   end
