@@ -205,7 +205,7 @@ function scope.find_bound_scope(S, bound_scope, name)
       if s.overwrite then top = s.parent end
       S = s.parent
       if not S then
-        error(("the reference '%s' is bound to a scope that is not available"):format(name), 0)
+        return bound_scope
       end
     end
   end
