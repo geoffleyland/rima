@@ -46,7 +46,7 @@ might be:
     fields, not identifiers, so we can use any character we like
 --]]
 
-local coroutine = require("coroutine")
+local coroutine, string = require("coroutine"), require("string")
 local error, require, setmetatable = error, require, setmetatable
 local ipairs, pairs = ipairs, pairs
 
@@ -61,14 +61,57 @@ module(...)
 
 local ref = require("rima.ref")
 
+-- Scope names -----------------------------------------------------------------
+
+local scope_names = setmetatable({}, { __mode="v" })
+
+local function new_name(prefix)
+
+  local function z(depth, prefix)
+    for c = ("A"):byte(), ("Z"):byte() do
+      local n = prefix..string.char(c)
+      if depth == 1 then
+        if not scope_names[n] then
+          return n
+        end
+      else
+        local n = z(depth-1, n)
+        if n then return n end
+      end
+    end
+  end
+
+  local i = 1
+  local n
+  repeat
+    n = z(i, prefix)
+    i = i + 1
+  until n
+  return n
+end
+
+local function check_name(S)
+  if S.name then
+    if scope_names[S.name] then
+      error(("The scope name '%s' is already in use"):format(S.name))
+    end
+  else
+    S.name = new_name((S.parent and proxy.O(S.parent).name.."_") or "_")
+  end
+  scope_names[S.name] = S
+end
+
+
 -- Constructor -----------------------------------------------------------------
 
 local scope = object:new(_M, "scope")
 scope_proxy_mt = setmetatable({}, scope)
 scope.hidden = {}
 
+
 function scope.new(S)
   S = S or {}
+  check_name(S)
   if not S.values then S.values = {} end
   return proxy:new(object.new(scope, S), scope_proxy_mt)
 end
@@ -84,7 +127,9 @@ end
 function scope.spawn(S, values, options)
   options = options or {}
   local S2 = new{ parent = S,
-    overwrite = (options.overwrite and true or false), rewrite = (options.rewrite and true or false) }
+    overwrite = (options.overwrite and true or false),
+    rewrite = (options.rewrite and true or false),
+    name = options.name }
   if values then set(S2, values) end
   return S2
 end
@@ -113,6 +158,14 @@ end
 function scope.clear_parent(S)
   proxy.O(S).parent = nil
 end
+
+
+-- String representation -------------------------------------------------------
+
+function scope_proxy_mt.__repr(s)
+  return proxy.O(s).name
+end
+scope_proxy_mt.__tostring = scope_proxy_mt.__repr
 
 
 -- Accessing and setting -------------------------------------------------------

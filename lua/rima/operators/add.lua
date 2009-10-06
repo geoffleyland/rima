@@ -88,7 +88,7 @@ function add.__eval(raw_args, S)
   local constant, terms = 0, {}
   
   local function add_term(c, e)
-    local s = rima.repr(e)
+    local s = rima.repr(e, { scopes = true })
     local t = terms[s]
     if t then
       t.coeff = t.coeff + c

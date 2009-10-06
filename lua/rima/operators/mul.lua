@@ -96,7 +96,7 @@ function mul.simplify(args)
   local coeff, terms = 1, {}
   
   local function add_term(exp, e)
-    local s = rima.repr(e)
+    local s = rima.repr(e, { scopes = true })
     local t = terms[s]
     if t then
       t.exponent = t.exponent + exp
