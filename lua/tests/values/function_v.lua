@@ -5,6 +5,7 @@ local series = require("test.series")
 local function_v = require("rima.values.function_v")
 local object = require("rima.object")
 local scope = require("rima.scope")
+local expression = require("rima.expression")
 local rima = rima
 
 module(...)
@@ -13,6 +14,9 @@ module(...)
 
 function test(show_passes)
   local T = series:new(_M, show_passes)
+
+  local B = expression.bind
+  local E = expression.eval
 
   T:test(object.isa(function_v:new({"a"}, 3), function_v), "isa(function_v:new(), function_v)")
   T:check_equal(object.type(function_v:new({"a"}, 3)), "function_v", "type(function_v:new()) == 'function_v'")
@@ -46,41 +50,45 @@ function test(show_passes)
     local f = function_v:new({a}, 3)
     local S = scope.new()
     T:check_equal(f, "function(a) return 3", "function description")
-    T:check_equal(f:call(S, {5}), 3)
+    T:check_equal(f:call({5}, S, E), 3)
   end
   
   do
     local f = function_v:new({"a"}, 3 + a)
     local S = scope.create{ x = rima.free() }
     T:check_equal(f, "function(a) return 3 + a", "function description")
-    T:check_equal(f:call(S, {x}), "3 + x")
-    T:check_equal(f:call(S, {5}), 8)
-    T:check_equal(f:call(scope.spawn(S, {x=10}), {x}), 13)
+    T:check_equal(f:call({x}, S, B), "3 + x")
+    T:check_equal(f:call({x}, S, E), "3 + x")
+    T:check_equal(f:call({5}, S, B), "3 + a")
+    T:check_equal(f:call({5}, S, E), 8)
+    T:check_equal(f:call({x}, scope.spawn(S, {x=10}), B), "3 + x")
+    T:check_equal(f:call({x}, scope.spawn(S, {x=10}), E), 13)
   end
 
   do
     local f = function_v:new({a}, b + a)
     local S = scope.create{ ["a, b"] = rima.free() }
     T:check_equal(f, "function(a) return b + a", "function description")
-    T:check_equal(f:call(S, {x}), "b + x")
-    T:check_equal(f:call(S, {5}), "5 + b")
-    T:check_equal(f:call(S, {1 + a}), "1 + a + b")
-    T:check_equal(f:call(S, {1 + b}), "1 + 2*b")
+    T:check_equal(f:call({x}, S, E), "b + x")
+    T:check_equal(f:call({5}, S, E), "5 + b")
+    T:check_equal(f:call({1 + a}, S, E), "1 + a + b")
+    T:check_equal(f:call({1 + b}, S, E), "1 + 2*b")
     local S2 = scope.spawn(S, {b=20})
-    T:check_equal(f:call(S2, {x}), "20 + x")
-    T:check_equal(f:call(S2, {5}), 25)
+    T:check_equal(f:call({x}, S2, E), "20 + x")
+    T:check_equal(f:call({5}, S2, E), 25)
     S2.x = 100
-    T:check_equal(f:call(S2, {x}), 120)
+    T:check_equal(f:call({x}, S2, E), 120)
     S2.a = 1000
-    T:check_equal(f:call(S2, {x}), 120)
+    T:check_equal(f:call({x}, S2, E), 120)
   end
 
   do
     local f = function_v:new({a, "b"}, 1 + a, nil, b^2)
     local S = scope.create{ ["a, b"] = rima.free() }
     T:check_equal(f, "function(a, b) return 1 + a", "function description")
-    T:check_equal(f:call(S, {2 + x, 5, {x}}), 28)
-    T:check_equal(f:call(S, {5 * x, b, {x}}), "1 + 5*b^2")
+    T:check_equal(f:call({2 + x, 5, {x}}, S, B), "3 + b^2")
+    T:check_equal(f:call({2 + x, 5, {x}}, S, E), 28)
+    T:check_equal(f:call({5 * x, b, {x}}, S, E), "1 + 5*b^2")
   end
 
   do

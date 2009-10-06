@@ -66,7 +66,8 @@ function function_v:__repr(format)
 end
 __tostring = __repr
 
-function function_v:call(S, args)
+
+function function_v:call(args, S, eval)
   if not args then return self end
 
   local outputs = {}
@@ -85,24 +86,32 @@ function function_v:call(S, args)
     error(("the function needs to be called with %d arguments, got %d"):format(#self.inputs, #args), 0)
   end
 
-  local caller_scope = rima.scope.spawn(S, nil, {overwrite=true})
-  local function_scope = rima.scope.spawn(self.S or S, nil, {overwrite=true})
-
+  local caller_scope = (self.outputs[1] and rima.scope.spawn(S, nil, {overwrite=true, rewrite=true})) or S
+  local function_scope = (self.inputs[1] and rima.scope.spawn(self.S or S, nil, {overwrite=true, rewrite=true})) or S
+  
   for i, a in ipairs(outputs) do
-    caller_scope[rima.repr(a)] = expression:new(call, function_v:new({}, self.outputs[i], function_scope))
+    caller_scope[rima.repr(a)] = 0
   end
 
   for i, a in ipairs(self.inputs) do
-    function_scope[rima.repr(a)] = expression:new(call, function_v:new({}, args[i], caller_scope))
+    function_scope[rima.repr(a)] = 0
   end
 
-  return expression.eval(self.expression, function_scope)
+  for i, a in ipairs(outputs) do
+    caller_scope[rima.repr(a)] = expression.bind(self.outputs[i], function_scope)
+  end
+
+  for i, a in ipairs(self.inputs) do
+    function_scope[rima.repr(a)] = expression.bind(args[i], caller_scope)
+  end
+
+  return eval(self.expression, function_scope)
 end
 
 
 function function_v:__call(...)
   local S = rima.scope.new()
-  return self:call(S, {...})
+  return self:call({...}, S, expression.eval)
 end
 
 -- EOF -------------------------------------------------------------------------

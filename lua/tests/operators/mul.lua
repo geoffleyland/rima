@@ -22,7 +22,8 @@ function test(show_passes)
 
   local OD = function(e) return mul.__repr(e, { dump=true }) end
   local OS = function(e) return mul.__repr(e) end
-  local OE = function(e, S) return mul.__eval(e, S) end
+  local OB = function(e, S) return mul.__eval(e, S, B) end
+  local OE = function(e, S) return mul.__eval(e, S, E) end
 
   T:test(object.isa(mul:new(), mul), "isa(mul:new(), mul)")
   T:check_equal(object.type(mul:new()), "mul", "type(mul:new()) == 'mul'")
@@ -47,6 +48,10 @@ function test(show_passes)
   local a, b = rima.R"a,b"
   rima.scope.set(S, {a = 5, b = rima.positive()})
   T:check_equal(OD({{1, a}}), "*(ref(a)^1)")
+
+  T:check_equal(OB({{1, a}}, S), "a")
+  T:check_equal(OB({{1, a}, {2, a}}, S), "a^3")
+
   T:check_equal(OE({{1, a}}, S), 5)
   T:check_equal(OE({{1, a}, {2, a}}, S), 125)
 

@@ -77,19 +77,15 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function mul.__eval(raw_args, S)
+function mul.__eval(args, S, eval)
   -- Multiply all the arguments, keeping track of the product of any exponents,
   -- and of all remaining unresolved terms
   -- If any subexpressions are products, we dive into them, if any are
   -- sums with one term we pull it up and if any are pows, we try to hoist out
   -- the constant and see if what's left is a product.
 
-  -- evaluate all arguments
-  local args = {} 
-  for i, a in ipairs(raw_args) do
-    args[i] = { a[1], expression.eval(a[2], S) }
-  end
-  return simplify(args)
+  -- evaluate or bind all arguments
+  return simplify(rima.imap(function(a) return { a[1], eval(a[2], S) } end, args))
 end
 
 function mul.simplify(args)

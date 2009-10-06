@@ -16,7 +16,8 @@ module(...)
 
 function test(show_passes)
   local T = series:new(_M, show_passes)
-  
+
+  local B = expression.bind
   local E = expression.eval
   local D = expression.dump
 
@@ -34,17 +35,43 @@ function test(show_passes)
   check_strings(ref:new{name="e", type=rima.integer()}, "e", "0 <= e <= inf, e integer")  
   check_strings(ref:new{name="f", type=rima.binary()}, "f", "f binary")  
 
-  local S = rima.scope.create{ a = rima.free(1, 10), b = 1, c = "c" }
+  -- simple references and types
+  do
+    local S = rima.scope.create{ a = rima.free(1, 10), b = 1, c = "c" }
 
-  T:expect_ok(function() E(ref:new{name="z"}, S) end, "z undefined")
-  T:check_equal(E(ref:new{name="z"}, S), "z", "undefined remains an unbound variable")
-  T:expect_error(function() E(ref:new{name="a", type=rima.free(11, 20)}, S) end,
-    "the type of 'a' %(1 <= a <= 10, a real%) and the type of the reference %(11 <= a <= 20, a real%) are mutually exclusive")
-  T:expect_error(function() E(ref:new{name="b", type=rima.free(11, 20)}, S) end,
-    "'b' %(1%) is not of type '11 <= b <= 20, b real'")
-  T:check_equal(E(ref:new{name="a"}, S), "a")
-  T:check_equal(E(ref:new{name="b", rima.binary()}, S), 1)
+    -- binding
+    T:expect_ok(function() B(ref:new{name="z"}, S) end, "bind ok")
+    T:check_equal(B(ref:new{name="z"}, S), "z", "undefined returns a ref")
+    T:check_equal(B(ref:new{name="b"}, S), "b", "defined returns a ref")
 
+    -- simple reference evaluating
+    T:expect_ok(function() E(ref:new{name="z"}, S) end, "z undefined")
+    T:check_equal(E(ref:new{name="z"}, S), "z", "undefined remains an unbound variable")
+    T:check_equal(E(ref:new{name="b"}, S), 1, "defined returns a value")
+
+    -- types
+    T:check_equal(E(ref:new{name="a"}, S), "a")
+    T:expect_error(function() E(ref:new{name="a", type=rima.free(11, 20)}, S) end,
+      "the type of 'a' %(1 <= a <= 10, a real%) and the type of the reference %(11 <= a <= 20, a real%) are mutually exclusive")
+    T:expect_error(function() E(ref:new{name="b", type=rima.free(11, 20)}, S) end,
+      "'b' %(1%) is not of type '11 <= b <= 20, b real'")
+    T:check_equal(E(ref:new{name="b", rima.binary()}, S), 1)
+  end
+
+  -- references to references
+  do
+    local a, b, c = rima.R"a, b, c"
+    local S1 = rima.scope.create{ a = b, b = 17 }
+    local S2 = rima.scope.create{ a = b - c, b = 1 }
+    
+    -- binding
+    T:check_equal(B(a, S1), "b")
+    T:check_equal(B(a, S2), "b - c")
+
+    -- evaluating
+    T:check_equal(E(a, S1), 17)
+    T:check_equal(E(a, S2), "1 - c")
+  end
 
   -- index tests
   local a, b, c = rima.R"a, b, c"
@@ -94,14 +121,6 @@ function test(show_passes)
     T:check_equal(ref.is_simple(a.b), false)
     T:check_equal(ref.is_simple(a[2]), false)
     T:check_equal(ref.is_simple(E(a, S)), false)
-  end
-
-  do
-    local a = rima.R"a, b, c"
-    local S1 = rima.scope.create{ a = b, b = 17 }
-    T:check_equal(rima.E(a, S1), 17)
-    local S2 = rima.scope.create{ a = b - c, b = 1 }
-    T:check_equal(rima.E(a, S2), "1 - c")
   end
 
   do

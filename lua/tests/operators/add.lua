@@ -22,7 +22,8 @@ function test(show_passes)
 
   local OD = function(e) return add.__repr(e, { dump=true }) end
   local OS = function(e) return add.__repr(e) end
-  local OE = function(e, S) return add.__eval(e, S) end
+  local OB = function(e, S) return add.__eval(e, S, B) end
+  local OE = function(e, S) return add.__eval(e, S, E) end
 
   T:test(object.isa(add:new(), add), "isa(add, add:new())")
   T:check_equal(object.type(add:new()), "add", "type(add:new()) == 'add'")
@@ -47,6 +48,10 @@ function test(show_passes)
   local a, b, c = rima.R"a,b,c"
   rima.scope.set(S, { a = 5, b = rima.positive() })
   T:check_equal(OD({{1, a}}), "+(1*ref(a))")
+
+  T:check_equal(OB({{1, a}}, S), "a")
+  T:check_equal(OB({{1, a}, {2, a}}, S), "3*a")
+
   T:check_equal(OE({{1, a}}, S), 5)
   T:check_equal(OE({{1, a}, {2, a}}, S), 15)
 

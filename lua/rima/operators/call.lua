@@ -1,7 +1,8 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local error, ipairs, pcall, unpack = error, ipairs, pcall, unpack
+local error, ipairs, xpcall, unpack = error, ipairs, xpcall, unpack
+local debug = require("debug")
 
 local object = require("rima.object")
 local expression = require("rima.expression")
@@ -35,8 +36,8 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function call.__eval(args, S)
-  local e = expression.eval(args[1], S)
+function call.__eval(args, S, eval)
+  local e = eval(args[1], S)
   if not expression.defined(e) then
     return expression:new(call, e, unpack(args, 2))
   else
@@ -45,9 +46,9 @@ function call.__eval(args, S)
       for i, a in ipairs(args) do
         args[i] = expression.eval(a, S)
       end
-      status, r = pcall(function() return e(unpack(args, 2)) end)
+      status, r = xpcall(function() return e(unpack(args, 2)) end, debug.traceback)
     else
-      status, r = pcall(function() return e:call(S, {unpack(args, 2)}) end)
+      status, r = xpcall(function() return e:call({unpack(args, 2)}, S, eval) end, debug.traceback)
     end
 
     if not status then

@@ -72,18 +72,15 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function add.__eval(raw_args, S)
+function add.__eval(args, S, eval)
   -- Sum all the arguments, keeping track of the sum of any constants,
   -- and of all remaining unresolved terms.
   -- If any subexpressions are sums, we dive into them, and if any are
   -- products, we try to hoist out the constant and see if what's left is a
   -- sum.
 
-  -- evaluate all arguments
-  local args = {} 
-  for i, a in ipairs(raw_args) do
-    args[i] = { a[1], expression.eval(a[2], S) }
-  end
+  -- evaluate or bind all arguments
+  args = rima.imap(function(a) return { a[1], eval(a[2], S) } end, args)
 
   local constant, terms = 0, {}
   

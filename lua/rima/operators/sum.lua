@@ -1,7 +1,7 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local ipairs, pairs, tostring = ipairs, pairs, tostring
+local ipairs, pairs = ipairs, pairs
 
 local object = require("rima.object")
 local expression = require("rima.expression")
@@ -30,14 +30,14 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 
-function sum.__eval(args, S)
+function sum.__eval(args, S, eval)
   local sets, e = rima.iteration.set_list:new(args[1]), args[2]
   local defined_terms, undefined_terms = {}, {}
 
   -- Iterate through all the elements of the sets, collecting defined and
   -- undefined terms
   for S2, undefined in sets:iterate(S) do
-    local z = expression.eval(e, S2)
+    local z = eval(e, S2)
     if undefined[1] then
       -- Undefined terms are stored in groups based on the undefined sum
       -- indices (so we can group them back into sums over the same indices)
@@ -78,7 +78,7 @@ function sum.__eval(args, S)
   if #total_terms == 1 then
     return total_terms[1][2]
   else
-    return expression.eval(expression:new_table(add, total_terms), S)
+    return eval(expression:new_table(add, total_terms), S)
   end
 end
 

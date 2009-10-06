@@ -52,8 +52,8 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function pow.__eval(args, S)
-  local base, exponent = expression.eval(args[1], S), expression.eval(args[2], S)
+function pow.__eval(args, S, eval)
+  local base, exponent = eval(args[1], S), eval(args[2], S)
   
   if type(exponent) == "number" then
     if exponent == 0 then

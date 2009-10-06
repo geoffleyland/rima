@@ -149,10 +149,27 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
+function expression.bind(e, S)
+  local mt = getmetatable(e)
+  if mt then
+    local f = rawget(mt, "__bind")
+    if f then
+      return f(proxy.O(e), S)
+    else
+      f = rawget(mt, "__eval")
+      if f then
+        return f(proxy.O(e), S, bind)
+      end
+    end
+  end
+  return e
+end
+
+
 function expression.eval(e, S)
   local mt = getmetatable(e)
   local f = mt and rawget(mt, "__eval")
-  return (f and f(proxy.O(e), S)) or e
+  return (f and f(proxy.O(e), S, eval)) or e
 end
 
 

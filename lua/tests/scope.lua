@@ -6,6 +6,7 @@ local object = require("rima.object")
 local types = require("rima.types")
 local scope = require("rima.scope")
 local ref = require("rima.ref")
+local expression = require("rima.expression")
 local rima = rima
 
 module(...)
@@ -14,6 +15,9 @@ module(...)
 
 function test(show_passes)
   local T = series:new(_M, show_passes)
+
+  local B = expression.bind
+  local E = expression.eval
 
   T:test(object.isa(scope.new(), scope), "isa(scope.new(), scope)")
   T:check_equal(object.type(scope.new()), "scope", "type(scope.new()) == 'scope'")
@@ -128,7 +132,19 @@ function test(show_passes)
     T:check_equal(scope.lookup(S2, "a"), 5)
     T:check_equal(scope.lookup(S3, "a"), 7)
     T:check_equal(scope.lookup(S3, "a", S1), 5)  
+
+    local b, c = rima.R"b, c"
     S1.b = rima.integer()
+    T:check_equal(B(b, S3), "b")
+    T:check_equal(E(B(b, S3), S2), "b")
+
+    S3.c = 5
+    T:check_equal(E(B(c, S3), S2), 5)
+    S2.c = 7
+    T:check_equal(E(B(c, S3), S2), 5)
+
+    T:check_equal(B(B(c, S3) + c, S2), "c + c")
+    T:check_equal(E(B(c, S3) + c, S2), 12)
   end
 
   do

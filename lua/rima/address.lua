@@ -28,8 +28,8 @@ end
 
 -- evaluation ------------------------------------------------------------------
 
-function address:__eval(S)
-  return address:new(rima.imap(function(a) return expression.eval(a, S) end, self))
+function address:__eval(S, eval)
+  return address:new(rima.imap(function(a) return eval(a, S) end, self))
 end
 
 

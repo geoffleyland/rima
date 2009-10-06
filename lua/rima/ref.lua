@@ -85,6 +85,18 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
+function ref.proxy_mt.__bind(r, S)
+  local e, found_scope = scope.lookup(S, r.name, r.scope)
+  if not e then
+    return ref:new{ name=r.name, type=r.type, scope=r.scope }  
+  elseif expression.defined(e) then
+    return ref:new{ name=r.name, type=r.type, scope=found_scope }
+  else
+    return expression.bind(e, S)
+  end
+end
+
+
 function ref.proxy_mt.__eval(r, S)
   -- evaluate the address of the ref if there is one
   local new_address = expression.eval(r.address, S)
