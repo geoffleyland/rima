@@ -130,7 +130,7 @@ ref_iterator.__tostring = ref_iterator.__repr
 
 
 function ref_iterator:eval(S)
-  return ref_iterator:new{ exp=rima.E(self.exp, S), name=self.name }
+  return ref_iterator:new{ exp=rima.E(self.exp, S), name=self.name, bound=expression.bind(self.exp, S) }
 end
 
 
@@ -159,6 +159,9 @@ function ref_iterator:__iterate()
     return coroutine.wrap(
       function()
         for i, v in ipairs(z) do
+          if object.isa(v, types.undefined_t) then
+            v = self.bound[i]
+          end
           coroutine.yield({[self.name]=element:new(z, i, v)})
         end
       end)
@@ -219,7 +222,8 @@ function set_list:iterate(S)
       else
         undefined_sets[#undefined_sets+1] = rima.E(iterator, Sn)
         local S2 = scope.spawn(Sn, nil, {overwrite=true, rewrite=true})
-        for _, n in ipairs(iterator:names()) do          scope.hide(S2, n)
+        for _, n in ipairs(iterator:names()) do
+          scope.hide(S2, n)
         end
         z(S2, i+1)
         undefined_sets[#undefined_sets] = nil
