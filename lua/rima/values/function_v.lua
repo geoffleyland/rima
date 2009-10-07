@@ -67,9 +67,7 @@ end
 __tostring = __repr
 
 
-function function_v:call(args, S, eval)
-  if not args then return self end
-
+function function_v:check_args(args)
   local outputs = {}
   if #args < #self.inputs then
     error(("the function needs to be called with at least %d arguments, got %d"):format(#self.inputs, #args), 0)
@@ -85,6 +83,14 @@ function function_v:call(args, S, eval)
   elseif #args ~= #self.inputs then
     error(("the function needs to be called with %d arguments, got %d"):format(#self.inputs, #args), 0)
   end
+  return outputs
+end
+
+
+function function_v:call(args, S, eval)
+  if not args then return self end
+
+  local outputs = self:check_args(args)
 
   local caller_scope = (self.outputs[1] and rima.scope.spawn(S, nil, {overwrite=true, rewrite=true})) or S
   local function_scope = (self.inputs[1] and rima.scope.spawn(self.S or S, nil, {overwrite=true, rewrite=true})) or S
