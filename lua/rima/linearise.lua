@@ -13,6 +13,7 @@ module(...)
 
 local scope = require("rima.scope")
 local operators = require("rima.operators")
+local expression = require("rima.expression")
 
 -- Getting a linear form -------------------------------------------------------
 
@@ -25,8 +26,7 @@ function linearise(l, S)
     if terms[s] then
       error(("the reference '%s' appears more than once"):format(s), 0)
     end
-    v = proxy.O(v)
-    local t = scope.lookup(S, v.name, v.scope)
+    local t = expression.type(v, S)
     if not object.isa(t, rima.types.number_t) then
       error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
     end
@@ -53,8 +53,10 @@ function linearise(l, S)
         constant = c * x
       elseif object.type(x) == "ref" then
         add_variable(x, x, c)
+      elseif object.type(x) == "index" then
+        add_variable(x, x, c)
       else
-        error(("term %d (%s) is not linear"):format(i, rima.repr(x)), 0)
+        error(("term %d is not linear (got '%s', %s)"):format(i, rima.repr(x), object.type(x)), 0)
       end
     end
   else

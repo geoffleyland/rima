@@ -23,14 +23,21 @@ expression.proxy_mt = setmetatable({}, expression)
 
 function expression:new(x, ...)
   local e = {...}
+  if x and x.construct then e = x.construct(e) end
   for k, v in pairs(self.proxy_mt) do if not(x[k]) then rawset(x, k, v) end end
 --  e:check()
   return proxy:new(object.new(self, e), x)
 end
 
 function expression:new_table(x, t)
-  local e = {}
-  for i, a in ipairs(t) do e[i] = a end
+  local e
+  if x and x.construct then
+    e = x.construct(t)
+  else
+    e = {}
+    for i, a in ipairs(t) do e[i] = a end
+  end
+
   for k, v in pairs(self.proxy_mt) do if not(x[k]) then rawset(x, k, v) end end
 --  e:check()
   return proxy:new(object.new(self, e), x)
@@ -169,7 +176,11 @@ end
 function expression.eval(e, S)
   local mt = getmetatable(e)
   local f = mt and rawget(mt, "__eval")
-  return (f and f(proxy.O(e), S, eval)) or e
+  if f then
+    return f(proxy.O(e), S, eval)               -- __eval can return multiple values so no if ... and ... or tricks
+  else
+    return e
+  end
 end
 
 
@@ -181,6 +192,17 @@ function expression.set(e, t, v)
       format(rima.repr(e), rima.repr(v)))
   end
   f(proxy.O(e), t, v)
+end
+
+
+function expression.type(e, S)
+  local mt = getmetatable(e)
+  local f = mt and rawget(mt, "__type")
+  if not f then
+    error(("error getting type information for '%s': the object doesn't support type queries"):
+      format(rima.repr(e)))
+  end
+  return f(proxy.O(e), S)
 end
 
 
@@ -214,12 +236,9 @@ function expression.proxy_mt.__call(...)
   return expression:new(operators.call, ...)
 end
 
-
---[[
-function expression_proxy_mt.__index(...)
-  return expression:new(rima.operators.index, ...)
+function expression.proxy_mt.__index(r, i)
+  return expression:new(operators.index, r, i)
 end
---]]
 
 
 -- EOF -------------------------------------------------------------------------

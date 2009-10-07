@@ -73,62 +73,12 @@ function test(show_passes)
     T:check_equal(E(a, S2), "1 - c")
   end
 
-  -- index tests
-  local a, b, c = rima.R"a, b, c"
-  T:check_equal(D(a[b]), "ref(a[ref(b)])")
-  T:check_equal(a[b], "a[b]")
-  T:check_equal(a[b][c], "a[b, c]")
-
-  do
-    local S = rima.scope.create{ a={ "x", "y" }, b = 2}
-    T:check_equal(rima.E(a[b], S), "y")
-  end
-
-  do
-    local S = rima.scope.create{ a=rima.types.undefined_t:new(), b = 2}
-    T:check_equal(D(a[b]), "ref(a[ref(b)])")
-    T:check_equal(D(rima.E(a[b], S)), "ref(a[number(2)])")
-    local e = rima.E(a[b], S)
-    T:check_equal(D(e), "ref(a[number(2)])")
-    S2 = scope.spawn(S, {a = { "x" }})
-    T:check_equal(D(rima.E(e, S2)), "ref(a[number(2)])")
-    S2.a[2] = "yes"
-    T:check_equal(D(rima.E(e, S2)), "string(yes)")    
-
-    S3 = scope.spawn(S, {a = { b="x" }})
-    T:check_equal(D(rima.E(a.b, S)), "ref(a[string(b)])")
-    T:check_equal(D(rima.E(a.b, S3)), "string(x)")
-  end
-
-  do
-    local x, y, N = rima.R"x,y,N"
-    local S = rima.scope.create{ N={ {1, 2}, {3, 4} } }
-    T:check_equal(D(N[x][y]), "ref(N[ref(x), ref(y)])")
-    T:check_equal(rima.E(N[x][y], S), "N[x, y]")
-    S.x = 2
-    T:check_equal(rima.E(N[x][y], S), "N[2, y]")
-    T:check_equal(rima.E(N[y][x], S), "N[y, 2]")
-    S.y = 1
-    T:check_equal(rima.E(N[x][y], S), 3)
-    T:check_equal(rima.E(N[y][x], S), 2)
-  end
-
   do
     local a = rima.R"a"
     local S = rima.scope.create{ a = rima.free() }
     
     T:check_equal(ref.is_simple(a), true)
-    T:check_equal(ref.is_simple(a.b), false)
-    T:check_equal(ref.is_simple(a[2]), false)
     T:check_equal(ref.is_simple(E(a, S)), false)
-  end
-
-  do
-    local a, b, i = rima.R"a, b, i"
-    local S = rima.scope.create{ a = { { 5 } }, b = rima.tabulate({i}, a[1][i]) }
-    T:check_equal(rima.E(a[1][1], S), 5)
-    T:check_equal(rima.E(b[1], S), 5)
-    T:expect_error(function() rima.E(b[1][1], S) end, "evaluate: error evaluating 'b%[1, 1%]")
   end
 
   do
@@ -136,15 +86,13 @@ function test(show_passes)
     local S = rima.scope.create{ a = { 5 }, b = { c=3 }, i = iteration.element:new({}, 1, "c") }
     T:check_equal(rima.E(a[i] * b[i], S), 15)
   end
-  
+
   do
     local a, b = rima.R"a, b"
-    local t = { b = { x = { y = 3}, z = 10 } }
-    expression.set(a.b.c, t, 10)
-    T:check_equal(t.a.b.c, 10)
-    T:expect_error(function() expression.set(b.z.b, t, 5) end, "error setting 'b%.z%.b' to 5: field is not a table %(10%)")
-    T:expect_error(function() expression.set(b.x.y, t, 5) end, "error setting 'b%.x%.y' to 5: field already exists %(3%)")
-  end   
+    local t = {}
+    expression.set(a, t, 10)
+    T:check_equal(t.a, 10)
+  end
 
   do
     local x, y = rima.R"x, y"

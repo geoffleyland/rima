@@ -21,16 +21,15 @@ of the reference somewhere tricky.  This is a giant pain in the ass.
 local object = require("rima.object")
 local proxy = require("rima.proxy")
 local args = require("rima.args")
-local expression = require("rima.expression")
 local undefined_t = require("rima.types.undefined_t")
 require("rima.private")
 local rima = rima
 
 module(...)
 
+local expression = require("rima.expression")
 local scope = require("rima.scope")
 local iteration = require("rima.iteration")
-local address = require("rima.address")
 
 -- References to values --------------------------------------------------------
 
@@ -38,21 +37,20 @@ local ref = object:new(_M, "ref")
 ref.proxy_mt = setmetatable({}, ref)
 
 function ref:new(r)
-  local fname, usage = "rima.ref:new", "new(r: {name, address, type, scope})"
+  local fname, usage = "rima.ref:new", "new(r: {name, type, scope})"
   args.check_type(r, "r", "table", usage, fname)
   args.check_type(r.name, "r.name", "string", usage, fname)
   args.check_types(r.type, "r.type", {"nil", {undefined_t, "type"}}, usage, fname)
   args.check_types(r.scope, "r.scope", {"nil", {scope, "scope" }}, usage, fname)
-  args.check_types(r.address, "r.address", {"nil", "table", "address"}, usage, fname)
 
   r.type = r.type or undefined_t:new()
 
-  return proxy:new(object.new(ref, { name=r.name, address=address:new(r.address), type=r.type, scope=r.scope }), ref.proxy_mt)
+  return proxy:new(object.new(ref, { name=r.name, type=r.type, scope=r.scope }), ref.proxy_mt)
 end
 
 function ref.is_simple(r)
   r = proxy.O(r)
-  return (not r.scope and r.address[1] == nil) and true or false
+  return (not r.scope and true) or false
 end
 
 
@@ -69,9 +67,9 @@ function ref.proxy_mt.__repr(r, format)
   end
   
   if format and format.dump then
-    return "ref("..name..rima.repr(R.address, format)..")"
+    return "ref("..name..")"
   else
-    return name..rima.repr(R.address, format)
+    return name
   end
 end
 ref.proxy_mt.__tostring = ref.proxy_mt.__repr
@@ -98,58 +96,46 @@ end
 
 
 function ref.proxy_mt.__eval(r, S)
-  -- evaluate the address of the ref if there is one
-  local new_address = expression.eval(r.address, S)
-  
   -- look the ref up in the scope
   local e, found_scope = scope.lookup(S, r.name, r.scope)
   if not e then                                 -- remain unbound
-    return ref:new{name=r.name, address=new_address, type=r.type, scope=r.scope}
+    return ref:new{name=r.name, type=r.type, scope=r.scope}
   end
 
   -- evaluate the result of the lookup - it might be an expression, or another ref
   local status, v = pcall(function() return expression.eval(e, S) end)
   if not status then
-    error(("reference: error evaluating '%s' as '%s':\n  %s"):
-      format(ref.proxy_mt.__repr(r), rima.repr(e), v:gsub("\n", "\n  ")), 0)
+    error(("error evaluating '%s' as '%s':\n  %s"):
+      format(r.name, rima.repr(e), v:gsub("\n", "\n  ")), 0)
   end
 
   if object.isa(v, undefined_t) then
     if not v:includes(r.type) and not r.type:includes(v) then
       error(("the type of '%s' (%s) and the type of the reference (%s) are mutually exclusive"):
-        format(ref.proxy_mt.__repr(r), v:describe(r.name), r.type:describe(r.name)), 0)
+        format(r.name, v:describe(r.name), r.type:describe(r.name)), 0)
     else
       -- update the address and bind the reference to the scope if it doesn't already have one
-      return ref:new{name=r.name, address=new_address, type=r.type, scope=r.scope or found_scope}
+      return ref:new{name=r.name, type=r.type, scope=r.scope or found_scope}, v
     end
   elseif not expression.defined(v) then
     return v
   else
     if not r.type:includes(v) then
       error(("'%s' (%s) is not of type '%s'"):
-        format(ref.proxy_mt.__repr(r), rima.repr(v), r.type:describe(r.name)), 0)
-    else
-      v = proxy.O(v)
-      if type(v) == "table" and v.handle_address then
-        local status, v = pcall(function() return v:handle_address(S, new_address) end)
-        if not status then
-          error(("reference: error resolving address of '%s' as '%s':\n  %s"):
-            format(ref.proxy_mt.__repr(r), rima.repr(e), v:gsub("\n", "\n  ")), 0)
-        end
-        return v
-      end
-      for _, i in ipairs(new_address) do
-        if object.isa(i, iteration.element) then
-          v = v[1] and v[i.index] or v[i.key]
-        else
-          v = v[i]
-        end
-        if not v then
-          return ref:new{name=r.name, address=new_address, type=r.type, scope=r.scope or found_scope}
-        end
-      end
+        format(r.name, rima.repr(v), r.type:describe(r.name)), 0)
     end
     return v
+  end
+end
+
+
+function ref.proxy_mt.__type(r, S)
+  -- look the ref up in the scope
+  local e = scope.lookup(S, r.name, r.scope)
+  if not object.isa(e, undefined_t) then
+    error(("No type information available for '%s'"):format(r.name))
+  else
+    return e
   end
 end
 
@@ -157,31 +143,15 @@ end
 -- Setting ---------------------------------------------------------------------
 
 function ref.proxy_mt.__set(r, t, v)
---  local R = proxy.O(r)
   local name = r.name
-  local address = r.address
-
-  function s(t, name, i)
-    if object.type(name) == "element" then name = name.key end
-    local cv = t[name]
-    if #address == i then
-      if cv then
-        error(("error setting '%s' to %s: field already exists (%s)"):
-          format(ref.proxy_mt.__repr(r), rima.repr(v), rima.repr(cv)), 0)
-      end
-      t[name] = v
-    else
-      if cv and type(cv) ~= "table" then
-        error(("error setting '%s' to %s: field is not a table (%s)"):
-          format(ref.proxy_mt.__repr(r), rima.repr(v), rima.repr(cv)), 0)
-      end
-      if not cv then t[name] = {} end
-      s(t[name], address[i+1], i+1)
-    end
+  local cv = t[name]
+  if cv then
+    error(("error setting '%s' to %s: field already exists (%s)"):
+      format(name, rima.repr(v), rima.repr(cv)), 0)
+  else
+    t[name] = v
   end
-  s(t, name, 0)
 end
-ref.__set = ref.proxy_mt.__set
 
 
 -- Operators -------------------------------------------------------------------
@@ -193,17 +163,7 @@ ref.proxy_mt.__mul = expression.proxy_mt.__mul
 ref.proxy_mt.__div = expression.proxy_mt.__div
 ref.proxy_mt.__pow = expression.proxy_mt.__pow
 ref.proxy_mt.__call = expression.proxy_mt.__call
-
---[[
-function ref_proxy_mt.__index(r, i)
-  return expression:new(addresss, r, i)
-end
-
---]]
-function ref.proxy_mt.__index(r, i)
-  r = proxy.O(r)
-  return ref:new{name=r.name, address=r.address+i, type=r.type, scope=r.scope}
-end
+ref.proxy_mt.__index = expression.proxy_mt.__index
 
 
 -- EOF -------------------------------------------------------------------------
