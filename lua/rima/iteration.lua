@@ -56,7 +56,11 @@ end
 
 
 function element:__repr(format)
-  return self.key
+  if format and format.dump then
+    return ("element(%s, %s, %s)"):format(rima.repr(self.set, format), rima.repr(self.index, format), rima.repr(self.key, format))
+  else
+    return rima.repr(self.key, format)
+  end
 end
 element.__tostring = element.__repr
 
