@@ -82,7 +82,7 @@ function test(show_passes)
     local X, x, y, z = rima.R"X, x, y, z"
     local S = rima.scope.create{ X = rima.range(1, y) }
     T:check_equal(expression.dump(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S)), "sum({iterator(x in range(number(1), ref(y)))}, ref(x[string(key)]))")
-    T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S), "sum({x in range(1, y)}, x[key])")
+    T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S), "sum({x in range(1, y)}, x.key)")
     S.y = 5
     T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, x.key), S), 15)
     T:check_equal(rima.E(rima.sum({rima.alias(X, "x")}, z * x.key), S), 15*z)

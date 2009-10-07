@@ -29,9 +29,9 @@ function test(show_passes)
     S.x = rima.tabulate({y}, y.key^2)
     T:check_equal(rima.E(e, S), 77)
     T:expect_error(function() rima.E(x, S) end,
-      "tabulate: error evaluating 'tabulate%({y}, y%[key%]%^2%)' as 'y%[key%]%^2': the tabulation needs 1 indexes, got 0")
+      "tabulate: error evaluating 'tabulate%({y}, y%.key%^2%)' as 'y%.key%^2': the tabulation needs 1 indexes, got 0")
     T:expect_error(function() rima.E(x[1][2], S) end,
-      "tabulate: error evaluating 'tabulate%({y}, y%[key%]%^2%)' as 'y%[key%]%^2': the tabulation needs 1 indexes, got 2")
+      "tabulate: error evaluating 'tabulate%({y}, y%.key%^2%)' as 'y%.key%^2': the tabulation needs 1 indexes, got 2")
   end
 
   do
