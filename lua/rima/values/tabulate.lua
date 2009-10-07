@@ -1,7 +1,9 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local error, ipairs = error, ipairs
+local debug = require("debug")
+local error, xpcall = error, xpcall
+local ipairs = ipairs
 
 local object = require("rima.object")
 local scope = require("rima.scope")
@@ -45,7 +47,8 @@ __tostring = __repr
 
 function tabulate_type:handle_address(S, a)
   if #a ~= #self.indexes then
-    error(("the tabulation needs %d indexes, got %d"):format(#self.indexes, #a), 0)
+    error(("tabulate: error evaluating '%s' as '%s': the tabulation needs %d indexes, got %d"):
+      format(__repr(self), rima.repr(self.expression), #self.indexes, #a), 0)
   end
   S2 = scope.spawn(S, nil, {overwrite=true})
 
@@ -53,7 +56,12 @@ function tabulate_type:handle_address(S, a)
     S2[rima.repr(j)] = expression.eval(a[i], S)
   end
 
-  return expression.eval(self.expression, S2)
+  status, r = xpcall(function() return expression.eval(self.expression, S2) end, debug.traceback)
+  if not status then
+    error(("tabulate: error evaluating '%s' as '%s':\n  %s"):
+      format(__repr(self), rima.repr(self.expression), r:gsub("\n", "\n  ")), 0)
+  end
+  return r
 end
 
 

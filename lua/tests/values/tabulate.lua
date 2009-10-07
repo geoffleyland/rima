@@ -28,9 +28,19 @@ function test(show_passes)
     local S = scope.create{ Q={4, 5, 6} }
     S.x = rima.tabulate({y}, y.key^2)
     T:check_equal(rima.E(e, S), 77)
-    T:expect_error(function() rima.E(x, S) end, "the tabulation needs 1 indexes, got 0")
-    T:expect_error(function() rima.E(x[1][2], S) end, "the tabulation needs 1 indexes, got 2")
+    T:expect_error(function() rima.E(x, S) end,
+      "tabulate: error evaluating 'tabulate%({y}, y%[key%]%^2%)' as 'y%[key%]%^2': the tabulation needs 1 indexes, got 0")
+    T:expect_error(function() rima.E(x[1][2], S) end,
+      "tabulate: error evaluating 'tabulate%({y}, y%[key%]%^2%)' as 'y%[key%]%^2': the tabulation needs 1 indexes, got 2")
   end
+
+  do
+    local t, x, y = rima.R"t, x, y"
+    S.t = rima.tabulate({y}, y + x[1])
+    S.x = 1
+    T:expect_error(function() rima.E(t[1], S) end,
+      "tabulate: error evaluating 'tabulate%({y}, y %+ x%[1%]%)' as 'y %+ x%[1%]':")
+end
 
   return T:close()
 end
