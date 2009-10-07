@@ -140,10 +140,10 @@ function test(show_passes)
   do
     local a, b = rima.R"a, b"
     local t = { b = { x = { y = 3}, z = 10 } }
-    ref.set(a.b.c, t, 10)
+    expression.set(a.b.c, t, 10)
     T:check_equal(t.a.b.c, 10)
-    T:expect_error(function() ref.set(b.z.b, t, 5) end, "error setting 'b%.z%.b' to 5: field is not a table %(10%)")
-    T:expect_error(function() ref.set(b.x.y, t, 5) end, "error setting 'b%.x%.y' to 5: field already exists %(3%)")
+    T:expect_error(function() expression.set(b.z.b, t, 5) end, "error setting 'b%.z%.b' to 5: field is not a table %(10%)")
+    T:expect_error(function() expression.set(b.x.y, t, 5) end, "error setting 'b%.x%.y' to 5: field already exists %(3%)")
   end   
 
   do

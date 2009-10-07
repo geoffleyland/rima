@@ -4,7 +4,7 @@
 local assert, ipairs = assert, ipairs
 
 local core = require("rima_clp_core")
-local ref = require("rima.ref")
+local expression = require("rima.expression")
 
 module(...)
 
@@ -20,7 +20,7 @@ function solve(sense, variables, constraints)
   
   local s2 = { objective=s.objective, constraints=s.constraints, variables={} }
   for i, v in ipairs(s.variables) do
-    ref.set(variables[i].ref, s2.variables, v)
+    expression.set(variables[i].ref, s2.variables, v)
   end
   return s2
 end

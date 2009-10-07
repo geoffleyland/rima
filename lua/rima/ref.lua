@@ -156,10 +156,10 @@ end
 
 -- Setting ---------------------------------------------------------------------
 
-function ref.set(r, t, v)
-  local R = proxy.O(r)
-  local name = R.name
-  local address = R.address
+function ref.proxy_mt.__set(r, t, v)
+--  local R = proxy.O(r)
+  local name = r.name
+  local address = r.address
 
   function s(t, name, i)
     if object.type(name) == "element" then name = name.key end
@@ -167,13 +167,13 @@ function ref.set(r, t, v)
     if #address == i then
       if cv then
         error(("error setting '%s' to %s: field already exists (%s)"):
-          format(rima.repr(r), rima.repr(v), rima.repr(cv)), 0)
+          format(ref.proxy_mt.__repr(r), rima.repr(v), rima.repr(cv)), 0)
       end
       t[name] = v
     else
       if cv and type(cv) ~= "table" then
         error(("error setting '%s' to %s: field is not a table (%s)"):
-          format(rima.repr(r), rima.repr(v), rima.repr(cv)), 0)
+          format(ref.proxy_mt.__repr(r), rima.repr(v), rima.repr(cv)), 0)
       end
       if not cv then t[name] = {} end
       s(t[name], address[i+1], i+1)
@@ -181,6 +181,8 @@ function ref.set(r, t, v)
   end
   s(t, name, 0)
 end
+ref.__set = ref.proxy_mt.__set
+
 
 -- Operators -------------------------------------------------------------------
 
