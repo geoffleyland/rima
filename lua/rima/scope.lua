@@ -47,7 +47,7 @@ might be:
 --]]
 
 local coroutine, string = require("coroutine"), require("string")
-local error, require, setmetatable = error, require, setmetatable
+local error, require, setmetatable, unpack = error, require, setmetatable, unpack
 local ipairs, pairs = ipairs, pairs
 
 local object = require("rima.object")
@@ -170,27 +170,45 @@ scope_proxy_mt.__tostring = scope_proxy_mt.__repr
 
 -- Accessing and setting -------------------------------------------------------
 
-function scope.find(s, name)
-  -- Return values from our own hidden table
+function scope.find(s, name, op, results)
+  -- return all the values that could bind to the name in this and parent scopes
   local S = proxy.O(s)
   local c = S.values[name]
   if c then
-    -- but not hidden values
-    if c ~= scope.hidden then
-      return c, s
-    end
-  elseif S.parent then
-  -- or look for them in a parent
-    return scope.find(S.parent, name)
+    results = results or {}
+    results[#results+1] = { c, s }
   end
+
+  -- We have to keep looking if there's a parent scope and
+  if S.parent and
+     -- we're planning to read, and we haven't found anything yet
+     ((op == "read" and not results) or
+     -- we're planning to write, and we haven't reached a scope we can overwrite
+      (op == "write" and not S.overwrite)) then
+    results = find(S.parent, name, op, results)
+  end
+  return results
 end
 
 
 function scope_proxy_mt.__index(S, name)
-  local c = scope.find(S, name)
-  if c then
-    -- return a bound variable with the top type (perhaps should be all?) or the value
-    return object.isa(c, undefined_t) and ref:new{name=name, type=c, scope=S} or c
+  -- We either want to return the literal value we've looked up, or, if there's
+  -- only type information, a reference.
+  -- there's two types of literal value - a value, and nil.  We'd like to
+  -- return nil if that's what we find.
+  local results = find(S, name, "read")
+  if results then
+    local c, s = unpack(results[1])
+    if object.isa(c, undefined_t) then
+      -- There is a value (and it's not hidden), return a reference that I
+      -- think should be bound to the top scope.
+      -- I'm not sure about this though.  Maybe it should be bound to the scope
+      -- the variable was found in (this will come into play with function
+      -- scopes, but I haven't worked out how to test it yet)
+      return ref:new{name=name, type=c, scope=S}
+    elseif c ~= hidden then
+      return c
+    end
   end
 end
 
@@ -214,37 +232,32 @@ end
 
 
 function scope.lookup(S, name, bound_scope)
-  return scope.find(find_bound_scope(S, bound_scope, name), name)
+  local r = find(find_bound_scope(S, bound_scope, name), name, "read")
+  if r and r[1][1] ~= hidden then
+    return unpack(r[1])                         -- returning multiple values so no if..and..or
+  end
 end
 
 
-function scope.check(S, name, value, is_parent)
-  is_parent = is_parent or false
+function scope.check(S, name, value)
+  local results = find(S, name, "write")
+  if not results then return end
   local s = proxy.O(S)
-  local c = s.values[name]
 
-  local function describe(v, name)
-    if object.isa(v, undefined_t) then
-      return v:describe(name)
-    else
-      return rima.repr(v)
-    end
-  end
-
-  if c then
-    if is_parent and object.isa(c, undefined_t) then
+  for _, r in ipairs(results) do
+    local c, CS = unpack(r)
+    if CS == S and not s.rewrite then
+      error(("scope: cannot set '%s' to '%s': existing definition as '%s'"):
+        format(name, rima.repr(value), rima.repr(c)), 0)
+    elseif object.isa(c, undefined_t) then
       if not c:includes(value) then
-        error(("cannot set '%s' to '%s': violates existing constraint '%s'"):
-              format(name, describe(value, name), describe(c, name)), 0)
+        error(("scope: cannot set '%s' to '%s': violates existing constraint '%s'"):
+          format(name, rima.repr(value), rima.repr(c)), 0)
       end
-    elseif is_parent or not s.rewrite then
-      error(("cannot set '%s' to '%s': existing definition as '%s'"):
-            format(name, describe(value, name), describe(c, name)), 0)
+    elseif CS ~= S then
+      error(("scope: cannot set '%s' to '%s': existing definition as '%s'"):
+        format(name, rima.repr(value), rima.repr(c)), 0)
     end
-  end
-
-  if s.parent and not s.overwrite then
-    check(s.parent, name, value, true)
   end
 end
 
