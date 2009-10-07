@@ -4,7 +4,6 @@
 local string = require("string")
 local series = require("test.series")
 local call = require("rima.operators.call")
-local object = require("rima.object")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
 require("rima.public")
@@ -16,9 +15,6 @@ module(...)
 
 function test(show_passes)
   local T = series:new(_M, show_passes)
-
-  T:test(object.isa(call:new(), call), "isa(call:new(), call)")
-  T:check_equal(object.type(call:new()), "call", "type(call:new()) == 'call'")
 
   local S = scope.create{ a = rima.free(), b = rima.free(), x = rima.free() }
 
@@ -38,7 +34,7 @@ function test(show_passes)
 
   local c2 = expression:new(call, rima.R"f")
   T:expect_error(function() expression.eval(c2, S) end,
-    "error while evaluating 'f%(%)':\n  the function needs to be called with at least")
+    "error evaluating 'f%(%)' as 'function%(a%) return 2%*a':\n  the function needs to be called with at least 1 arguments, got 0")
 
   do
     local f, a, b = rima.R"f, a, b"

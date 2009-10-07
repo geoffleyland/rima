@@ -1,10 +1,10 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local error, ipairs, xpcall, unpack = error, ipairs, xpcall, unpack
 local debug = require("debug")
+local error, xpcall = error, xpcall
+local ipairs, type, unpack  = ipairs, type, unpack
 
-local object = require("rima.object")
 local expression = require("rima.expression")
 require("rima.private")
 local rima = rima
@@ -14,7 +14,8 @@ module(...)
 
 -- Addition --------------------------------------------------------------------
 
-local call = object:new(_M, "call")
+local call = _M
+call.__typename = "index"
 
 
 -- Argument Checking -----------------------------------------------------------
@@ -37,23 +38,24 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function call.__eval(args, S, eval)
-  local e = eval(args[1], S)
-  if not expression.defined(e) then
-    return expression:new(call, e, unpack(args, 2))
+  local f = expression.eval(args[1], S)
+  if not expression.defined(f) then
+    return expression:new(call, f, unpack(args, 2))
   else
     local status, r
-    if type(e) == "function" then
-      for i, a in ipairs(args) do
-        args[i] = expression.eval(a, S)
+    if type(f) == "function" then
+      local fargs = {}
+      for i = 2, #args do
+        fargs[i-1] = expression.eval(args[i], S)
       end
-      status, r = xpcall(function() return e(unpack(args, 2)) end, debug.traceback)
+      status, r = xpcall(function() return f(unpack(fargs)) end, debug.traceback)
     else
-      status, r = xpcall(function() return e:call({unpack(args, 2)}, S, eval) end, debug.traceback)
+      status, r = xpcall(function() return f:call({unpack(args, 2)}, S, eval) end, debug.traceback)
     end
 
     if not status then
-      error(("error while evaluating '%s':\n  %s"):
-        format(__repr(args), r:gsub("\n", "\n  ")), 0)
+      error(("call: error evaluating '%s' as '%s':\n  %s"):
+        format(__repr(args), rima.repr(f), r:gsub("\n", "\n  ")), 0)
     end
     return r
   end
