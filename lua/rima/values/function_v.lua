@@ -12,7 +12,6 @@ local rima = rima
 module(...)
 
 local expression = require("rima.expression")
-require("rima.public")
 
 -- Function type ---------------------------------------------------------------
 
