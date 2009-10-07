@@ -54,8 +54,8 @@ function call.__eval(args, S, eval)
     end
 
     if not status then
-      error(("call: error evaluating '%s' as '%s':\n  %s"):
-        format(__repr(args), rima.repr(f), r:gsub("\n", "\n  ")), 0)
+      error(("call: error evaluating '%s' as '%s' with arguments (%s):\n  %s"):
+        format(__repr(args), rima.repr(f), expression.concat({unpack(args, 2)}), r:gsub("\n", "\n  ")), 0)
     end
     return r
   end

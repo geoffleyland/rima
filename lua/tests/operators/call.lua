@@ -34,7 +34,7 @@ function test(show_passes)
 
   local c2 = expression:new(call, rima.R"f")
   T:expect_error(function() expression.eval(c2, S) end,
-    "error evaluating 'f%(%)' as 'function%(a%) return 2%*a':\n  the function needs to be called with at least 1 arguments, got 0")
+    "error evaluating 'f%(%)' as 'function%(a%) return 2%*a' with arguments %(%):\n  the function needs to be called with at least 1 arguments, got 0")
 
   do
     local f, a, b = rima.R"f, a, b"

@@ -19,6 +19,10 @@ local rima = getfenv(0).rima
 
 -- Module functionality --------------------------------------------------------
 
+rima.set_number_format = expression.set_number_format
+rima.repr = expression.repr
+
+
 function rima.R(names, type)
   local results = {}
   for n in names:gmatch("[%a_][%w_]*") do
@@ -50,13 +54,10 @@ function rima.E(e, S)
   if status then
     return r
   else
-    error(("evaluate: error evaluating '%s':\n  %s"): format(rima.repr(e), r:gsub("\n", "\n  ")), 0)
+    error(("evaluate: error evaluating '%s':\n  %s"): format(expression.repr(e), r:gsub("\n", "\n  ")), 0)
   end
 end
 
-
-rima.set_number_format = expression.set_number_format
-rima.repr = expression.repr
 
 function rima.F(inputs, expression, S)
   return function_v:new(inputs, expression, S)

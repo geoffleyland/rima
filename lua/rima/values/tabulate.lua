@@ -47,8 +47,8 @@ __tostring = __repr
 
 function tabulate_type:handle_address(S, a)
   if #a ~= #self.indexes then
-    error(("tabulate: error evaluating '%s' as '%s': the tabulation needs %d indexes, got %d"):
-      format(__repr(self), rima.repr(self.expression), #self.indexes, #a), 0)
+    error(("tabulate: error evaluating '%s' as '%s': the tabulation needs %d indexes, got %d (%s)"):
+      format(__repr(self), rima.repr(self.expression), #self.indexes, #a, expression.concat(a)), 0)
   end
   S2 = scope.spawn(S, nil, {overwrite=true})
 
@@ -58,8 +58,11 @@ function tabulate_type:handle_address(S, a)
 
   status, r = xpcall(function() return expression.eval(self.expression, S2) end, debug.traceback)
   if not status then
-    error(("tabulate: error evaluating '%s' as '%s':\n  %s"):
-      format(__repr(self), rima.repr(self.expression), r:gsub("\n", "\n  ")), 0)
+    local i = 0
+    local args = rima.concat(self.indexes, ", ",
+      function(si) i = i + 1; return ("%s=%s"):format(rima.repr(si), rima.repr(a[i])) end)
+    error(("tabulate: error evaluating '%s' as '%s' where %s:\n  %s"):
+      format(__repr(self), rima.repr(self.expression), args, r:gsub("\n", "\n  ")), 0)
   end
   return r
 end

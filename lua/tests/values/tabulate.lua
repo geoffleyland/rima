@@ -39,7 +39,7 @@ function test(show_passes)
     S.t = rima.tabulate({y}, y + x[1])
     S.x = 1
     T:expect_error(function() rima.E(t[1], S) end,
-      "tabulate: error evaluating 'tabulate%({y}, y %+ x%[1%]%)' as 'y %+ x%[1%]':")
+      "tabulate: error evaluating 'tabulate%({y}, y %+ x%[1%]%)' as 'y %+ x%[1%]' where y=1:")
 end
 
   return T:close()
