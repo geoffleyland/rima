@@ -128,7 +128,7 @@ function test(show_passes)
     local S = rima.scope.create{ a = { { 5 } }, b = rima.tabulate({i}, a[1][i]) }
     T:check_equal(rima.E(a[1][1], S), 5)
     T:check_equal(rima.E(b[1], S), 5)
-    T:expect_error(function() rima.E(b[1][1], S) end, "error while evaluating 'b%[1, 1%]")
+    T:expect_error(function() rima.E(b[1][1], S) end, "evaluate: error evaluating 'b%[1, 1%]")
   end
 
   do

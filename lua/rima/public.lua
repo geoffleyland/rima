@@ -50,7 +50,7 @@ function rima.E(e, S)
   if status then
     return r
   else
-    error(("error while evaluating '%s':\n  %s"): format(rima.repr(e), r:gsub("\n", "\n  ")), 0)
+    error(("evaluate: error evaluating '%s':\n  %s"): format(rima.repr(e), r:gsub("\n", "\n  ")), 0)
   end
 end
 
