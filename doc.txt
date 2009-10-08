@@ -52,7 +52,7 @@ I took a bit of a more tortuous route, and use the COIN trunk.
 
 #### Building and installing Rima
 
-There's a makefile in this distribution with, at this stage, I'm afraid you'll almost certainly have to modify yourself.
+There's a makefile in this distribution which, at this stage, I'm afraid you'll almost certainly have to modify yourself.
 It works for me on OS X, and I'd appreciate it if you let me know what works on your setup.
 
 Ideally you'll just
@@ -141,7 +141,7 @@ The result of evaluating an expression is just an expression, so you can always 
 
     x, y = rima.R"x, y"
     e = rima.E(x + y, { x=7 })
-    print(e)                                            --> 7 + y
+    =e                                                  --> 7 + y
     =rima.E(e, { y=13 })                                --> 20
 
 Rima will simplify expressions when it evaluates.
@@ -238,7 +238,7 @@ Remembering that the return value of an expression is another expression:
     f, x, y = rima.R"f, x, y"
     F = rima.F({x}, x * y, { y=5 })
     e = rima.E(x * f(y), { f=F })
-    print(e)                                           --> 5*x*y
+    =e                                                 --> 5*x*y
     =rima.E(e, { x=2, y=3 })                           --> 30
 
 This illustrates, to some extent, why we define *references* and not *variables* with `rima.R`.
@@ -254,13 +254,13 @@ If you don't fully define function local variables, you can run into trouble:
     f, x, y = rima.R"f, x, y"
     F = rima.F({x}, x * y, { y=rima.free() })
     e = rima.E(f(x), { f=F })
-    print(e)                                            --> x*y
+    =e                                                 --> x*y
 
 Which *looks* ok, but the `y` is now *bound* to the function's local `y`, which is no longer available:
 
     =rima.E(e, { x=2, y=3 })
     -- error while evaluating 'x*y':
-         the reference 'y' is bound to a scope that is not available
+    --   the reference 'y' is bound to a scope that is not available
 
 (There are ways to fool this mechanism at the moment, and it's not handled well, but we'll get there eventually...)
 
