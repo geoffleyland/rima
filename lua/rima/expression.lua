@@ -237,7 +237,13 @@ function expression.proxy_mt.__call(...)
 end
 
 function expression.proxy_mt.__index(r, i)
-  return expression:new(operators.index, r, i)
+  local e = expression:new(operators.index, r, i)
+  local f = expression.eval(e)
+  if not f or (object.type(f) == "table" and not getmetatable(f)) then
+    return e
+  else
+    return f
+  end
 end
 
 

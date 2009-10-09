@@ -216,6 +216,7 @@ end
 function scope.find_bound_scope(s, bound_scope, name)
   -- If the variable is bound to a scope, then go looking for it through parents
   -- taking care of overwritable (function) scopes
+  if not s then return bound_scope end
   local top = s
   if bound_scope then
     while s ~= bound_scope do
@@ -232,7 +233,9 @@ end
 
 
 function scope.lookup(s, name, bound_scope)
-  local r = find(find_bound_scope(s, bound_scope, name), name, "read")
+  s = find_bound_scope(s, bound_scope, name)
+  if not s then return end
+  local r = find(s, name, "read")
   if r and r[1][1] ~= hidden then
     return unpack(r[1])                         -- returning multiple values so no if..and..or
   end
