@@ -156,6 +156,52 @@ function test(show_passes)
     T:check_equal(S.d, 4)
   end
 
+  do
+    local S = scope.create{ a={x={y={z=1}}} }
+    T:check_equal(S.a.x.y.z, 1)
+  end
+
+  do
+    local S = scope.create{ a={x=1} }
+    local a = S.a
+    T:check_equal(object.type(a), "ref")
+    T:expect_ok(function() S.a.y = 2 end, "scope newindex")
+    T:expect_ok(function() a.z = 3 end, "scope newindex")
+    T:expect_ok(function() S.a = {q=10, r=20} end, "scope newindex")
+    T:check_equal(S.a.x, 1)
+    T:check_equal(S.a.y, 2)
+    T:check_equal(S.a.z, 3)
+    T:check_equal(S.a.q, 10)
+    T:check_equal(S.a.r, 20)
+    T:check_equal(a.x, 1)
+    T:check_equal(a.y, 2)
+    T:check_equal(a.z, 3)
+    T:check_equal(a.q, 10)
+    T:check_equal(a.r, 20)
+
+    T:expect_ok(function() S.f.g.h = 2 end, "ref newindex")
+  end
+
+  do
+    local S = scope.new()
+    S.a.b = rima.free()
+    local S2 = scope.spawn(S)
+    T:expect_ok(function() S2.a.b = rima.integer() end)
+  end
+
+  do
+    local x = rima.R"x"
+    local S = scope.create{x={a=1}}
+    local S2 = scope.spawn(S, {x={b=2}})
+    
+    T:check_equal(E(x.a, S), 1)
+    T:check_equal(E(x.a, S2), 1)
+
+    S.a.b = rima.free()
+    local S2 = scope.spawn(S)
+    T:expect_ok(function() S2.a.b = rima.integer() end)
+  end
+
   return T:close()
 end
 

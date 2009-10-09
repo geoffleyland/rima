@@ -37,9 +37,12 @@ function test(show_passes)
     local e = E(a[b], S)
     T:check_equal(D(e), "index(ref(a), address(number(2)))")
     S2 = rima.scope.spawn(S, {a = { "x" }})
+    T:check_equal(D(S2.a), "ref(a)")
+    T:check_equal(S2.a[1], "x")
+    T:check_equal(D(S2.a[2]), "index(ref(a), address(number(2)))")
     T:check_equal(D(E(e, S2)), "index(ref(a), address(number(2)))")
-    S2.a[2] = "yes"
-    T:check_equal(D(E(e, S2)), "string(yes)")    
+    T:expect_ok(function() S2.a[2] = "yes" end, "setting a table field")
+    T:check_equal(D(E(e, S2)), "string(yes)")
 
     S3 = rima.scope.spawn(S, {a = { b="x" }})
     T:check_equal(D(E(a.b, S)), "index(ref(a), address(string(b)))")
@@ -111,6 +114,33 @@ function test(show_passes)
     }
     T:check_equal(E(x[{key=1}], S), 2)
     T:check_equal(E(s[{key=1}], S), E(rima.exp(2)*rima.sin(2)))
+  end
+
+  do
+    local S = rima.scope.new()
+    S.e = 1
+    S.f.g = 2
+    S.h.i.j = 3
+    S.k.l.m.n = 4
+
+    T:check_equal(S.e, 1)    
+    T:check_equal(S.f.g, 2)    
+    T:check_equal(S.h.i.j, 3)    
+    T:check_equal(S.k.l.m.n, 4)    
+  end
+
+  do
+    local e, f, g, h = rima.R"e, f, g, h"
+    local S = rima.scope.new()
+    S.e = rima.free()
+    S.f[rima.default] = rima.free()
+    S.g[rima.default][rima.default] = rima.free()
+    S.h[rima.default][rima.default][rima.default] = rima.free()
+
+    T:check_equal(expression.type(e, S), "-inf <= * <= inf, * real")
+    T:check_equal(expression.type(f[1], S), "-inf <= * <= inf, * real")
+    T:check_equal(expression.type(g.a[2], S), "-inf <= * <= inf, * real")
+    T:check_equal(expression.type(h[3].b[8], S), "-inf <= * <= inf, * real")
   end
 
   return T:close()
