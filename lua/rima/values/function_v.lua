@@ -51,7 +51,7 @@ end
 
 function function_v:__repr(format)
   return ("function(%s) return %s"):
-    format(expression.concat(self.inputs, format), rima.repr(self.expression))
+    format(expression.concat(self.inputs, format), rima.repr(self.expression, format))
 --[[
   if self.outputs[1] then
     s = s.." where {"
