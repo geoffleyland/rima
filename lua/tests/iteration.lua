@@ -42,6 +42,13 @@ function test(show_passes)
     T:check_equal(rima.E(rima.sum({rima.pairs(y, k, v)}, v), S), 70)
     T:check_equal(rima.E(rima.sum({rima.ipairs(y, k, v)}, v), S), 60)
   end
+  
+  do
+    local t, v = rima.R"t, v"
+    local S = rima.scope.create{ t={ {b=5}, {b=6}, {b=7} }}
+    T:check_equal(rima.sum({rima.ipairs(t, "_", v)}, v.a * v.b), "sum({_, v in ipairs(t)}, v.a*v.b)")
+    T:check_equal(rima.E(rima.sum({rima.ipairs(t, "_", v)}, v.a * v.b), S), "5*t[1].a + 6*t[2].a + 7*t[3].a")
+  end
 
   return T:close()
 end
