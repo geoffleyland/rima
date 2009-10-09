@@ -148,25 +148,28 @@ function address:resolve(S, current, i, base, eval)
   local function handle_expression(c, j)
     local new_base = expression.bind(c, S)
     local new_address = self:sub(j)
-    local new_current = expression.eval(new_base, S)
-    if not expression.defined(new_current) then
-      return false, nil, new_base, new_address
-    end
 
-    local k = 1
-    -- if it's an index, glue the two addresses together - it looks prettier
+    -- if the base is an index, use its base and glue the two addresses together
     if object.type(new_base) == "index" then
       local C = proxy.O(new_base)
       new_base = C[1]
       new_address = C[2] + new_address
-      k = #C[2] + 1
     end
-    local status, r = xpcall(function() return { new_address:resolve(S, new_current, k, new_base) } end, debug.traceback)
-    if not status then
-      error(("address: error evaluating '%s%s' as '%s%s':\n  %s"):
-        format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), r:gsub("\n", "\n  ")), 0)
+
+    local function try_current(c)
+      local status, r = xpcall(function() return { new_address:resolve(S, c, 1, new_base, eval) } end, debug.traceback)
+      if not status then
+        error(("address: error evaluating '%s%s' as '%s%s':\n  %s"):
+          format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), r:gsub("\n", "\n  ")), 0)
+      end
+      return r
     end
-    return unpack(r)
+
+    local new_current = expression.eval(new_base, S)
+    if not expression.defined(new_current) then
+      return false, nil, new_base, new_address
+    end
+    return unpack(try_current(new_current))
   end
 
   -- This is where the function proper starts.
