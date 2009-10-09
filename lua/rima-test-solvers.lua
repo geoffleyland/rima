@@ -4,3 +4,4 @@
 dofile("../lua/examples/simple.lua")
 dofile("../lua/examples/whiskas.lua")
 dofile("../lua/examples/minimax.lua")
+dofile("../lua/examples/knapsack.lua")

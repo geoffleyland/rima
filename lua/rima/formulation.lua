@@ -59,6 +59,10 @@ function formulation:set(values)
   scope.set(self.S, values)
 end
 
+function formulation:scope()
+  return self.S
+end
+
 function formulation:solve(solver, values)
   local S = scope.spawn(self.S)
   if values then scope.set(S, values) end

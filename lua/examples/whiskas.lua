@@ -9,7 +9,7 @@ require("rima")
 This blending problem is copied from
 http://130.216.209.237/engsci392/pulp/ABlendingProblem
 which I believe is in turn copied from Mike Trick's web pages, though I can't
-find the page is question.
+find the page in question.
 --]]
 
 -- Set up references to variables
@@ -45,7 +45,7 @@ local f = rima.R"f"                     -- ingredient fractions (result)
 
 -- Set up the blending problem
 blending_problem = rima.formulation:new()
-blending_problem:set{ f = rima.positive() }
+blending_problem:scope().f[rima.default] = rima.positive()
 blending_problem:set_objective(rima.sum({I}, c[I] * f[I]), "minimise")
 blending_problem:add(rima.sum({I}, f[I]), "==", T)
 blending_problem:add(rima.sum({I}, n[I][N] * f[I]), ">=", T * l[N], N)
@@ -87,21 +87,25 @@ local whiskas_data = {
 -- An instance is actually just another formulation
 whiskas = blending_problem:instance(whiskas_data)
 
-local function s(solver, S)
-  local r = whiskas:solve(solver, S)
+local function s(problem, solver, S)
+  local r = problem:solve(solver, S)
   io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, r.objective))
   for k, v in pairs(r.variables.f) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, v.p, v.d)) end
 end
 
 -- We can choose our solver and set any extra variables when we solve.
-s("clp", { T=1 })
+s(whiskas, "clp", { T=1 })
 -- cbc and lpsolve can solve integer problems
 -- Note that we're redefining f as an integer.  What there is of a type
 -- system lets this happen because integers are subsets of positive variables.
 -- You couldn't set f to a free variable (because a free variable is not a
 -- subset of a positive variable).
-s("cbc", { T=99, f=rima.integer() })
-s("lpsolve", { T=99, f=rima.integer() })
+
+whiskas_integer = whiskas:instance{ T = 99 }
+whiskas_integer:scope().f[rima.default] = rima.integer()
+
+s(whiskas_integer, "cbc")
+s(whiskas_integer, "lpsolve")
 
 -- EOF -------------------------------------------------------------------------
 
