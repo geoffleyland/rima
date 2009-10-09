@@ -144,7 +144,8 @@ function address:resolve(S, current, i, base, eval)
     end
   end
 
-  local function handle_undefined(c, j)
+  -- What do we do when we come across an expression?
+  local function handle_expression(c, j)
     local new_base = expression.bind(c, S)
     local new_address = self:sub(j)
     local new_current = expression.eval(new_base, S)
@@ -168,21 +169,28 @@ function address:resolve(S, current, i, base, eval)
     return unpack(r)
   end
 
+  -- This is where the function proper starts.
+  -- We've got an object (current) and we're trying to index it with a.
+  -- How should we treat it?
   local mt = getmetatable(current)
 
-  -- if we've got something that wants to resolve itself, then handle it and continue
+  -- if we've got something that wants to resolve itself, then handle it and continue.
+  -- The object might use more than one element of the address.
   if mt and mt.__address then
+    -- We only want to bind to the result...
     local status, v, j = xpcall(function() return mt.__address(current, S, self, i, expression.bind) end, debug.traceback)
     if not status then
       error(("address: error evaluating '%s%s' as '%s':\n  %s"):
         format(rima.repr(base), rima.repr(self), rima.repr(current), v:gsub("\n", "\n  ")), 0)
     end
+    -- ... and then, if there are no more indexes left, we'll evaluate it.
+    -- otherwise we leave it as a ref for the next call to index.
     if not j then v = eval(v, S) end
     return self:resolve(S, v, j, base, eval)
 
-  -- if it's a ref or an expression, evaluate it and continue
+  -- if it's a ref or an expression, evaluate it (and recursively tidy up the remaining indices)
   elseif not expression.defined(current) then
-    return handle_undefined(current, i)
+    return handle_expression(current, i)
 
   -- if we're trying to index what has to be a scalar, give up
   elseif object.isa(current, number_t) then
