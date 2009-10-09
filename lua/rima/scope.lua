@@ -191,21 +191,21 @@ function scope.find(s, name, op, results)
 end
 
 
-function scope_proxy_mt.__index(S, name)
+function scope_proxy_mt.__index(s, name)
   -- We either want to return the literal value we've looked up, or, if there's
   -- only type information, a reference.
   -- there's two types of literal value - a value, and nil.  We'd like to
   -- return nil if that's what we find.
-  local results = find(S, name, "read")
+  local results = find(s, name, "read")
   if results then
-    local c, s = unpack(results[1])
+    local c, fs = unpack(results[1])
     if object.isa(c, undefined_t) then
       -- There is a value (and it's not hidden), return a reference that I
       -- think should be bound to the top scope.
       -- I'm not sure about this though.  Maybe it should be bound to the scope
       -- the variable was found in (this will come into play with function
       -- scopes, but I haven't worked out how to test it yet)
-      return ref:new{name=name, type=c, scope=S}
+      return ref:new{name=name, type=c, scope=s}
     elseif c ~= hidden then
       return c
     end
@@ -213,16 +213,16 @@ function scope_proxy_mt.__index(S, name)
 end
 
 
-function scope.find_bound_scope(S, bound_scope, name)
+function scope.find_bound_scope(s, bound_scope, name)
   -- If the variable is bound to a scope, then go looking for it through parents
   -- taking care of overwritable (function) scopes
-  local top = S
+  local top = s
   if bound_scope then
-    while S ~= bound_scope do
-      local s = proxy.O(S)
-      if s.overwrite then top = s.parent end
-      S = s.parent
-      if not S then
+    while s ~= bound_scope do
+      local S = proxy.O(s)
+      if S.overwrite then top = S.parent end
+      s = S.parent
+      if not s then
         return bound_scope
       end
     end
@@ -231,22 +231,22 @@ function scope.find_bound_scope(S, bound_scope, name)
 end
 
 
-function scope.lookup(S, name, bound_scope)
-  local r = find(find_bound_scope(S, bound_scope, name), name, "read")
+function scope.lookup(s, name, bound_scope)
+  local r = find(find_bound_scope(s, bound_scope, name), name, "read")
   if r and r[1][1] ~= hidden then
     return unpack(r[1])                         -- returning multiple values so no if..and..or
   end
 end
 
 
-function scope.check(S, name, value)
-  local results = find(S, name, "write")
+function scope.check(s, name, value)
+  local results = find(s, name, "write")
   if not results then return end
-  local s = proxy.O(S)
+  local S = proxy.O(s)
 
   for _, r in ipairs(results) do
-    local c, CS = unpack(r)
-    if CS == S and not s.rewrite then
+    local c, cs = unpack(r)
+    if cs == s and not S.rewrite then
       error(("scope: cannot set '%s' to '%s': existing definition as '%s'"):
         format(name, rima.repr(value), rima.repr(c)), 0)
     elseif object.isa(c, undefined_t) then
@@ -254,7 +254,7 @@ function scope.check(S, name, value)
         error(("scope: cannot set '%s' to '%s': violates existing constraint '%s'"):
           format(name, rima.repr(value), rima.repr(c)), 0)
       end
-    elseif CS ~= S then
+    elseif cs ~= s then
       error(("scope: cannot set '%s' to '%s': existing definition as '%s'"):
         format(name, rima.repr(value), rima.repr(c)), 0)
     end
@@ -282,14 +282,14 @@ end
 
 -- Bulk set --------------------------------------------------------------------
 
-function scope.set(S, values)
+function scope.set(s, values)
   local fname, usage =
     "rima.scope:set",
     "set(values: {string = type or value, ...})"
   args.check_type(values, "values", "table", usage, fname)
   for k, v in pairs(values) do
     for n in k:gmatch("[%a_][%w_]*") do
-      S[n] = v
+      s[n] = v
     end
   end
 end
@@ -297,14 +297,14 @@ end
 
 -- Iterating -------------------------------------------------------------------
 
-function scope.iterate(S, t)
+function scope.iterate(s, t)
   t = t or {}
-  local s = proxy.O(S)
-  for k, v in pairs(s.values) do
+  local S = proxy.O(s)
+  for k, v in pairs(S.values) do
     t[k] = t[k] or v
   end
-  if s.parent then
-    iterate(s.parent, t)
+  if S.parent then
+    iterate(S.parent, t)
   end
   return coroutine.wrap(
     function() for k, v in pairs(t) do coroutine.yield(k, v) end end)
