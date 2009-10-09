@@ -88,7 +88,7 @@ function test(show_passes)
   check_nonlinear(1 + a*b, S)
   check_linear(1 + a*b, 1, {a=5}, scope.spawn(S, {b=5}))
   check_linear(1 + d[2]*5, 1, {["d[2]"]=5}, S)
-  check_linear(1 + rima.sum({rima.alias(d, "c")}, c.key*5*c.index), 1, {["d[1]"]=5, ["d[2]"]=10}, S)
+  check_linear(1 + rima.sum({rima.alias(d, "c")}, c.value*5*c.index), 1, {["d[1]"]=5, ["d[2]"]=10}, S)
   check_linear(1 + rima.sum({rima.alias(d, "c")}, d[c]*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
 
   return T:close()

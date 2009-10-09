@@ -136,8 +136,8 @@ function address:resolve(S, current, i, base, eval)
         self[i] = j.index
         return v[j.index]
       else
-        self[i] = j.key
-        return v[j.key]
+        self[i] = j.value
+        return v[j.value]
       end
     else
       return v[j]

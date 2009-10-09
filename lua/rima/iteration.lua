@@ -50,16 +50,17 @@ end
 -- Set element -----------------------------------------------------------------
 
 element = object:new({}, "element")
-function element:new(set, index, key)
-  return object.new(self, {set=set, index=index, key=key})
+function element:new(set, index, value)
+  return object.new(self, {set=set, index=index, value=value})
 end
 
 
-function element:__repr(format)
-  if format and format.dump then
-    return ("element(%s, %s, %s)"):format(rima.repr(self.set, format), rima.repr(self.index, format), rima.repr(self.key, format))
+function element:__repr(f)
+  if f and f.dump then
+    return ("element(%s, %s, %s)"):format(
+      rima.repr(self.set, f), rima.repr(self.index, f), rima.repr(self.value, f))
   else
-    return rima.repr(self.key, format)
+    return rima.repr(self.value, f)
   end
 end
 element.__tostring = element.__repr

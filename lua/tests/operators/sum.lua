@@ -81,11 +81,11 @@ function test(show_passes)
   do 
     local X, x, y, z = rima.R"X, x, y, z"
     local S = rima.scope.create{ X = rima.range(1, y) }
-    T:check_equal(D(E(rima.sum({rima.alias(X, "x")}, x.key), S)), "sum({iterator(x in range(number(1), ref(y)))}, index(ref(x), address(string(key))))")
-    T:check_equal(E(rima.sum({rima.alias(X, "x")}, x.key), S), "sum({x in range(1, y)}, x.key)")
+    T:check_equal(D(E(rima.sum({rima.alias(X, "x")}, x.value), S)), "sum({iterator(x in range(number(1), ref(y)))}, index(ref(x), address(string(value))))")
+    T:check_equal(E(rima.sum({rima.alias(X, "x")}, x.value), S), "sum({x in range(1, y)}, x.value)")
     S.y = 5
-    T:check_equal(E(rima.sum({rima.alias(X, "x")}, x.key), S), 15)
-    T:check_equal(E(rima.sum({rima.alias(X, "x")}, z * x.key), S), 15*z)
+    T:check_equal(E(rima.sum({rima.alias(X, "x")}, x.value), S), 15)
+    T:check_equal(E(rima.sum({rima.alias(X, "x")}, z * x.value), S), 15*z)
   end
 
   do
@@ -102,15 +102,15 @@ function test(show_passes)
     T:check_equal(E(e1, S), "X[1].y + X[2].y + X[3].y")
     T:check_equal(E(e1, S2), 6)
 
-    local e2 = rima.sum({X}, X.key.y)
-    T:check_equal(e2, "sum({X}, X.key.y)")
-    T:check_equal(D(e2), "sum({ref(X)}, index(ref(X), address(string(key), string(y))))")
+    local e2 = rima.sum({X}, X.value.y)
+    T:check_equal(e2, "sum({X}, X.value.y)")
+    T:check_equal(D(e2), "sum({ref(X)}, index(ref(X), address(string(value), string(y))))")
     T:check_equal(E(e2, S), "X[1].y + X[2].y + X[3].y")
     T:check_equal(E(e2, S2), 6)
 
-    local e3 = rima.sum({rima.alias(X, "x")}, x.key.y)
-    T:check_equal(e3, "sum({x in X}, x.key.y)")
-    T:check_equal(D(e3), "sum({alias(x in ref(X))}, index(ref(x), address(string(key), string(y))))")
+    local e3 = rima.sum({rima.alias(X, "x")}, x.value.y)
+    T:check_equal(e3, "sum({x in X}, x.value.y)")
+    T:check_equal(D(e3), "sum({alias(x in ref(X))}, index(ref(x), address(string(value), string(y))))")
     T:check_equal(E(e3, S), "X[1].y + X[2].y + X[3].y")
     T:check_equal(E(e3, S2), 6)
   end
@@ -130,15 +130,15 @@ function test(show_passes)
     T:check_equal(E(e1, S), 0)
     T:check_equal(E(e1, S2), 6)
 
-    local e2 = rima.sum({X}, X.key.y)
-    T:check_equal(e2, "sum({X}, X.key.y)")
-    T:check_equal(D(e2), "sum({ref(X)}, index(ref(X), address(string(key), string(y))))")
+    local e2 = rima.sum({X}, X.value.y)
+    T:check_equal(e2, "sum({X}, X.value.y)")
+    T:check_equal(D(e2), "sum({ref(X)}, index(ref(X), address(string(value), string(y))))")
     T:check_equal(E(e2, S), 0)
     T:check_equal(E(e2, S2), 6)
 
-    local e3 = rima.sum({rima.alias(X, "x")}, x.key.y)
-    T:check_equal(e3, "sum({x in X}, x.key.y)")
-    T:check_equal(D(e3), "sum({alias(x in ref(X))}, index(ref(x), address(string(key), string(y))))")
+    local e3 = rima.sum({rima.alias(X, "x")}, x.value.y)
+    T:check_equal(e3, "sum({x in X}, x.value.y)")
+    T:check_equal(D(e3), "sum({alias(x in ref(X))}, index(ref(x), address(string(value), string(y))))")
     T:check_equal(E(e3, S), 0)
     T:check_equal(E(e3, S2), 6)
   end
@@ -158,12 +158,12 @@ function test(show_passes)
     T:check_equal(e1, "sum({_, x in ipairs(X)}, x.y*x.z)")
     T:check_equal(E(e1, S2), "11*X[1].y + 13*X[2].y + 17*X[3].y")
 
-    local e2 = rima.sum({X}, X.key.y * X.key.z)
-    T:check_equal(e2, "sum({X}, X.key.y*X.key.z)")
+    local e2 = rima.sum({X}, X.value.y * X.value.z)
+    T:check_equal(e2, "sum({X}, X.value.y*X.value.z)")
     T:check_equal(E(e2, S2), 11*X[1].y + 13*X[2].y + 17*X[3].y)
 
-    local e3 = rima.sum({rima.alias(X, "x")}, x.key.y * x.key.z)
-    T:check_equal(e3, "sum({x in X}, x.key.y*x.key.z)")
+    local e3 = rima.sum({rima.alias(X, "x")}, x.value.y * x.value.z)
+    T:check_equal(e3, "sum({x in X}, x.value.y*x.value.z)")
     T:check_equal(E(e3, S2), 11*X[1].y + 13*X[2].y + 17*X[3].y)
   end
 

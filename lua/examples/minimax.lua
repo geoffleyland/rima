@@ -22,7 +22,7 @@ local e = rima.R"e"                     -- positive and negative Errors at each 
 local curve_fit = rima.formulation:new()
 curve_fit:add(
   rima.sum({rima.alias(T, "t")}, w[t] * y[t][p]) +
-  rima.sum({rima.alias(Q, "q")}, q.key * e[q][p]), "==",
+  rima.sum({rima.alias(Q, "q")}, q.value * e[q][p]), "==",
   s[p], rima.alias(P, "p"))
 curve_fit:add(max_error, ">=", e[q][p], rima.alias(Q, "q"), rima.alias(P, "p"))
 curve_fit:add(sum_error, "==", rima.sum({rima.alias(Q, "q"), rima.alias(P, "p")}, e[q][p]))
@@ -55,11 +55,11 @@ local points, x, xmin, xmax = rima.R"points, x, xmin, xmax"
 local equispaced_points =
 {
   P = rima.range(0, points),
-  x = rima.tabulate({p}, xmin + (xmax - xmin) * p.key / points),
+  x = rima.tabulate({p}, xmin + (xmax - xmin) * p.value / points),
 }
 
 -- fit a polynomial with arbitrary order terms
-local polynomial_fits = { y = rima.tabulate({t, p}, x[p]^t.key) }
+local polynomial_fits = { y = rima.tabulate({t, p}, x[p]^t.value) }
 
 -- fit polynomial with terms 1, x, x^2
 local terms = rima.R"terms"
