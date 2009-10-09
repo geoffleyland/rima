@@ -247,5 +247,37 @@ function expression.proxy_mt.__index(r, i)
 end
 
 
+function expression.proxy_mt.__newindex(e, i, v)
+  local err
+  r = bind(e)
+  local R = proxy.O(r)
+  if object.type(r) == "ref" then
+    if R.scope then
+      proxy.O(R.scope).newindex(R.scope, R.name, nil, i, v)
+    else
+      err = "is not bound to a scope"
+    end
+  elseif object.type(r) == "index" then
+    local r2, address = R[1], R[2]
+    if object.type(r2) == "ref" then
+      local R2 = proxy.O(r2)
+      if R2.scope then
+        proxy.O(R2.scope).newindex(R2.scope, R2.name, address, i, v)
+      else
+        err = "is not bound to a scope"
+      end
+    else
+      err = "isn't an expression that can be set"
+    end
+  else
+    err = "isn't an expression that can be set"
+  end
+  if err then
+    error(("expression new index: error setting '%s' as '%s' to %s: '%s' %s"):
+      format(rima.repr(e[i]), rima.repr(r[i]), rima.repr(v), rima.repr(r), err), 0)
+  end
+end
+
+
 -- EOF -------------------------------------------------------------------------
 

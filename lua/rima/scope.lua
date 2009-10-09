@@ -47,7 +47,8 @@ might be:
 --]]
 
 local coroutine, string = require("coroutine"), require("string")
-local error, require, setmetatable, unpack = error, require, setmetatable, unpack
+local error, require, unpack = error, require, unpack
+local getmetatable, setmetatable = getmetatable, setmetatable
 local ipairs, pairs = ipairs, pairs
 
 local object = require("rima.object")
@@ -60,6 +61,8 @@ local rima = rima
 module(...)
 
 local ref = require("rima.ref")
+local address = require("rima.address")
+local expression = require("rima.expression")
 
 -- Scope names -----------------------------------------------------------------
 
@@ -206,9 +209,15 @@ function scope_proxy_mt.__index(s, name)
       -- the variable was found in (this will come into play with function
       -- scopes, but I haven't worked out how to test it yet)
       return ref:new{name=name, type=c, scope=s}
-    elseif c ~= hidden then
+    elseif c == hidden then
+      return nil
+    elseif type(c) == "table" and not getmetatable(c) then
+      return ref:new{name=name, scope=s}
+    else
       return c
     end
+  else
+    return ref:new{name=name, scope=s}
   end
 end
 
@@ -242,37 +251,92 @@ function scope.lookup(s, name, bound_scope)
 end
 
 
-function scope.check(s, name, value)
+function scope.check(s, name, address, value)
   local results = find(s, name, "write")
   if not results then return end
   local S = proxy.O(s)
+  address = (address and address[1] and address) or nil
+  local r = address and ref:new{ name = name }
 
   for _, r in ipairs(results) do
     local c, cs = unpack(r)
-    if cs == s and not S.rewrite then
-      error(("scope: cannot set '%s' to '%s': existing definition as '%s'"):
-        format(name, rima.repr(value), rima.repr(c)), 0)
-    elseif object.isa(c, undefined_t) then
-      if not c:includes(value) then
-        error(("scope: cannot set '%s' to '%s': violates existing constraint '%s'"):
-          format(name, rima.repr(value), rima.repr(c)), 0)
+    if address then
+      local status, nc = address:resolve(s, c, 1, r, expression.eval)
+      c = status and nc or nil
+    end
+    if c then
+      if type(value) == "table" and not getmetatable(value) and
+         type(c) == "table" and not getmetatable(c) then
+         -- this is ok - we can merge two tables
+      elseif cs == s and not S.rewrite then
+        error(("scope: cannot set '%s%s' to '%s': existing definition as '%s'"):
+          format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
+      elseif cs ~= s and object.isa(c, undefined_t) then
+        if not c:includes(value) then
+          error(("scope: cannot set '%s%s' to '%s': violates existing constraint '%s'"):
+            format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
+        end
+      elseif cs ~= s then
+        error(("scope: cannot set '%s%s' to '%s': existing definition as '%s'"):
+          format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
       end
-    elseif cs ~= s then
-      error(("scope: cannot set '%s' to '%s': existing definition as '%s'"):
-        format(name, rima.repr(value), rima.repr(c)), 0)
     end
   end
 end
 
 
-function scope_proxy_mt.__newindex(S, name, value)
+function scope_proxy_mt.__newindex(s, name, value)
   local fname, usage =
     "rima.scope:__newindex",
     "__newindex(name: string, value: type or value)"
   args.check_type(name, "name", "string", usage, fname) 
 
-  check(S, name, value)
-  proxy.O(S).values[name] = value
+  check(s, name, nil, value)
+  local S = proxy.O(s)
+
+  if type(value) == "table" and not getmetatable(value) then
+    S.values[name] = S.values[name] or {}
+    for k, v in pairs(value) do
+      scope.newindex(s, name, nil, k, v)
+    end
+  else
+    S.values[name] = value
+  end
+end
+
+
+function scope.newindex(s, name, addr, index, value)
+  local new_address = addr and addr+index or address:new{index}
+  scope.check(s, name, new_address, value)
+  local S = proxy.O(s)
+
+  local function newtable(v, name)
+    local z = v[name]
+    if not z then
+      z = {}
+      v[name] = z
+    end
+    return z
+  end
+  
+  local c = newtable(S.values, name)
+
+  -- we can be fairly cavalier about resolving the address because
+  -- check() made sure it's ok for us.  Here we're just building any
+  -- necessary intermediate tables.
+  if addr then
+    for i, a in ipairs(addr) do
+      c = newtable(c, a)
+    end
+  end
+  
+  if type(value) == "table" and not getmetatable(value) then
+    for k, v in pairs(value) do
+      scope.newindex(s, name, new_address, k, v)
+    end
+  else
+    c[index] = value
+  end
 end
 
 

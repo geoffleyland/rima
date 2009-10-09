@@ -16,6 +16,7 @@ module(...)
 function test(show_passes)
   local T = series:new(_M, show_passes)
 
+  local D = expression.dump
   local B = expression.bind
   local E = expression.eval
 
@@ -26,7 +27,7 @@ function test(show_passes)
 
   -- Setting a variable
   T:expect_ok(function() local a = S1.a end, "undefined ok")
-  T:check_equal(S1.a, nil, "undefined nil")
+  T:check_equal(D(S1.a), "ref(a)")
   T:expect_ok(function() S1.a = types.undefined_t:new() end)
   local S2 = scope.spawn(S1)
   T:expect_ok(function() S2.a = rima.free() end)

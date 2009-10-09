@@ -164,6 +164,7 @@ ref.proxy_mt.__div = expression.proxy_mt.__div
 ref.proxy_mt.__pow = expression.proxy_mt.__pow
 ref.proxy_mt.__call = expression.proxy_mt.__call
 ref.proxy_mt.__index = expression.proxy_mt.__index
+ref.proxy_mt.__newindex = expression.proxy_mt.__newindex
 
 
 -- EOF -------------------------------------------------------------------------
