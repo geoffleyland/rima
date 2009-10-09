@@ -159,10 +159,7 @@ function ref_iterator:__iterate()
     return coroutine.wrap(
       function()
         for i, v in ipairs(z) do
-          if object.isa(v, types.undefined_t) then
-            v = self.bound[i]
-          end
-          coroutine.yield({[self.name]=element:new(z, i, v)})
+          coroutine.yield({[self.name]=element:new(z, i, self.bound[i])})
         end
       end)
   end
@@ -238,8 +235,8 @@ end
 -- Pairs -----------------------------------------------------------------------
 
 pairs_type = object:new({}, "pairs")
-function pairs_type:new(exp, key, value, iterator)
-  return object.new(self, { exp=exp, key_name=key, value_name=value, iterator=iterator })
+function pairs_type:new(exp, key, value, iterator, bound)
+  return object.new(self, { exp=exp, key_name=key, value_name=value, iterator=iterator, bound=bound })
 end
 
 
@@ -256,7 +253,7 @@ pairs_type.__tostring = pairs_type.__repr
 
 
 function pairs_type:eval(S)
-  return pairs_type:new(rima.E(self.exp, S), self.key_name, self.value_name, self.iterator)
+  return pairs_type:new(rima.E(self.exp, S), self.key_name, self.value_name, self.iterator, expression.bind(self.exp, S))
 end
 
 
@@ -280,7 +277,7 @@ function pairs_type:__iterate()
       for k, v in iterator(z) do
         local r = {}
         if key_name ~= "_" then r[key_name] = k end
-        if value_name ~= "_" then r[value_name] = v end
+        if value_name ~= "_" then r[value_name] = self.bound[k] end
         coroutine.yield(r)
       end
     end)
