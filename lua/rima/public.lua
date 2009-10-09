@@ -2,7 +2,8 @@
 -- see license.txt for license information
 
 local debug = require("debug")
-local error, getfenv, require, unpack, xpcall = error, getfenv, require, unpack, xpcall
+local getfenv, setmetatable, require, unpack = getfenv, setmetatable, require, unpack
+local error, xpcall = error, xpcall
 
 module(...)
 
@@ -19,7 +20,11 @@ local rima = getfenv(0).rima
 
 -- Module functionality --------------------------------------------------------
 
-rima.default = {}
+local default_metatable = {}
+default_metatable.__repr = function() return "default" end
+default_metatable.__tostring = default_metatable.__repr
+rima.default = setmetatable({}, default_metatable)
+
 rima.set_number_format = expression.set_number_format
 rima.repr = expression.repr
 
