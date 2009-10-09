@@ -88,7 +88,7 @@ function ref.proxy_mt.__bind(r, S)
   if not e then
     return ref:new{ name=r.name, type=r.type, scope=r.scope }  
   elseif expression.defined(e) then
-    return ref:new{ name=r.name, type=r.type, scope=found_scope }
+    return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
   else
     return expression.bind(e, S)
   end
