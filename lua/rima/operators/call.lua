@@ -15,7 +15,7 @@ module(...)
 -- Addition --------------------------------------------------------------------
 
 local call = _M
-call.__typename = "index"
+call.__typename = "call"
 
 
 -- Argument Checking -----------------------------------------------------------

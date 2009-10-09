@@ -3,6 +3,7 @@
 
 local string = require("string")
 local series = require("test.series")
+local object = require("rima.object")
 local call = require("rima.operators.call")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
@@ -17,6 +18,9 @@ function test(show_passes)
   local T = series:new(_M, show_passes)
 
   local S = scope.create{ a = rima.free(), b = rima.free(), x = rima.free() }
+
+  T:test(object.isa(expression:new(call), call), "isa(call, call)")
+  T:check_equal(object.type(expression:new(call)), "call")
 
   T:check_equal(expression.dump(S.a(S.b)), "call(ref(a), ref(b))")
   T:check_equal(S.a(S.b), "a(b)")
