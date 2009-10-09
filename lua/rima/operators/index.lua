@@ -51,24 +51,17 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function index.resolve(args, S, eval)
---  print("index.resolve", __repr(args))
---  print("index.resolve", __repr(args), "address is", expression.dump(args[2]))
   local address = expression.eval(args[2], S)
---  print("index.resolve", __repr(args), "address evaluates to", expression.dump(address))
   if not address:defined() then
---    print("index.resolve", __repr(args), "address not defined", expression.dump(address))
     return false, nil, expression.bind(args[1], S), address
   end
   local b = expression.bind(args[1], S)
---  print("index.resolve", __repr(args), "expression binds to", b, address)
   if object.type(b) == "index" then
     local B = proxy.O(b)
     b = B[1]
     address = B[2] + address
---    print("index.resolve", __repr(args), "expression simplifies to", b, address)
   end
   local e, v = expression.eval(b, S)
---  print("index.resolve", __repr(args), "expression evaluates to", e, v)
 
   local function try(f)
     local status, r = xpcall(f, debug.traceback)
