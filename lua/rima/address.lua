@@ -165,11 +165,51 @@ function address:resolve(S, current, i, base, eval)
       return r
     end
 
-    local new_current = expression.eval(new_base, S)
-    if not expression.defined(new_current) then
-      return false, nil, new_base, new_address
+    -- If the base is ref, we have to try to resolve the address in all the
+    -- scopes that the ref occurs in.  We do it manually.  This is a real mess.
+    if object.type(new_base) == "ref" then
+      local R = proxy.O(new_base)
+
+      -- Get the list of values for this reference
+      local RS = scope.find_bound_scope(S, R.scope, R.name)
+      local values = scope.find(RS, R.name, "read")
+
+      -- Give up if there's none or it's hidden
+      if not values or values[1][1] == hidden then
+        return false, nil, new_base, new_address
+      end
+
+      -- Run through the values, seeing if we can find something
+      local results = {}
+      for k, v in ipairs(values) do
+
+        -- By now we should have bare refs that don't reference other objects.
+        -- This should never happen, but I could be wrong.
+        if not expression.defined(v[1]) then
+          error(("address: internal error evaluating '%s%s' as '%s%s':\n  Got an undefined expression (%s) when I shouldn't"):
+            format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), rima.repr(v[1])), 0)
+        end
+
+        -- try to resolve the address with this version of the ref as a base
+        results[#results+1] = try_current(v[1])
+        -- and if we find something good, return it
+        if results[#results][1] then
+          return unpack(results[#results])
+        end
+      end
+      -- We found nothing good, return the first thing we found (I think we
+      -- could return any of the results.
+      return unpack(results[1])
+
+    else
+      -- Otherwise, the new base is not a ref.  I'm not sure this can actually happen --
+      -- I'll have to write more tests...
+      local new_current = expression.eval(new_base, S)
+      if not expression.defined(new_current) then
+        return false, nil, new_base, new_address
+      end
+      return unpack(try_current(new_current))
     end
-    return unpack(try_current(new_current))
   end
 
   -- This is where the function proper starts.

@@ -61,26 +61,26 @@ function index.resolve(args, S, eval)
     b = B[1]
     address = B[2] + address
   end
+
+  -- eval can return a reference and a type if we're evaluating a ref, we need
+  -- the type...
   local e, v = expression.eval(b, S)
 
-  local function try(f)
-    local status, r = xpcall(f, debug.traceback)
+  -- ...because if the first return value from eval is a ref, and the second
+  -- is a scalar type, we can't index it.  Here we try to index it - it
+  -- might work because it's not a scalar type or it might fail.  Maybe
+  -- we could just check that first?
+  if expression.defined(e) or v then
+    local status, r = xpcall(function() return { address:resolve(S, b, 1, b, eval) } end, debug.traceback)
     if not status then
       error(("index: error evaluating '%s' as '%s%s':\n  %s"):
         format(__repr(args), rima.repr(b), rima.repr(address), r:gsub("\n", "\n  ")), 0)
     else
-      return r
+      return unpack(r)
     end
   end
 
-  if not expression.defined(e) then
-    if v then
-      return unpack(try(function() return { address:resolve(S, v, 1, b, eval) } end))
-    else
-      return false, nil, e, address
-    end
-  end
-  return unpack(try(function() return { address:resolve(S, e, 1, b, eval) } end))
+  return false, nil, e, address
 end
 
 

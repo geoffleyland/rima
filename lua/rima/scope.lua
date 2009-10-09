@@ -181,8 +181,8 @@ function scope.find(s, name, op, results)
 
   -- We have to keep looking if there's a parent scope and
   if S.parent and
-     -- we're planning to read, and we haven't found anything yet
-     ((op == "read" and not results) or
+     -- we're planning to read
+     (op == "read" or
      -- we're planning to write, and we haven't reached a scope we can overwrite
       (op == "write" and not S.overwrite)) then
     results = find(S.parent, name, op, results)
