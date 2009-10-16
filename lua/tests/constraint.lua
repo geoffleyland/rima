@@ -19,7 +19,7 @@ function test(show_passes)
   local S = scope.create{ ["a,b"]=rima.free() }
 
   local c
-  T:expect_ok(function() c = constraint:new(a + b, "==", b) end)
+  T:expect_ok(function() c = constraint:new({}, a + b, "==", b) end)
   T:check_equal(rima.repr(c), "a + b == b")
 
   return T:close()

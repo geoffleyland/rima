@@ -51,8 +51,8 @@ function formulation:set_objective(o, sense)
   self.objective = o
 end
 
-function formulation:add(lhs, type, rhs, ...)
-  self.constraints[#self.constraints+1] = constraint:new(lhs, type, rhs, ...)
+function formulation:add(sets, lhs, type, rhs)
+  self.constraints[#self.constraints+1] = constraint:new(sets, lhs, type, rhs)
 end
 
 function formulation:set(values)

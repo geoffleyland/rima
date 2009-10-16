@@ -15,10 +15,10 @@ module(...)
 
 local constraint = object:new(_M, "constraint")
 
-function constraint:new(lhs, rel, rhs, ...)
+function constraint:new(sets, lhs, rel, rhs)
   assert(rel == "==" or rel == ">=" or rel == "<=")
 
-  o = { type=rel, lhs=lhs, rhs=rhs, sets=rima.iteration.set_list:new{...} }
+  o = { type=rel, lhs=lhs, rhs=rhs, sets=rima.iteration.set_list:new(sets) }
 
   return object.new(self, o)
 end
