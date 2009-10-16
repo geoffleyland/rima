@@ -86,7 +86,7 @@ end
 function ref.proxy_mt.__bind(r, S)
   local e, found_scope = scope.lookup(S, r.name, r.scope)
   if not e then
-    return ref:new{ name=r.name, type=r.type, scope=r.scope }  
+    return ref:new{ name=r.name, type=r.type, scope=r.scope or S }
   elseif expression.defined(e) then
     return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
   else
