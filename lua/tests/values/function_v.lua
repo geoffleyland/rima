@@ -164,6 +164,24 @@ function test(show_passes)
     T:expect_error(function() E(b(1)[1], S) end, "error evaluating 'b%(1%)%[1%]' as 'a%[1, 1, 1%]':.*address: error resolving 'a%[1, 1, 1%]': 'a%[1, 1%]' is not indexable %(got '5' number%)")
   end
 
+  do
+    local f, x, y = rima.R"f, x, y"
+    local S = rima.scope.create{ f = rima.F({y}, y + x, { x=5 }) }
+    T:check_equal(E(f(x), S), "5 + x")
+    S.x = 100
+    T:check_equal(E(f(x), S), 105)
+  end
+
+  do
+    local f, x, y = rima.R"f, x, y"
+    local S = rima.scope.create{ f = rima.F({y}, y + x, { x=5 }) }
+    local e = E(f(x), S)
+    local S2 = rima.scope.spawn(S)
+    S2.x = 200
+    T:check_equal(E(e, S2), 205)
+  end
+
+
   -- more tests in expression
 
   return T:close()
