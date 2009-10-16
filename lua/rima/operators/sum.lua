@@ -16,7 +16,11 @@ local sum = object:new(_M, "sum")
 sum.precedence = 1
 
 function rima.sum(sets, e)
-  return expression:new(sum, sets, e)
+  if e then
+    return expression:new(sum, sets, e)
+  else
+    return function(e2) return expression:new(sum, sets, e2) end
+  end
 end
 
 
@@ -33,7 +37,11 @@ end
 
 function sum.__repr(args, format)
   local sets, e = args[1], args[2]
-  return "sum({"..expression.concat(sets, format).."}, "..rima.repr(e, format)..")"
+  if format and format.dump then
+    return "sum({"..expression.concat(sets, format).."}, "..rima.repr(e, format)..")"
+  else
+    return "sum{"..expression.concat(sets, format).."}("..rima.repr(e, format)..")"
+  end
 end
 
 
