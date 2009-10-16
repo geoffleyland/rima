@@ -19,6 +19,16 @@ function rima.sum(sets, e)
   return expression:new(sum, sets, e)
 end
 
+
+function sum.construct(args)
+  local sets = args[1]
+  if not object.isa(sets, rima.iteration.set_list) then
+    sets = rima.iteration.set_list:new(sets)
+  end
+  return { sets, args[2] }
+end
+
+
 -- String Representation -------------------------------------------------------
 
 function sum.__repr(args, format)
@@ -31,7 +41,7 @@ end
 
 
 function sum.__eval(args, S, eval)
-  local sets, e = rima.iteration.set_list:new(args[1]), args[2]
+  local sets, e = args[1], args[2]
   local defined_terms, undefined_terms = {}, {}
 
   -- Iterate through all the elements of the sets, collecting defined and
