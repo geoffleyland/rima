@@ -35,7 +35,7 @@ function constraint:linearise(S)
 
   local function list()
     for S2, undefined in self.sets:iterate(S) do
-      if undefined[1] then
+      if undefined and undefined[1] then
         error("Some of the constraint's indices are undefined")
       end
       local constant, lhs = rima.linearise(e, S2)
@@ -55,7 +55,7 @@ function constraint:tostring(S)
       local lhs = rima.repr(expression.eval(self.lhs, S2))
       local rhs = rima.repr(expression.eval(self.rhs, S2))
       local s = lhs.." "..self.type.." "..rhs
-      if undefined[1] then s = s.." for all "..rima.repr(undefined) end
+      if undefined and undefined[1] then s = s.." for all "..rima.repr(undefined) end
       coroutine.yield(s)
     end
   end

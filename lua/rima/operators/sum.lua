@@ -56,7 +56,7 @@ function sum.__eval(args, S, eval)
   -- undefined terms
   for S2, undefined in sets:iterate(S) do
     local z = eval(e, S2)
-    if undefined[1] then
+    if undefined and undefined[1] then
       -- Undefined terms are stored in groups based on the undefined sum
       -- indices (so we can group them back into sums over the same indices)
       local name = rima.concat(undefined, ",", rima.repr)
