@@ -13,8 +13,8 @@ This simple problem is copied from an OSI example:
 io.write("\nSimple Test:\n")
 local x, y = rima.R"x, y"
 local f = rima.formulation:new()
-f:add(x + 2*y, "<=", 3)
-f:add(2*x + y, "<=", 3)
+f:add({}, x + 2*y, "<=", 3)
+f:add({}, 2*x + y, "<=", 3)
 f:set_objective(x + y, "maximise")
 f:set{ ["x, y"] = rima.positive() }
 io.write("Algebraic Form:\n")

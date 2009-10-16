@@ -14,12 +14,12 @@ http://dashoptimization.com/home/cgi-bin/example.pl?id=mosel_model_2_2
 items, item = rima.R"items, item"       -- items to put in the knapsack
 capacity = rima.R"capacity"             -- capacity of the knapsack
 
-value = rima.sum({rima.pairs(items, "_", item)}, item.picked * item.value)
-weight = rima.sum({rima.pairs(items, "_", item)}, item.picked * item.weight)
+value = rima.sum{["_, item"]=rima.pairs(items)}(item.picked * item.value)
+weight = rima.sum{["_, item"]=rima.pairs(items)}(item.picked * item.weight)
 
 knapsack = rima.formulation:new()
 knapsack:set_objective(value, "maximise")
-knapsack:add(weight, "<=", capacity)
+knapsack:add({}, weight, "<=", capacity)
 knapsack:scope().items[rima.default].picked = rima.binary()
 
 io.write("\nKnapsack Problem\n")

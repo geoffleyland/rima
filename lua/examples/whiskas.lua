@@ -47,8 +47,8 @@ local f = rima.R"f"                     -- ingredient fractions (result)
 blending_problem = rima.formulation:new()
 blending_problem:scope().f[rima.default] = rima.positive()
 blending_problem:set_objective(rima.sum({I}, c[I] * f[I]), "minimise")
-blending_problem:add(rima.sum({I}, f[I]), "==", T)
-blending_problem:add(rima.sum({I}, n[I][N] * f[I]), ">=", T * l[N], N)
+blending_problem:add({}, rima.sum({I}, f[I]), "==", T)
+blending_problem:add({N}, rima.sum({I}, n[I][N] * f[I]), ">=", T * l[N])
 
 -- The formulation can describe itself
 io.write("\nBlending Problem\n")
