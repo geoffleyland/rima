@@ -37,7 +37,7 @@ function address:__repr(format)
       local count = 0
       local s = ""
       for _, a in ipairs(self) do
-        if type(a) == "string" then
+        if type(a) == "string" and a:match("^[_%a][_%w]*$") then
           if mode ~= "s" then
             mode = "s"
             s = s.."]"
@@ -53,7 +53,11 @@ function address:__repr(format)
             s = s..", "
           end
           count = count + 1
-          s = s..rima.repr(a, format)
+          if type(a) == "string" then
+            s = s.."'"..a.."'"
+          else
+            s = s..rima.repr(a, format)
+          end
         end
       end
       if mode == "v" then s = s.."]" end
