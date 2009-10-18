@@ -60,6 +60,14 @@ function test(show_passes)
     T:check_equal(E(rima.sum({["_, v"]=rima.ipairs(t)}, v.a * v.b), S), "5*t[1].a + 6*t[2].a + 7*t[3].a")
   end
 
+  do
+    local x, X = rima.R"x, X"
+    local S = rima.scope.create{ X = {a=1, b=2} }
+    T:check_equal(E(rima.sum({["_, x"]=rima.pairs(X)}, x), S), 3)
+    local S1 = rima.scope.spawn(S, { X = {c=3, d=4} })
+    T:check_equal(E(rima.sum({["_, x"]=rima.pairs(X)}, x), S1), 10)
+  end
+    
   return T:close()
 end
 

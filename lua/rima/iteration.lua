@@ -110,8 +110,47 @@ end
 
 
 function iterator:eval(S)
-  return iterator:new(expression.bind(self.exp, S), self.order, self.values,
-    self.names, expression.eval(self.exp, S))
+  -- We're looking to evaluate to a table.
+  -- Unfortunately, the elements of the table might be spread over several
+  -- layers of scope, so we have to work backwards through the scopes
+  -- looking for other versions of the table.
+  -- This might get easier if resolve was rewritten, but I'm just not ready
+  -- to face that yet...
+  local b = expression.bind(self.exp, S)
+  local found = {}
+  local es = {}
+  local r
+  
+  while S do
+    local e = expression.eval(self.exp, S)
+    if not expression.defined(e) and not es[1] then
+      r = e
+      break
+    end
+    local m = getmetatable(e)
+    local i = m and m.__iterate
+    if i then
+      r = e
+      break
+    end
+    
+    if not found[e] then
+      found[e] = true
+      es[#es+1] = e
+    end
+    S = proxy.O(S).parent
+  end
+
+  if not r then
+    r = {}
+    for _, e in ipairs(es) do
+      for k, v in pairs(e) do
+        if not r[k] then r[k] = v end
+      end
+    end
+  end
+
+  return iterator:new(b, self.order, self.values, self.names, r)
 end
 
 
