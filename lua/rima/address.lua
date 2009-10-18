@@ -260,7 +260,7 @@ function address:resolve(S, current, i, base, eval)
       if r1[1] then return unpack(r1) end
     end
     -- including any default values
-    next = current[rima.default]
+    next = scope.default(current)
     if next then
       local r2 = { self:resolve(S, next, i+1, base, eval) }
       if r2[1] then return unpack(r2) end

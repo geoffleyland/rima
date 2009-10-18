@@ -67,6 +67,7 @@ local expression = require("rima.expression")
 -- Scope names -----------------------------------------------------------------
 
 local scope_names = setmetatable({}, { __mode="v" })
+local defaults = setmetatable({}, { __mode="k" })
 
 local function new_name(prefix)
 
@@ -172,6 +173,12 @@ scope_proxy_mt.__tostring = scope_proxy_mt.__repr
 
 
 -- Accessing and setting -------------------------------------------------------
+
+
+function scope.default(t)
+  return defaults[t]
+end
+
 
 function scope.find(s, name, op, results)
   -- return all the values that could bind to the name in this and parent scopes
@@ -311,10 +318,19 @@ function scope.newindex(s, name, addr, index, value)
   local S = proxy.O(s)
 
   local function newtable(v, name)
-    local z = v[name]
-    if not z then
-      z = {}
-      v[name] = z
+    local z
+    if name == rima.default then
+      z = defaults[v]
+      if not z then
+        z = {}
+        defaults[v] = z
+      end
+    else
+      z = v[name]
+      if not z then
+        z = {}
+        v[name] = z
+      end
     end
     return z
   end
@@ -335,7 +351,11 @@ function scope.newindex(s, name, addr, index, value)
       scope.newindex(s, name, new_address, k, v)
     end
   else
-    c[index] = value
+    if index == rima.default then
+      defaults[c] = value
+    else
+      c[index] = value
+    end
   end
 end
 
