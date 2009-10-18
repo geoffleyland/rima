@@ -116,7 +116,24 @@ end
 
 
 function iterator:defined()
-  return expression.defined(self.result)
+  -- we're looking for a table (or something iterable)
+  -- if the table is empty, we'll call it undefined.
+  -- This could be wrong in some cases (I hope not), but usually
+  -- it means we're being evaluated with partial data.
+  local r = self.result
+  if expression.defined(r) then
+    local m = getmetatable(r)
+    local i = m and m.__iterate
+    if i then
+      return true
+    elseif next(r) then
+      return true
+    else
+      return false
+    end
+  else
+    return false
+  end
 end
 
 

@@ -126,19 +126,19 @@ function test(show_passes)
     local e1 = rima.sum({["_, x"]=rima.ipairs(X)}, x.y)
     T:check_equal(e1, "sum{_, x in ipairs(X)}(x.y)")
     T:check_equal(D(e1), "sum({_, x in ipairs(ref(X))}, index(ref(x), address(string(y))))")
-    T:check_equal(E(e1, S), 0)
+    T:check_equal(E(e1, S), "sum{_, x in ipairs(X)}(x.y)")
     T:check_equal(E(e1, S2), 6)
 
     local e2 = rima.sum({X}, X.value.y)
     T:check_equal(e2, "sum{X}(X.value.y)")
     T:check_equal(D(e2), "sum({X in ref(X)}, index(ref(X), address(string(value), string(y))))")
---    T:check_equal(E(e2, S), 0)
+    T:check_equal(E(e2, S), "sum{X}(X.value.y)")
     T:check_equal(E(e2, S2), 6)
 
     local e3 = rima.sum({x=X}, x.value.y)
     T:check_equal(e3, "sum{x in X}(x.value.y)")
     T:check_equal(D(e3), "sum({x in ref(X)}, index(ref(x), address(string(value), string(y))))")
---    T:check_equal(E(e3, S), 0)
+    T:check_equal(E(e3, S), "sum{x in X}(x.value.y)")
     T:check_equal(E(e3, S2), 6)
   end
 
