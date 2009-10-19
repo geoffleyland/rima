@@ -39,9 +39,8 @@ local limits         = rima.R"limits"       -- limits on nutrients
 local quantity       = rima.R"quantity"     -- quantity of pet food to make
 
 -- Set up the blending problem
-total_cost = rima.sum{["_, i"]=rima.pairs(ingredients)}(i.cost * i.quantity)
-total_quantity = rima.sum{["_, i"]=rima.pairs(ingredients)}(i.quantity)
-
+total_cost = rima.sum{i=ingredients}(i.cost * i.quantity)
+total_quantity = rima.sum{i=ingredients}(i.quantity)
 
 blending_problem = rima.formulation:new()
 blending_problem:scope().ingredients[rima.default].quantity = rima.positive()
@@ -49,17 +48,17 @@ blending_problem:scope().ingredients[rima.default].quantity = rima.positive()
 blending_problem:set_objective(total_cost, "minimise")
 blending_problem:add({}, total_quantity, "==", quantity)
 
-blending_problem:add({n=nutrients}, rima.sum{["_, i"]=rima.pairs(ingredients)}(i.composition[n] * i.quantity), ">=", quantity * limits[n])
+blending_problem:add({n=nutrients}, rima.sum{i=ingredients}(i.composition[n] * i.quantity), ">=", quantity * limits[n])
 
 -- The formulation can describe itself
 io.write("\nBlending Problem\n")
 blending_problem:write()
 --[[
 Minimise:
-  sum{_, i in pairs(ingredients)}(i.cost*i.quantity)
+  sum{i in ingredients}(i.cost*i.quantity)
 Subject to:
-  sum{_, i in pairs(ingredients)}(i.quantity) == quantity
-  sum{_, i in pairs(ingredients)}(i.composition[n]*i.quantity) >= limits[n]*quantity for all {n in nutrients}
+  sum{i in ingredients}(i.quantity) == quantity
+  sum{i in ingredients}(i.composition[n]*i.quantity) >= limits[n]*quantity for all {n in nutrients}
 --]]
 
 --[[

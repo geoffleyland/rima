@@ -22,7 +22,7 @@ local e = rima.R"e"                     -- positive and negative Errors at each 
 local curve_fit = rima.formulation:new()
 curve_fit:add({p=P},
   rima.sum{t=T}(w[t] * y[t][p]) +
-  rima.sum{q=Q}(q.value * e[q][p]), "==",
+  rima.sum{q=Q}(q * e[q][p]), "==",
   s[p])
 curve_fit:add({q=Q, p=P}, max_error, ">=", e[q][p])
 curve_fit:add({}, sum_error, "==", rima.sum{q=Q, p=P}(e[q][p]))
