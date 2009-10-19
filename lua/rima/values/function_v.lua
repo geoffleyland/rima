@@ -91,8 +91,8 @@ function function_v:call(args, S, eval)
 
   local outputs = self:check_args(args)
 
-  local caller_scope = (self.outputs[1] and rima.scope.spawn(S, nil, {overwrite=true, rewrite=true})) or S
-  local function_scope = (self.inputs[1] and rima.scope.spawn(self.S or S, nil, {overwrite=true, rewrite=true})) or S
+  local caller_scope = (self.outputs[1] and rima.scope.spawn(S, nil, {overwrite=true, rewrite=true, no_undefined=true})) or S
+  local function_scope = (self.inputs[1] and rima.scope.spawn(self.S or S, nil, {overwrite=true, rewrite=true, no_undefined=true})) or S
   
   for i, a in ipairs(outputs) do
     caller_scope[rima.repr(a)] = 0

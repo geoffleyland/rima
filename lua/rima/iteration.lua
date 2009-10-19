@@ -340,29 +340,29 @@ function set_list:iterate(S)
   local scopes = {}
   local undefined_sets = {}
 
-  local function z(i)
+  local function z(i, cS)
     i = i or 1
+    cS = cS or S
     if not self[i] then
       local ud
       if undefined_sets[1] then ud = set_list:copy(undefined_sets) end
-      coroutine.yield(scopes[i-1] or S, ud)
+      coroutine.yield(cS, ud)        
     else
-      if not scopes[i] then
-        scopes[i] = scope.spawn(scopes[i-1] or S, nil, {overwrite=true, rewrite=true})
-      end
-      local it = self[i]:eval(scopes[i-1] or S)
+      local it = self[i]:eval(cS)
       if it:defined() then
         local results = it:results()
         for variables in it:iterate() do
-          results(variables, scopes[i])
-          z(i+1)
+          local nS = scope.spawn(cS, nil, {overwrite=true, no_undefined=true})
+          results(variables, nS)
+          z(i+1, nS)
         end
       else
+        local nS = scope.spawn(cS, nil, {overwrite=true, no_undefined=true})
         undefined_sets[#undefined_sets+1] = it
         for _, n in ipairs(it.names) do
-          scope.hide(scopes[i], n)
+          scope.hide(nS, n)
         end
-        z(i+1)
+        z(i+1, nS)
         undefined_sets[#undefined_sets] = nil
       end
     end

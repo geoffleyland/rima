@@ -133,6 +133,7 @@ function scope.spawn(S, values, options)
   local S2 = new{ parent = S,
     overwrite = (options.overwrite and true or false),
     rewrite = (options.rewrite and true or false),
+    no_undefined = (options.no_undefined and true or false),
     name = options.name }
   if values then set(S2, values) end
   return S2
@@ -177,6 +178,17 @@ scope_proxy_mt.__tostring = scope_proxy_mt.__repr
 
 function scope.default(t)
   return defaults[t]
+end
+
+
+function scope.scope_for_undefined(s)
+  if not s then return nil end
+  local S = proxy.O(s)
+  if S.no_undefined and S.parent then
+    return scope_for_undefined(S.parent)
+  else
+    return s
+  end
 end
 
 
@@ -252,8 +264,12 @@ function scope.lookup(s, name, bound_scope)
   s = find_bound_scope(s, bound_scope, name)
   if not s then return end
   local r = find(s, name, "read")
-  if r and r[1][1] ~= hidden then
-    return unpack(r[1])                         -- returning multiple values so no if..and..or
+  if r then
+    if r[1][1] ~= hidden then
+      return unpack(r[1])                     -- returning multiple values so no if..and..or
+    else
+      return nil, r[1][2], true
+    end
   end
 end
 
