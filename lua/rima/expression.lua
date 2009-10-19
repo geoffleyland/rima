@@ -3,7 +3,7 @@
 
 local error = error
 local ipairs, pairs = ipairs, pairs
-local require, rawtype, tostring = require, type, tostring
+local require, rawtype, tostring, unpack = require, type, tostring, unpack
 local getmetatable, setmetatable = getmetatable, setmetatable
 local rawget, rawset = rawget, rawset
 
@@ -159,15 +159,24 @@ end
 function expression.bind(e, S)
   local mt = getmetatable(e)
   if mt then
+    local r
+    local E = proxy.O(e)
+    local t = E._tags
     local f = rawget(mt, "__bind")
     if f then
-      return f(proxy.O(e), S)
+      r = { f(E, S) }
     else
       f = rawget(mt, "__eval")
       if f then
-        return f(proxy.O(e), S, bind)
+        r = { f(E, S, bind) }
       end
     end
+    
+    if r then
+      if t and not defined(r[1]) then tag(r[1], t) end
+      return unpack(r)
+    end
+    
   end
   return e
 end
@@ -177,7 +186,11 @@ function expression.eval(e, S)
   local mt = getmetatable(e)
   local f = mt and rawget(mt, "__eval")
   if f then
-    return f(proxy.O(e), S, eval)               -- __eval can return multiple values so no if ... and ... or tricks
+    local E = proxy.O(e)
+    local t = E._tags
+    local r = { f(E, S, eval) }
+    if t and not defined(r[1]) then tag(r[1], t) end
+    return unpack(r)
   else
     return e
   end
@@ -205,6 +218,32 @@ function expression.type(e, S)
   return f(proxy.O(e), S)
 end
 
+
+-- Tags ------------------------------------------------------------------------
+
+function expression.tag(e, t)
+  local mt = getmetatable(e)
+  local f = mt and rawget(mt, "__eval")
+  if not f then
+    error(("error tagging '%s': the object isn't an expression"):
+      format(rima.repr(e)))
+  end
+  local E = proxy.O(e)
+  E._tags = E._tags or {}
+  local et = E._tags
+  for k,v in pairs(t) do et[k] = v end
+end
+
+
+function expression.tags(e)
+  local r
+  local mt = getmetatable(e)
+  local f = mt and rawget(mt, "__eval")
+  if f then
+    r = proxy.O(e)._tags
+  end
+  return r or {}
+end
 
 -- Overloaded operators --------------------------------------------------------
 

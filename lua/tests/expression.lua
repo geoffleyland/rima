@@ -109,6 +109,18 @@ function test(show_passes)
     T:check_equal(rima.E(f(x), S), 7)
   end
 
+  -- Tagged expressions
+  do
+    local x, y = rima.R"x, y"
+    local e = x + y
+    expression.tag(e, { check = 1 })
+    T:check_equal(expression.tags(e).check, 1)
+    T:check_equal(expression.tags(rima.E(e, { x=1 })).check, 1)
+    T:check_equal(expression.tags(rima.E(e, { y=2 })).check, 1)
+    T:expect_ok(function() local a = expression.tags(rima.E(e, { x=1, y=2 })).check end)
+    T:check_equal(expression.tags(rima.E(e, { x=1, y=2 })).check, nil)
+  end
+
   return T:close()
 end
 
