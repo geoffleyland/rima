@@ -83,7 +83,6 @@ end
 
 iterator = object:new({}, "iterator")
 
-
 function iterator:new(exp, order, values, names, result)
   return object.new(self, {exp=exp, order=order, values=values, names=names, result=result})
 end
@@ -107,6 +106,7 @@ function iterator:__repr(format)
     end
   end
 end
+iterator.__tostring = iterator.__repr
 
 
 function iterator:eval(S)
