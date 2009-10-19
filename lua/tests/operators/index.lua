@@ -63,12 +63,6 @@ function test(show_passes)
   end
 
   do
-    local a, b, i = rima.R"a, b, i"
-    local S = rima.scope.create{ a = { 5 }, b = { c=3 }, i = iteration.element:new({}, 1, "c") }
-    T:check_equal(E(a[i] * b[i], S), 15)
-  end
-
-  do
     local a, b = rima.R"a, b"
     local t = { b = { x = { y = 3}, z = 10 } }
     expression.set(a.b.c, t, 10)

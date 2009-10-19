@@ -8,6 +8,7 @@ local error, getmetatable, require, type = error, getmetatable, require, type
 local object = require("rima.object")
 local proxy = require("rima.proxy")
 local types = require("rima.types")
+local index_op = require("rima.operators.index")
 require("rima.private")
 local rima = rima
 
@@ -17,24 +18,25 @@ local scope = require("rima.scope")
 local expression = require("rima.expression")
 local ref = require("rima.ref")
 
+-- Ord -------------------------------------------------------------------------
 
--- Set elements ----------------------------------------------------------------
-
-element = object:new({}, "element")
-function element:new(set, index, value)
-  return object.new(self, {set=set, index=index, value=value})
-end
+ord = object:new({}, "ord")
 
 
-function element:__repr(f)
-  if f and f.dump then
-    return ("element(%s, %s, %s)"):format(
-      rima.repr(self.set, f), rima.repr(self.index, f), rima.repr(self.value, f))
+function ord.__eval(args, S, eval)
+  local a = expression.bind(args[1], S)
+  local k = expression.tags(a).key
+  if not k or eval == expression.bind then
+    return expression:new(ord, a)
   else
-    return rima.repr(self.value, f)
+    return k
   end
 end
-element.__tostring = element.__repr
+
+
+function rima.ord(e)
+  return expression:new(ord, e)
+end
 
 
 -- Ranges ----------------------------------------------------------------------
@@ -220,13 +222,15 @@ function iterator:results()
       if names[1] and names[1] ~= "_" then S[names[1]] = v[1] end
       if names[2] and names[2] ~= "_" then S[names[2]] = exp[v[1]] end
     end
-  elseif self.values == "values" then
-    return function(v, S) S[names[1]] = exp[v[1]] end
   elseif self.values == "elements" then
     local m = getmetatable(self.result)
     local i = m and m.__iterate
     if not i then
-      return function(v, S) S[names[1]] = element:new(exp, v[1], exp[v[1]]) end
+      return function(v, S)
+        local e = expression:new(index_op, exp, v[1])
+        expression.tag(e, { set_expression=exp, set=self.result, key=v[1], value=v[2] })
+        S[names[1] ] = e
+      end
     else
       return function(v, S)
         local j = #v

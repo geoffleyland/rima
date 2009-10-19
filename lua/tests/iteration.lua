@@ -27,9 +27,10 @@ function test(show_passes)
   T:check_equal(rima.sum{y=Q}(x[y]), "sum{y in Q}(x[y])")
   T:check_equal(rima.sum{Q=Q}(x[Q]), "sum{Q}(x[Q])")
   T:check_equal(E(rima.sum({y=Q}, x[y]), S), 60)
-  T:check_equal(rima.sum({y=Q}, y.index), "sum{y in Q}(y.index)")
-  T:check_equal(E(rima.sum{y=Q}(y.index), S), 6)
-  T:check_equal(E(rima.sum{y=x}(y.value), S), 60)
+  T:check_equal(rima.sum({y=Q}, rima.ord(y)), "sum{y in Q}(ord(y))")
+  T:check_equal(E(rima.sum{y=Q}(rima.ord(y)), S), 6)
+
+  T:check_equal(E(rima.sum{y=x}(y), S), 60)
 
   T:check_equal(rima.sum({R}, R), "sum{R}(R)")
   T:check_equal(rima.sum({R=rima.range(2, r)}, R), "sum{R in range(2, r)}(R)")

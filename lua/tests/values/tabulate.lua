@@ -30,10 +30,10 @@ function test(show_passes)
     local Q, x, y = rima.R"Q, x, y"
     local e = rima.sum({Q}, x[Q])
     local S = scope.create{ Q={4, 5, 6} }
-    S.x = rima.tabulate({y}, y.value^2)
+    S.x = rima.tabulate({y}, y^2)
     T:check_equal(rima.E(e, S), 77)
     T:expect_error(function() rima.E(x[1][2], S) end,
-      "error evaluating 'x%[1, 2%]' as 'tabulate%({y}, y%.value%^2%)':.*address: error resolving 'y%.value': 'y' is not indexable %(got '1' number%)")
+      "error evaluating 'x%[1, 2%]' as 'y%^2%[2%]':.*address: error resolving 'y%^2%[2%]': 'y%^2' is not indexable %(got '1' number%)")
   end
 
   do

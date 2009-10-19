@@ -150,7 +150,7 @@ end
 
 function address:defined()
   for _, a in ipairs(self) do
-    if not expression.defined(a.value) then
+    if not expression.defined(a.value) and not expression.tags(a.exp).key then
       return false
     end
   end
@@ -173,16 +173,18 @@ function address:resolve(S, current, i, base, eval)
   end
 
   local function index(t, j, b)
-    if object.isa(j, iteration.element) then
-      if t[1] then
-        self[i].value = j.index
-        return t[j.index]
-      else
-        self[i].value = j.value
-        return t[j.value]
-      end
-    else
+    local tags = expression.tags(b)
+    local k = tags.key
+    local v = tags.value
+    if not k then
       return t[j]
+    end
+    if type(k) == "number" and not t[1] then
+      self[i].value = v
+      return t[v]
+    else
+      self[i].value = k
+      return t[k]
     end
   end
 
