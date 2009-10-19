@@ -53,7 +53,7 @@ function tabulate_type:__address(S, a, i, eval)
   S2 = scope.spawn(S, nil, {overwrite=true})
 
   for _, j in ipairs(self.indexes) do
-    S2[rima.repr(j)] = eval(a[i], S)
+    S2[rima.repr(j)] = eval(a:value(i), S)
     i = i + 1
   end
 
@@ -61,7 +61,7 @@ function tabulate_type:__address(S, a, i, eval)
   if not status then
     local i = 0
     local args = rima.concat(self.indexes, ", ",
-      function(si) i = i + 1; return ("%s=%s"):format(rima.repr(si), rima.repr(a[i])) end)
+      function(si) i = i + 1; return ("%s=%s"):format(rima.repr(si), rima.repr(a:value(i))) end)
     error(("tabulate: error evaluating '%s' as '%s' where %s:\n  %s"):
       format(__repr(self), rima.repr(self.expression), args, r:gsub("\n", "\n  ")), 0)
   end

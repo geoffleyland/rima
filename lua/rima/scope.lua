@@ -341,7 +341,7 @@ function scope.newindex(s, name, addr, index, value)
   -- check() made sure it's ok for us.  Here we're just building any
   -- necessary intermediate tables.
   if addr then
-    for i, a in ipairs(addr) do
+    for i, a in addr:values() do
       c = newtable(c, a)
     end
   end

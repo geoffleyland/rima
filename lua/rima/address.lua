@@ -105,6 +105,25 @@ function address:sub(i, j)
 end
 
 
+function address:value(i)
+  return self[i]
+end
+
+
+local function avnext(a, i)
+  i = i + 1
+  local v = a[i]
+  if v then
+    return i, v
+  end
+end
+
+
+function address:values()
+  return avnext, self, 0
+end
+
+
 -- evaluation ------------------------------------------------------------------
 
 function address:__eval(S, eval)

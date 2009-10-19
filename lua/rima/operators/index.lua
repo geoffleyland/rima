@@ -143,7 +143,7 @@ function index.__set(args, t, v)
           format(__repr(args), rima.repr(v), rima.repr(cv)), 0)
       end
       if not cv then t[name] = {} end
-      s(t[name], address[i+1], i+1)
+      s(t[name], address:value(i+1), i+1)
     end
   end
   s(t, name, 0)
