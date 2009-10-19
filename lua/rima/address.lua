@@ -23,6 +23,14 @@ local iteration = require("rima.iteration")
 
 local address = object:new(_M, "address")
 
+function address:new(a)
+  local a2 = {}
+  for i, v in ipairs(a) do
+    a2[i] = { exp=v, value=v }
+  end
+  return object.new(self, a2)
+end
+
 
 -- string representation -------------------------------------------------------
 
@@ -31,12 +39,16 @@ function address:__repr(format)
     return ""
   else
     if format and format.dump then
-      return ("address(%s)"):format(expression.concat(self, format))
+      return ("address(%s)"):format(rima.concat(self, ", ",
+        function(a)
+          return rima.repr(a.value, format)
+        end))
     else
       local mode = "s"
       local count = 0
       local s = ""
       for _, a in ipairs(self) do
+        a = a.value
         if type(a) == "string" and a:match("^[_%a][_%w]*$") then
           if mode ~= "s" then
             mode = "s"
@@ -74,19 +86,19 @@ function address.__add(a, b)
   local z = {}
   if object.isa(a, address) then
     for i, a in ipairs(a) do
-      z[i] = a
+      z[i] = { exp=a.exp, value=a.value }
     end
   else
-    z[1] = a
+    z[1] = { exp=a, value=a }
   end
   if object.isa(b, address) then
     for _, a in ipairs(b) do
-      z[#z+1] = a
+      z[#z+1] = { exp=a.exp, value=a.value }
     end
   else
-    z[#z+1] = b
+    z[#z+1] = { exp=b, value=b }
   end
-  return address:new(z)
+  return object.new(address, z)
 end
 
 
@@ -99,14 +111,14 @@ function address:sub(i, j)
 
   local z = {}
   for k = i, j do
-    z[#z+1] = self[k]
+    z[#z+1] = { exp=self[k].exp, value=self[k].value }
   end
-  return address:new(z)
+  return object.new(address, z)
 end
 
 
 function address:value(i)
-  return self[i]
+  return self[i].value
 end
 
 
@@ -114,7 +126,7 @@ local function avnext(a, i)
   i = i + 1
   local v = a[i]
   if v then
-    return i, v
+    return i, v.value
   end
 end
 
@@ -127,13 +139,18 @@ end
 -- evaluation ------------------------------------------------------------------
 
 function address:__eval(S, eval)
-  return address:new(rima.imap(function(a) return eval(a, S) end, self))
+  local a = {}
+  for i, v in ipairs(self) do
+    local b = expression.bind(v.exp, S)
+    a[i] = { exp=b, value=eval(v.value, S) }
+  end
+  return object.new(address, a)
 end
 
 
 function address:defined()
   for _, a in ipairs(self) do
-    if not expression.defined(a) then
+    if not expression.defined(a.value) then
       return false
     end
   end
@@ -145,25 +162,27 @@ end
 
 -- resolve an address by working through its indexes recursively
 function address:resolve(S, current, i, base, eval)
-  local a = self[i]
-  if not a then return true, current, base, self end
+  local si = self[i]
+  if not si then return true, current, base, self end
+  local a = si.value
+  local b = si.exp
 
   local function fail()
     error(("address: error resolving '%s%s': '%s%s' is not indexable (got '%s' %s)"):
       format(rima.repr(base), rima.repr(self:sub(1, i)), rima.repr(base), rima.repr(self:sub(1, i-1)), rima.repr(current), object.type(current)))
   end
 
-  local function index(v, j)
+  local function index(t, j, b)
     if object.isa(j, iteration.element) then
-      if v[1] then
-        self[i] = j.index
-        return v[j.index]
+      if t[1] then
+        self[i].value = j.index
+        return t[j.index]
       else
-        self[i] = j.value
-        return v[j.value]
+        self[i].value = j.value
+        return t[j.value]
       end
     else
-      return v[j]
+      return t[j]
     end
   end
 
@@ -272,7 +291,7 @@ function address:resolve(S, current, i, base, eval)
 
   -- handle tables and things we can index just by indexing
   elseif (mt and mt.__index) or type(current) == "table" then
-    local next = index(current, a)
+    local next = index(current, a, b)
     local r1
     if next then
       r1 = { self:resolve(S, next, i+1, base, eval) }
