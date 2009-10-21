@@ -1,16 +1,17 @@
 # Rima Documentation
 
 - [Home Page](index.html)
-- [Features](features.html)
-- [Quick Start Modelling](quick.html)
+- [Quick Look at a Model](knapsack.html)
 - [Obtaining and Installing Rima](install.html)
-- User Guide
+- Rima Manual
     --! ignore
     - [Expressions](expressions.html)
     - [Arrays and Structures](arrays.html)
     - [Sums](sums.html)
     - [Functions](functions.html)
     - [Tabulation](tabulation.html)
+    - [Modelling](modelling.html)
+    - [Scopes](scopes.html)
 - Examples (Lua code, not html)
     --! ignore
     - [Simple Example](examples/simple.lua)

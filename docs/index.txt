@@ -32,16 +32,15 @@ Currently, bindings are available for:
 ## Find out More
 
 If Rima has got your attention,
-you can [read more about Rima's features](features.html),
-read [Rima's user guide](contents.html),
-starting with how to [build expressions](expressions.html),
-skip to some [examples of optimization models](optimization.html) or
-[obtain Rima](getit.html),
+you can [have a look at a Rima model](knapsack.html),
+read [Rima's user guide](contents.html) (including example models),
+starting with how to [build expressions](expressions.html)
+or you can [get Rima](install.html),
 
 Like Lua, Rima is available under the [MIT Licence](http://www.opensource.org/licenses/mit-license.php),
 and source code is freely available.
 Rima's [development site](http://code.google.com/p/rima/) is hosted at [Google Code](http://code.google.com)
 
 Rima is developed by [Incremental](http://www.incremental.co.nz/).
-You can contact us <rima@incremental.co.nz>.
+You can contact us at <rima@incremental.co.nz>.
 

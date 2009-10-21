@@ -2,7 +2,7 @@
 
 # Rima Manual: Tabulation
 
-[ [Contents](contents.html) | Previous: [Functions](functions.html) | Next: [Tabulation](tabulation.html) ]
+[ [Contents](contents.html) | Previous: [Functions](functions.html) | Next: [Optimization Models](modelling.html) ]
 
 Sometimes there's not much difference between indexing a variable and calling a function.
 Rima's `tabulate` function allows you to make the link:
@@ -26,4 +26,4 @@ Note that rima always iterates through sets with ipairs, not pairs, so indexes a
 and you can't expect to see any non-array members of the table defining the set.
 
 
-[ [Contents](contents.html) | Previous: [Functions](functions.html) | Next: [Tabulation](tabulation.html) ]
+[ [Contents](contents.html) | Previous: [Functions](functions.html) | Next: [Optimization Models](modelling.html) ]
