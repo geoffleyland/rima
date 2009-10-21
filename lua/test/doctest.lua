@@ -78,14 +78,44 @@ end
 
 
 -- Tricks to capture output.  Of course this doesn't work for io.write yet.
-local print_result
-local function myprint(...)
-  print_result = ""
+local current_output = ""
+local function reset_output()
+  current_output = ""
+end
+
+local function doctest_print(...)
   for i = 1, select("#", ...) do
-    if i > 1 then print_result = print_result.."\t" end
-    print_result = print_result..tostring(select(i, ...))
+    if i > 1 then current_output = current_output.."\t" end
+    current_output = current_output..tostring(select(i, ...))
   end
 end
+
+local function doctest_io_write(...)
+  for _, s in ipairs{...} do
+    current_output = current_output..s
+  end
+end
+
+
+local function doctest_obj_io_write(o, ...)
+  for _, s in ipairs{...} do
+    current_output = current_output..s
+  end
+end
+
+
+-- Save io.stderr:write
+
+local saved_stderr = io.stderr
+local saved_stdout = io.stdout
+
+-- overwrite print, io.write, io.stdout and io.stderr in the
+-- GLOBAL (yes, GLOBAL) scope
+
+print = doctest_print
+io.write = doctest_io_write
+io.stdout = { write = doctest_obj_io_write, read = function(o, ...) return saved_stdout:read(...) end }
+io.stderr = { write = doctest_obj_io_write, read = function(o, ...) return saved_stderr:read(...) end }
 
 
 -- Create a new sandbox environment
@@ -96,10 +126,10 @@ end
 
 local function newenv(type)
   local functions =
-[[ require ]]
+[[ require print ]]
 
   local f = loadstring(env_start)
-  local e = { print = myprint }
+  local e = {}
   for w in functions:gmatch("(%S+)") do
     e[w] = _G[w]
   end
@@ -119,6 +149,7 @@ end
 
 
 local function process(l)
+  reset_output()
   local write = true
   local exec = true
 
@@ -148,7 +179,7 @@ local function process(l)
       end
     end
     if mode == "lua" and exec then
-      local output = code:match("%-%->%s*(.*)[\r\n]*")
+      local expected_output = code:match("%-%->%s*(.*)[\r\n]*")
       local code = code:gsub("%-%->.*", ""):gsub("%s*$", ""):gsub("^%s*=%s*(.+)$", "print(%1)")
       local f, r = loadstring(code)
       if not f then
@@ -159,11 +190,12 @@ local function process(l)
       if not status then
         report_error(("error:\n  %s"):format(r:gsub("\n", "\n  ")), l)
       end
-      if output then
-        output = output:gsub("%s+", " ")
-        print_result = print_result:gsub("%s+", " ")
-        if output ~= print_result then
-          report_error(("output mismatch:\n  expected: %s\n  got     : %s"):format(output, print_result), l)
+      if expected_output then
+        expected_output = expected_output:gsub("%s+", " ")
+        local actual_output = current_output:gsub("%s+", " ")
+        if expected_output ~= actual_output then
+          report_error(("output mismatch:\n  expected: %s\n  got     : %s")
+            :format(expected_output, actual_output), l)
         end
       end
     end
@@ -182,7 +214,7 @@ for l in infile:lines() do
   local s, m = pcall(process, l)
   if not s then
     error_count = error_count + 1
-    io.stderr:write(m)
+    saved_stderr:write(m)
   end
   linenumber = linenumber + 1
 end
@@ -191,5 +223,6 @@ infile:close()
 outfile:close()
 
 os.exit(error_count)
+
 
 -- EOF -------------------------------------------------------------------------
