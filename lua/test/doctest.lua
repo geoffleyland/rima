@@ -31,10 +31,12 @@ code blocks as the Lua command line would (local variables don't work),
 and reports any errors.
 Each block is executed in a new environment, so you'll have to redefine any
 variables at the start of each block.
-It outputs the same file mostly unchanged.
+It outputs the same file mostly unchanged, unless you ask it to highlight
+syntax, in which case it'll mark things up for 
+http://alexgorbatchev.com/wiki/SyntaxHighlighter
 
 If a line ends with "--> expected output", it will check that the output matches
-what's expected.  At the moment it only captures print though.
+what's expected.
 
 If a line contains "    --! env <initialisation commands>" then it will
 initialise the environment for each block with those commands.
@@ -51,8 +53,10 @@ If the first line in a block is "    --! continue" then the environment from
 the last block will be recycled, and you'll be able to use variables from that
 block.
 
-Usage: doctest.lua -i <infile name> -o <outfile name>
+Usage: doctest.lua -sh -i <infile name> -o <outfile name>
 If a file name is missing it'll read from stdin or write to stdout.
+The -sh option will set up your code blocks for syntax highlighting with
+http://alexgorbatchev.com/wiki/SyntaxHighlighter
 --]]
 
 
@@ -62,6 +66,7 @@ If a file name is missing it'll read from stdin or write to stdout.
 local infilename = "stdin"
 local infile = io.stdin
 local outfile = io.stdout
+local syntax_highlighting = false
 
 local i = 1
 while i <= #arg do
@@ -72,6 +77,8 @@ while i <= #arg do
   elseif arg[i] == "-o" then
     i = i + 1
     outfile = assert(io.open(arg[i], "w"))
+  elseif arg[i] == "-sh" then
+    syntax_highlighting = true
   end
   i = i + 1
 end
@@ -176,9 +183,15 @@ local function process(l)
         mode = "lua"
         write = true
         currentenv = newenv(kind)
+        if syntax_highlighting then
+          outfile:write("<pre><code class='brush: lua'>\n")
+        end
       end
     end
     if mode == "lua" and exec then
+      if syntax_highlighting then
+        l = l:gsub("^    ", "")
+      end
       local expected_output = code:match("%-%->%s*(.*)[\r\n]*")
       local code = code:gsub("%-%->.*", ""):gsub("%s*$", ""):gsub("^%s*=%s*(.+)$", "print(%1)")
       local f, r = loadstring(code)
@@ -200,6 +213,13 @@ local function process(l)
       end
     end
   else
+    if syntax_highlighting then
+      if mode == "lua" then
+        outfile:write("</code></pre>\n")
+      end
+      l = l:gsub("`(.-)`", "<code class='brush: lua inline: true'>%1</code>")
+    end
+      
     mode = "text"
   end
   
