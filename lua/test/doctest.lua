@@ -176,9 +176,12 @@ local function process(l)
   end
 end
 
+local error_count = 0
+
 for l in infile:lines() do
   local s, m = pcall(process, l)
   if not s then
+    error_count = error_count + 1
     io.stderr:write(m)
   end
   linenumber = linenumber + 1
@@ -187,5 +190,6 @@ end
 infile:close()
 outfile:close()
 
+os.exit(error_count)
 
 -- EOF -------------------------------------------------------------------------
