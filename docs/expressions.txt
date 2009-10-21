@@ -1,0 +1,112 @@
+    --! env rima = require("rima")
+
+# Rima Manual: Expressions
+
+[ [Contents](contents.html) | Next: [Arrays and Structures](arrays.html) ]
+
+*Expressions* are Rima's fundamental construct.
+They are stored symbolically and
+can be evaluated with partial or full data at any time.
+Expressions are built from references (to data or variables),
+arithmetic operators and functions and by combining other expressions.
+
+All the code in this document should work on the Lua command line.
+Either start Lua with `lua -lrima`,
+or type `require("rima")` as your first line
+and you'll be able to copy and paste from the code examples.
+
+
+## Defining References
+
+In order to write an expression, you'll first need to define some references.
+Rima's references are different from normal Lua variables,
+so in order to use them in Lua, we first have to declare them:
+
+    x = rima.R"x"
+    print(x)                                            --> x
+
+`rima.R` creates a new reference named `x`.
+We don't have to assign a value, or any other information to the reference.
+If you wish to define more than one variable at a time, you can:
+
+    x, y = rima.R"x, y"
+
+Note that unlike most other math modelling languages,
+Rima doesn't distinguish between *variables* (which are to be solved for)
+and *parameters* (which are expected to be defined before the model is solved).
+Rima works out what it does and doesn't know just before it solves,
+and then solves for the unknowns if it can,
+or tells you what's wrong if it can't.
+
+
+## Defining an Expression
+
+Defining an expression in Rima is straightforward:
+
+    x, y = rima.R"x, y"
+    e = x + y
+    print(e)                                            --> x + y
+
+Normal math operators (`+`, `-`, `*`, `/`) all work,
+and you can use all the functions in the Lua math library,
+though you have you'll have to use the Rima versions:
+
+    print(rima.sin(rima.R"x"))                          --> sin(x)
+
+Expressions can be treated just like variables, and used to build more complex expressions:
+
+    x, y = rima.R"x, y"
+    e = 2 + y
+    print(x * e)                                         --> x*(2 + y)
+
+
+## Evaluating Expressions
+
+To *evaluate* an expression, you call `rima.E`,
+passing the expression you want to evaluate,
+and a list of the values to assign to the references in the expression.
+
+    x, y = rima.R"x, y"
+    print(rima.E(x + y, { x=1, y=2 }))                  --> 3
+
+Partial lists of values are fine - `rima.E` doesn't mind if some variables aren't defined:
+
+    x, y = rima.R"x, y"
+    print(rima.E(x * rima.sin(y), { x=5 }))             --> 5*sin(y)
+
+And sometimes it doesn't matter if they're defined or not:
+
+    x, y = rima.R"x, y"
+    print(rima.E(x * y * y / y^2 - x))                  --> 0
+
+If an expression is completely defined,
+that is,
+all the references in the expression resolve to numbers,
+then `rima.E` returns a number.
+If not, `rima.E` returns another expression,
+which you can evaluate later:
+
+    x, y = rima.R"x, y"
+    e = rima.E(x + y, { x=7 })
+    print(e)                                            --> 7 + y
+    print(rima.E(e, { y=13 }))                          --> 20
+
+`rima.E` will simplify expressions, even without a table of values:
+
+    x, y = rima.R"x, y"
+    e = x * x * y * y^2
+    print(e)                                            --> x*x*y*y^2
+    print(rima.E(e))                                    --> x^2*y^3
+
+
+## References to References
+
+The values in the table you pass to `rima.E` don't have to be literals,
+they can be references to other variables or expressions:
+
+    x, y, z = rima.R"x, y, z"
+    e = x / y
+    print(rima.E(e, { y=z^2 }))                         --> x/z^2
+    print(rima.E(e, { y=z^2, z=x^0.5 }))                --> 1
+
+[ [Contents](contents.html) | Next: [Arrays and Structures](arrays.html) ]

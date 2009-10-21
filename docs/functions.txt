@@ -1,0 +1,85 @@
+    --! env rima = require("rima") io = require("io")
+
+# Rima Manual: Functions
+
+[ [Contents](contents.html) | Previous: [Sums](sums.html) | Next: [Tabulation](tabulation.html) ]
+
+You can define functions in Rima with the same syntax as sums: `rima.F{arg1, arg2,...}(expression)`.
+Functions are data in Rima, so they go in the table of data (or *scope*) that you pass into `rima.E`:
+
+    f, x, y = rima.R"f, x, y"
+    S = { f=rima.F{x, y}(y^x) }
+    print(rima.E(f(2, 3), S))                           --> 9
+
+The list of arguments can contain references or just strings.
+
+Functions "return" the result of evaluating their expression - which could well be an expression:
+
+    f, x, y = rima.R"f, x, y"
+    S = { f=rima.F{"y"}(rima.sin(y)) }
+    print(rima.E(f(x), S))                              --> sin(x)
+
+Function arguments can be expressions,
+and they'll get symbolic treatment if they're not defined:
+
+    f, x, y = rima.R"f, x, y"
+    S = { f=rima.F{y}(y*y) }
+    print(rima.E(f(x^3), S))                            --> x^6
+
+If a function uses a reference that doesn't have the same name as an argument,
+Rima will look look it up in the *global scope*.
+In this example, the `y` in `x * y` is not a function argument,
+and is found in the scope passed to `rima.E`:
+
+    f, x, y, a = rima.R"f, x, y, a"
+    F = rima.F{x}(x * y)
+    print(rima.E(f(a), { f=F, a=2, y=3 }))              --> 6
+
+You can define local variable for a function by passing them as the third argument to `rima.func`
+in the same manner that you pass global variables to `rima.E`.
+Here, `y` is neither defined as an argument or in the global scope,
+but in the function's local scope.
+
+    f, x, y = rima.R"f, x, y"
+    S = { f=rima.F{x}(x * y, { y=5 }) }
+    print(rima.E(f(2), S))                              --> 10
+
+When evaluating a function,
+Rima will look up references in the local scope before looking in the global scope.
+This means that if a local and global variable have the same names,
+Rima will do the right thing.
+Here, `F` has a local `y` defined as 5, while in the global scope,
+`y` is 100:
+
+    f, x, y = rima.R"f, x, y"
+    F = rima.F{x}(x * y, { y=5 })
+    print(rima.E(f(y), { f=F, y=100 }))                 --> 500
+
+The return value of an expression is another expression,
+and you can define any of the variables passed after you've evaluated the function:
+
+    f, x, y, u, v = rima.R"f, x, y, u, v"
+    F = rima.F{x}(x * y, { y=5 })
+    e = rima.E(u * f(v), { f=F })
+    print(e)                                            --> 5*u*v
+    print(rima.E(e, { u=2, v=3 }))                      --> 30
+
+You can call a Rima function like a regular Lua function.
+Keep in mind that the result might be an expression rather than a number:
+
+    y = rima.R"y"
+    F = rima.F({y}, y^2)
+    print(F(5))                                         --> 25
+
+You can also call a Lua function as a Rima function.
+Be careful, because Rima will pass expressions to your Lua function,
+but then, this might not matter:
+
+    f, x = rima.R"f, x"
+    F = function(a) io.write("lua! ") return a + 1 end
+    print(rima.E(2 * f(x), { f = F }))                  --> lua! 2*(x + 1)
+    print(rima.E(2 * f(x), { f = F, x=3 }))             --> lua! 8
+    
+
+[ [Contents](contents.html) | Previous: [Sums](sums.html) | Next: [Tabulation](tabulation.html) ]
+

@@ -1,0 +1,56 @@
+    --! env rima = require("rima")
+
+# Rima Manual: Arrays and Structures
+
+[ [Contents](contents.html) | Previous: [Expressions](expressions.html) | Next: [Sums](sums.html) ]
+
+Array indexing in Rima (and Lua) uses square brackets (`x[1]`) and
+array construction uses curly braces (`x = {13, 15, 17}`).
+
+    x = rima.R"x"
+    print(x[1] + x[2] + x[3])                           --> x[1] + x[2] + x[3]
+    print(rima.E(x[1] + x[2] + x[3], {x={10,20,30}}))   --> 60
+
+If you wish to use 2D arrays, you need to use two separate sets of square brackets
+(`x[2][3]` rather than `x[2, 3]`),
+and construct an array of arrays (`x = {{2, 4}, {3, 5}}`).
+
+    x = rima.R"x"
+    e = x[1][1] + x[2][2]
+    print(rima.E(e, {x={{5,7},{11,13}}}))               --> 18
+
+In fact, Lua and Rima only have one data structure, the `table` which is
+efficient as both a numerically indexed array,
+and as a hash lookup or dictionary.
+
+You can index the hash part of the table with the same syntax as the array part:
+`x["key"]` works as well as `x[1]`, or, for string keys,
+you can use dot notation: `x.key` is exactly the same as `x["key"]`.
+
+The table constructor syntax for non-consecutive integer keys is
+`x = { a=1, b=2 }`.
+You can mix integer indexes and string keys in your table constructor,
+and you can mix the the dot and square bracket notation for string key indexing:
+
+    x = rima.R"x"
+    e = x.a + x["b"] + x.c + x["d"]
+    print(rima.E(e, {x={a=1,b=1,c=2,d=3}}))             --> 7
+
+Just like 2 and higher dimensional arrays, you can construct complex tables,
+and index them with several indices:
+
+    x = rima.R"x"
+    e = x[1].a + x[2].b
+    print(rima.E(e, {x={{a=17},{b=19}}}))               --> 36
+
+The subscripts you use in indexes don't have to be literal values,
+they can be references to other variables:
+
+    x, y = rima.R"x, y"
+    e = x[y].a
+    print(rima.E(e, {y=2}))                             --> x[2].a
+    print(rima.E(e, {y=2, x={{a=20},{a=50}}}))          --> 50
+
+Beware of confusing `x[a]` with `x["a"]` and `x.a` though!
+
+[ [Contents](contents.html) | Previous: [Expressions](expressions.html) | Next: [Sums](sums.html) ]

@@ -1,0 +1,20 @@
+# Rima Documentation
+
+- [Home Page](index.html)
+- [Features](features.html)
+- [Quick Start Modelling](quick.html)
+- [Obtaining and Installing Rima](install.html)
+- User Guide
+    --! ignore
+    - [Expressions](expressions.html)
+    - [Arrays and Structures](arrays.html)
+    - [Sums](sums.html)
+    - [Functions](functions.html)
+    - [Tabulation](tabulation.html)
+- Examples (Lua code, not html)
+    --! ignore
+    - [Simple Example](examples/simple.lua)
+    - [Knapsack](examples/knapsack.lua)
+    - [Blending](examples/whiskas.lua)
+    - [Curve Fitting](examples/minimax.lua)
+  

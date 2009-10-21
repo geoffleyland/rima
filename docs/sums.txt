@@ -1,0 +1,100 @@
+    --! env rima = require("rima")
+
+# Rima Manual: Sums
+
+[ [Contents](contents.html) | Previous: [Arrays and Structures](arrays.html) | Next: [Functions](functions.html) ]
+
+Summing the elements of a table is achieved with `rima.sum{tables}(expression)`,
+which takes a list of tables to sum over as its first argument,
+and an expression to sum as its second:
+
+    X = rima.R"X"
+    e = rima.sum{X}(X)
+    print(e)                                            --> sum{X}(X)
+    print(rima.E(e, {X={3, 5, 7}}))                     --> 15
+
+It's usually nicer to give the current element of the table a different name from
+the table you're summing over.  For this, use `{x=X}` for the table argument.
+
+    x, X = rima.R"x, X"
+    e = rima.sum{x=X}(x)
+    print(e)                                            --> sum{x in X}(x)
+    print(rima.E(e, {X={4, 5, 6}}))                     --> 15
+
+This is especially useful if you want to sum over the same table more than once:
+
+    x1, x2, X = rima.R"x1, x2, X"
+    e = rima.sum{x1=X, x2=X}(x1 * x2)
+    print(rima.E(e, {X={2, 3, 4}}))                     --> 81
+
+Often, you'll want your sum expression to operate on data from more than one array:
+
+    i, Y, Z = rima.R"i, Y, Z"
+    e = rima.sum{i=Y}(Y[i] * Z[i])
+    print(rima.E(e, {Y={3,5,7}, Z={7,5,3}}))            --> 67
+
+Notice than in this example, we used the "bound variable" (`i`) as and index to a subscript,
+whereas in the previous example, we used the bound variable (`x`) directly in an expression.
+
+Rima knows the difference between using a bound variable in an index expression,
+and as a value, and tries to do the right thing.
+You can combine the two approaches:
+
+    x, X = rima.R"x, X"
+    e = rima.sum{x=X}(x * X[x])
+    print(rima.E(e, {X={3,5,7}}))                      --> 83
+
+Though I don't recommend it for making code easy to understand.
+
+Rima understands structures as well as arrays,
+and you might choose to put your data into a single table rather than two:
+
+    x, X = rima.R"x, X"
+    e = rima.sum{x=X}(x.y * x.z)
+    XX = {{y=3, z=7}, {y=5, z=5}, {y=7, z=3}}
+    print(rima.E(e, {X=XX}))                            --> 67
+
+or be more descriptive of your data:
+
+    item, items = rima.R"item, items"
+    e = rima.sum{item=items}(item.cost * item.quantity)
+    ITEMS = {apples={cost=1, quantity=2}, oranges={cost=2, quantity=5}}
+    print(rima.E(e, {items=ITEMS}))                     --> 12
+
+Rima doesn't mind if some of the data isn't defined:
+
+    item, items = rima.R"item, items"
+    e = rima.sum{item=items}(item.cost * item.quantity)
+    ITEMS = {apples={cost=1}, oranges={cost=2}}
+    print(rima.E(e, {items=ITEMS}))                     --> items.apples.quantity + 2*items.oranges.quantity
+
+Often, though, you can't put all your data into a single table,
+and you'll have to index more than one table.
+`rima.sum` works quite hard to do what you mean when you index tables,
+hard enough that tables can be used like sets in other modelling languages:
+
+    s, S, cost = rima.R"s, S, cost"
+    e = rima.sum{s=S}(cost[s])
+    SS = { "north", "south", "east", "west" }
+    COST = { north=1, south=2, east=4, west=8 }
+    print(rima.E(e, {S=SS, cost=COST}))                 --> 15
+
+A set defined with string elements as in `set = { "one", "two", "three" }`
+can be used on tables with string or integer elements:
+
+    s, S, cost, count = rima.R"s, S, cost, count"
+    e = rima.sum{s=S}(cost[s] * count[s])
+    SS = { "north", "south", "east", "west" }
+    COST = { north=1, south=2, east=4, west=8 }
+    COUNT = { 3, 2, 1, 1 }
+    print(rima.E(e, {S=SS, cost=COST, count=COUNT}))    --> 19
+
+Sometimes, you'll need to know the index of the set element you're indexing -
+you can get it with `rima.ord`:
+
+    s, S = rima.R"s, S"
+    e = rima.sum{s=S}(rima.ord(s))
+    SS = { "north", "south", "east", "west" }
+    print(rima.E(e, {S=SS}))                            --> 10
+
+[ [Contents](contents.html) | Previous: [Arrays and Structures](arrays.html) | Next: [Functions](functions.html) ]

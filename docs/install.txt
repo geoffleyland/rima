@@ -1,0 +1,56 @@
+# Installing Rima
+
+Rima is open source, licensed under the [MIT Licence](http://www.opensource.org/licenses/mit-license.php).
+You can download the latest version of Rima [here](/download/rima-0.01.tar.gz),
+or visit Rima's project page on [Google Code](http://code.google.com/p/rima/).
+
+In order to get Rima running, first you'll need Lua,
+and a linear program solver.
+
+## Prerequisites
+
+### Lua
+
+You'll need to have Lua 5.1 installed and working (which should be easy).
+Instructions and binaries are [here](http://www.lua.org/download.html).
+There may be an even easier way to get it for your platform:
+
++ Linux: you can almost certainly `apt-get install lua`
++ OS X: if have [MacPorts](http://www.macports.org/) installed you can `port install lua` (there must be a similar command for [Fink](http://www.finkproject.org/))
++ Windows: there's [Lua for Windows](http://luaforwindows.luaforge.net/) which is a binary installer for Lua and a range of modules
+
+You might want to get LuaJIT instead, which is considerably faster on x86 platforms.
+It's available [here](http://luajit.org/)
+
+### Solvers
+
+If you want to solve any optimisation problems
+(you could just play with Rima's late-bound symbolic maths stuff, but I don't think it'll keep you amused for long),
+you'll need to install one of the solvers.
+
+[lpsolve](http://sourceforge.net/projects/lpsolve) is probably easier to get running - it compiles to one shared library.
+The download contains makefiles, build scripts and project files for most platforms.
+You'll need version 5.5.
+
+The COIN solvers take a bit more work, and build several shared libraries.
+I think the right way to install them is to check out the latest stable version of
+[CBC](https://projects.coin-or.org/Cbc/)
+from COIN's [Subversion server](https://projects.coin-or.org/svn/Cbc/stable/) and proceed from there.
+I took a bit of a more tortuous route, and use the COIN trunk.
+
+
+## Building and installing Rima
+
+There's a makefile in the distribution which, at this stage, I'm afraid you'll almost certainly have to modify yourself.
+It works for me on OS X, and I'd appreciate it if you let me know what works on your setup.
+
+Ideally you'll just
+
+    --! ignore
+    make
+    make test
+    sudo make install
+
+The default target for the makefile, the test target and the install target all try to build and test all three solvers:
+you'll probably want to modify the makefile to only use one.
+

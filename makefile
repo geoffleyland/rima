@@ -1,5 +1,5 @@
 PACKAGE=rima
-VERSION=0.01
+VERSION=0.02
 
 LUA= $(shell echo `which lua`)
 LUA_BINDIR= $(shell echo `dirname $(LUA)`)
@@ -17,8 +17,8 @@ LPSOLVE_LIBDIR=$(LPSOLVE_PREFIX)/lib
 LPSOLVE_INCDIR=$(LPSOLVE_PREFIX)/include/lpsolve
 
 CPP=g++
-#-DNOMINMAX is for some compilers on windows.  I'm no sure which, so I guess I'll just blanket-add it for now.  Can't hurt, right?
-CFLAGS=-O3 -DNOMINMAX
+#-DNOMINMAX is needed for some compilers on windows.  I'm no sure which, so I guess I'll just blanket-add it for now.  Can't hurt, right?
+CFLAGS=-O3 -DNOMINMAX -m32
 SO_SUFFIX=so
 SHARED=-bundle -bundle_loader $(LUA)
 
@@ -37,7 +37,8 @@ test: all
 	cp rima_clp_core.so lua/
 	cp rima_cbc_core.so lua/
 	cp rima_lpsolve_core.so lua/
-	cd lua; lua rima-test-expression.lua; lua rima-test-solvers.lua
+	cd lua; $(LUA) rima-test.lua; $(LUA) rima-test-solvers.lua
+	cd lua; for f in `find ../docs -name "*.txt"`; do $(LUA) test/doctest.lua -i $$f > /dev/null; done
 
 install: rima_lpsolve_core.so
 	mkdir -p $(LUA_SHAREDIR)
@@ -48,12 +49,14 @@ install: rima_lpsolve_core.so
 	cp rima_cbc_core.so $(LUA_LIBDIR)
 	cp rima_lpsolve_core.so $(LUA_LIBDIR)
 
-dist:
+doc:
+	for f in `find docs -name "*.txt"`; do n=`basename $$f .txt`; $(LUA) lua/test/doctest.lua -sh -i $$f | markdown.lua -e docs/header.html > htmldocs/$$n.html; done
+
+dist: doc
 	rm -f dist.files
 	rm -rf $(PACKAGE)-$(VERSION)
-	markdown.lua doc.txt
 	rm -f $(PACKAGE)-$(VERSION).tar.gz
-	find * | grep -v "\.svn" | grep -v "\.DS_Store" | grep -v "build" > dist.files
+	find * | grep -v "\.svn" | grep -v "\.DS_Store" | grep -v "build" | grep -v ".so" > dist.files
 	mkdir -p $(PACKAGE)-$(VERSION)
 	cpio -p $(PACKAGE)-$(VERSION) < dist.files
 	tar czvf $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)

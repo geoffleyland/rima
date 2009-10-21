@@ -1,0 +1,32 @@
+    --! env rima = require("rima")
+
+# Rima Features
+
+This page gives a quick overview of Rima's features,
+not an introduction to using and understanding it.
+For that, read the [user guide](contents.html).
+
+
+## Symbolic Expressions
+
+Rima handles expressions and equations symbolically.
+
+You can define a sum over a set X
+
+    x, X, a, b, c = rima.R"x, X, a, b, c"
+    e = rima.sum{x=X}(x^2)
+    = e                                                 --> sum{x in X}(x^2)
+    = rima.E(e, { X = {1, 2, 3} } )                     --> 14
+    = rima.E(e, { X = {a, b, c} } )                     --> a^2 + b^2 + c^2
+
+
+## Flexible Data
+
+Rima understands your data in the structures that you want to use.
+
+    x, X = rima.R"x, X"
+    e = rima.sum{x=X}(x.weight + x.quantity)
+
+
+## Separation of Models and Data
+
