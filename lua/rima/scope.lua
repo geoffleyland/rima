@@ -121,8 +121,13 @@ function scope.new(S)
 end
 
 
-function scope.create(values)
-  local S = new()
+function scope.create(values, options)
+  options = options or {}
+  local S = new{
+    overwrite = (options.overwrite and true or false),
+    rewrite = (options.rewrite and true or false),
+    no_undefined = (options.no_undefined and true or false),
+    name = options.name }
   set(S, values)
   return S
 end
@@ -184,8 +189,10 @@ end
 function scope.scope_for_undefined(s)
   if not s then return nil end
   local S = proxy.O(s)
-  if S.no_undefined and S.parent then
-    return scope_for_undefined(S.parent)
+  if S.no_undefined then
+    if S.parent then
+      return scope_for_undefined(S.parent)
+    end
   else
     return s
   end

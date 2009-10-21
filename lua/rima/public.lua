@@ -43,6 +43,15 @@ function rima.D(e)
 end
 
 
+local dgs
+local function default_global_scope()
+  if not dgs then
+    dgs = scope.new{ name="_GLOBAL" }
+  end
+  return dgs
+end
+
+
 function rima.E(e, S)
   local fname, usage =
     "rima.E",
@@ -51,9 +60,9 @@ function rima.E(e, S)
   args.check_types(S, "S", {"nil", "table", {scope, "scope"}}, usage, fname)
 
   if not S then
-    S = scope.new()
+    S = scope.spawn(default_global_scope(), nil, {no_undefined=true})
   elseif not object.isa(S, scope) then
-    S = scope.create(S)
+    S = scope.spawn(default_global_scope(), S, {no_undefined=true})
   end
 
   local status, r = xpcall(function() return expression.eval(e, S) end, debug.traceback)

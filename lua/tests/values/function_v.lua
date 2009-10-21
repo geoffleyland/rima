@@ -20,8 +20,10 @@ function test(show_passes)
   local B = expression.bind
   local E = expression.eval
 
-  T:test(object.isa(function_v:new({"a"}, 3), function_v), "isa(function_v:new(), function_v)")
-  T:check_equal(object.type(function_v:new({"a"}, 3)), "function_v", "type(function_v:new()) == 'function_v'")
+  T:test(object.isa(function_v:new({"a"}, 3), function_v),
+    "isa(function_v:new(), function_v)")
+  T:check_equal(object.type(function_v:new({"a"}, 3)),
+    "function_v", "type(function_v:new()) == 'function_v'")
 
   T:expect_error(function() function_v:new({1}, 1) end,
     "expected string or simple reference, got '1' %(number%)")
@@ -127,7 +129,8 @@ function test(show_passes)
     local e = B(t(1), S)
     T:check_equal(E(e, S), 10)
 
-    T:check_equal(D(s(1).z), "index(call(ref(s), number(1)), address(string(z)))")
+    T:check_equal(D(s(1).z),
+      "index(call(ref(s), number(1)), address(string(z)))")
     T:check_equal(s(1).z, "s(1).z")
     T:expect_ok(function() B(s(1).z, S) end, "binding")
     T:check_equal(B(s(1).z, S), "a.w[1].y.z")
@@ -161,7 +164,10 @@ function test(show_passes)
     local S = rima.scope.create{ a = { { 5 } }, b = rima.F({i}, a[1][i]) }
     T:check_equal(E(a[1][1], S), 5)
     T:check_equal(E(b(1), S), 5)
-    T:expect_error(function() E(b(1)[1], S) end, "error evaluating 'b%(1%)%[1%]' as 'a%[1, 1, 1%]':.*address: error resolving 'a%[1, 1, 1%]': 'a%[1, 1%]' is not indexable %(got '5' number%)")
+    T:expect_error(function() E(b(1)[1], S) end,
+      "error evaluating 'b%(1%)%[1%]' as 'a%[1, 1, 1%]':"..
+      ".*address: error resolving 'a%[1, 1, 1%]':"..
+      " 'a%[1, 1%]' is not indexable %(got '5' number%)")
   end
 
   do
@@ -181,6 +187,18 @@ function test(show_passes)
     T:check_equal(E(e, S2), 205)
   end
 
+  do
+    local f, x, y, u, v = rima.R"f, x, y, u, v"
+    local F = rima.F{x}(x * y, { y=5 })
+    local e = rima.E(u * f(v), { f=F })
+    T:check_equal(e, 5*u*v)
+    T:check_equal(rima.E(e, { u=2, v=3 }), 30)
+  end
+
+  do
+    local f, x = rima.R"f, x"
+    T:check_equal(rima.E(f(x), { f=rima.F{x}(x) }), "x")
+  end
 
   -- more tests in expression
 
