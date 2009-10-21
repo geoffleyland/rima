@@ -1,0 +1,95 @@
+    --! env rima = require("rima")
+
+# Rima Manual: Optimization Models
+
+[ [Contents](contents.html) | Previous: [Tabulation](tabulation.html) Next: [Scopes](scopes.html) ]
+
+Rima's expressions can be used to express constraints and objectives in
+Linear and Mixed-Integer Programs,
+which can then be solved with one of the solvers Rima has bindings for.
+
+Examples of solving LPs can be found in the examples directory.
+
+The way a problem is constructed is likely to change, often, as Rima evolves.
+
+Because Rima expressions are symbolic, and because references are can be bound to data
+at any time (particularly late), you can express your problem in a very concise form,
+and use the same problem description (or *formulation*) on many sets of data.
+
+
+## Constructing a Model
+
+Formulations are constructed in a reasonably standard manner for Lua objects:
+
+    f = rima.formulation:new()
+
+Constraints are added with `formulation:add`:
+
+    --! continue
+    x, y = rima.R"x, y"
+    f:add({}, x + 2*y, "<=", 3)
+    f:add({}, 2*x + y, "<=", 3)
+
+And the objective is set with `formulation:set_objective`:
+
+    --! continue
+    f:set_objective(x + y, "maximise")
+
+The string setting the objective direction is not case-sensitive, and can be
+maximise, maximize, minimise or minimize.
+
+A formulation has a scope attached to it.  You can set variables in it with `set`:
+
+    --! continue
+    f:set{ ["x, y"] = rima.positive() }
+
+A formulation can write itself:
+
+    --! continue
+    f:write()
+    --> Maximise:
+    -->   x + y
+    --> Subject to:
+    -->   x + 2*y <= 3
+    -->   2*x + y <= 3
+
+
+## Solving a Model
+
+And you can solve a formulation using a solver:
+
+    --! continue
+    r = f:solve("lpsolve")
+
+The result, `r` in this case is a table with three elements: `objective`, `variables` and `constraints`.
+
+`r.objective` is the optimal objective value:
+
+    --! continue
+    print(r.objective)                                  --> 2
+
+`r.variables` is a table mimicking the structure of the undefined variables in the problem scope.
+Each entry in variables is a table with two values: `p` (primal) the optimal value of the variable
+and `d` the optimal dual (or reduced cost):
+
+    --! continue
+    print(r.variables.x.p, r.variables.y.p)             --> 1 1
+    print(r.variables.x.d, r.variables.y.d)             --> 0 0
+
+Constraints can't be named yet, so `r.constraints' is a numerically-indexed table with the constraint values and their duals:
+
+    --! continue
+    print(r.constraints[1].p, r.constraints[2].p)       --> 3 3
+    print(r.constraints[1].d, r.constraints[2].d)       --> 0.3333 0.3333
+
+
+## Model Instances
+
+`formulation:instance()` creates a new model with the old model as a parent.
+The new model has the same set of constraints and the same objective as the parent model,
+but its scope is a child of the parent model's scope.
+
+For examples of how this can be used for a rough stab at model composition, see
+the examples listed on the [contents page](contents.html).
+
+[ [Contents](contents.html) | Previous: [Tabulation](tabulation.html) Next: [Scopes](scopes.html) ]
