@@ -65,8 +65,21 @@ function rima.E(e, S)
 end
 
 
-function rima.F(inputs, expression, S)
-  return function_v:new(inputs, expression, S)
+function rima.F(inputs, e, S)
+  if e then
+    return function_v:new(inputs, e, S)
+  else
+    return function(e2, S2) return function_v:new(inputs, e2, S2) end
+  end
+end
+
+
+function rima.sum(sets, e)
+  if e then
+    return expression:new(rima.operators.sum, sets, e)
+  else
+    return function(e2) return expression:new(rima.operators.sum, sets, e2) end
+  end
 end
 
 

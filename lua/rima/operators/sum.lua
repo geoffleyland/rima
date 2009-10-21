@@ -15,15 +15,6 @@ module(...)
 local sum = object:new(_M, "sum")
 sum.precedence = 1
 
-function rima.sum(sets, e)
-  if e then
-    return expression:new(sum, sets, e)
-  else
-    return function(e2) return expression:new(sum, sets, e2) end
-  end
-end
-
-
 function sum.construct(args)
   local sets = args[1]
   if not object.isa(sets, rima.iteration.set_list) then
