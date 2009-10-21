@@ -156,7 +156,6 @@ end
 
 
 local function process(l)
-  reset_output()
   local write = true
   local exec = true
 
@@ -192,20 +191,48 @@ local function process(l)
       if syntax_highlighting then
         l = l:gsub("^    ", "")
       end
-      local expected_output = code:match("%-%->%s*(.*)[\r\n]*")
+      l = l:gsub("%-%-[!>]", "--"):gsub("%s*%-%-%s*$", "")
+      local behaviour, expected_output = code:match("%-%-([!>])%s?(.*)[\r\n]*")
+      local expect_error = false
+      if behaviour == "!" then
+        expect_error = true
+      end
+
       local code = code:gsub("%-%->.*", ""):gsub("%s*$", ""):gsub("^%s*=%s*(.+)$", "print(%1)")
-      local f, r = loadstring(code)
-      if not f then
-        report_error(("error:\n  %s"):format(r:gsub("\n", "\n  ")), l) 
+
+      -- run the line
+      if code and code ~= "" then
+        reset_output()
+        local f, r = loadstring(code)
+        if not f then
+          if expect_error then
+            io.write(r) 
+          else
+            report_error(("unexpected error:\n  %s"):format(r:gsub("\n", "\n  ")), l) 
+          end
+        end
+        setfenv(f, currentenv)
+        local status, r = pcall(f)
+        if not status then
+          if expect_error then
+            io.write(r) 
+          else
+            report_error(("unexpected error:\n  %s"):format(r:gsub("\n", "\n  ")), l)
+          end
+        end
       end
-      setfenv(f, currentenv)
-      local status, r = pcall(f)
-      if not status then
-        report_error(("error:\n  %s"):format(r:gsub("\n", "\n  ")), l)
-      end
-      if expected_output then
+
+      if expected_output and expected_output ~= "" then
         expected_output = expected_output:gsub("%s+", " ")
-        local actual_output = current_output:gsub("%s+", " ")
+        local actual_output
+        if current_output:find("\n") then
+          actual_output = current_output:match("(.-)\n")
+          current_output = current_output:match(".-\n(.*)")
+        else
+          actual_output = current_output
+          reset_output()
+        end
+        actual_output = actual_output:gsub("%s+", " ")
         if expected_output ~= actual_output then
           report_error(("output mismatch:\n  expected: %s\n  got     : %s")
             :format(expected_output, actual_output), l)
