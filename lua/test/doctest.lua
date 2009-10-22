@@ -51,6 +51,9 @@ error message.
 If you don't have "--#" and there's an error, it'll be reported as an
 unexpected error.
 
+If code line ends with "\" then the code is saved, and the line is continued
+with the next line.
+
 If a line contains "    --! env <initialisation commands>" then it will
 initialise the environment for each block with those commands.
 The line will not be included in the output file.
@@ -163,6 +166,7 @@ end
 local linenumber = 1
 local currentenv
 local mode = "text"
+local multiline_code = ""
 
 local function report_error(e, l)
   error(("%s: %s:%d: %s\nline:\n%s\n\n"):format(arg[0], infilename, linenumber, e, l), 0)
@@ -175,7 +179,7 @@ local function process(line)
   
   local outline = line
 
-  local code = (line):match("^%s%s%s%s(%S.*)$")
+  local code = line:match("^%s%s%s%s(.*)$")
   if code then
     if mode == "text" then
       local kind, rest = code:match(".*%-%-!%s*(%S*)%s*(.*)")
@@ -214,7 +218,11 @@ local function process(line)
       --   get rid of any match output: "--[!>] /blah/
       --   get rid of the ">" or "!" after the --
       --   remove any trailing --
-      outline = outline:gsub("%-%-([#>])%s*/.-/", "--%1"):gsub("%-%-[#>]", "--"):gsub("%s*%-%-%s*$", "")
+      outline = outline:gsub("%-%-([#>])%s*/.-/", "--%1"):gsub("%-%-[#>]", "--"):gsub("%s*\\%s*$", ""):gsub("%s*%-%-%s*$", "")
+
+      local multiline = code:find("\\%s*$")
+      code = code:gsub("\\?%s*$", "")
+
       local behaviour, expected_output = code:match("%-%-([#>])%s?(.*)[\r\n]*")
       local expect_error = false
       if behaviour == "#" then
@@ -224,8 +232,12 @@ local function process(line)
       local code = code:gsub("%-%->.*", ""):gsub("%s*$", ""):gsub("^%s*=%s*(.+)$", "print(%1)")
 
       -- run the line
-      if code and code ~= "" then
+      if code and multiline then
+        multiline_code = multiline_code.." "..code
+      elseif code and code ~= "" then
         reset_output()
+        code = multiline_code.." "..code
+        multiline_code = " "
         local f, r = loadstring(code)
         if not f then
           if expect_error then
