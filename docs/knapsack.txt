@@ -48,7 +48,7 @@ The empty {} are because this is one constraint only, not a constraint over a se
     --! continue
     knapsack:add({}, weight, "<=", capacity)
 
-Finally, we defines `item.picked` as a binary variable.
+Finally, we define `item.picked` as a binary variable.
 `rima.default` helps us set this for all items in `items`:
 
     --! continue

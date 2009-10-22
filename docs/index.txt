@@ -9,7 +9,7 @@ If you:
 - wish your modelling language had stronger support for general programming features (functions, data structures, more than one model...);
 - really like your optimization package for a mainstream language but miss defining your model symbolically;
 - wish your purpose-designed modelling language wouldn't make you to treat your data like FORTRAN 66 arrays;
-- wonder why optimization package for a modern, dynamic language still makes you treat your data like FORTAN 66 arrays;
+- wonder why your optimization package for a modern, dynamic language still makes you treat your data like FORTAN 66 arrays;
 - find that your modelling system imposes too many dependencies between equations and data;
 - just wish you could write a model and then make a subclass of it, or use it as part of another model
 

@@ -1,7 +1,7 @@
 # Installing Rima
 
 Rima is open source, licensed under the [MIT Licence](http://www.opensource.org/licenses/mit-license.php).
-You can download the latest version of Rima [here](/download/rima-0.02.tar.gz),
+You can download the latest version of Rima [here](http://rima.googlecode.com/files/rima-0.02.tar.gz),
 or visit Rima's project page on [Google Code](http://code.google.com/p/rima/).
 
 In order to get Rima running, first you'll need Lua,
