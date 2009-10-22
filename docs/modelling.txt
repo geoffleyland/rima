@@ -80,7 +80,7 @@ Constraints can't be named yet, so `r.constraints' is a numerically-indexed tabl
 
     --! continue
     print(r.constraints[1].p, r.constraints[2].p)       --> 3 3
-    print(r.constraints[1].d, r.constraints[2].d)       --> 0.3333 0.3333
+    print(r.constraints[1].d, r.constraints[2].d)       --> /0%.3+ 0%.3+/ 0.3333 0.3333
 
 
 ## Model Instances

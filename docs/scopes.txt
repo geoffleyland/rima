@@ -10,7 +10,7 @@ A `scope` is pretty much like a Lua table, but they're write once:
 
     S = rima.scope.new()
     S.a = 5
-    S.a = 6                                             --!
+    S.a = 6                                             --#
     --> scope: cannot set 'a' to '6': existing definition as '5'
 
 You can set values in a scope to be types as well as literal data:
@@ -42,7 +42,7 @@ but you can overwrite a type, if you meet its constraints:
     S2 = rima.scope.spawn(S1)
     S3 = rima.scope.spawn(S1)
     print(S1.one, S2.one, S3.one)                       --> 1 1 1
-    S2.a = 1.5                                          --!
+    S2.a = 1.5                                          --#
     --> scope: cannot set 'a' to '1.5': violates existing constraint '0 <= * <= inf, * integer'
     S2.a = 3
     print(S1.a, S2.a, S3.a)                             --> a 3 a
