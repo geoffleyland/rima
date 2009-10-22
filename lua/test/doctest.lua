@@ -37,6 +37,19 @@ http://alexgorbatchev.com/wiki/SyntaxHighlighter
 
 If a line ends with "--> expected output", it will check that the output matches
 what's expected.
+If there's nothing after the "-->" then output will be matched against 
+subsequent "-->" lines with nothing to execute.
+If the expected output is "/pattern/ other", then the output will be matched
+against the pattern, but the "/pattern/" will not be output to markdown, only
+"other" will (so you can expect "/3%.14*/", but have "pi" in the documention)
+The ">" on the end of the "--" will not be sent to markdown, and any trailing
+"--"s on lines with nothing after them will be stripped. 
+
+If a line ends with "--# expected output", it will behave exactly like "-->"
+except that it'll expect an error, and the output will be matched against the
+error message.
+If you don't have "--#" and there's an error, it'll be reported as an
+unexpected error.
 
 If a line contains "    --! env <initialisation commands>" then it will
 initialise the environment for each block with those commands.
@@ -57,6 +70,7 @@ Usage: doctest.lua -sh -i <infile name> -o <outfile name>
 If a file name is missing it'll read from stdin or write to stdout.
 The -sh option will set up your code blocks for syntax highlighting with
 http://alexgorbatchev.com/wiki/SyntaxHighlighter
+The exit code of doctest.lua is the number of problems it found.
 --]]
 
 
@@ -155,11 +169,13 @@ local function report_error(e, l)
 end
 
 
-local function process(l)
+local function process(line)
   local write = true
   local exec = true
+  
+  local outline = line
 
-  local code = (l):match("^%s%s%s%s(%S.*)$")
+  local code = (line):match("^%s%s%s%s(%S.*)$")
   if code then
     if mode == "text" then
       local kind, rest = code:match(".*%-%-!%s*(%S*)%s*(.*)")
@@ -173,6 +189,9 @@ local function process(l)
         mode = "lua"
         exec = false
         write = false
+        if syntax_highlighting then
+          outfile:write("<pre><code class='brush: lua'>\n")
+        end
       elseif kind == "env" then
         setenv(rest)
         mode = "text"
@@ -189,12 +208,16 @@ local function process(l)
     end
     if mode == "lua" and exec then
       if syntax_highlighting then
-        l = l:gsub("^    ", "")
+        outline = outline:gsub("^    ", "")
       end
-      l = l:gsub("%-%-[!>]", "--"):gsub("%s*%-%-%s*$", "")
-      local behaviour, expected_output = code:match("%-%-([!>])%s?(.*)[\r\n]*")
+      -- tidy up the line
+      --   get rid of any match output: "--[!>] /blah/
+      --   get rid of the ">" or "!" after the --
+      --   remove any trailing --
+      outline = outline:gsub("%-%-([#>])%s*/.-/", "--%1"):gsub("%-%-[#>]", "--"):gsub("%s*%-%-%s*$", "")
+      local behaviour, expected_output = code:match("%-%-([#>])%s?(.*)[\r\n]*")
       local expect_error = false
-      if behaviour == "!" then
+      if behaviour == "#" then
         expect_error = true
       end
 
@@ -208,7 +231,7 @@ local function process(l)
           if expect_error then
             io.write(r) 
           else
-            report_error(("unexpected error:\n  %s"):format(r:gsub("\n", "\n  ")), l) 
+            report_error(("unexpected error:\n  %s"):format(r:gsub("\n", "\n  ")), line) 
           end
         end
         setfenv(f, currentenv)
@@ -217,13 +240,12 @@ local function process(l)
           if expect_error then
             io.write(r) 
           else
-            report_error(("unexpected error:\n  %s"):format(r:gsub("\n", "\n  ")), l)
+            report_error(("unexpected error:\n  %s"):format(r:gsub("\n", "\n  ")), line)
           end
         end
       end
 
       if expected_output and expected_output ~= "" then
-        expected_output = expected_output:gsub("%s+", " ")
         local actual_output
         if current_output:find("\n") then
           actual_output = current_output:match("(.-)\n")
@@ -232,10 +254,20 @@ local function process(l)
           actual_output = current_output
           reset_output()
         end
+
         actual_output = actual_output:gsub("%s+", " ")
-        if expected_output ~= actual_output then
-          report_error(("output mismatch:\n  expected: %s\n  got     : %s")
-            :format(expected_output, actual_output), l)
+        local pattern_expect = expected_output:match("/(.-)/")
+        if pattern_expect then
+          if not actual_output:match(pattern_expect) then
+            report_error(("output mismatch:\n  expected: %s\n  got     : %s")
+              :format(pattern_expect, actual_output), line)
+          end
+        else
+          expected_output = expected_output:gsub("%s+", " ")
+          if expected_output ~= actual_output then
+            report_error(("output mismatch:\n  expected: %s\n  got     : %s")
+              :format(expected_output, actual_output), line)
+          end
         end
       end
     end
@@ -244,14 +276,14 @@ local function process(l)
       if mode == "lua" then
         outfile:write("</code></pre>\n")
       end
-      l = l:gsub("`(.-)`", "<code class='brush: lua inline: true'>%1</code>")
+      outline = outline:gsub("`(.-)`", "<code class='brush: lua inline: true'>%1</code>")
     end
       
     mode = "text"
   end
   
   if write then
-    outfile:write(l, "\n")
+    outfile:write(outline, "\n")
   end
 end
 
