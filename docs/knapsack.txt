@@ -1,0 +1,114 @@
+# Rima: The Knapsack Problem
+
+[ [Contents](contents.html) ]
+
+This is a Rima version of the "burglar bill"
+[XPress knapsack example](http://dashoptimization.com/home/cgi-bin/example.pl?id=mosel_model_2_2).
+A knapsack problem involves picking items to fill a knapsack of limited
+capacity with items of maximum value.
+We have a list of items, each with a weight and capacity, and wish to choose
+which we'll take.
+
+We start by requiring the Rima module:
+
+    rima = require("rima")
+
+Then we define some variables, or *references* with `rima.R`.
+Note that at this stage we don't have to tell Rima anything about the
+types of our variables, or whether they're parameters or variables we
+wish to solve for.
+We define references to our list of items, a reference to use for a single item
+and the total capacity of the knapsack:
+
+    --! continue
+    items, item = rima.R"items, item"
+    capacity = rima.R"capacity"
+
+Next, we define our two equations, one for the value of the items we're
+putting in the knapsack, and one for the weight of the items.
+Note that we're using syntax like `item.picked`, `item.value` and `item.weight` -
+Rima understands data structures like a dynamic language should.
+Also, we haven't defined these fields or structures at all,
+when Rima has the data, it'll check it works as expected - duck typing for a
+modelling language!
+
+    --! continue
+    value = rima.sum{item=items}(item.picked * item.value)
+    weight = rima.sum{item=items}(item.picked * item.weight)
+
+We create a new formulation, set its objective:
+
+    --! continue
+    knapsack = rima.formulation:new()
+    knapsack:set_objective(value, "maximise")
+
+The syntax for adding constraints is a little *constrained* by Lua syntax.
+The empty {} are because this is one constraint only, not a constraint over a set:
+
+    --! continue
+    knapsack:add({}, weight, "<=", capacity)
+
+Finally, we defines `item.picked` as a binary variable.
+`rima.default` helps us set this for all items in `items`:
+
+    --! continue
+    knapsack:scope().items[rima.default].picked = rima.binary()
+
+And we're done.  `knapsack` is a complete definition of a knapsack problem.
+You can derive from it, compose a new model with it, make a Lua module out
+of it and it can even write itself prettily:
+
+    --! continue
+    knapsack:write()
+    --> Maximise:
+    -->   sum{item in items}(item.picked*item.value)
+    --> Subject to:
+    -->   sum{item in items}(item.picked*item.weight) <= capacity
+
+So far, we've seen no data, other than the one bit we wanted -
+defining as `items[rima.default].picked` as a binary variable.
+Of course, we can't solve anything without data.
+
+Data's easy to add: we create an `instance` of the problem and pass it a
+table of data:
+
+    --! continue
+    burglar_bill = knapsack:instance \
+    { \
+      capacity = 102, \
+      items = \
+      { \
+        camera   = { value =  15, weight =  2 }, \
+        necklace = { value = 100, weight = 20 }, \
+        vase     = { value =  15, weight = 20 }, \
+        picture  = { value =  15, weight = 30 }, \
+        tv       = { value =  15, weight = 40 }, \
+        video    = { value =  15, weight = 30 }, \
+        chest    = { value =  15, weight = 60 }, \
+        brick    = { value =   1, weight = 10 }, \
+      } \
+    }
+
+`burglar_bill` is also a formulation: if we'd only given it partial data,
+we could create a new instance for further specialisation.
+Just like `knapsack`, it can write itself (but we'll save you the output for now).
+
+To solve the problem, just choose a solver, and use the `solve` method:
+
+    --! continue
+    r = burglar_bill:solve("cbc")
+
+We can check the objective:
+
+    --! continue
+    print(r.objective)                                  --> 160
+
+And see if it was worth taking the brick or necklace in the knapsack:
+
+    --! continue
+    print(r.variables.items.brick.picked.p)             --> 0
+    print(r.variables.items.necklace.picked.p)          --> 1
+
+Notice that our results follow the same structure as the input data,
+and that we access the primal value of the solution with `p`
+(and the dual with `d`).

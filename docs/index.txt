@@ -22,7 +22,7 @@ Then Rima might be for you.  With Rima you can:
 - access all the features of Lua, a fast, small, widely deployed scripting language that's easy to both embed and extend
 
 Rima binds to well-known optimisation packages to solve problems.
-Currently, bindings are available for:
+Currently bindings are available for:
 
 + [CLP](https://projects.coin-or.org/Clp) for linear problems
 + [CBC](https://projects.coin-or.org/Cbc) for mixed-integer linear problems
