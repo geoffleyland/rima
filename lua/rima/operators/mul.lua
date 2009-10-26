@@ -92,12 +92,13 @@ function mul.simplify(args)
   local coeff, terms = 1, {}
   
   local function add_term(exp, e)
+    local n = rima.repr(e)
     local s = rima.repr(e, { scopes = true })
     local t = terms[s]
     if t then
       t.exponent = t.exponent + exp
     else
-      terms[s] = { exponent=exp, expression=e }
+      terms[s] = { name=n, exponent=exp, expression=e }
     end
   end
 
@@ -137,7 +138,7 @@ function mul.simplify(args)
   local ordered_terms = {}
   for name, t in pairs(terms) do
     if t.exponent ~= 0 then
-      ordered_terms[#ordered_terms+1] = { name=name, exponent=t.exponent, expression=t.expression }
+      ordered_terms[#ordered_terms+1] = { name=t.name, exponent=t.exponent, expression=t.expression }
     end
   end
   table.sort(ordered_terms, function(a, b) return a.name < b.name end)

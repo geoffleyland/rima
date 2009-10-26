@@ -7,12 +7,12 @@ local ipairs, pairs = ipairs, pairs
 local getmetatable = getmetatable
 
 local proxy = require("rima.proxy")
-local expression = require("rima.expression")
 require("rima.private")
 local rima = rima
 
 module(...)
 
+local expression = require("rima.expression")
 local mul = require("rima.operators.mul")
 
 -- Addition --------------------------------------------------------------------
@@ -85,12 +85,13 @@ function add.__eval(args, S, eval)
   local constant, terms = 0, {}
   
   local function add_term(c, e)
+    local n = rima.repr(e)
     local s = rima.repr(e, { scopes = true })
     local t = terms[s]
     if t then
       t.coeff = t.coeff + c
     else
-      terms[s] = { coeff=c, expression=e }
+      terms[s] = { name=n, coeff=c, expression=e }
     end
   end
 
@@ -130,7 +131,7 @@ function add.__eval(args, S, eval)
   local ordered_terms = {}
   for name, t in pairs(terms) do
     if t.coeff ~= 0 then
-      ordered_terms[#ordered_terms+1] = { name=name, coeff=t.coeff, expression=t.expression }
+      ordered_terms[#ordered_terms+1] = { name=t.name, coeff=t.coeff, expression=t.expression }
     end
   end
   table.sort(ordered_terms, function(a, b) return a.name < b.name end)
