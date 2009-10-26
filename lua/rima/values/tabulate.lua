@@ -3,14 +3,16 @@
 
 local debug = require("debug")
 local error, xpcall = error, xpcall
-local ipairs = ipairs
+local ipairs, require = ipairs, require
 
 local object = require("rima.object")
 local scope = require("rima.scope")
-local expression = require("rima.expression")
 local rima = rima
 
 module(...)
+
+local ref = require("rima.ref")
+local expression = require("rima.expression")
 
 -- Tabulation ------------------------------------------------------------------
 
@@ -22,8 +24,8 @@ function tabulate_type:new(indexes, e)
   for i, v in ipairs(indexes) do
     if type(v) == "string" then
       new_indexes[i] = rima.R(v)
-    elseif isa(v, rima.ref) then
-      if rima.ref.is_simple(v) then
+    elseif isa(v, ref) then
+      if ref.is_simple(v) then
         new_indexes[i] = v
       else
         error(("bad index #%d to tabulate: expected string or simple reference, got '%s' (%s)"):

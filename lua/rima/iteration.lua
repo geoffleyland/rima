@@ -16,7 +16,6 @@ module(...)
 
 local scope = require("rima.scope")
 local expression = require("rima.expression")
-local ref = require("rima.ref")
 
 -- Ord -------------------------------------------------------------------------
 
@@ -289,7 +288,7 @@ function set_list:new(sets)
     if type(s[1]) == "number" then
       if type(s[2]) == "string" then
         namestring, set = s[2], s[2]
-      elseif object.isa(s[2], ref) then
+      elseif object.type(s[2]) == "ref" then
         namestring, set = rima.repr(s[2]), s[2]
       else -- assume it's a table
         namestring, set = next(s[2])

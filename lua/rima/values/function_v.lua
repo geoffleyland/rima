@@ -11,6 +11,7 @@ local rima = rima
 
 module(...)
 
+local ref = require("rima.ref")
 local expression = require("rima.expression")
 
 -- Function type ---------------------------------------------------------------
@@ -30,8 +31,8 @@ function function_v:new(inputs, expression, S, ...)
   for i, v in ipairs(inputs) do
     if type(v) == "string" then
       new_inputs[i] = rima.R(v)
-    elseif isa(v, rima.ref) then
-      if rima.ref.is_simple(v) then
+    elseif isa(v, ref) then
+      if ref.is_simple(v) then
         new_inputs[i] = v
       else
         error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
