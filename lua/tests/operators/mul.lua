@@ -2,6 +2,7 @@
 -- see license.txt for license information
 
 local series = require("test.series")
+require("rima.ref")
 local mul = require("rima.operators.mul")
 local object = require("rima.object")
 local expression = require("rima.expression")

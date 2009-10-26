@@ -2,6 +2,7 @@
 -- see license.txt for license information
 
 local series = require("test.series")
+require("rima.ref")
 local add = require("rima.operators.add")
 local object = require("rima.object")
 local expression = require("rima.expression")
@@ -67,14 +68,13 @@ function test(show_passes)
   T:check_equal(E(2 - (3 + a), S), -6)
   T:check_equal(E(-a, S), -5)
 
+  -- Tests simplifying mul
   T:check_equal(D(E(2 + 3*b, S)), "+(1*number(2), 3*ref(b))")
   T:check_equal(D(E(2 + b*c, S)), "+(1*number(2), 1**(ref(b)^1, ref(c)^1))")
   T:check_equal(D(E(2 + 5*b*c, S)), "+(1*number(2), 5**(ref(b)^1, ref(c)^1))")
 
   T:check_equal(D(OE({{2, S.b}}, S)), "+(2*ref(b))")
   T:check_equal(D(OE({{1, S.b}}, S)), "ref(b)", "checking we simplify identity")
-
-  -- Tests including mul are in rima.expression
 
   return T:close()
 end
