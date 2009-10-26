@@ -49,6 +49,9 @@ function test(show_passes)
   T:check_equal(a:sub(-2, -1), "[1, 2]")
   T:check_equal(a:sub(-1, -1), "[2]")
 
+  local a = address:new{"a", "index b"}
+  T:check_equal(a, ".a['index b']")
+
   return T:close()
 end
 
