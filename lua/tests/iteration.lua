@@ -3,6 +3,7 @@
 
 local series = require("test.series")
 local object = require("rima.object")
+local ref = require("rima.ref")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
 require("rima.iteration")
