@@ -2,7 +2,7 @@
 -- see license.txt for license information
 
 local error, pcall = error, pcall
-local ipairs, rawget, require, type, unpack = ipairs, rawget, require, type, unpack
+local ipairs, rawget, require, type = ipairs, rawget, require, type
 local getmetatable, setmetatable = getmetatable, setmetatable
 
 --[[

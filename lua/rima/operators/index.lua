@@ -3,7 +3,7 @@
 
 local debug = require("debug")
 local error, xpcall = error, xpcall
-local getmetatable, require, type, unpack = getmetatable, require, type, unpack
+local getmetatable, require, type = getmetatable, require, type
 
 local object = require("rima.object")
 local proxy = require("rima.proxy")
@@ -71,12 +71,12 @@ function index.resolve(args, S, eval)
   -- might work because it's not a scalar type or it might fail.  Maybe
   -- we could just check that first?
   if expression.defined(e) or v then
-    local status, r = xpcall(function() return { address:resolve(S, b, 1, b, eval) } end, debug.traceback)
+    local status, r = rima.packs(xpcall(function() return address:resolve(S, b, 1, b, eval) end, debug.traceback))
     if not status then
       error(("index: error evaluating '%s' as '%s%s':\n  %s"):
-        format(__repr(args), rima.repr(b), rima.repr(address), r:gsub("\n", "\n  ")), 0)
+        format(__repr(args), rima.repr(b), rima.repr(address), r[1]:gsub("\n", "\n  ")), 0)
     else
-      return unpack(r)
+      return rima.unpackn(r)
     end
   end
 

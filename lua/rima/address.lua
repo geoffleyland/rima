@@ -3,7 +3,7 @@
 
 local debug = require("debug")
 local ipairs, require = ipairs, require
-local getmetatable, unpack = getmetatable, unpack
+local getmetatable = getmetatable
 local error, xpcall = error, xpcall
 
 local object = require("rima.object")
@@ -201,10 +201,10 @@ function address:resolve(S, current, i, base, eval)
     end
 
     local function try_current(c)
-      local status, r = xpcall(function() return { new_address:resolve(S, c, 1, new_base, eval) } end, debug.traceback)
+      local status, r = rima.packs(xpcall(function() return new_address:resolve(S, c, 1, new_base, eval) end, debug.traceback))
       if not status then
         error(("address: error evaluating '%s%s' as '%s%s':\n  %s"):
-          format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), r:gsub("\n", "\n  ")), 0)
+          format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), r[1]:gsub("\n", "\n  ")), 0)
       end
       return r
     end
@@ -238,12 +238,12 @@ function address:resolve(S, current, i, base, eval)
         results[#results+1] = try_current(v[1])
         -- and if we find something good, return it
         if results[#results][1] then
-          return unpack(results[#results])
+          return rima.unpackn(results[#results])
         end
       end
       -- We found nothing good, return the first thing we found (I think we
       -- could return any of the results.
-      return unpack(results[1])
+      return rima.unpackn(results[1])
 
     else
       -- Otherwise, the new base is not a ref.  I'm not sure this can actually happen --
@@ -252,7 +252,7 @@ function address:resolve(S, current, i, base, eval)
       if not expression.defined(new_current) then
         return false, nil, new_base, new_address
       end
-      return unpack(try_current(new_current))
+      return rima.unpackn(try_current(new_current))
     end
   end
 
@@ -296,17 +296,17 @@ function address:resolve(S, current, i, base, eval)
     local next = index(current, a, b)
     local r1
     if next then
-      r1 = { self:resolve(S, next, i+1, base, eval) }
-      if r1[1] then return unpack(r1) end
+      r1 = rima.packn(self:resolve(S, next, i+1, base, eval))
+      if r1[1] then return rima.unpackn(r1) end
     end
     -- including any default values
     next = scope.default(current)
     if next then
-      local r2 = { self:resolve(S, next, i+1, base, eval) }
-      if r2[1] then return unpack(r2) end
+      local r2 = rima.packn(self:resolve(S, next, i+1, base, eval))
+      if r2[1] then return rima.unpackn(r2) end
     end
     if r1 then
-      return unpack(r1)
+      return rima.unpackn(r1)
     else
       return false, nil, base, self
     end

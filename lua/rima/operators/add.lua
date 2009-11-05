@@ -2,7 +2,7 @@
 -- see license.txt for license information
 
 local math, table = require("math"), require("table")
-local error, require, unpack = error, require, unpack
+local error, require = error, require
 local ipairs, pairs = ipairs, pairs
 local getmetatable = getmetatable
 
