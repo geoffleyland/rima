@@ -98,12 +98,14 @@ function iterator:__repr(format)
   local e = rima.repr(self.exp, format)
   local n = table.concat(self.names, ", ")
   if self.order ~= "a" or self.values ~= "elements" then
-    return ("%s in %s%s(%s)"):format(n, self.order, self.values, e)
+    local f = (format and format.readable and "%s=rima.%s%s(%s)") or "%s in %s%s(%s)"
+    return f:format(n, self.order, self.values, e)
   else
     if n == e then
       return n
     else
-      return ("%s in %s"):format(n, e)
+      local f = (format and format.readable and "%s=%s") or "%s in %s"
+      return f:format(n, e)
     end
   end
 end
@@ -228,7 +230,7 @@ function iterator:results()
       return function(v, S)
         local e = expression:new(index_op, exp, v[1])
         expression.tag(e, { set_expression=exp, set=self.result, key=v[1], value=v[2] })
-        S[names[1] ] = e
+        S[names[1]] = e
       end
     else
       return function(v, S)

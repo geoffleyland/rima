@@ -62,7 +62,11 @@ function address:__repr(format)
             count = 0
           end
           if count > 0 then
-            s = s..", "
+            if format and format.readable then
+              s = s.."]["
+            else
+              s = s..", "
+            end
           end
           count = count + 1
           if type(a) == "string" then

@@ -2,15 +2,16 @@
 -- see license.txt for license information
 
 local series = require("test.series")
+local expression_tester = require("test.expression_tester")
 require("rima.ref")
 local add = require("rima.operators.add")
 local object = require("rima.object")
 local expression = require("rima.expression")
-require("rima.types.number_t")
 require("rima.public")
 local rima = rima
 
 module(...)
+
 
 -- Tests -----------------------------------------------------------------------
 
@@ -56,25 +57,26 @@ function test(show_passes)
   T:check_equal(OE({{1, a}}, S), 5)
   T:check_equal(OE({{1, a}, {2, a}}, S), 15)
 
-  T:check_equal(2 + (3 + b), "2 + 3 + b")
-  T:check_equal(2 - (3 + b), "2 - (3 + b)")
+  local U = expression_tester(T, "a, b, c", { a = 5, b = rima.positive() })  
 
-  T:check_equal(E(b - b, S), 0)
-  T:check_equal(E(b + b, S), "2*b")
-  T:check_equal(E(2 + (3 + b), S), "5 + b")
-  T:check_equal(E(2 - (3 + b), S), "-1 - b")
+  U{ "b - b", S="b - b", D="+(1*ref(b), -1*ref(b))", ES=0 }
+  U{ "b + b", S="b + b", D="+(1*ref(b), 1*ref(b))", ES="2*b", ED="+(2*ref(b))" }
 
-  T:check_equal(E(2 + (3 + a), S), 10)
-  T:check_equal(E(2 - (3 + a), S), -6)
-  T:check_equal(E(-a, S), -5)
+  U{ "2 + b + 3", S="2 + b + 3", D="+(1*+(1*number(2), 1*ref(b)), 1*number(3))", ES="5 + b" }
+  U{ "2 - (3 + b)", S="2 - (3 + b)", D="+(1*number(2), -1*+(1*number(3), 1*ref(b)))", ES="-1 - b" }
 
-  -- Tests simplifying mul
-  T:check_equal(D(E(2 + 3*b, S)), "+(1*number(2), 3*ref(b))")
-  T:check_equal(D(E(2 + b*c, S)), "+(1*number(2), 1**(ref(b)^1, ref(c)^1))")
-  T:check_equal(D(E(2 + 5*b*c, S)), "+(1*number(2), 5**(ref(b)^1, ref(c)^1))")
+  U{ "2 + a + 3", S="2 + a + 3", D="+(1*+(1*number(2), 1*ref(a)), 1*number(3))", ES=10 }
+  U{ "2 - (3 + a)", S="2 - (3 + a)", D="+(1*number(2), -1*+(1*number(3), 1*ref(a)))", ES=-6 }
+  U{ "-a", S="-a", D="+(-1*ref(a))", ES=-5 }
 
-  T:check_equal(D(OE({{2, S.b}}, S)), "+(2*ref(b))")
-  T:check_equal(D(OE({{1, S.b}}, S)), "ref(b)", "checking we simplify identity")
+  -- Tests with mul
+  U{ "2 + 3*b", S="2 + 3*b", D="+(1*number(2), 1**(number(3)^1, ref(b)^1))", ED="+(1*number(2), 3*ref(b))" }
+  U{ "2 + b*c", S="2 + b*c", D="+(1*number(2), 1**(ref(b)^1, ref(c)^1))", ED="+(1*number(2), 1**(ref(b)^1, ref(c)^1))" }
+  U{ "2 + 5*b*c", S="2 + 5*b*c", D="+(1*number(2), 1**(*(number(5)^1, ref(b)^1)^1, ref(c)^1))", ED="+(1*number(2), 5**(ref(b)^1, ref(c)^1))" }
+
+  -- Check we simplify the identity (+0)
+  U{ "1 + 2*b - 1", S="1 + 2*b - 1", ED="+(2*ref(b))" }
+  U{ "1 + b - 1", S="1 + b - 1", ED="ref(b)" }
 
   return T:close()
 end

@@ -2,6 +2,7 @@
 -- see license.txt for license information
 
 local series = require("test.series")
+local expression_tester = require("test.expression_tester")
 local sum = require("rima.operators.sum")
 local object = require("rima.object")
 local scope = require("rima.scope")
@@ -23,69 +24,41 @@ function test(show_passes)
   T:test(object.isa(sum:new(), sum), "isa(sum, sum:new())")
   T:check_equal(object.type(sum:new()), "sum", "type(sum:new()) == 'sum'")
 
-  local x, y, Q, q, R, r = rima.R"x,y,Q,q,R,r"
+  local U = expression_tester(T, "x, y, z, Q, q, R, r, V, v", { R={"a", "b", "c"}, V={"d", "e"}, y={1, 2, 3}, z={{1,2},{3,4},{5,6}} })
+  U{"rima.sum{q=Q}(x)", S="sum{q in Q}(x)", ES="sum{q in Q}(x)", D="sum({q in ref(Q)}, ref(x))"}
+  U{"rima.sum{r=R}(x)", S="sum{r in R}(x)", ES="3*x" }
+  U{"rima.sum{q=Q}(x[q])", S="sum{q in Q}(x[q])"}
+  U{"rima.sum{r=R}(x[r])", S="sum{r in R}(x[r])", ES="x.a + x.b + x.c"}
 
-  T:check_equal(D(rima.sum({q=Q}, x)), "sum({q in ref(Q)}, ref(x))")
-  T:check_equal(rima.sum({q=Q}, x), "sum{q in Q}(x)")
-  T:check_equal(D(rima.sum({q=Q}, x[q])),
-    "sum({q in ref(Q)}, index(ref(x), address(ref(q))))")
-  T:check_equal(rima.sum({q=Q}, x[q]), "sum{q in Q}(x[q])")
-  T:check_equal(D(rima.sum({q=Q, R}, x[q][R])),
-    "sum({R in ref(R), q in ref(Q)}, index(ref(x), address(ref(q), ref(R))))")
-  T:check_equal(rima.sum({q=Q, "R"}, x[q][R]), "sum{R, q in Q}(x[q, R])")
+  U{"rima.sum{r=R}(y[r])", S="sum{r in R}(y[r])", ES=6}
 
-  local S = rima.scope.new()
-  T:check_equal(E(rima.sum({q=Q}, x), S), "sum{q in Q}(x)")
-  T:check_equal(E(rima.sum({q=Q}, x * y), S), "sum{q in Q}(x*y)")
-  T:check_equal(E(rima.sum({q=Q}, x[q] * y[q]), S), "sum{q in Q}(x[q]*y[q])")
-  T:check_equal(E(rima.sum({q=Q, r=R}, x[q][r]), S), "sum{q in Q, r in R}(x[q, r])")
-  T:check_equal(E(rima.sum({q=Q, "R"}, x[q][R]), S), "sum{R, q in Q}(x[q, R])")
-  T:check_equal(E(rima.sum({q=Q, R}, x[q][R] * y[q]), S), "sum{R, q in Q}(x[q, R]*y[q])")
-  S.Q = {"a", "b", "c"}
-  T:check_equal(E(rima.sum({q=Q}, x), S), "3*x")
-  T:check_equal(E(rima.sum({q=Q}, x[q]), S), "x.a + x.b + x.c")
-  S.x = { 1, 2, 3 }
-  T:check_equal(E(rima.sum({q=Q}, x[q]), S), 6)
-  T:check_equal(E(rima.sum({"Q"}, x[Q]), S), 6)
+  U{"rima.sum{q=Q}(x*y)", S="sum{q in Q}(x*y)" }
+  U{"rima.sum{q=Q}(x[q]*y[q])", S="sum{q in Q}(x[q]*y[q])"}  
+  U{"rima.sum{r=R}(x[r]*y[r])", S="sum{r in R}(x[r]*y[r])", ES="x.a + 2*x.b + 3*x.c"}
+  U{"rima.sum{q=Q, R}(x[q][R])", S="sum{R, q in Q}(x[q, R])", ES="sum{q in Q}(x[q].a + x[q].b + x[q].c)"}
+  U{"rima.sum{q=Q, r=R}(x[q][r])", S="sum{q in Q, r in R}(x[q, r])", ES="sum{q in Q}(x[q].a + x[q].b + x[q].c)"}
+  U{"rima.sum{q=Q, r=R}(x[q][r] * y[q])", S="sum{q in Q, r in R}(x[q, r]*y[q])", ES="sum{q in Q}(x[q].a*y[q] + x[q].b*y[q] + x[q].c*y[q])"}
+  U{"rima.sum{q=Q, r=R}(x[q][r] * y[r])", S="sum{q in Q, r in R}(x[q, r]*y[r])", ES="sum{q in Q}(x[q].a + 2*x[q].b + 3*x[q].c)"}
 
-  do 
-    local S = rima.scope.new()
-    local x, Q, R = rima.R"x, Q, R"
-    local xx = {{1,2},{3,4},{5,6}}
-    local QQ = {"a", "b", "c"}
-    local RR = {"d", "e" }
-    T:check_equal(E(rima.sum({Q, R}, x[Q][R]), S), "sum{Q, R}(x[Q, R])")
-    T:check_equal(E(rima.sum({Q, R}, x[Q][R]), scope.spawn(S, {x=xx})), "sum{Q, R}(x[Q, R])")
-    T:check_equal(E(rima.sum({Q, R}, x[Q][R]), scope.spawn(S, {Q=QQ})), "sum{R}(x.a[R] + x.b[R] + x.c[R])")
-    T:check_equal(E(rima.sum({Q, R}, x[Q][R]), scope.spawn(S, {R=RR})), "sum{Q}(x[Q].d + x[Q].e)")
-    T:check_equal(E(rima.sum({Q, R}, x[Q][R]), scope.spawn(S, {x=xx,Q=QQ})), "sum{R}(x.a[R] + x.b[R] + x.c[R])")
-    T:check_equal(E(rima.sum({Q, R}, x[Q][R]), scope.spawn(S, {x=xx,R=RR})), "sum{Q}(x[Q].d + x[Q].e)")
-    T:check_equal(E(rima.sum({Q, R}, x[Q][R]), scope.spawn(S, {Q=QQ,R=RR})), "x.a.d + x.a.e + x.b.d + x.b.e + x.c.d + x.c.e")
-    T:check_equal(E(rima.sum({Q, R}, x[Q][R]), scope.spawn(S, {x=xx,Q=QQ,R=RR})), 21)
-  end
+  U{"rima.sum{Q, R}(x[Q][R])", S="sum{Q, R}(x[Q, R])", ES="sum{Q}(x[Q].a + x[Q].b + x[Q].c)"}
+  U{"rima.sum{Q, R}(z[Q][R])", S="sum{Q, R}(z[Q, R])", ES="sum{Q}(z[Q].a + z[Q].b + z[Q].c)"}
+  U{"rima.sum{V, Q}(x[V][Q])", S="sum{V, Q}(x[V, Q])", ES="sum{Q}(x.d[Q] + x.e[Q])"}
+  U{"rima.sum{R, V}(x[R][V])", S="sum{R, V}(x[R, V])", ES="x.a.d + x.a.e + x.b.d + x.b.e + x.c.d + x.c.e"}
+  U{"rima.sum{R, V}(z[R][V])", S="sum{R, V}(z[R, V])", ES=21}
 
-  do 
-    local S = rima.scope.new()
-    local x, Q, R, r = rima.R"x, Q, R, r"
-    local xx = { x = 1, y = 2, z = 3}
-    local QQ = {"a", "b"}
-    local RR = { a = { "x", "y" }, b = { "y", "z" } }
-    T:check_equal(E(rima.sum({Q, r=R[Q]}, x[r]), S), "sum{Q, r in R[Q]}(x[r])")
-    T:check_equal(E(rima.sum({Q, r=R[Q]}, x[r]), scope.spawn(S, {Q=QQ})), "sum{r in R.a}(x[r]) + sum{r in R.b}(x[r])")
-    T:check_equal(E(rima.sum({Q, r=R[Q]}, x[r]), scope.spawn(S, {R=RR})), "sum{Q, r in R[Q]}(x[r])")
-    T:check_equal(E(rima.sum({Q, r=R[Q]}, x[r]), scope.spawn(S, {Q=QQ,R=RR})), "x.x + 2*x.y + x.z")
-    T:check_equal(E(rima.sum({Q, r=R[Q]}, x[r]), scope.spawn(S, {Q=QQ,R=RR,x=xx})), 8)
-  end
+  -- Recursive indexes
+  local U = expression_tester(T, "x, y, Q, R, r, V", { Q={"a", "b"}, R={ a={ "x", "y" }, b={ "y", "z" } }, y={ x=1, y=2, z=3} })
+  U{"rima.sum{Q, r=R[Q]}(x[r])", S="sum{Q, r in R[Q]}(x[r])", ES="x.x + 2*x.y + x.z"}
+  U{"rima.sum{V, r=R[V]}(x[r])", S="sum{V, r in R[V]}(x[r])", ES="sum{V, r in R[V]}(x[r])"}
+  U{"rima.sum{Q, r=V[Q]}(x[r])", S="sum{Q, r in V[Q]}(x[r])", ES="sum{r in V.a}(x[r]) + sum{r in V.b}(x[r])"}
+  U{"rima.sum{Q, r=R[Q]}(y[r])", S="sum{Q, r in R[Q]}(y[r])", ES=8}
 
-  do 
-    local X, x, y, z = rima.R"X, x, y, z"
-    local S = rima.scope.create{ X = rima.range(1, y) }
-    T:check_equal(D(E(rima.sum({x=X}, x), S)), "sum({x in range(number(1), ref(y))}, ref(x))")
-    T:check_equal(E(rima.sum({x=X}, x), S), "sum{x in range(1, y)}(x)")
-    S.y = 5
-    T:check_equal(E(rima.sum({x=X}, x), S), 15)
-    T:check_equal(E(rima.sum({x=X}, z * x), S), 15*z)
-  end
+  -- Ranges
+  local y, z = rima.R"y, z"
+  local U = expression_tester(T, "x, Y, y, Z, z", { Y=rima.range(1, y), Z=rima.range(1, z), z=5 })
+  U{"rima.sum{x=Y}(x)", S="sum{x in Y}(x)", ES="sum{x in range(1, y)}(x)", ED="sum({x in range(number(1), ref(y))}, ref(x))"}
+  U{"rima.sum{x=Z}(x)", S="sum{x in Z}(x)", ES=15}
+  U{"rima.sum{x=Z}(x * y)", S="sum{x in Z}(x*y)", ES=15*y}
 
   do
     local x, X = rima.R"x, X"
