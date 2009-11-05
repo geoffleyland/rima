@@ -16,7 +16,9 @@ local function equal(T, expected, got)
     if object.type(z) == "table" then
       local e = z[1]
       for i = 3, #z do
-        e = expression[z[i]](e, z[2])
+        local arg = z[2]
+        arg = (arg ~= "" and arg) or nil
+        e = expression[z[i]](e, arg)
       end
       return e
     else
@@ -44,12 +46,12 @@ function test(show_passes)
   local S = scope.new()
 
   -- literals
-  equal(T, "number(1)", {1, nil, "dump"})
+  equal(T, "number(1)", {1, "", "dump"})
   equal(T, 1, {1, S, "eval"})
 
   -- variables
   local a = rima.R"a"
-  equal(T, "ref(a)", {a, nil, "dump"})
+  equal(T, "ref(a)", {a, "", "dump"})
   T:expect_ok(function() rima.E(a, S) end)
   equal(T, "ref(a)", {a, S, "dump"})
   equal(T, "a", {a, S, "eval"})
@@ -84,7 +86,7 @@ function test(show_passes)
     equal(T, "1 + 1.5/a", {1 + 3 / (a + a), S, "eval"})
 
 
-    equal(T, "*(number(3)^1, ^(ref(a), number(2))^1)", {3 * a^2, nil, "dump"})
+    equal(T, "*(number(3)^1, ^(ref(a), number(2))^1)", {3 * a^2, "", "dump"})
     equal(T, "*(number(3)^1, ref(a)^2)", {3 * a^2, S, "eval", "dump"})
     equal(T, "*(number(3)^1, +(1*number(1), 1*ref(a))^2)", {3 * (a+1)^2, S, "eval", "dump"})
   end
