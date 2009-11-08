@@ -305,12 +305,15 @@ function address:resolve(S, current, i, base, eval)
     end
     -- including any default values
     next = scope.default(current)
+    local r2
     if next then
-      local r2 = rima.packn(self:resolve(S, next, i+1, base, eval))
+      r2 = rima.packn(self:resolve(S, next, i+1, base, eval))
       if r2[1] then return rima.unpackn(r2) end
     end
     if r1 then
       return rima.unpackn(r1)
+    elseif r2 then
+      return rima.unpackn(r2)
     else
       return false, nil, base, self
     end
