@@ -27,36 +27,44 @@ function test(show_passes)
   T:expect_ok(function() t = rima.tabulate({"a", "b", "c"}, 3) end, "constructing tabulate")
 
   do
+    local x, y = rima.R"x, y"
+    local S = scope.new()
+    S.x[rima.default] = rima.tabulate({y}, y + 1)
+    T:check_equal(E(x[1], S), 2)
+  end
+
+  do
     local Q, x, y = rima.R"Q, x, y"
     local e = rima.sum({Q}, x[Q])
     local S = scope.create{ Q={4, 5, 6} }
-    S.x = rima.tabulate({y}, y^2)
-    T:check_equal(rima.E(e, S), 77)
-    T:expect_error(function() rima.E(x[1][2], S) end,
+    S.x[rima.default] = rima.tabulate({y}, y^2)
+    T:check_equal(E(x[3], S), 9)
+    T:check_equal(E(e, S), 77)
+    T:expect_error(function() E(x[1][2], S) end,
       "error evaluating 'x%[1, 2%]' as 'y%^2%[2%]':.*address: error resolving 'y%^2%[2%]': 'y%^2' is not indexable %(got '1' number%)")
   end
 
   do
     local t, x, y = rima.R"t, x, y"
-    local S = scope.create{ t=rima.tabulate({y}, y + x[1]), x=1 }
+    local S = scope.create{ x=1 }
+    S.t[rima.default] = rima.tabulate({y}, y + x[1])
     T:expect_error(function() rima.E(t[1], S) end,
       "tabulate: error evaluating 'tabulate%({y}, y %+ x%[1%]%)' as 'y %+ x%[1%]' where y=1:")
   end
 
   do
     local x, y, z = rima.R"x, y, z"
-    local S = scope.create{ x = rima.tabulate({y, z}, y * z) }
+    local S = scope.new()
+    S.x[rima.default][rima.default] = rima.tabulate({y, z}, y * z)
     T:check_equal(rima.E(x[2][3], S), 6)
-    T:expect_error(function() rima.E(x[1], S) end, "the tabulation needs 2 indexes, got 1")
   end
 
   do
     local a, b, c, t, s, u = rima.R"a, b, c, t, s, u"
-    local S = scope.create{
-      a={w={{x=10,y={z=100}},{x=20,y={z=200}}}},
-      t=rima.tabulate({b}, a.w[b].x),
-      s=rima.tabulate({b}, a.w[b].y),
-      u=rima.tabulate({b}, a.q[b].y) }
+    local S = scope.create{ a={w={{x=10,y={z=100}},{x=20,y={z=200}}}} }
+    S.t[rima.default] = rima.tabulate({b}, a.w[b].x)
+    S.s[rima.default] = rima.tabulate({b}, a.w[b].y)
+    S.u[rima.default] = rima.tabulate({b}, a.q[b].y)
 
     T:check_equal(t[1], "t[1]")
     T:expect_ok(function() B(t[1], S) end, "binding")
@@ -97,7 +105,8 @@ function test(show_passes)
 
   do
     local a, b, i = rima.R"a, b, i"
-    local S = rima.scope.create{ a = { { 5 } }, b = rima.tabulate({i}, a[1][i]) }
+    local S = rima.scope.create{ a = { { 5 } } }
+    S.b[rima.default] = rima.tabulate({i}, a[1][i])
     T:check_equal(E(a[1][1], S), 5)
     T:check_equal(E(b[1], S), 5)
     T:expect_error(function() E(b[1][1], S) end,

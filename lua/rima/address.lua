@@ -165,7 +165,25 @@ end
 -- resolving -------------------------------------------------------------------
 
 -- resolve an address by working through its indexes recursively
-function address:resolve(S, current, i, base, eval)
+function address:resolve(S, current, i, base, eval, collected)
+
+  -- if we've got something that wants to resolve itself, then give it the
+  -- collected indexes
+  local mt = getmetatable(current)
+  if mt and mt.__address then
+    -- We only want to bind to the result...
+    local status, v, j = xpcall(function() return mt.__address(current, S, collected, 1, expression.bind) end, debug.traceback)
+    if not status then
+      error(("address: error evaluating '%s%s' as '%s':\n  %s"):
+        format(rima.repr(base), rima.repr(self), rima.repr(current), v:gsub("\n", "\n  ")), 0)
+    end
+    -- ... and then, if there are no more indexes left, we'll evaluate it.
+    -- otherwise we leave it as a ref for the next call to index.
+    if i > #self then v = eval(v, S) end
+    return self:resolve(S, v, i, base, eval)
+  end
+
+  -- Otherwise, move on to the next index
   local si = self[i]
   if not si then return true, current, base, self end
   local a = si.value
@@ -263,24 +281,9 @@ function address:resolve(S, current, i, base, eval)
   -- This is where the function proper starts.
   -- We've got an object (current) and we're trying to index it with a.
   -- How should we treat it?
-  local mt = getmetatable(current)
-
-  -- if we've got something that wants to resolve itself, then handle it and continue.
-  -- The object might use more than one element of the address.
-  if mt and mt.__address then
-    -- We only want to bind to the result...
-    local status, v, j = xpcall(function() return mt.__address(current, S, self, i, expression.bind) end, debug.traceback)
-    if not status then
-      error(("address: error evaluating '%s%s' as '%s':\n  %s"):
-        format(rima.repr(base), rima.repr(self), rima.repr(current), v:gsub("\n", "\n  ")), 0)
-    end
-    -- ... and then, if there are no more indexes left, we'll evaluate it.
-    -- otherwise we leave it as a ref for the next call to index.
-    if not j then v = eval(v, S) end
-    return self:resolve(S, v, j, base, eval)
 
   -- if it's a ref or an expression, evaluate it (and recursively tidy up the remaining indices)
-  elseif not expression.defined(current) then
+  if not expression.defined(current) then
     return handle_expression(current, i)
 
   -- if we're trying to index what has to be a scalar, give up
@@ -300,14 +303,16 @@ function address:resolve(S, current, i, base, eval)
     local next = index(current, a, b)
     local r1
     if next then
-      r1 = rima.packn(self:resolve(S, next, i+1, base, eval))
+      r1 = rima.packn(self:resolve(S, next, i+1, base, eval, collected))
       if r1[1] then return rima.unpackn(r1) end
     end
     -- including any default values
     next = scope.default(current)
     local r2
     if next then
-      r2 = rima.packn(self:resolve(S, next, i+1, base, eval))
+      local new_collected = object.new(address, {{value=a, exp=b}})
+      if collected then new_collected = collected + new_collected end
+      r2 = rima.packn(self:resolve(S, next, i+1, base, eval, new_collected))
       if r2[1] then return rima.unpackn(r2) end
     end
     if r1 then
