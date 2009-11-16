@@ -14,3 +14,22 @@ code
 {
 	font-family: "Courier New", Courier, monospace !important;
 }
+
+#footer
+{
+  text-align: right;
+  font-size: 80%;
+  font-style: italic;
+  margin-top: 1px;
+  padding: 5px 2px 2px 2px;
+  width: 100%;
+}
+
+hr
+{
+  border-style: solid;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  border-width: 1px 0px 0px 0px;
+  border-color: gray;
+}

@@ -50,7 +50,7 @@ install: rima_lpsolve_core.so
 	cp rima_lpsolve_core.so $(LUA_LIBDIR)
 
 doc:
-	for f in `find docs -name "*.txt"`; do n=`basename $$f .txt`; $(LUA) lua/test/doctest.lua -sh -i $$f | markdown.lua -e docs/header.html > htmldocs/$$n.html; done
+	for f in `find docs -name "*.txt"`; do n=`basename $$f .txt`; $(LUA) lua/test/doctest.lua -sh -i $$f | markdown.lua -e docs/header.html -f docs/footer.html > htmldocs/$$n.html; done
 
 dist: doc
 	rm -f dist.files
