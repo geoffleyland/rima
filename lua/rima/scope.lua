@@ -49,7 +49,7 @@ might be:
 local coroutine, string = require("coroutine"), require("string")
 local error, require, unpack = error, require, unpack
 local getmetatable, setmetatable = getmetatable, setmetatable
-local ipairs, pairs = ipairs, pairs
+local ipairs, next, pairs = ipairs, next, pairs
 
 local object = require("rima.object")
 local proxy = require("rima.proxy")
@@ -63,6 +63,7 @@ module(...)
 local ref = require("rima.ref")
 local address = require("rima.address")
 local expression = require("rima.expression")
+local tabulate_type = require("rima.values.tabulate")
 
 -- Scope names -----------------------------------------------------------------
 
@@ -335,19 +336,36 @@ function scope_proxy_mt.__newindex(s, name, value)
 end
 
 
-function scope.newindex(s, name, addr, index, value)
+function scope.newindex(s, name, addr, index, value, names)
   local new_address = addr and addr+index or address:new{index}
   scope.check(s, name, new_address, value)
   local S = proxy.O(s)
 
+  local function newname(n)
+    names = names or {}
+    names[#names+1] = n
+  end
+
+  local function newdefault(v)
+    z = defaults[v]
+    if not z then
+      z = {}
+      defaults[v] = z
+    end
+    return z
+  end
+
   local function newtable(v, name)
     local z
     if name == rima.default then
-      z = defaults[v]
-      if not z then
-        z = {}
-        defaults[v] = z
-      end
+      z = newdefault(v)
+    elseif type(name) == "ref" then
+      z = newdefault(v)
+      newname(name)
+    elseif type(name) == "table" and getmetatable(name) == nil then
+      z = newdefault(v)
+      local n, s = next(name)
+      newname(rima.R(n))
     else
       z = v[name]
       if not z then
@@ -371,10 +389,25 @@ function scope.newindex(s, name, addr, index, value)
   
   if type(value) == "table" and not getmetatable(value) then
     for k, v in pairs(value) do
-      scope.newindex(s, name, new_address, k, v)
+      local n2
+      if names then for i, n in ipairs(names) do n2[i] = n end end
+      scope.newindex(s, name, new_address, k, v, n2)
     end
   else
+    if type(index) == "ref" then
+      newname(index)
+    elseif type(index) == "table" and not getmetatable(index) then
+      local n, s = next(index)
+      newname(rima.R(n))
+    end
+    if names then
+      value = tabulate_type:new(names, value)
+    end
     if index == rima.default then
+      defaults[c] = value
+    elseif type(index) == "ref" then
+      defaults[c] = value
+    elseif type(index) == "table" and not getmetatable(index) then
       defaults[c] = value
     else
       c[index] = value

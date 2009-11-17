@@ -55,11 +55,11 @@ local points, x, xmin, xmax = rima.R"points, x, xmin, xmax"
 local equispaced_points =
 {
   P = rima.range(0, points),
-  x = { [rima.default] = rima.tabulate({p}, xmin + (xmax - xmin) * p / points) }
+  x = { [p] = xmin + (xmax - xmin) * p / points }
 }
 
 -- fit a polynomial with arbitrary order terms
-local polynomial_fits = { y = { [rima.default] = { [rima.default] = rima.tabulate({t, p}, x[p]^t) } } }
+local polynomial_fits = { y = { [t] = { [p] = x[p]^t } } }
 
 -- fit polynomial with terms 1, x, x^2
 local terms = rima.R"terms"
@@ -67,7 +67,7 @@ local consecutive_polynomials = { T = rima.range(1, terms) }
 
 -- fit to a function
 local f = rima.R"f"
-local samples_from_function = { s = { [rima.default] = rima.tabulate({p}, f(x[p])) } }
+local samples_from_function = { s = { [p] = f(x[p]) } }
 
 
 -- Put it all together

@@ -104,8 +104,8 @@ function test(show_passes)
       xmax = 20,
       points = 10,
     }
-    S.s[rima.default] = rima.tabulate({p}, f(x[p]))
-    S.x[rima.default] = rima.tabulate({p},  xmin + (xmax - xmin)*p.key/points)
+    S.s[p] = f(x[p])
+    S.x[p] = xmin + (xmax - xmin)*p.key/points
     T:check_equal(E(x[{key=1}], S), 2)
     T:check_equal(E(s[{key=1}], S), E(rima.exp(2)*rima.sin(2)))
   end

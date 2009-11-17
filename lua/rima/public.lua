@@ -13,7 +13,6 @@ local ref = require("rima.ref")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
 local function_v = require("rima.values.function_v")
-local tabulate_type = require("rima.values.tabulate")
 local linearise = require("rima.linearise")
 
 local rima = getfenv(0).rima
@@ -89,11 +88,6 @@ function rima.sum(sets, e)
   else
     return function(e2) return expression:new(rima.operators.sum, sets, e2) end
   end
-end
-
-
-function rima.tabulate(indexes, e)
-  return tabulate_type:new(indexes, e)
 end
 
 
