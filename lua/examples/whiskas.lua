@@ -43,7 +43,7 @@ total_cost = rima.sum{i=ingredients}(i.cost * i.quantity)
 total_quantity = rima.sum{i=ingredients}(i.quantity)
 
 blending_problem = rima.formulation:new()
-blending_problem:scope().ingredients[rima.default].quantity = rima.positive()
+blending_problem:scope().ingredients[i].quantity = rima.positive()
 
 blending_problem:set_objective(total_cost, "minimise")
 blending_problem:add({}, total_quantity, "==", quantity)
@@ -99,7 +99,7 @@ s(whiskas, "clp", { quantity=1 })
 -- You couldn't set f to a free variable (because a free variable is not a
 -- subset of a positive variable).
 whiskas_integer = whiskas:instance{ quantity = 99 }
-whiskas_integer:scope().ingredients[rima.default].quantity = rima.integer()
+whiskas_integer:scope().ingredients[i].quantity = rima.integer()
 
 s(whiskas_integer, "cbc")
 s(whiskas_integer, "lpsolve")

@@ -357,9 +357,7 @@ function scope.newindex(s, name, addr, index, value, names)
 
   local function newtable(v, name)
     local z
-    if name == rima.default then
-      z = newdefault(v)
-    elseif type(name) == "ref" then
+    if type(name) == "ref" then
       z = newdefault(v)
       newname(name)
     elseif type(name) == "table" and getmetatable(name) == nil then
@@ -403,9 +401,7 @@ function scope.newindex(s, name, addr, index, value, names)
     if names then
       value = tabulate_type:new(names, value)
     end
-    if index == rima.default then
-      defaults[c] = value
-    elseif type(index) == "ref" then
+    if type(index) == "ref" then
       defaults[c] = value
     elseif type(index) == "table" and not getmetatable(index) then
       defaults[c] = value

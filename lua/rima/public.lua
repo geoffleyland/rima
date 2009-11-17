@@ -19,11 +19,6 @@ local rima = getfenv(0).rima
 
 -- Module functionality --------------------------------------------------------
 
-local default_metatable = {}
-default_metatable.__repr = function() return "default" end
-default_metatable.__tostring = default_metatable.__repr
-rima.default = setmetatable({}, default_metatable)
-
 rima.set_number_format = expression.set_number_format
 rima.repr = expression.repr
 

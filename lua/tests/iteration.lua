@@ -93,7 +93,7 @@ function test(show_passes)
   do
     local x, X, r = rima.R"x, X, r"
     local S = rima.scope.create{ r = rima.range(1, 3) }
-    S.X[rima.default] = rima.free()
+    S.X[r] = rima.free()
     T:check_equal(E(rima.sum{r}(r), S), 6)
     T:check_equal(B(rima.sum{r}(r * x[r]), S), "r*x[1] + r*x[2] + r*x[3]")
     T:check_equal(E(B(rima.sum{r}(r * x[r]), S)), "x[1] + 2*x[2] + 3*x[3]")

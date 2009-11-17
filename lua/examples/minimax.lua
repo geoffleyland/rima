@@ -27,8 +27,8 @@ curve_fit:add({p=P},
 curve_fit:add({q=Q, p=P}, max_error, ">=", e[q][p])
 curve_fit:add({}, sum_error, "==", rima.sum{q=Q, p=P}(e[q][p]))
 curve_fit:set{ ["max_error, sum_error"]=rima.positive(), Q = {-1, 1} }
-curve_fit:scope().e[rima.default][rima.default] = rima.positive()
-curve_fit:scope().w[rima.default] = rima.free()
+curve_fit:scope().e[{q=Q}][{p=P}] = rima.positive()
+curve_fit:scope().w[{t=T}] = rima.free()
 
 -- Write the formulation
 io.write("\nCurve Fitting\n")

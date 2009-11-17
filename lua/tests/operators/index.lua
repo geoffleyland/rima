@@ -124,12 +124,12 @@ function test(show_passes)
   end
 
   do
-    local e, f, g, h = rima.R"e, f, g, h"
+    local e, f, g, h, i, j, k = rima.R"e, f, g, h, i, j, k"
     local S = rima.scope.new()
     S.e = rima.free()
-    S.f[rima.default] = rima.free()
-    S.g[rima.default][rima.default] = rima.free()
-    S.h[rima.default][rima.default][rima.default] = rima.free()
+    S.f[i] = rima.free()
+    S.g[i][j] = rima.free()
+    S.h[i][j][k] = rima.free()
 
     T:check_equal(expression.type(e, S), "-inf <= * <= inf, * real")
     T:check_equal(expression.type(f[1], S), "-inf <= * <= inf, * real")

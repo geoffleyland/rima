@@ -48,11 +48,10 @@ The empty {} are because this is one constraint only, not a constraint over a se
     --! continue
     knapsack:add({}, weight, "<=", capacity)
 
-Finally, we define `item.picked` as a binary variable.
-`rima.default` helps us set this for all items in `items`:
+Finally, we define `item.picked` as a binary variable:
 
     --! continue
-    knapsack:scope().items[rima.default].picked = rima.binary()
+    knapsack:scope().items[item].picked = rima.binary()
 
 And we're done.  `knapsack` is a complete definition of a knapsack problem.
 You can derive from it, compose a new model with it, make a Lua module out
@@ -66,7 +65,7 @@ of it and it can even write itself prettily:
     -->   sum{item in items}(item.picked*item.weight) <= capacity
 
 So far, we've seen no data, other than the one bit we wanted -
-defining as `items[rima.default].picked` as a binary variable.
+defining as `items[item].picked` as a binary variable.
 Of course, we can't solve anything without data.
 
 Data's easy to add: we create an `instance` of the problem and pass it a

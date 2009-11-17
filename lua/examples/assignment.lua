@@ -20,7 +20,7 @@ assignment = rima.formulation:new()
 
 assignment:add({s=stores}, rima.sum{p=plants}(flow[p][s]), "==", s.demand)
 assignment:add({p=plants}, rima.sum{s=stores}(flow[p][s]), "<=", p.capacity)
-assignment:scope().flow[rima.default][rima.default] = rima.positive()
+assignment:scope().flow[{p=plants}][{s=stores}] = rima.positive()
 assignment:scope().total_transport_cost = rima.sum{p=plants, s=store_order}(flow[p][s] * transport_cost[p][s])
 assignment:set_objective(total_transport_cost, "minimise")
 
@@ -94,7 +94,7 @@ facility_location = assignment:instance()
 
 facility_location:add({p=plants}, rima.sum{s=store_order}(flow[p][s]), "<=", p.capacity * p.built)
 facility_location:scope().build_cost = rima.sum{p=plants}(p.build_cost * p.built)
-facility_location:scope().plants[rima.default].built = rima.binary()
+facility_location:scope().plants[{p=plants}].built = rima.binary()
 facility_location:set_objective(total_transport_cost + build_cost, "minimise")
 
 facility_location:write()

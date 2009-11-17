@@ -88,9 +88,9 @@ function test(show_passes)
   end
 
   do
-    local x, X = rima.R"x, X"
+    local x, X, i = rima.R"x, X, i"
     local S = scope.new()
-    S.X[rima.default].y = rima.free()
+    S.X[i].y = rima.free()
     local S2 = scope.spawn(S, { X={{y=1},{y=2},{y=3}} })
     
     T:check_equal(expression.type(X[1].y, S), rima.free())
@@ -116,9 +116,9 @@ function test(show_passes)
   end
 
   do
-    local x, X = rima.R"x, X"
+    local x, X, i = rima.R"x, X, i"
     local S = scope.new()
-    S.X[rima.default].y = rima.free()
+    S.X[i].y = rima.free()
     local S2 = scope.spawn(S, { X={{z=11},{z=13},{z=17}} })
     
     T:check_equal(expression.type(X[1].y, S), rima.free())
