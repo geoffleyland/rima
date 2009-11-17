@@ -285,17 +285,17 @@ function set_list:new(sets)
   -- now work through the sets to see how to handle each one
   local clean_sets = {}
   for i, s in ipairs(sorted_sets) do
-    -- did we get "l", "a=l" or "{a=l}"?
+    -- did we get 'l', '"l"', 'a=l' or '{a=l}'?
     local namestring, set
     if type(s[1]) == "number" then
-      if type(s[2]) == "string" then
+      if type(s[2]) == "string" then -- '"l"'
         namestring, set = s[2], s[2]
-      elseif object.type(s[2]) == "ref" then
+      elseif object.type(s[2]) == "ref" then -- 'l'
         namestring, set = rima.repr(s[2]), s[2]
-      else -- assume it's a table
+      else -- assume it's a table '{a=l}'
         namestring, set = next(s[2])
       end
-    elseif type(s[1]) == "string" then
+    elseif type(s[1]) == "string" then -- 'a=l'
       namestring = s[1]
       set = s[2]
     else
