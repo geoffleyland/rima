@@ -36,6 +36,8 @@ function test(show_passes)
   T:expect_error(LF(1 + a[2]*5), "'a' is not indexable")
   T:expect_error(LF(1 + c[2]*5), "No type information available for 'c%[2%]'")
   T:expect_ok(LF(1 + d[2]*5), "d[2] is a number")
+  T:expect_ok(LF(1 + d[2]), "d[2] is an index")
+  T:expect_ok(LF(d[2]), "d[2] is an index")
 
   local function check_nonlinear(e, S)
     T:expect_error(function() rima.linearise(e, S) end, "error while linearising")

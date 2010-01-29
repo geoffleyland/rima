@@ -37,6 +37,8 @@ function linearise(l, S)
     constant = l
   elseif object.type(l) == "ref" then
     add_variable(l, l, 1)
+  elseif object.type(l) == "index" then
+    add_variable(l, l, 1)
   elseif getmetatable(l) == operators.add then
     for i, a in ipairs(proxy.O(l)) do
       a = proxy.O(a)
