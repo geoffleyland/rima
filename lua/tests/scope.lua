@@ -81,6 +81,15 @@ function test(show_passes)
   T:check_equal(r.c, "3 <= * <= 5, * integer")
   T:check_equal(r.c2, "c")
   
+  do
+    local S1 = scope.create{ a = { b = 1 } }
+    local S2 = scope.spawn(S1, { a = { c = 2 } })
+    local r = {}
+    for k, v in scope.iterate(S2) do r[k] = v end
+    T:check_equal(r.a.b, 1)
+    T:check_equal(r.a.c, 2)
+  end
+  
   local S_overwrite = scope.spawn(S, nil, {overwrite=true})
   T:expect_ok(function() S_overwrite.c = 7 end, "can overwrite c")
 

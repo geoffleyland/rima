@@ -436,12 +436,30 @@ end
 
 -- Iterating -------------------------------------------------------------------
 
+local function copy(t0, t1)
+  for k, v in pairs(t1) do
+    local c = t0[k]
+    if c then
+      if type(c) == "table" and not getmetatable(c) then
+        copy(c, v)
+      end
+    else
+      if type(v) == "table" and not getmetatable(v) then
+        local c = {}
+        t0[k] = c
+        copy(c, v)
+      else
+        t0[k] = v
+      end
+    end
+  end
+end
+
+
 function scope.iterate(s, t)
   t = t or {}
   local S = proxy.O(s)
-  for k, v in pairs(S.values) do
-    t[k] = t[k] or v
-  end
+  copy(t, S.values)
   if S.parent then
     iterate(S.parent, t)
   end
