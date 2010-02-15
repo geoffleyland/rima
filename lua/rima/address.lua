@@ -165,14 +165,20 @@ end
 -- resolving -------------------------------------------------------------------
 
 -- resolve an address by working through its indexes recursively
-function address:resolve(S, current, i, base, eval, collected)
+-- returns
+--   status - did it resolve to something?
+--   value - the value it resolved to
+--   base - the base of the expression it finally resolved to
+--   address - the address of the expression it finally resolved to
+--   collected - any indexes it might have picked up through defaults
+function address:resolve(S, current, i, base, eval, collected, used)
 
   -- if we've got something that wants to resolve itself, then give it the
   -- collected indexes
   local mt = getmetatable(current)
   if mt and mt.__address then
     -- We only want to bind to the result...
-    local status, v, j = xpcall(function() return mt.__address(current, S, collected, 1, expression.bind) end, debug.traceback)
+    local status, v, j = xpcall(function() return mt.__address(current, S, collected:sub(used or 1), 1, expression.bind) end, debug.traceback)
     if not status then
       error(("address: error evaluating '%s%s' as '%s':\n  %s"):
         format(rima.repr(base), rima.repr(self), rima.repr(current), v:gsub("\n", "\n  ")), 0)
@@ -180,12 +186,12 @@ function address:resolve(S, current, i, base, eval, collected)
     -- ... and then, if there are no more indexes left, we'll evaluate it.
     -- otherwise we leave it as a ref for the next call to index.
     if i > #self then v = eval(v, S) end
-    return self:resolve(S, v, i, base, eval)
+    return self:resolve(S, v, i, base, eval, collected, #collected)
   end
 
   -- Otherwise, move on to the next index
   local si = self[i]
-  if not si then return true, current, base, self end
+  if not si then return true, current, base, self, collected end
   local a = si.value
   local b = si.exp
 
@@ -242,7 +248,7 @@ function address:resolve(S, current, i, base, eval, collected)
 
       -- Give up if there's none or it's hidden
       if not values or values[1][1] == hidden then
-        return false, nil, new_base, new_address
+        return false, nil, new_base, new_address, collected
       end
 
       -- Run through the values, seeing if we can find something
@@ -272,7 +278,7 @@ function address:resolve(S, current, i, base, eval, collected)
       -- I'll have to write more tests...
       local new_current = expression.eval(new_base, S)
       if not expression.defined(new_current) then
-        return false, nil, new_base, new_address
+        return false, nil, new_base, new_address, collected
       end
       return rima.unpackn(try_current(new_current))
     end
@@ -292,18 +298,18 @@ function address:resolve(S, current, i, base, eval, collected)
 
   -- if we're trying to index an undefined type, return it and say we didn't get to the end
   elseif object.isa(current, undefined_t) then
-    return false, current, base, self
+    return false, current, base, self, collected
 
   -- if it's hidden then stop here
   elseif current == scope.hidden then
-    return true, scope.hidden, base, self
+    return true, scope.hidden, base, self, collected
 
   -- handle tables and things we can index just by indexing
   elseif (mt and mt.__index) or type(current) == "table" then
     local next = index(current, a, b)
     local r1
     if next then
-      r1 = rima.packn(self:resolve(S, next, i+1, base, eval, collected))
+      r1 = rima.packn(self:resolve(S, next, i+1, base, eval, collected, used))
       if r1[1] then return rima.unpackn(r1) end
     end
     -- including any default values
@@ -312,7 +318,7 @@ function address:resolve(S, current, i, base, eval, collected)
     if next then
       local new_collected = object.new(address, {{value=a, exp=b}})
       if collected then new_collected = collected + new_collected end
-      r2 = rima.packn(self:resolve(S, next, i+1, base, eval, new_collected))
+      r2 = rima.packn(self:resolve(S, next, i+1, base, eval, new_collected, used))
       if r2[1] then return rima.unpackn(r2) end
     end
     if r1 then

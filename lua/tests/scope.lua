@@ -89,7 +89,17 @@ function test(show_passes)
     T:check_equal(r.a.b, 1)
     T:check_equal(r.a.c, 2)
   end
-  
+
+  do
+    local i, j = rima.R"i, j"
+    local S = scope.new()
+    S.a[i] = i
+    T:expect_ok(function() S.a[2] = 10 end)
+    T:check_equal(S.a[1], 1)
+    T:check_equal(S.a[2], 10)
+    T:check_equal(S.a[3], 3)
+  end
+
   local S_overwrite = scope.spawn(S, nil, {overwrite=true})
   T:expect_ok(function() S_overwrite.c = 7 end, "can overwrite c")
 

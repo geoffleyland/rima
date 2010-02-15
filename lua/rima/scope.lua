@@ -291,14 +291,18 @@ function scope.check(s, name, address, value)
 
   for _, r in ipairs(results) do
     local c, cs = unpack(r)
+    local collected
     if address then
-      local status, nc = address:resolve(s, c, 1, r, expression.eval)
+      local status, nc
+      status, nc, _, _, collected = address:resolve(s, c, 1, r, expression.eval)
       c = status and nc or nil
     end
     if c then
       if type(value) == "table" and not getmetatable(value) and
          type(c) == "table" and not getmetatable(c) then
-         -- this is ok - we can merge two tables
+        -- this is ok - we can merge two tables
+      elseif collected and #collected > 0 then
+        -- this is ok, we can override a default value
       elseif cs == s and not S.rewrite then
         error(("scope: cannot set '%s%s' to '%s': existing definition as '%s'"):
           format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
