@@ -21,12 +21,11 @@ local tabulate_type = object:new(_M, "tabulate")
 
 function tabulate_type:new(indexes, e)
   local new_indexes = {}
-  for i, v in ipairs(indexes) do
-    if type(v) == "string" then
-      new_indexes[i] = rima.R(v)
-    elseif isa(v, ref) then
+  for i, s in ipairs(indexes) do
+    local v, set = s[1], s[2]
+    if isa(v, ref) then
       if ref.is_simple(v) then
-        new_indexes[i] = v
+        new_indexes[i] = { ref = v, set = set }
       else
         error(("bad index #%d to tabulate: expected string or simple reference, got '%s' (%s)"):
           format(i, rima.repr(v), type(v)), 0)
@@ -42,7 +41,9 @@ end
 
 
 function tabulate_type:__repr(format)
-  return ("tabulate({%s}, %s)"):format(expression.concat(self.indexes, format), rima.repr(self.expression, format))
+  return ("tabulate({%s}, %s)"):format(
+    rima.concat(self.indexes, ", ", function(i) return rima.repr(i.ref, format) end),
+    rima.repr(self.expression, format))
 end
 __tostring = __repr
 
@@ -55,7 +56,7 @@ function tabulate_type:__address(S, a, i, eval)
   S2 = scope.spawn(S, nil, {overwrite=true})
 
   for _, j in ipairs(self.indexes) do
-    S2[rima.repr(j)] = eval(a:value(i), S)
+    S2[rima.repr(j.ref)] = eval(a:value(i), S)
     i = i + 1
   end
 
@@ -63,7 +64,7 @@ function tabulate_type:__address(S, a, i, eval)
   if not status then
     local i = 0
     local args = rima.concat(self.indexes, ", ",
-      function(si) i = i + 1; return ("%s=%s"):format(rima.repr(si), rima.repr(a:value(i))) end)
+      function(si) i = i + 1; return ("%s=%s"):format(rima.repr(si.ref), rima.repr(a:value(i))) end)
     error(("tabulate: error evaluating '%s' as '%s' where %s:\n  %s"):
       format(__repr(self), rima.repr(self.expression), args, r:gsub("\n", "\n  ")), 0)
   end
