@@ -347,11 +347,13 @@ function scope.newindex(s, name, addr, index, value, sets)
   local S = proxy.O(s)
 
   local function newset(n, s)
+    s = s or n
     if type(s) == "string" then
       s = rima.R(s)
     end
+    n = rima.repr(n)
     sets = sets or {}
-    sets[#sets+1] = { n, s }
+    sets[#sets+1] = { [n] = s }
   end
 
   local function newdefault(v)
@@ -371,7 +373,7 @@ function scope.newindex(s, name, addr, index, value, sets)
     elseif type(set) == "table" and getmetatable(set) == nil then
       z = newdefault(v)
       local n, s = next(set)
-      newset(rima.R(n), s)
+      newset(n, s)
     else
       z = v[set]
       if not z then
@@ -404,7 +406,7 @@ function scope.newindex(s, name, addr, index, value, sets)
       newset(index)
     elseif type(index) == "table" and not getmetatable(index) then
       local n, s = next(index)
-      newset(rima.R(n), s)
+      newset(n, s)
     end
     if sets then
       value = tabulate_type:new(sets, value)
