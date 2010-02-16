@@ -441,7 +441,7 @@ end
 -- Iterating -------------------------------------------------------------------
 
 local function copy(t0, t1)
-  for k, v in pairs(t1) do
+  local function z(k, v)
     local c = t0[k]
     if c then
       if type(c) == "table" and not getmetatable(c) then
@@ -457,18 +457,28 @@ local function copy(t0, t1)
       end
     end
   end
+
+  for k, v in pairs(t1) do z(k, v) end
+  local d = defaults[t1]
+  if d then z(default, d) end
 end
 
+function scope.contents(s, t)
+  t = t or {}
+  local S = proxy.O(s)
+  copy(t, S.values)
+  if S.parent then
+    contents(S.parent, t)
+  end
+  return t
+end
 
 function scope.iterate(s, t)
   t = t or {}
   local S = proxy.O(s)
   copy(t, S.values)
-  if S.parent then
-    iterate(S.parent, t)
-  end
   return coroutine.wrap(
-    function() for k, v in pairs(t) do coroutine.yield(k, v) end end)
+    function() for k, v in pairs(contents(s, t)) do coroutine.yield(k, v) end end)
 end
 
 

@@ -91,6 +91,17 @@ function test(show_passes)
   end
 
   do
+    local S1 = scope.new()
+    local i = rima.R"i"
+    S1.a[i] = i
+    S1.a[3] = 20
+    local r = scope.contents(S1)
+    T:check_equal(r.a[1], nil)
+    T:check_equal(r.a[3], 20)
+    T:check_equal(r.a[scope.default], "tabulate({i}, i)")
+  end
+
+  do
     local i, j = rima.R"i, j"
     local S = scope.new()
     S.a[i] = i
