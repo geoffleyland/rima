@@ -69,7 +69,7 @@ local tabulate_type = require("rima.values.tabulate")
 
 local scope_names = setmetatable({}, { __mode="v" })
 local defaults = setmetatable({}, { __mode="k" })
-default = {}
+default_marker = {}
 
 local function new_name(prefix)
 
@@ -466,7 +466,7 @@ local function copy(t0, t1)
 
   for k, v in pairs(t1) do z(k, v) end
   local d = defaults[t1]
-  if d then z(default, d) end
+  if d then z(default_marker, d) end
 end
 
 function scope.contents(s, t)
