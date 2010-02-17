@@ -67,7 +67,15 @@ function formulation:solve(solver, values)
   local S = scope.spawn(self.S)
   if values then scope.set(S, values) end
   local solve_mod = require("rima.solvers."..solver)
-  return solve_mod.solve(self.sense, self:sparse_form(S))
+  local variables, constraints = self:sparse_form(S)
+
+  local r = solve_mod.solve(self.sense, variables, constraints)
+
+  local r2 = { objective=r.objective, constraints=r.constraints, variables={} }
+  for i, v in ipairs(r.variables) do
+    expression.set(variables[i].ref, r2.variables, v)
+  end
+  return r2
 end
 
 --[[

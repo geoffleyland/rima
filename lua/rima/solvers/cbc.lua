@@ -15,13 +15,7 @@ function solve(sense, variables, constraints)
   assert(m:set_objective(variables, sense))
   assert(m:build_rows(constraints))
   assert(m:solve())
-  local s = assert(m:get_solution())
-
-  local s2 = { objective=s.objective, constraints=s.constraints, variables={} }
-  for i, v in ipairs(s.variables) do
-    expression.set(variables[i].ref, s2.variables, v)
-  end
-  return s2
+  return assert(m:get_solution())
 end
 
 -- EOF -------------------------------------------------------------------------
