@@ -23,7 +23,7 @@ rima.set_number_format = expression.set_number_format
 rima.repr = expression.repr
 
 
-function rima.R(names, type)
+function rima.R(names, type) -- create a reference
   local results = {}
   for n in names:gmatch("[%a_][%w_]*") do
     results[#results+1] = ref:new{name=n, type=type}
@@ -32,7 +32,7 @@ function rima.R(names, type)
 end
 
 
-function rima.D(e)
+function rima.D(e) -- check if an expression is defined
   return expression.defined(e)
 end
 
@@ -46,7 +46,7 @@ local function default_global_scope()
 end
 
 
-function rima.E(e, S)
+function rima.E(e, S) -- create an expression
   local fname, usage =
     "rima.E",
     "E(e:expression, S:nil, table or scope)"
@@ -68,7 +68,7 @@ function rima.E(e, S)
 end
 
 
-function rima.F(inputs, e, S)
+function rima.F(inputs, e, S) -- create a function
   if e then
     return function_v:new(inputs, e, S)
   else
