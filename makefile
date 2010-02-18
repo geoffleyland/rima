@@ -18,7 +18,7 @@ LPSOLVE_INCDIR=$(LPSOLVE_PREFIX)/include/lpsolve
 
 CPP=g++
 #-DNOMINMAX is needed for some compilers on windows.  I'm no sure which, so I guess I'll just blanket-add it for now.  Can't hurt, right?
-CFLAGS=-O3 -DNOMINMAX -m32
+CFLAGS=-O3 -DNOMINMAX -arch i686 -arch x86_64
 SO_SUFFIX=so
 SHARED=-bundle -bundle_loader $(LUA)
 
