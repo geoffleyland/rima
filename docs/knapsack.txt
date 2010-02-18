@@ -39,30 +39,35 @@ modelling language!
 We create a new formulation, set its objective:
 
     --! continue
-    knapsack = rima.formulation:new()
-    knapsack:set_objective(value, "maximise")
+    knapsack = rima.new()
+    knapsack.objective = value
+    knapsack.sense = "maximise"
 
-The syntax for adding constraints is a little *constrained* by Lua syntax.
-The empty {} are because this is one constraint only, not a constraint over a set:
+A formulation is just a scope,
+and the objective and optimisation sense are just variables in the scope.
+Rima accepts both `"maximise"` and `"maximize"`.
+
+We use `rima.C` to construct a constraint,
+and add it to the scope like any other value::
 
     --! continue
-    knapsack:add({}, weight, "<=", capacity)
+    knapsack.weight_limit = rima.C(weight, "<=", capacity)
 
 Finally, we define `item.picked` as a binary variable:
 
     --! continue
-    knapsack:scope().items[item].picked = rima.binary()
+    knapsack.items[item].picked = rima.binary()
 
 And we're done.  `knapsack` is a complete definition of a knapsack problem.
 You can derive from it, compose a new model with it, make a Lua module out
-of it and it can even write itself prettily:
+of it and we can even write it out in a readable format:
 
     --! continue
-    knapsack:write()
+    rima.lp.write(knapsack)
     --> Maximise:
     -->   sum{item in items}(item.picked*item.value)
     --> Subject to:
-    -->   sum{item in items}(item.picked*item.weight) <= capacity
+    -->   weight_limit: sum{item in items}(item.picked*item.weight) <= capacity
 
 So far, we've seen no data, other than the one bit we wanted -
 defining as `items[item].picked` as a binary variable.
@@ -72,7 +77,7 @@ Data's easy to add: we create an `instance` of the problem and pass it a
 table of data:
 
     --! continue
-    burglar_bill = knapsack:instance \
+    burglar_bill = rima.instance(knapsack, \
     { \
       capacity = 102, \
       items = \
@@ -86,7 +91,7 @@ table of data:
         chest    = { value =  15, weight = 60 }, \
         brick    = { value =   1, weight = 10 }, \
       } \
-    }
+    })
 
 `burglar_bill` is also a formulation: if we'd only given it partial data,
 we could create a new instance for further specialisation.
@@ -95,18 +100,18 @@ Just like `knapsack`, it can write itself (but we'll save you the output for now
 To solve the problem, just choose a solver, and use the `solve` method:
 
     --! continue
-    r = burglar_bill:solve("cbc")
+    objective, r = rima.lp.solve("cbc", burglar_bill)
 
 We can check the objective:
 
     --! continue
-    print(r.objective)                                  --> 160
+    print(objective)                                    --> 160
 
 And see if it was worth taking the brick or necklace in the knapsack:
 
     --! continue
-    print(r.variables.items.brick.picked.p)             --> 0
-    print(r.variables.items.necklace.picked.p)          --> 1
+    print(r.items.brick.picked.p)                       --> 0
+    print(r.items.necklace.picked.p)                    --> 1
 
 Notice that our results follow the same structure as the input data,
 and that we access the primal value of the solution with `p`

@@ -11,24 +11,25 @@ This simple problem is copied from an OSI example:
 --]]
 
 io.write("\nSimple Test:\n")
+
 local x, y = rima.R"x, y"
-local f = rima.formulation:new()
-f:add({}, x + 2*y, "<=", 3)
-f:add({}, 2*x + y, "<=", 3)
-f:set_objective(x + y, "maximise")
-f:set{ ["x, y"] = rima.positive() }
+local S = rima.new()
+S.c1 = rima.C(x + 2*y, "<=", 3)
+S.c2 = rima.C(2*x + y, "<=", 3)
+S.objective = x + y
+S.sense = "maximise"
+rima.set(S, { ["x, y"] = rima.positive() })
+
 io.write("Algebraic Form:\n")
-f:write()
+rima.lp.write(S)
 io.write("\nSparse Form:\n")
-f:write_sparse()
+rima.lp.write_sparse(S)
 
 io.write("Solutions:\n")
 local function s(solver)
-  local r = f:solve(solver)
-  io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, r.objective))
-  for k, v in pairs(r.variables) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, v.p, v.d)) end
-  io.write("  constraints:\n")
-  for i, v in ipairs(r.constraints) do io.write(("    %-10d\t% 10.2f\t(% 10.2f)\n"):format(i, v.p, v.d)) end
+  local objective, r = rima.lp.solve(solver, S)
+  io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables and constraints:\n"):format(solver, objective))
+  for k, v in pairs(r) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, v.p, v.d)) end
 end
 
 s("lpsolve")

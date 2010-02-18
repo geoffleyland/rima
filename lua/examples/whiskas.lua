@@ -42,23 +42,24 @@ local quantity       = rima.R"quantity"     -- quantity of pet food to make
 total_cost = rima.sum{i=ingredients}(i.cost * i.quantity)
 total_quantity = rima.sum{i=ingredients}(i.quantity)
 
-blending_problem = rima.formulation:new()
-blending_problem:scope().ingredients[i].quantity = rima.positive()
+blending_problem = rima.new()
+blending_problem.ingredients[i].quantity = rima.positive()
 
-blending_problem:set_objective(total_cost, "minimise")
-blending_problem:add({}, total_quantity, "==", quantity)
+blending_problem.objective = total_cost
+blending_problem.sense = "minimise"
 
-blending_problem:add({n=nutrients}, rima.sum{i=ingredients}(i.composition[n] * i.quantity), ">=", quantity * limits[n])
+blending_problem.make_quantity = rima.C(total_quantity, "==", quantity)
+blending_problem.sufficient_nutrients[{n=nutrients}] = rima.C(rima.sum{i=ingredients}(i.composition[n] * i.quantity), ">=", quantity * limits[n])
 
 -- The formulation can describe itself
 io.write("\nBlending Problem\n")
-blending_problem:write()
+rima.lp.write(blending_problem)
 --[[
 Minimise:
   sum{i in ingredients}(i.cost*i.quantity)
 Subject to:
-  sum{i in ingredients}(i.quantity) == quantity
-  sum{i in ingredients}(i.composition[n]*i.quantity) >= limits[n]*quantity for all {n in nutrients}
+  make_quantity:        sum{i in ingredients}(i.quantity) == quantity
+  sufficient_nutrients: sum{i in ingredients}(i.composition[n]*i.quantity) >= limits[n]*quantity for all {n in nutrients}
 --]]
 
 --[[
@@ -82,12 +83,12 @@ local whiskas_data =
 
 -- An instance is a formulation plus some data.
 -- An instance is actually just another formulation
-whiskas = blending_problem:instance(whiskas_data)
+whiskas = rima.instance(blending_problem, whiskas_data)
 
 local function s(problem, solver, S)
-  local r = problem:solve(solver, S)
-  io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, r.objective))
-  for k, v in pairs(r.variables.ingredients) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, v.quantity.p, v.quantity.d)) end
+  local objective, r = rima.lp.solve(solver, problem, S)
+  io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, objective))
+  for k, v in pairs(r.ingredients) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, v.quantity.p, v.quantity.d)) end
 end
 
 -- We can choose our solver and set any extra variables when we solve.
@@ -98,8 +99,8 @@ s(whiskas, "clp", { quantity=1 })
 -- system lets this happen because integers are subsets of positive variables.
 -- You couldn't set f to a free variable (because a free variable is not a
 -- subset of a positive variable).
-whiskas_integer = whiskas:instance{ quantity = 99 }
-whiskas_integer:scope().ingredients[i].quantity = rima.integer()
+whiskas_integer = rima.instance(whiskas, { quantity = 99 })
+whiskas_integer.ingredients[i].quantity = rima.integer()
 
 s(whiskas_integer, "cbc")
 s(whiskas_integer, "lpsolve")

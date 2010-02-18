@@ -15,12 +15,14 @@ module(...)
 function test(show_passes)
   local T = series:new(_M, show_passes)
 
-  local a, b = rima.R"a,b"
-  local S = scope.create{ ["a,b"]=rima.free() }
-
-  local c
-  T:expect_ok(function() c = constraint:new({}, a + b, "==", b) end)
-  T:check_equal(rima.repr(c), "a + b == b")
+  local a, b, c, d, i, I, j, J = rima.R"a, b, c, d, i, I, j, J"
+  local S = scope.new()
+  S.a = rima.free()
+  S.b = 3
+  S.c = rima.free()
+  S.d = 5
+  T:expect_ok(function() S.e = constraint:new(a * b + c * d, "<=", 3) end)
+  T:check_equal(rima.repr(S.e), "a*b + c*d <= 3")
 
   return T:close()
 end

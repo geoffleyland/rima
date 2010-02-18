@@ -1,7 +1,6 @@
 -- Copyright (c) 2009 Incremental IP Limited
 -- see license.txt for license information
 
-local coroutine = require("coroutine")
 local assert, ipairs = assert, ipairs
 
 local object = require("rima.object")
@@ -15,52 +14,25 @@ module(...)
 
 local constraint = object:new(_M, "constraint")
 
-function constraint:new(sets, lhs, rel, rhs)
+function constraint:new(lhs, rel, rhs)
   assert(rel == "==" or rel == ">=" or rel == "<=")
 
-  o = { type=rel, lhs=lhs, rhs=rhs, sets=rima.iteration.set_list:new(sets) }
+  o = { type=rel, lhs=lhs, rhs=rhs }
 
   return object.new(self, o)
 end
 
---[[
-function constraint:list_variables(variables)
-  self.lhs:list_variables(variables)
-  self.rhs:list_variables(variables)
-end
---]]
-
 function constraint:linearise(S)
-  local e = self.lhs - self.rhs
-
-  local function list()
-    for S2, undefined in self.sets:iterate(S) do
-      if undefined and undefined[1] then
-        error("Some of the constraint's indices are undefined")
-      end
-      local constant, lhs = rima.linearise(e, S2)
-      coroutine.yield(lhs, self.type, -constant)
-    end
-  end
-  
-  return coroutine.wrap(list)
-
+  local constant, lhs = rima.linearise(self.lhs - self.rhs, S)
+  return lhs, self.type, -constant
 end
 
 
 function constraint:tostring(S)
-
-  local function list()
-    for S2, undefined in self.sets:iterate(S) do
-      local lhs = rima.repr(expression.eval(self.lhs, S2))
-      local rhs = rima.repr(expression.eval(self.rhs, S2))
-      local s = lhs.." "..self.type.." "..rhs
-      if undefined and undefined[1] then s = s.." for all "..rima.repr(undefined) end
-      coroutine.yield(s)
-    end
-  end
-  
-  return coroutine.wrap(list)
+  local lhs = rima.repr(expression.eval(self.lhs, S))
+  local rhs = rima.repr(expression.eval(self.rhs, S))
+  local s = lhs.." "..self.type.." "..rhs
+  return s
 end
 
 function constraint:__tostring()

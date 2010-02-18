@@ -2,7 +2,7 @@
 -- see license.txt for license information
 
 local debug = require("debug")
-local getfenv, setmetatable, require, unpack = getfenv, setmetatable, require, unpack
+local getfenv, ipairs, setmetatable, require, unpack = getfenv, ipairs, setmetatable, require, unpack
 local error, xpcall = error, xpcall
 
 module(...)
@@ -77,12 +77,30 @@ function rima.F(inputs, e, S) -- create a function
 end
 
 
+function rima.C(lhs, rel, rhs) -- create a constraint
+  return rima.constraint:new(lhs, rel, rhs)
+end
+
+
 function rima.sum(sets, e)
   if e then
     return expression:new(rima.operators.sum, sets, e)
   else
     return function(e2) return expression:new(rima.operators.sum, sets, e2) end
   end
+end
+
+
+rima.new = rima.scope.create
+rima.set = rima.scope.set
+
+
+function rima.instance(S, ...) -- create a new instance of a scope
+  local S2 = rima.scope.spawn(S)
+  for _, v in ipairs{...} do
+    scope.set(S2, v)
+  end
+  return S2
 end
 
 
