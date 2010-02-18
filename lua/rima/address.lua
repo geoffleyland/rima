@@ -41,6 +41,10 @@ function address:__repr(format)
     if format and format.dump then
       return ("address(%s)"):format(rima.concat(self, ", ",
         function(a)
+          local t = expression.tags(a.exp)
+          if t.key then
+            return "element("..rima.repr(t.set_expression, format)..", "..rima.repr(t.key, format)..", "..rima.repr(t.value, format)..")"
+          end
           return rima.repr(a.value, format)
         end))
     else
@@ -48,7 +52,18 @@ function address:__repr(format)
       local count = 0
       local s = ""
       for _, a in ipairs(self) do
-        a = a.value
+        local t = expression.tags(a.exp)
+        if t.key then
+          if format and format.readable then
+            a = "rima.element("..rima.repr(t.set_expression, format)..", "..rima.repr(t.key, format)..", "..rima.repr(t.value, format)..")"
+          elseif rima.repr(a.value, format):sub(1,5) == "table" then
+            a = t.key
+          else
+            a = a.value
+          end
+        else
+          a = a.value
+        end
         if type(a) == "string" and a:match("^[_%a][_%w]*$") then
           if mode ~= "s" then
             mode = "s"
