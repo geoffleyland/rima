@@ -1,5 +1,5 @@
 PACKAGE=rima
-VERSION=0.02
+VERSION=0.03
 
 LUA= $(shell echo `which lua`)
 LUA_BINDIR= $(shell echo `dirname $(LUA)`)
@@ -62,3 +62,6 @@ dist: doc
 	tar czvf $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
 	rm -f dist.files
 	rm -rf $(PACKAGE)-$(VERSION)
+
+clean:
+	rm -f rima_clp_core.so rima_cbc_core.so rima_lpsolve_core.so lua/rima_clp_core.so lua/rima_cbc_core.so lua/rima_lpsolve_core.so
