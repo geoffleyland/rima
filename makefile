@@ -68,3 +68,7 @@ dist: doc
 
 clean:
 	rm -f rima_clp_core.so rima_cbc_core.so rima_lpsolve_core.so lua/rima_clp_core.so lua/rima_cbc_core.so lua/rima_lpsolve_core.so
+	rm -f htmldocs/*.html
+	rm -f $(PACKAGE)-$(VERSION).tar.gz
+	rm -f lua/luacov.*.out
+
