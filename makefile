@@ -49,7 +49,10 @@ install: rima_lpsolve_core.so
 	cp rima_cbc_core.so $(LUA_LIBDIR)
 	cp rima_lpsolve_core.so $(LUA_LIBDIR)
 
-doc:
+doc: all
+	cp rima_clp_core.so lua/
+	cp rima_cbc_core.so lua/
+	cp rima_lpsolve_core.so lua/
 	cd lua; for f in `find ../docs -name "*.txt"`; do n=`basename $$f .txt`; $(LUA) test/doctest.lua -sh -i $$f | markdown.lua -e ../docs/header.html -f ../docs/footer.html > ../htmldocs/$$n.html; done
 
 dist: doc
