@@ -130,7 +130,7 @@ function scope.create(values, options)
     rewrite = (options.rewrite and true or false),
     no_undefined = (options.no_undefined and true or false),
     name = options.name }
-  set(S, values)
+  if values then set(S, values) end
   return S
 end
 
