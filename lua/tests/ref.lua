@@ -37,7 +37,7 @@ function test(show_passes)
 
   -- simple references and types
   do
-    local S = rima.scope.create{ a = rima.free(1, 10), b = 1, c = "c" }
+    local S = rima.scope.new{ a = rima.free(1, 10), b = 1, c = "c" }
 
     -- binding
     T:expect_ok(function() B(ref:new{name="z"}, S) end, "bind ok")
@@ -61,8 +61,8 @@ function test(show_passes)
   -- references to references
   do
     local a, b, c = rima.R"a, b, c"
-    local S1 = rima.scope.create{ a = b, b = 17 }
-    local S2 = rima.scope.create{ a = b - c, b = 1 }
+    local S1 = rima.scope.new{ a = b, b = 17 }
+    local S2 = rima.scope.new{ a = b - c, b = 1 }
     
     -- binding
     T:check_equal(B(a, S1), "b")
@@ -75,7 +75,7 @@ function test(show_passes)
 
   do
     local a = rima.R"a"
-    local S = rima.scope.create{ a = rima.free() }
+    local S = rima.scope.new{ a = rima.free() }
     
     T:check_equal(ref.is_simple(a), true)
     T:check_equal(ref.is_simple(E(a, S)), false)
@@ -90,7 +90,7 @@ function test(show_passes)
 
   do
     local x, y = rima.R"x, y"
-    local S = rima.scope.create{ x = 2, y = 3 }
+    local S = rima.scope.new{ x = 2, y = 3 }
     T:check_equal(rima.E(x + y, S), 5)
     T:check_equal(rima.E(x - y, S), -1)
     T:check_equal(rima.E(-x + y, S), 1)
@@ -101,7 +101,7 @@ function test(show_passes)
 
   do
     local f, x, y = rima.R"f, x, y"
-    local S = rima.scope.create{ x = 2, f = rima.F({y}, y + 5) }
+    local S = rima.scope.new{ x = 2, f = rima.F({y}, y + 5) }
     T:check_equal(rima.E(f(x), S), 7)
   end   
 

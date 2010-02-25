@@ -18,7 +18,7 @@ function test(show_passes)
   local E = expression.eval
 
   local b = rima.R"b"
-  local S = scope.create{ a = rima.free() }
+  local S = scope.new{ a = rima.free() }
 
 --  local t
 --  T:expect_error(function() t = rima.tabulate({1}, 3) end, "expected string or simple reference, got '1' %(number%)")
@@ -42,7 +42,7 @@ function test(show_passes)
   do
     local Q, x, y = rima.R"Q, x, y"
     local e = rima.sum({Q}, x[Q])
-    local S = scope.create{ Q={4, 5, 6} }
+    local S = scope.new{ Q={4, 5, 6} }
     S.x[y] = y^2
     T:check_equal(E(x[3], S), 9)
     T:check_equal(E(e, S), 77)
@@ -52,7 +52,7 @@ function test(show_passes)
 
   do
     local t, x, y = rima.R"t, x, y"
-    local S = scope.create{ x=1 }
+    local S = scope.new{ x=1 }
     S.t[y] = y + x[1]
     T:expect_error(function() rima.E(t[1], S) end,
       "tabulate: error evaluating 'tabulate%({y}, y %+ x%[1%]%)' as 'y %+ x%[1%]' where y=1:")
@@ -67,7 +67,7 @@ function test(show_passes)
 
   do
     local a, b, c, t, s, u = rima.R"a, b, c, t, s, u"
-    local S = scope.create{ a={w={{x=10,y={z=100}},{x=20,y={z=200}}}} }
+    local S = scope.new{ a={w={{x=10,y={z=100}},{x=20,y={z=200}}}} }
     S.t[b] = a.w[b].x
     S.s[b] = a.w[b].y
     S.u[b] = a.q[b].y
@@ -111,7 +111,7 @@ function test(show_passes)
 
   do
     local a, b, i = rima.R"a, b, i"
-    local S = rima.scope.create{ a = { { 5 } } }
+    local S = rima.scope.new{ a = { { 5 } } }
     S.b[i] = a[1][i]
     T:check_equal(E(a[1][1], S), 5)
     T:check_equal(E(b[1], S), 5)

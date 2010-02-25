@@ -115,7 +115,7 @@ scope_proxy_mt = setmetatable({}, scope)
 scope.hidden = {}
 
 
-function scope.new(S)
+function scope._new(S)
   S = S or {}
   check_name(S)
   if not S.values then S.values = {} end
@@ -123,9 +123,9 @@ function scope.new(S)
 end
 
 
-function scope.create(values, options)
+function scope.new(values, options)
   options = options or {}
-  local S = new{
+  local S = _new{
     overwrite = (options.overwrite and true or false),
     rewrite = (options.rewrite and true or false),
     no_undefined = (options.no_undefined and true or false),
@@ -137,7 +137,8 @@ end
 
 function scope.spawn(S, values, options)
   options = options or {}
-  local S2 = new{ parent = S,
+  local S2 = _new{
+    parent = S,
     overwrite = (options.overwrite and true or false),
     rewrite = (options.rewrite and true or false),
     no_undefined = (options.no_undefined and true or false),

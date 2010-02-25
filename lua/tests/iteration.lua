@@ -21,7 +21,7 @@ function test(show_passes)
   local E = expression.eval
   
   local x, y, z, Q, R, r = rima.R"x, y, z, Q, R, r"
-  local S = scope.create{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = rima.range(2, r) }
+  local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = rima.range(2, r) }
   
   T:check_equal(rima.sum{Q}(x[Q]), "sum{Q}(x[Q])")
   T:check_equal(E(rima.sum{Q}(x[Q])), "sum{Q}(x[Q])")
@@ -39,7 +39,7 @@ function test(show_passes)
   T:check_equal(E(rima.sum{y=Q}(x[y] + z[y]), S), 660)
 
   do
-    local S = scope.create{ Q = {"a", "b", "c"}, x = { rima.free(), rima.free(), rima.free() }, z = { a=rima.free(), b=rima.free(), c=rima.free() } }
+    local S = scope.new{ Q = {"a", "b", "c"}, x = { rima.free(), rima.free(), rima.free() }, z = { a=rima.free(), b=rima.free(), c=rima.free() } }
     T:check_equal(E(rima.sum{y=x}(y), S), "x[1] + x[2] + x[3]")
     T:check_equal(E(rima.sum{y=z}(y), S), "z.a + z.b + z.c")
     T:check_equal(E(rima.sum{y=Q}(y), S), "a + b + c")
@@ -64,7 +64,7 @@ function test(show_passes)
 
   do
     local x, k, v = rima.R"x, k, v"
-    local S = rima.scope.create{ x = { 10, 20, 30 }, y = { 10, 20, 30, a = 10 } }
+    local S = rima.scope.new{ x = { 10, 20, 30 }, y = { 10, 20, 30, a = 10 } }
     T:check_equal(rima.sum{["k, v"]=rima.pairs(x)}(k + v), "sum{k, v in pairs(x)}(k + v)")
     T:check_equal(rima.sum{["k, v"]=rima.ipairs(x)}(k + v), "sum{k, v in ipairs(x)}(k + v)")
     T:check_equal(E(rima.sum({["k, v"]=rima.pairs(x)}, k + v), S), 66)
@@ -74,7 +74,7 @@ function test(show_passes)
   
   do
     local t, v = rima.R"t, v"
-    local S = rima.scope.create{ t={ {b=5}, {b=6}, {b=7} }}
+    local S = rima.scope.new{ t={ {b=5}, {b=6}, {b=7} }}
     T:check_equal(rima.sum({["_, v"]=rima.ipairs(t)}, v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
     T:check_equal(B(rima.sum({["_, v"]=rima.ipairs(t)}, v.b), S), "t[1].b + t[2].b + t[3].b")
     T:check_equal(B(rima.sum({["_, v"]=rima.ipairs(t)}, v.a * v.b), S), "t[1].a*t[1].b + t[2].a*t[2].b + t[3].a*t[3].b")
@@ -84,7 +84,7 @@ function test(show_passes)
 
   do
     local x, X = rima.R"x, X"
-    local S = rima.scope.create{ X = {a=1, b=2} }
+    local S = rima.scope.new{ X = {a=1, b=2} }
     T:check_equal(E(rima.sum({["_, x"]=rima.pairs(X)}, x), S), 3)
     local S1 = rima.scope.spawn(S, { X = {c=3, d=4} })
     T:check_equal(E(rima.sum({["_, x"]=rima.pairs(X)}, x), S1), 10)
@@ -92,7 +92,7 @@ function test(show_passes)
 
   do
     local x, X, r = rima.R"x, X, r"
-    local S = rima.scope.create{ r = rima.range(1, 3) }
+    local S = rima.scope.new{ r = rima.range(1, 3) }
     S.X[r] = rima.free()
     T:check_equal(E(rima.sum{r}(r), S), 6)
     T:check_equal(B(rima.sum{r}(r * x[r]), S), "r*x[1] + r*x[2] + r*x[3]")

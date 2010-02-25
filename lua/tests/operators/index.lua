@@ -26,12 +26,12 @@ function test(show_passes)
   T:check_equal(a[b][c], "a[b, c]")
 
   do
-    local S = rima.scope.create{ a={ "x", "y" }, b = 2}
+    local S = rima.scope.new{ a={ "x", "y" }, b = 2}
     T:check_equal(rima.E(a[b], S), "y")
   end
 
   do
-    local S = rima.scope.create{ a=rima.types.undefined_t:new(), b = 2}
+    local S = rima.scope.new{ a=rima.types.undefined_t:new(), b = 2}
     T:check_equal(D(a[b]), "index(ref(a), address(ref(b)))")
     T:check_equal(D(E(a[b], S)), "index(ref(a), address(number(2)))")
     local e = E(a[b], S)
@@ -51,7 +51,7 @@ function test(show_passes)
 
   do
     local x, y, N = rima.R"x,y,N"
-    local S = rima.scope.create{ N={ {1, 2}, {3, 4} } }
+    local S = rima.scope.new{ N={ {1, 2}, {3, 4} } }
     T:check_equal(D(N[x][y]), "index(ref(N), address(ref(x), ref(y)))")
     T:check_equal(E(N[x][y], S), "N[x, y]")
     S.x = 2
@@ -73,7 +73,7 @@ function test(show_passes)
 
   do
     local a, b, c = rima.R"a, b, c"
-    local S = rima.scope.create{ a={x={y={z=3}}}, b={s={t=a.x.y}}, c={s={t=a.q}} }  -- note that c is undefined
+    local S = rima.scope.new{ a={x={y={z=3}}}, b={s={t=a.x.y}}, c={s={t=a.q}} }  -- note that c is undefined
     T:check_equal(D(b.s.t), "index(ref(b), address(string(s), string(t)))")
     T:check_equal(b.s.t, "b.s.t")
     T:check_equal(D(B(b.s.t, S)), "index(ref(a), address(string(x), string(y)))")
@@ -97,7 +97,7 @@ function test(show_passes)
 
   do
     local f, p, s, x, z, xmax, xmin, points = rima.R"f, p, s, x, z, xmax, xmin, points"
-    local S = rima.scope.create
+    local S = rima.scope.new 
     {
       f = rima.F({x}, rima.exp(x)*rima.sin(x)),
       xmin = 0,

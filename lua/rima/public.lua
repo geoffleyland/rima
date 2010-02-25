@@ -40,7 +40,7 @@ end
 local dgs
 local function default_global_scope()
   if not dgs then
-    dgs = scope.new{ name="_GLOBAL" }
+    dgs = scope.new(nil, { name="_GLOBAL" })
   end
   return dgs
 end
@@ -91,7 +91,7 @@ function rima.sum(sets, e)
 end
 
 
-rima.new = rima.scope.create
+rima.new = rima.scope.new
 rima.set = rima.scope.set
 
 

@@ -22,12 +22,12 @@ You can set values in a scope to be types as well as literal data:
 There's shorthand for creating scopes like table constructors,
 with the addition that you can set several values at once:
 
-    S = rima.scope.create{ ["a, b, c"]=5, ["x, y"]=rima.free() }
+    S = rima.scope.new{ ["a, b, c"]=5, ["x, y"]=rima.free() }
     print(S.a, S.b, S.x)                                --> 5 5 x
 
 You can create complex structures with scopes:
 
-    S = rima.scope.create{ a = {} }
+    S = rima.scope.new { a = {} }
     S.a.b.c = {}
     r = S.a.b.c
     r.d = 5
@@ -38,7 +38,7 @@ and you can set values in them.
 You still can't overwrite a value in a parent scope,
 but you can overwrite a type, if you meet its constraints:
 
-    S1 = rima.scope.create{ one=1, a=rima.integer() }
+    S1 = rima.scope.new{ one=1, a=rima.integer() }
     S2 = rima.scope.spawn(S1)
     S3 = rima.scope.spawn(S1)
     print(S1.one, S2.one, S3.one)                       --> 1 1 1

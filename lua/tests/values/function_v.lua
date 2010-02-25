@@ -31,7 +31,7 @@ function test(show_passes)
     local a = rima.R"a"
     T:expect_error(function() function_v:new({a[1]}, 1) end,
       "expected string or simple reference, got 'a%[1%]' %(index%)")
-    local S = scope.create{ b=rima.free() }
+    local S = scope.new{ b=rima.free() }
     T:expect_error(function() function_v:new({S.b}, 1) end,
       "expected string or simple reference, got 'b' %(ref%)")
   end
@@ -40,7 +40,7 @@ function test(show_passes)
 
   do
     local f = rima.R"f"
-    local S = scope.create{ f = function_v:new({a}, 3) }
+    local S = scope.new{ f = function_v:new({a}, 3) }
     T:expect_error(function() rima.E(f(), S) end,
       "the function needs to be called with at least 1 arguments, got 0")
     T:expect_error(function() rima.E(f(1, 2), S) end,
@@ -58,7 +58,7 @@ function test(show_passes)
   
   do
     local f = function_v:new({"a"}, 3 + a)
-    local S = scope.create{ x = rima.free() }
+    local S = scope.new{ x = rima.free() }
     T:check_equal(f, "function(a) return 3 + a", "function description")
     T:check_equal(f:call({x}, S, B), "3 + x")
     T:check_equal(f:call({x}, S, E), "3 + x")
@@ -70,7 +70,7 @@ function test(show_passes)
 
   do
     local f = function_v:new({a}, b + a)
-    local S = scope.create{ ["a, b"] = rima.free() }
+    local S = scope.new{ ["a, b"] = rima.free() }
     T:check_equal(f, "function(a) return b + a", "function description")
     T:check_equal(f:call({x}, S, E), "b + x")
     T:check_equal(f:call({5}, S, E), "5 + b")
@@ -87,7 +87,7 @@ function test(show_passes)
 
   do
     local f = function_v:new({a, "b"}, 1 + a, nil, b^2)
-    local S = scope.create{ ["a, b"] = rima.free() }
+    local S = scope.new{ ["a, b"] = rima.free() }
     T:check_equal(f, "function(a, b) return 1 + a", "function description")
     T:check_equal(f:call({2 + x, 5, {x}}, S, B), "3 + b^2")
     T:check_equal(f:call({2 + x, 5, {x}}, S, E), 28)
@@ -96,7 +96,7 @@ function test(show_passes)
 
   do
     local f = rima.R"f"
-    local S = scope.create{ f = function_v:new({"a", b}, 1 + a, nil, b^2) }
+    local S = scope.new{ f = function_v:new({"a", b}, 1 + a, nil, b^2) }
     local e = 1 + f(1 + x, 3, {x})
     T:check_equal(rima.E(e, S), 12)
   end
@@ -113,7 +113,7 @@ function test(show_passes)
 
   do
     local a, b, c, t, s, u = rima.R"a, b, c, t, s, u"
-    local S = scope.create{
+    local S = scope.new{
       a={w={{x=10,y={z=100}},{x=20,y={z=200}}}},
       t=rima.F({b}, a.w[b].x),
       s=rima.F({b}, a.w[b].y),
@@ -161,7 +161,7 @@ function test(show_passes)
 
   do
     local a, b, i = rima.R"a, b, i"
-    local S = rima.scope.create{ a = { { 5 } }, b = rima.F({i}, a[1][i]) }
+    local S = rima.scope.new{ a = { { 5 } }, b = rima.F({i}, a[1][i]) }
     T:check_equal(E(a[1][1], S), 5)
     T:check_equal(E(b(1), S), 5)
     T:expect_error(function() E(b(1)[1], S) end,
@@ -172,7 +172,7 @@ function test(show_passes)
 
   do
     local f, x, y = rima.R"f, x, y"
-    local S = rima.scope.create{ f = rima.F({y}, y + x, { x=5 }) }
+    local S = rima.scope.new{ f = rima.F({y}, y + x, { x=5 }) }
     T:check_equal(E(f(x), S), "5 + x")
     S.x = 100
     T:check_equal(E(f(x), S), 105)
@@ -180,7 +180,7 @@ function test(show_passes)
 
   do
     local f, x, y = rima.R"f, x, y"
-    local S = rima.scope.create{ f = rima.F({y}, y + x, { x=5 }) }
+    local S = rima.scope.new{ f = rima.F({y}, y + x, { x=5 }) }
     local e = E(f(x), S)
     local S2 = rima.scope.spawn(S)
     S2.x = 200

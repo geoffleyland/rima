@@ -62,7 +62,7 @@ function test(show_passes)
 
   do
     local x, X = rima.R"x, X"
-    local S = scope.create{ X={{y=rima.free()},{y=rima.free()},{y=rima.free()}} }
+    local S = scope.new{ X={{y=rima.free()},{y=rima.free()},{y=rima.free()}} }
     local S2 = scope.spawn(S, { X={{y=1},{y=2},{y=3}} })
     local e1 = rima.sum({["_, x"]=rima.ipairs(X)}, x.y)
 

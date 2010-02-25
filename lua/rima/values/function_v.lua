@@ -25,7 +25,7 @@ function function_v:new(inputs, expression, S, ...)
 
   args.check_types(S, "S", {"nil", "table", {rima.scope, "scope"}}, usage, fname)
 
-  if S and not isa(S, rima.scope) then S = rima.scope.create(S) end
+  if S and not isa(S, rima.scope) then S = rima.scope.new(S) end
 
   local new_inputs = {}
   for i, v in ipairs(inputs) do

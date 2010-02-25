@@ -38,7 +38,7 @@ local function expression_tester(T, variables, scope)
   for n in variables:gmatch("[%a_][%w_]*") do
     V[#V+1] = n
   end
-  local S = rima.scope.create(scope or {})
+  local S = rima.scope.new(scope or {})
 
   return function(t)
     local e = load_expression(T, t[1], V)

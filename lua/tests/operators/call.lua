@@ -21,7 +21,7 @@ function test(show_passes)
   local B = expression.bind
   local E = expression.eval
 
-  local S = scope.create{ a = rima.free(), b = rima.free(), x = rima.free() }
+  local S = scope.new{ a = rima.free(), b = rima.free(), x = rima.free() }
 
   T:test(object.isa(expression:new(call), call), "isa(call, call)")
   T:check_equal(object.type(expression:new(call)), "call")
@@ -62,7 +62,7 @@ function test(show_passes)
 
   do
     local f, a, b = rima.R"f, a, b"
-    local S = scope.create{ f = string.sub, a = "hello", b = 2 }
+    local S = scope.new{ f = string.sub, a = "hello", b = 2 }
     T:check_equal(E(f(a, b), S), "ello")  
   end
 

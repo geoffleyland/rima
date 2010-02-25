@@ -19,7 +19,7 @@ function test(show_passes)
 
 
   local a, b, c, d = rima.R"a, b, c, d"
-  local S = rima.scope.create{ ["a,b"] = rima.free(), c=rima.types.undefined_t:new() }
+  local S = rima.scope.new{ ["a,b"] = rima.free(), c=rima.types.undefined_t:new() }
   S.d = { rima.free(), rima.free() }
   
   local L = function(e, _S) return rima.linearise(e, _S or S) end

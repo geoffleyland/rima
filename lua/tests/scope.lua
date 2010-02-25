@@ -82,7 +82,7 @@ function test(show_passes)
   T:check_equal(r.c2, "c")
   
   do
-    local S1 = scope.create{ a = { b = 1 } }
+    local S1 = scope.new{ a = { b = 1 } }
     local S2 = scope.spawn(S1, { a = { c = 2 } })
     local r = {}
     for k, v in scope.iterate(S2) do r[k] = v end
@@ -179,7 +179,7 @@ function test(show_passes)
   end
 
   do
-    local S = scope.create{a=1, ["b, c"]=2, d=4}
+    local S = scope.new{a=1, ["b, c"]=2, d=4}
     T:check_equal(S.a, 1)
     T:check_equal(S.b, 2)
     T:check_equal(S.c, 2)
@@ -187,12 +187,12 @@ function test(show_passes)
   end
 
   do
-    local S = scope.create{ a={x={y={z=1}}} }
+    local S = scope.new{ a={x={y={z=1}}} }
     T:check_equal(S.a.x.y.z, 1)
   end
 
   do
-    local S = scope.create{ a={x=1} }
+    local S = scope.new{ a={x=1} }
     local a = S.a
     T:check_equal(object.type(a), "ref")
     T:expect_ok(function() S.a.y = 2 end, "scope newindex")
@@ -221,7 +221,7 @@ function test(show_passes)
 
   do
     local x = rima.R"x"
-    local S = scope.create{x={a=1}}
+    local S = scope.new{x={a=1}}
     local S2 = scope.spawn(S, {x={b=2}})
     
     T:check_equal(E(x.a, S), 1)

@@ -69,7 +69,7 @@ function test(show_passes)
   -- tests with add, mul and pow
   do
     local a, b = rima.R"a, b"
-    local S = rima.scope.create{ ["a,b"]=rima.free() }
+    local S = rima.scope.new{ ["a,b"]=rima.free() }
     equal(T, "+(1*number(3), 4*ref(a))", {3 + 4 * a, S, "eval", "dump"})
     equal(T, "3 - 4*a", {4 * -a + 3, S, "eval"})
     equal(T, "+(1*number(3), 4**(ref(a)^1, ref(b)^1))", {3 + 4 * a * b, S, "eval", "dump"})
@@ -94,7 +94,7 @@ function test(show_passes)
   -- tests with references to expressions
   do
     local a, b = rima.R"a,b"
-    local S = rima.scope.create{ a = rima.free(), b = 3 * (a + 1)^2 }
+    local S = rima.scope.new{ a = rima.free(), b = 3 * (a + 1)^2 }
     equal(T, {b, S, "eval", "dump"}, {3 * (a + 1)^2, S, "eval", "dump"})
     equal(T, {5 * b, S, "eval", "dump"}, {5 * (3 * (a + 1)^2), S, "eval", "dump"} )
     
@@ -107,7 +107,7 @@ function test(show_passes)
   -- references to functions
   do
     local f, x, y = rima.R"f, x, y"
-    local S = rima.scope.create{ x = 2, f = rima.F({y}, y + 5) }
+    local S = rima.scope.new{ x = 2, f = rima.F({y}, y + 5) }
     T:check_equal(rima.E(f(x), S), 7)
   end
 

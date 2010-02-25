@@ -30,7 +30,7 @@ function test(show_passes)
 --    "expecting expressions for base and exponent, got 'hello' %(string%) and 'nil' %(nil%)") 
 
   local a, b = rima.R"a, b"
-  local S = rima.scope.create{ a = 5 }
+  local S = rima.scope.new{ a = 5 }
   T:check_equal(expression.dump(a^2), "^(ref(a), number(2))")
   T:check_equal(a^2, "a^2")
   T:check_equal(a^b, "a^b")
