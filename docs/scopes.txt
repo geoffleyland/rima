@@ -27,7 +27,7 @@ with the addition that you can set several values at once:
 
 You can create complex structures with scopes:
 
-    S = rima.scope.new { a = {} }
+    S = rima.scope.new{ a = {} }
     S.a.b.c = {}
     r = S.a.b.c
     r.d = 5
