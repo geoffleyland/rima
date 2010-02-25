@@ -136,6 +136,9 @@ end
 
 
 function scope.spawn(S, values, options)
+  local fname, usage = "rima.scope.spawn", "spawn(S, values, options})"
+  args.check_type(S, "S", {scope, "scope" }, usage, fname)
+
   options = options or {}
   local S2 = _new{
     parent = S,

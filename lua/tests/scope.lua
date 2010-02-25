@@ -111,8 +111,11 @@ function test(show_passes)
     T:check_equal(S.a[3], 3)
   end
 
-  local S_overwrite = scope.spawn(S, nil, {overwrite=true})
-  T:expect_ok(function() S_overwrite.c = 7 end, "can overwrite c")
+  do
+    local S = scope.new{ c=5 }
+    local S_overwrite = scope.spawn(S, nil, {overwrite=true})
+    T:expect_ok(function() S_overwrite.c = 7 end, "can overwrite c")
+  end
 
   do
     local S1, S2, S2

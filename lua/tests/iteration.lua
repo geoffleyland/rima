@@ -18,7 +18,7 @@ function test(show_passes)
   local T = series:new(_M, show_passes)
   
   local B = expression.bind
-  local E = expression.eval
+  local E = rima.E
   
   local x, y, z, Q, R, r = rima.R"x, y, z, Q, R, r"
   local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = rima.range(2, r) }

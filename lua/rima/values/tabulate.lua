@@ -38,7 +38,12 @@ function tabulate_type:__address(S, a, i, eval)
     error(("tabulate: error evaluating '%s' as '%s': the tabulation needs %d indexes, got %d"):
       format(__repr(self), rima.repr(self.expression), #self.indexes, #a - i + 1), 0)
   end
-  S2 = scope.spawn(S, nil, {overwrite=true})
+  local S2
+  if S then
+    S2 = scope.spawn(S, nil, {overwrite=true})
+  else
+    S2 = scope.new(nil, {overwrite=true})
+  end
 
   for _, j in ipairs(self.indexes) do
     for _, n in ipairs(j.names) do
