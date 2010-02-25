@@ -2,7 +2,7 @@
 -- see license.txt for license information
 
 local debug = require("debug")
-local ipairs, require = ipairs, require
+local ipairs, rawget, require = ipairs, rawget, require
 local getmetatable = getmetatable
 local error, xpcall = error, xpcall
 
@@ -35,7 +35,7 @@ end
 -- string representation -------------------------------------------------------
 
 function address:__repr(format)
-  if not self[1] then
+  if not rawget(self, 1) then
     return ""
   else
     if format and format.dump then
@@ -143,7 +143,7 @@ end
 
 local function avnext(a, i)
   i = i + 1
-  local v = a[i]
+  local v = rawget(a, i)
   if v then
     return i, v.value
   end
@@ -191,7 +191,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
   -- if we've got something that wants to resolve itself, then give it the
   -- collected indexes
   local mt = getmetatable(current)
-  if mt and mt.__address then
+  if mt and rawget(mt, "__address") then
     -- We only want to bind to the result...
     local status, v, j = xpcall(function() return mt.__address(current, S, collected:sub(used or 1), 1, expression.bind) end, debug.traceback)
     if not status then
@@ -205,7 +205,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
   end
 
   -- Otherwise, move on to the next index
-  local si = self[i]
+  local si = rawget(self, i)
   if not si then return true, current, base, self, collected end
   local a = si.value
   local b = si.exp

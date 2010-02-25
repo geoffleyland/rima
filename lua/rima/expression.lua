@@ -23,22 +23,22 @@ expression.proxy_mt = setmetatable({}, expression)
 
 function expression:new(x, ...)
   local e = {...}
-  if x and x.construct then e = x.construct(e) end
-  for k, v in pairs(self.proxy_mt) do if not(x[k]) then rawset(x, k, v) end end
+  if x and rawget(x, "construct") then e = x.construct(e) end
+  for k, v in pairs(self.proxy_mt) do if not(rawget(x, k)) then rawset(x, k, v) end end
 --  e:check()
   return proxy:new(object.new(self, e), x)
 end
 
 function expression:new_table(x, t)
   local e
-  if x and x.construct then
+  if x and rawget(x, "construct") then
     e = x.construct(t)
   else
     e = {}
     for i, a in ipairs(t) do e[i] = a end
   end
 
-  for k, v in pairs(self.proxy_mt) do if not(x[k]) then rawset(x, k, v) end end
+  for k, v in pairs(self.proxy_mt) do if not(rawget(x, k)) then rawset(x, k, v) end end
 --  e:check()
   return proxy:new(object.new(self, e), x)
 end
@@ -138,7 +138,7 @@ function expression.parenthise(e, format, parent_precedence)
   parent_precedence = parent_precedence or 1
   local s = repr(e, format)
   local mt = getmetatable(e)
-  local precedence = (mt and mt.precedence) or 0
+  local precedence = (mt and rawget(mt, "precedence")) or 0
   if precedence > parent_precedence then
     s = "("..s..")"
   end
@@ -161,7 +161,7 @@ function expression.bind(e, S)
   if mt then
     local r
     local E = proxy.O(e)
-    local t = E._tags
+    local t = rawtype(E) == "table" and rawget(E, "_tags")
     local f = rawget(mt, "__bind")
     if f then
       r = { f(E, S) }
@@ -187,7 +187,7 @@ function expression.eval(e, S)
   local f = mt and rawget(mt, "__eval")
   if f then
     local E = proxy.O(e)
-    local t = E._tags
+    local t = rawget(E, "_tags")
     local r = { f(E, S, eval) }
     if t and not defined(r[1]) then tag(r[1], t) end
     return unpack(r)
@@ -229,7 +229,7 @@ function expression.tag(e, t)
       format(rima.repr(e)))
   end
   local E = proxy.O(e)
-  E._tags = E._tags or {}
+  E._tags = rawget(E, "_tags") or {}
   local et = E._tags
   for k,v in pairs(t) do et[k] = v end
 end
@@ -240,7 +240,7 @@ function expression.tags(e)
   local mt = getmetatable(e)
   local f = mt and rawget(mt, "__eval")
   if f then
-    r = proxy.O(e)._tags
+    r = rawget(proxy.O(e), "_tags")
   end
   return r or {}
 end

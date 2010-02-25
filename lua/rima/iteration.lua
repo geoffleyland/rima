@@ -2,7 +2,7 @@
 -- see license.txt for license information
 
 local coroutine, table = require("coroutine"), require("table")
-local ipairs, next, pairs = ipairs, next, pairs
+local ipairs, next, pairs, rawget = ipairs, next, pairs, rawget
 local error, getmetatable, require, type = error, getmetatable, require, type
 
 local object = require("rima.object")
@@ -131,7 +131,7 @@ function iterator:eval(S)
       break
     end
     local m = getmetatable(e)
-    local i = m and m.__iterate
+    local i = m and rawget(m, "__iterate")
     if i then
       r = e
       break
@@ -348,7 +348,7 @@ function set_list:iterate(S)
   local function z(i, cS)
     i = i or 1
     cS = cS or S
-    if not self[i] then
+    if not rawget(self, i) then
       local ud
       if undefined_sets[1] then ud = set_list:copy(undefined_sets) end
       coroutine.yield(cS, ud)        
