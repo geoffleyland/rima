@@ -126,6 +126,7 @@ end
 function scope.new(values, options)
   options = options or {}
   local S = _new{
+    parent = false,
     overwrite = (options.overwrite and true or false),
     rewrite = (options.rewrite and true or false),
     no_undefined = (options.no_undefined and true or false),
@@ -172,7 +173,7 @@ end
 
 
 function scope.clear_parent(S)
-  proxy.O(S).parent = nil
+  proxy.O(S).parent = false
 end
 
 
