@@ -23,7 +23,7 @@ function function_v:new(inputs, expression, S, ...)
     "function_v:now",
     "new(inputs, expression, table or scope)"
 
-  args.check_types(S, "S", {"nil", "table", {rima.scope, "scope"}}, usage, frame)
+  args.check_types(S, "S", {"nil", "table", {rima.scope, "scope"}}, usage, fname)
 
   if S and not isa(S, rima.scope) then S = rima.scope.create(S) end
 

@@ -357,7 +357,7 @@ function scope.newindex(s, name, addr, index, value, sets)
   end
 
   local function newdefault(v)
-    z = defaults[v]
+    local z = defaults[v]
     if not z then
       z = {}
       defaults[v] = z

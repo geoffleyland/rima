@@ -262,7 +262,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
       local values = scope.find(RS, R.name, "read")
 
       -- Give up if there's none or it's hidden
-      if not values or values[1][1] == hidden then
+      if not values or values[1][1] == scope.hidden then
         return false, nil, new_base, new_address, collected
       end
 
