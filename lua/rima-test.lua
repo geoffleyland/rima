@@ -2,6 +2,7 @@
 -- see license.txt for license information
 
 require("test.directory")
+require("test.strict")
 
 --------------------------------------------------------------------------------
 
