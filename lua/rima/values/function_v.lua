@@ -44,7 +44,7 @@ function function_v:new(inputs, expression, S, ...)
     end
   end
 
-  return object.new(self, { inputs=new_inputs, expression=expression, S=S, outputs={...} })
+  return object.new(self, { inputs=new_inputs, expression=expression, S=S or false, outputs={...} })
 end
 
 
