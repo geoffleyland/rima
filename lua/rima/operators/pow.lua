@@ -13,6 +13,7 @@ module(...)
 -- Exponentiation --------------------------------------------------------------
 
 local pow = rima.object:new(_M, "pow")
+pow.precedence = 0
 
 
 -- Argument Checking -----------------------------------------------------------

@@ -21,6 +21,7 @@ local address = require("rima.address")
 
 local index = _M
 index.__typename = "index"
+index.precedence = 0
 
 
 -- Argument Checking -----------------------------------------------------------

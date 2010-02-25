@@ -16,6 +16,7 @@ module(...)
 
 local call = _M
 call.__typename = "call"
+call.precedence = 0
 
 
 -- Argument Checking -----------------------------------------------------------
