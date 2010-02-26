@@ -8,6 +8,7 @@
     - [Expressions](expressions.html)
     - [Arrays and Structures](arrays.html)
     - [Sums](sums.html)
+    - [Cases](cases.html)
     - [Functions](functions.html)
     - [Tabulation](tabulation.html)
     - [Modelling](modelling.html)
@@ -18,4 +19,6 @@
     - [Knapsack](examples/knapsack.lua)
     - [Blending](examples/whiskas.lua)
     - [Curve Fitting](examples/minimax.lua)
+    - [Assignment and Facility Location](examples/assignment.lua)
+    - [Sudoku](examples/sudoku.lua)
   

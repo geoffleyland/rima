@@ -2,7 +2,7 @@
 
 # Rima Manual: Sums
 
-[ [Contents](contents.html) | Previous: [Arrays and Structures](arrays.html) | Next: [Functions](functions.html) ]
+[ [Contents](contents.html) | Previous: [Arrays and Structures](arrays.html) | Next: [Cases](cases.html) ]
 
 Summing the elements of a table is achieved with `rima.sum{tables}(expression)`,
 which takes a list of tables to sum over as its first argument,
@@ -97,4 +97,4 @@ you can get it with `rima.ord`:
     SS = { "north", "south", "east", "west" }
     print(rima.E(e, {S=SS}))                            --> 10
 
-[ [Contents](contents.html) | Previous: [Arrays and Structures](arrays.html) | Next: [Functions](functions.html) ]
+[ [Contents](contents.html) | Previous: [Arrays and Structures](arrays.html) | Next: [Cases](cases.html) ]

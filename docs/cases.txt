@@ -1,0 +1,32 @@
+    --! env rima = require("rima")
+
+# Rima Manual: Cases
+
+[ [Contents](contents.html) | Previous: [Sums](sums.html) | Next: [Functions](functions.html) ]
+
+A `case` is Rima's generalisation of an if statement.
+The syntax isn't pretty, so you can make any suggestions you like:
+
+    value, m1, r1, m2, r2, default = rima.R"value, m1, r1, m2, r2, default"
+    c = rima.case(value, {{m1, r1}, {m2, r2}}, default)
+    print(c)                                            --> case value (m1: r1; m2: r2; default: default; )
+    print(rima.E(c, {value=1, m1=1}))                   --> r1
+
+If there's more than one match, the case always picks the first:
+
+    --! continue
+    print(rima.E(c, {value=1, m1=1, m2=1}))             --> r1
+
+If an early match isn't yet defined, then the case will remain undefined, even if there's a later match
+(but following matches and the default will be discarded)
+
+    --! continue
+    print(rima.E(c, {value=1, m2=1}))                   --> case 1 (m1: r1; 1: r2; )
+
+If there's a non-match, but no actual match, the non-match is discarded:
+
+    --! continue
+    print(rima.E(c, {value=1, m1=2}))                   --> case 1 (m2: r2; default: default; )
+
+
+[ [Contents](contents.html) | Previous: [Cases](cases.html) | Next: [Functions](functions.html) ]

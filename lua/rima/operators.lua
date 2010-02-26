@@ -14,5 +14,6 @@ require("rima.operators.math")
 require("rima.operators.call")
 require("rima.operators.index")
 require("rima.operators.sum")
+require("rima.operators.case")
 
 -- EOF -------------------------------------------------------------------------

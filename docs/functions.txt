@@ -2,7 +2,7 @@
 
 # Rima Manual: Functions
 
-[ [Contents](contents.html) | Previous: [Sums](sums.html) | Next: [Tabulation](tabulation.html) ]
+[ [Contents](contents.html) | Previous: [Cases](cases.html) | Next: [Tabulation](tabulation.html) ]
 
 You can define functions in Rima with the same syntax as sums: `rima.F{arg1, arg2,...}(expression)`.
 Functions are data in Rima, so they go in the table of data (or *scope*) that you pass into `rima.E`:
@@ -81,5 +81,5 @@ but then, this might not matter:
     print(rima.E(2 * f(x), { f = F, x=3 }))             --> lua! 8
     
 
-[ [Contents](contents.html) | Previous: [Sums](sums.html) | Next: [Tabulation](tabulation.html) ]
+[ [Contents](contents.html) | Previous: [Cases](cases.html) | Next: [Tabulation](tabulation.html) ]
 
