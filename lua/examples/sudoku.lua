@@ -7,7 +7,7 @@ require("rima")
 
 --[[
 This is the rima version of the sudoku problem.
-The PuLP version is at knapsack problem found at http://code.google.com/p/pulp-or/source/browse/trunk/pulp-or/examples/Sudoku1.py
+The PuLP version is at http://code.google.com/p/pulp-or/source/browse/trunk/pulp-or/examples/Sudoku1.py
 and a python-zibopt version at http://code.google.com/p/python-zibopt/source/browse/trunk/examples/sudoku.py
 --]]
 
