@@ -18,20 +18,34 @@ LPSOLVE_INCDIR=$(LPSOLVE_PREFIX)/include/lpsolve
 
 CPP=g++
 #-DNOMINMAX is needed for some compilers on windows.  I'm no sure which, so I guess I'll just blanket-add it for now.  Can't hurt, right?
-CFLAGS=-O3 -DNOMINMAX -arch i686 -arch x86_64
+CFLAGS=-O3 -DNOMINMAX
 SO_SUFFIX=so
-SHARED=-bundle -bundle_loader $(LUA)
+#SHARED=-bundle -bundle_loader $(LUA)
+
+# Guess a platform
+UNAME=$(shell uname -s)
+ifneq (,$(findstring Darwin,$(UNAME)))
+  # OS X
+  CFLAGS:=$(CFLAGS) -arch i686 -arch x86_64
+  SHARED=-bundle -bundle_loader $(LUA)
+  LIBS=
+else
+  # Linux
+  SHARED=-shared -llua
+  LIBS=-lcstring
+endif
+
 
 all: rima_clp_core.$(SO_SUFFIX) rima_cbc_core.$(SO_SUFFIX) rima_lpsolve_core.$(SO_SUFFIX)
 
 rima_clp_core.$(SO_SUFFIX): c/rima_clp_core.cpp 
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils $(LIBS) -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
 
 rima_cbc_core.$(SO_SUFFIX): c/rima_cbc_core.cpp
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lcbc -losiclp -I$(COIN_INCDIR)/cbc -I$(COIN_INCDIR)/osi -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lcbc -losiclp $(LIBS) -I$(COIN_INCDIR)/cbc -I$(COIN_INCDIR)/osi -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
 
 rima_lpsolve_core.$(SO_SUFFIX): c/rima_lpsolve_core.cpp
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(LPSOLVE_LIBDIR) -llpsolve55 -I$(LPSOLVE_INCDIR)
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(LPSOLVE_LIBDIR) -llpsolve55 $(LIBS) -I$(LPSOLVE_INCDIR)
 
 test: all
 	cp rima_clp_core.so lua/
