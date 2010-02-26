@@ -22,6 +22,11 @@ function constraint:new(lhs, rel, rhs)
   return object.new(self, o)
 end
 
+function constraint:trivial(S)
+  local e = expression.eval(self.lhs - self.rhs, S)
+  return e == 0
+end
+
 function constraint:linearise(S)
   local constant, lhs = rima.linearise(self.lhs - self.rhs, S)
   return lhs, self.type, -constant
