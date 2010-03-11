@@ -1,0 +1,165 @@
+    --! env rima = require("rima")
+
+# Rima Manual: Enough Lua to get you into Trouble
+
+[ [Contents](contents.html) | Next: [References](references.html) ]
+
+Rima is implemented in [Lua](http://www.lua.org/),
+a fast, lightweight dynamically-typed scripting language.
+The intention here is to give you enough of an introduction to Lua that you can
+understand the rima examples presented here.
+If you want a comprehensive introduction to the language -
+you're better off reading [Programming in Lua](http://www.inf.puc-rio.br/~roberto/pil2/).
+
+
+## Hello World
+
+The traditional first program is straightforward in Lua:
+
+    print("Hello World")                               --> Hello World
+
+`print` is just a normal function like any other.
+Function arguments are enclosed in parentheses, and strings can be delimited with
+paired single `'` or double `"` quotes.
+`--` introduces a comment,
+and, as a convention in this manual,
+the output of a line is shown as a comment on the right hand side of the page.
+
+In fact, the script that generates the html for the manual runs all the embedded
+code and checks the output against the comments,
+so the code examples in the manual, at least, *should* always be right.
+
+
+## Running Your Program
+
+If you save the above program as `hello.lua` then
+
+    --!ignore
+    $ lua hello.lua
+
+on the command line should run it.
+Alternatively, you can run Lua in interactive mode:
+
+    --!ignore
+    $ lua
+    Lua 5.1.4  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+    > print("Hello World")
+    Hello World
+
+Control-C will get you out of interactive mode.
+
+To run rima examples, you'll need no tell lua to use rima.
+You can do this when you start Lua interactively:
+
+    --!ignore
+    $ lua -lrima
+
+or by using `require` once the interpreter has started:
+
+    --!ignore
+    $ lua
+    > require("rima")
+
+In scripts, just put `require("rima") at the top of the file.
+
+If you start the interpreter with `-lrima` or `require("rima")` you should be
+able to copy and paste all the examples from this manual onto the command-line.
+
+
+## Variables
+
+Lua variables are dynamically typed, and global variables don't need to be declared:
+
+    a = 1
+    print(a)                                            --> 1
+    a = "Hello"
+    print(a)                                            --> Hello
+
+Local variables can be declared with `local`:
+
+    local b = 1; print(b)                               --> 1
+
+We have to do the assignment to `b` and the `print` on the same line because
+`b` is a local variable,
+and in the interactive interpreter,
+local variables are only in scope for the line they're defined on.
+Lua doesn't require semicolons as statement terminators or separators,
+but it does accept them.
+
+Local variables are good practice in Lua,
+but for simplicity we don't use them much in the manual.
+For a comprehensive explanation see [PiL](http://www.inf.puc-rio.br/~roberto/pil2/).
+
+
+## Tables
+
+Lua has only one data structure, the `table`.
+It works as both an array and an associative map (or dictionary),
+and is arranged to work optimally in both cases.
+You can construct a table with curly braces.
+The following example constructs an array-like table:
+
+    t = { "one", "two", "three" }
+    print(t[1])                                         --> one
+
+Lua tables are 1-based (not 0-based like C) which can trip you up.
+To set non-integer keys in a table, use the following syntax:
+
+    t = { key = "value" }
+    print(t["key"])                                     --> value
+
+In Lua the expressions `t["key"]` and `t.key` are exactly the same,
+so you could also
+
+    --!continue
+    print(t.key)                                        --> value
+
+You can mix the array and associative map parts of a table:
+
+    t = { "one", key = "value", two = 2, "two", "three" }
+    print(t[1])                                         --> one
+    print(t.key)                                        --> value
+    print(t["two"])                                     --> 2
+    print(t[3])                                         --> three
+
+
+## Functions
+
+Functions are defined with the `function` keyword:
+
+    function f(x) print(x + 1) end
+    f(10)                                               --> 11
+
+Functions are values, and the above is the same as:
+
+    f = function(x) print(x + 1) end
+
+As values, functions can be assigned to, for example, table fields:
+
+    t = { f = function(x) print(x + 1) end }
+    t.f(11)                                             --> 12
+
+This looks a little like member function syntax.
+If we passed the table itself as the first argument, then:
+
+    t = { i = 2 }
+    function t.f(self, x) print(x + self.i) end
+    t.f(t, 20)                                          --> 22
+
+The `:` operator supports member functions or methods by doing just that,
+passing a hidden argument `self` that's the table the function was found in.
+The following is exactly equivalent to the above:
+
+    t = { i = 2 }
+    function t:f(x) print(x + self.i) end
+    t:f(20)                                             --> 22
+
+If your function has only one argument, and you're going to pass it a string or
+a table, you can omit the parentheses, for example, to print a string,
+the two following lines are equivalent:
+
+    print("hello")                                      --> hello
+    print"hello"                                        --> hello
+
+
+[ [Contents](contents.html) | Next: [References](references.html) ]

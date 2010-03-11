@@ -5,6 +5,8 @@
 - [Obtaining and Installing Rima](install.html)
 - Rima Manual
     --! ignore
+    - [Enough Lua to get you in Trouble](trouble.html)
+    - [References](references.html)
     - [Expressions](expressions.html)
     - [Arrays and Structures](arrays.html)
     - [Sums](sums.html)

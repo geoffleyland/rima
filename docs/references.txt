@@ -1,0 +1,86 @@
+    --! env rima = require("rima")
+
+# Rima Manual: References
+
+[ [Contents](contents.html) | Previous: [Introduction to Lua](trouble.html) Next: [Expressions](expressions.html) ]
+
+The values Rima works with, called *references* are quite different from Lua variables,
+and probably quite different from variables and parameters you've seen in other modelling languages.
+
+For a start, Rima doesn't distinguish between variables
+(values Rima should solve for)
+and parameters
+(values that are inputs to the problem).
+Instead, when you ask Rima to solve a problem,
+it works out what it does and doesn't know,
+and if it can work out what it doesn't from what it does.
+
+Secondly, you can't directly assign a value to a reference.
+Instead, references are just the names you'll use to refer to your values,
+and the names you'll use to bind to data later.
+
+
+## Defining References
+
+You define a reference with `rima.R`:
+
+    x = rima.R"x"
+    print(x)                                            --> x
+
+`x` is now a Lua variable (so we can use it in Lua) that points to a Rima
+reference called `x`.
+You don't *have* to use the same name for the Lua variable and the reference,
+but if you don't you might get horribly confused:
+
+    x = rima.R"y"
+    print(x)                                            --> y
+
+If you wish to define more than one variable at a time, you can:
+
+    x, y = rima.R"x, y"
+
+
+## Evaluating References
+
+You can *evaluate* a reference with `rima.E`.
+We pass `rima.E` the reference we wish to evaluate,
+and a table of values to look the reference up in:
+
+    x = rima.R"x"
+    print(rima.E(x, { x=5 }))                           --> 5
+
+You can use the same reference in more than one evaluation,
+with different tables:
+
+    x = rima.R"x"
+    print(rima.E(x, { x=5 }))                           --> 5
+    print(rima.E(x, { x="hello" }))                     --> hello
+
+Again, it's a good idea to give your variables and references the same name:
+
+    x = rima.R"y"
+    print(rima.E(x, { x="I'm x", y="I'm y" }))         --> I'm y
+
+If you're a Lua user, it might help to think of rima.E as something like `setfenv`
+and references as global variables.
+If you're used to object oriented languages,
+it might help to thing of references as pointers to members,
+and the tables you pass in as objects.
+
+
+## References to References
+
+It's quite ok for the table of values you pass in to contain other references:
+
+    x, y, z = rima.R"x, y, z"
+    print(rima.E(x, { x=y, y=z, z="you got to z!" }))   --> you got to z!
+
+The combination of references and the tables of values you pass in,
+which are actually *scopes* - tables that allow composition through layering
+are what give Rima it's flexibility in data composition.
+
+Scopes are covered in more detail in [Scopes](scopes.html),
+next, we cover `rima.E` in more detail when building expressions.
+
+
+[ [Contents](contents.html) | Previous: [Introduction to Lua](trouble.html) Next: [Expressions](expressions.html) ]
