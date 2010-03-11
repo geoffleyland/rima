@@ -2,7 +2,7 @@
 
 # Rima Manual: Expressions
 
-[ [Contents](contents.html) | Next: [Arrays and Structures](arrays.html) ]
+[ [Contents](contents.html) | Previous: [References](references.html) | Next: [Arrays and Structures](arrays.html) ]
 
 *Expressions* are Rima's fundamental construct.
 They are stored symbolically and
@@ -81,4 +81,4 @@ and meaning you can leave some parts of an expression to be defined later:
     print(rima.E(e, { y=z^2 }))                         --> x/z^2
     print(rima.E(e, { y=z^2, z=x^0.5 }))                --> 1
 
-[ [Contents](contents.html) | Next: [Arrays and Structures](arrays.html) ]
+[ [Contents](contents.html) | Previous: [References](references.html) | Next: [Arrays and Structures](arrays.html) ]

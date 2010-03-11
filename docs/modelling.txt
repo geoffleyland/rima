@@ -2,7 +2,7 @@
 
 # Rima Manual: Optimization Models
 
-[ [Contents](contents.html) | Previous: [Tabulation](tabulation.html) Next: [Scopes](scopes.html) ]
+[ [Contents](contents.html) | Previous: [Tabulation](tabulation.html) | Next: [Scopes](scopes.html) ]
 
 Rima's expressions can be used to express constraints and objectives in
 Linear and Mixed-Integer Programs,
@@ -96,4 +96,4 @@ but its scope is a child of the parent model's scope.
 For examples of how this can be used for a rough stab at model composition, see
 the examples listed on the [contents page](contents.html).
 
-[ [Contents](contents.html) | Previous: [Tabulation](tabulation.html) Next: [Scopes](scopes.html) ]
+[ [Contents](contents.html) | Previous: [Tabulation](tabulation.html) | Next: [Scopes](scopes.html) ]

@@ -2,7 +2,7 @@
 
 # Rima Manual: References
 
-[ [Contents](contents.html) | Previous: [Introduction to Lua](trouble.html) Next: [Expressions](expressions.html) ]
+[ [Contents](contents.html) | Previous: [Introduction to Lua](trouble.html) | Next: [Expressions](expressions.html) ]
 
 The values Rima works with, called *references* are quite different from Lua variables,
 and probably quite different from variables and parameters you've seen in other modelling languages.
@@ -83,4 +83,4 @@ Scopes are covered in more detail in [Scopes](scopes.html),
 next, we cover `rima.E` in more detail when building expressions.
 
 
-[ [Contents](contents.html) | Previous: [Introduction to Lua](trouble.html) Next: [Expressions](expressions.html) ]
+[ [Contents](contents.html) | Previous: [Introduction to Lua](trouble.html) | Next: [Expressions](expressions.html) ]
