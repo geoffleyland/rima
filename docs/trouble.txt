@@ -8,7 +8,7 @@ Rima is implemented in [Lua](http://www.lua.org/),
 a fast, lightweight dynamically-typed scripting language.
 The intention here is to give you enough of an introduction to Lua that you can
 understand the rima examples presented here.
-If you want a comprehensive introduction to the language -
+If you want a comprehensive introduction to the language
 you're better off reading [Programming in Lua](http://www.inf.puc-rio.br/~roberto/pil2/).
 
 
@@ -21,13 +21,13 @@ The traditional first program is straightforward in Lua:
 `print` is just a normal function like any other.
 Function arguments are enclosed in parentheses, and strings can be delimited with
 paired single `'` or double `"` quotes.
-`--` introduces a comment,
+
+`--&nbsp;`introduces a comment,
 and, as a convention in this manual,
 the output of a line is shown as a comment on the right hand side of the page.
-
 In fact, the script that generates the html for the manual runs all the embedded
 code and checks the output against the comments,
-so the code examples in the manual, at least, *should* always be right.
+so the code examples in the manual, *should* always be right.
 
 
 ## Running Your Program
