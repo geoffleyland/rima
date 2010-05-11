@@ -362,13 +362,13 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     free_indexes[#free_indexes+1] = { [name] = set }
   end
 
-  local function get_prototype(v)
-    local z = prototypes[v]
-    if not z then
-      z = {}
-      prototypes[v] = z
+  local function get_prototype(t)
+    local p = prototypes[t]
+    if not p then
+      p = {}
+      prototypes[t] = p
     end
-    return z
+    return p
   end
 
   local function apply_index(t, index)
@@ -424,7 +424,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
       record_free_index(n, s)
     end
 
-    -- if there are any free indices, then this is a tabulate type
+    -- if there are any free indexes, then wrap their details up with the value
     if free_indexes then
       value = tabulate_type:new(free_indexes, value)
     end
