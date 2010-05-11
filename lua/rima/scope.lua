@@ -346,22 +346,23 @@ function scope_proxy_mt.__newindex(s, name, value)
 end
 
 
-function scope.newindex(s, name, addr, index, value, sets)
+function scope.newindex(s, name, addr, index, value, free_indexes)
   local new_address = addr and addr+index or address:new{index}
   scope.check(s, name, new_address, value)
+
   local S = proxy.O(s)
 
-  local function newset(n, s)
-    s = s or n
-    if type(s) == "string" then
-      s = rima.R(s)
+  local function record_free_index(name, set)
+    set = set or name
+    if type(set) == "string" then
+      set = rima.R(set)
     end
-    n = rima.repr(n)
-    sets = sets or {}
-    sets[#sets+1] = { [n] = s }
+    name = rima.repr(name)
+    free_indexes = free_indexes or {}
+    free_indexes[#free_indexes+1] = { [name] = set }
   end
 
-  local function newdefault(v)
+  local function get_prototype(v)
     local z = defaults[v]
     if not z then
       z = {}
@@ -370,55 +371,65 @@ function scope.newindex(s, name, addr, index, value, sets)
     return z
   end
 
-  local function newtable(v, set)
-    local z
-    if type(set) == "ref" then
-      z = newdefault(v)
-      newset(set)
-    elseif type(set) == "table" and getmetatable(set) == nil then
-      z = newdefault(v)
-      local n, s = next(set)
-      newset(n, s)
+  local function apply_index(t, index)
+    if type(index) == "ref" then
+      -- index is a reference: t...[index]... = value
+      -- return the prototype  table, and record the name of our index
+      record_free_index(index)
+      return get_prototype(t)
+    elseif type(index) == "table" and getmetatable(index) == nil then
+      -- index is a named member of a set: t...[{i=I}]... = value
+      -- write to the prototype table, and record i as the name and I as the set of our index
+      local n, s = next(index)
+      record_free_index(n, s)
+      return get_prototype(t)
     else
-      z = v[set]
+      -- just a normal index: t...["index"]... = value
+      local z = t[index]
       if not z then
         z = {}
-        v[set] = z
+        t[index] = z
       end
+      return z
     end
-    return z
   end
   
-  local c = newtable(S.values, name)
+  local c = apply_index(S.values, name)
 
   -- we can be fairly cavalier about resolving the address because
   -- check() made sure it's ok for us.  Here we're just building any
   -- necessary intermediate tables.
   if addr then
     for i, a in addr:values() do
-      c = newtable(c, a)
+      c = apply_index(c, a)
     end
   end
   
   if type(value) == "table" and not getmetatable(value) then
+    -- s.name[addr1][addr2]...[addrN][index] = { a = b, c = d ... }
+    -- Go through all of this again with one extra index.
+    -- Clearly a waste of time, there must be a better way to do this...
     for k, v in pairs(value) do
-      local s2
-      if sets then for i, s in ipairs(sets) do s2[i] = s end end
-      scope.newindex(s, name, new_address, k, v, s2)
+      local f
+      if free_indexes then for i, j in ipairs(free_indexes) do f[i] = j end end
+      scope.newindex(s, name, new_address, k, v, f)
     end
   else
     if type(index) == "ref" then
-      newset(index)
+      -- s.name[addr1][addr2]...[addrN][index] = value
+      record_free_index(index)
     elseif type(index) == "table" and not getmetatable(index) then
+      -- s.name[addr1][addr2]...[addrN][{i=I}] = value
       local n, s = next(index)
-      newset(n, s)
+      record_free_index(n, s)
     end
-    if sets then
-      value = tabulate_type:new(sets, value)
+
+    -- if there are any free indices, then this is a tabulate type
+    if free_indexes then
+      value = tabulate_type:new(free_indexes, value)
     end
-    if type(index) == "ref" then
-      defaults[c] = value
-    elseif type(index) == "table" and not getmetatable(index) then
+
+    if type(index) == "ref" or (type(index) == "table" and not getmetatable(index)) then
       defaults[c] = value
     else
       c[index] = value
