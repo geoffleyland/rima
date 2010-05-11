@@ -68,8 +68,8 @@ local tabulate_type = require("rima.values.tabulate")
 -- Scope names -----------------------------------------------------------------
 
 local scope_names = setmetatable({}, { __mode="v" })
-local defaults = setmetatable({}, { __mode="k" })
-default_marker = {}
+local prototypes = setmetatable({}, { __mode="k" })
+free_index_marker = {}
 
 local function new_name(prefix)
 
@@ -188,8 +188,8 @@ scope_proxy_mt.__tostring = scope_proxy_mt.__repr
 -- Accessing and setting -------------------------------------------------------
 
 
-function scope.default(t)
-  return defaults[t]
+function scope.prototype(t)
+  return prototypes[t]
 end
 
 
@@ -308,7 +308,7 @@ function scope.check(s, name, address, value)
          type(c) == "table" and not getmetatable(c) then
         -- this is ok - we can merge two tables
       elseif collected and #collected > 0 then
-        -- this is ok, we can override a default value
+        -- this is ok, we can override a prototype
       elseif cs == s and not S.rewrite then
         error(("scope: cannot set '%s%s' to '%s': existing definition as '%s'"):
           format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
@@ -363,10 +363,10 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
   end
 
   local function get_prototype(v)
-    local z = defaults[v]
+    local z = prototypes[v]
     if not z then
       z = {}
-      defaults[v] = z
+      prototypes[v] = z
     end
     return z
   end
@@ -393,7 +393,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
       return z
     end
   end
-  
+
   local c = apply_index(S.values, name)
 
   -- we can be fairly cavalier about resolving the address because
@@ -404,7 +404,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
       c = apply_index(c, a)
     end
   end
-  
+
   if type(value) == "table" and not getmetatable(value) then
     -- s.name[addr1][addr2]...[addrN][index] = { a = b, c = d ... }
     -- Go through all of this again with one extra index.
@@ -430,7 +430,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     end
 
     if type(index) == "ref" or (type(index) == "table" and not getmetatable(index)) then
-      defaults[c] = value
+      prototypes[c] = value
     else
       c[index] = value
     end
@@ -481,8 +481,8 @@ local function copy(t0, t1)
   end
 
   for k, v in pairs(t1) do z(k, v) end
-  local d = defaults[t1]
-  if d then z(default_marker, d) end
+  local d = prototypes[t1]
+  if d then z(free_index_marker, d) end
 end
 
 function scope.contents(s, t)

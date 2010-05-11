@@ -185,7 +185,7 @@ end
 --   value - the value it resolved to
 --   base - the base of the expression it finally resolved to
 --   address - the address of the expression it finally resolved to
---   collected - any indexes it might have picked up through defaults
+--   collected - any free indexes it might have picked up
 function address:resolve(S, current, i, base, eval, collected, used)
 
   -- if we've got something that wants to resolve itself, then give it the
@@ -327,8 +327,8 @@ function address:resolve(S, current, i, base, eval, collected, used)
       r1 = rima.packn(self:resolve(S, next, i+1, base, eval, collected, used))
       if r1[1] then return rima.unpackn(r1) end
     end
-    -- including any default values
-    next = scope.default(current)
+    -- including any values from prototypes
+    next = scope.prototype(current)
     local r2
     if next then
       local new_collected = object.new(address, {{value=a, exp=b}})

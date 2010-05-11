@@ -98,7 +98,7 @@ function test(show_passes)
     local r = scope.contents(S1)
     T:check_equal(r.a[1], nil)
     T:check_equal(r.a[3], 20)
-    T:check_equal(r.a[scope.default_marker], "tabulate({i}, i)")
+    T:check_equal(r.a[scope.free_index_marker], "tabulate({i}, i)")
   end
 
   do
