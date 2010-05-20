@@ -108,6 +108,26 @@ local function check_name(S)
 end
 
 
+-- Scope values ----------------------------------------------------------------
+
+local svalue = object:new({}, "svalue")
+
+
+function svalue:new(v)
+  if object.isa(v, self) then
+    return v
+  else
+    return object.new(self, {value=v})
+  end
+end
+
+
+function svalue:__repr(f)
+  return "svalue{ value = "..rima.repr(self.value, f).." }"
+end
+svalue.__tostring = svalue.__repr
+
+
 -- Constructor -----------------------------------------------------------------
 
 local scope = object:new(_M, "scope")
@@ -212,7 +232,7 @@ function scope.find(s, name, op, results)
   local c = S.values[name]
   if c then
     results = results or {}
-    results[#results+1] = { c, s }
+    results[#results+1] = { c.value, s }
   end
 
   -- We have to keep looking if there's a parent scope and
@@ -336,12 +356,12 @@ function scope_proxy_mt.__newindex(s, name, value)
   local S = proxy.O(s)
 
   if type(value) == "table" and not getmetatable(value) then
-    S.values[name] = S.values[name] or {}
+    S.values[name] = S.values[name] or svalue:new({})
     for k, v in pairs(value) do
       scope.newindex(s, name, nil, k, v)
     end
   else
-    S.values[name] = value
+    S.values[name] = svalue:new(value)
   end
 end
 
@@ -387,10 +407,10 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
       -- just a normal index: t...["index"]... = value
       local z = t[index]
       if not z then
-        z = {}
+        z = svalue:new({})
         t[index] = z
       end
-      return z
+      return z.value
     end
   end
 
@@ -432,7 +452,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     if type(index) == "ref" or (type(index) == "table" and not getmetatable(index)) then
       prototypes[c] = value
     else
-      c[index] = value
+      c[index] = svalue:new(value)
     end
   end
 end
@@ -441,7 +461,7 @@ end
 -- Hide ------------------------------------------------------------------------
 
 function scope.hide(S, name)
-  proxy.O(S).values[name] = scope.hidden
+  proxy.O(S).values[name] = svalue:new(scope.hidden)
 end
 
 
@@ -480,7 +500,7 @@ local function copy(t0, t1)
     end
   end
 
-  for k, v in pairs(t1) do z(k, v) end
+  for k, v in pairs(t1) do z(k, v.value) end
   local d = prototypes[t1]
   if d then z(free_index_marker, d) end
 end

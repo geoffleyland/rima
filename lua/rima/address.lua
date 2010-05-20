@@ -219,16 +219,17 @@ function address:resolve(S, current, i, base, eval, collected, used)
     local tags = expression.tags(b)
     local k = tags.key
     local v = tags.value
+    local result
     if not k then
-      return t[j]
-    end
-    if type(k) == "number" and not t[1] then
+      result = t[j]
+    elseif type(k) == "number" and not t[1] then
       self[i].value = v
-      return t[v]
+      result = t[v]
     else
       self[i].value = k
-      return t[k]
+      result = t[k]
     end
+    return result and result.value
   end
 
   -- What do we do when we come across an expression?

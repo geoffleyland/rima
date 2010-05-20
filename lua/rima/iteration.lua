@@ -184,14 +184,14 @@ function iterator:iterate()
     local i = e[1] + 1
     local v = a[i]
     if v then
-      return { i, v }
+      return { i, v.value }
     end
   end
 
   local function iter(a, e)
     local i, v = next(a, e[1])
     if v then
-      return { i, v }
+      return { i, v.value }
     end
   end
 
