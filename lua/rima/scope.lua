@@ -186,8 +186,12 @@ function svalue:new(o)
 end
 
 
-function svalue:__repr(f)
-  return "svalue{ value = "..rima.repr(self.value, f).." }"
+function svalue:__repr(format)
+  if format and format.dump then
+    return "svalue{ value = "..rima.repr(self.value, format).." }"
+  else
+    return rima.repr(self.value, format)
+  end
 end
 svalue.__tostring = svalue.__repr
 

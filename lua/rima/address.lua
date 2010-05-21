@@ -198,7 +198,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
     local status, v, j = xpcall(function() return mt.__address(current.value, S, collected:sub(used or 1), 1, expression.bind) end, debug.traceback)
     if not status then
       error(("address: error evaluating '%s%s' as '%s':\n  %s"):
-        format(rima.repr(base), rima.repr(self), rima.repr(current.value), v:gsub("\n", "\n  ")), 0)
+        format(rima.repr(base), rima.repr(self), rima.repr(current), v:gsub("\n", "\n  ")), 0)
     end
     -- ... and then, if there are no more indexes left, we'll evaluate it.
     -- otherwise we leave it as a ref for the next call to index.
@@ -214,7 +214,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
   local function fail()
     error(("address: error resolving '%s%s': '%s%s' is not indexable (got '%s' %s)"):
-      format(rima.repr(base), rima.repr(self:sub(1, i)), rima.repr(base), rima.repr(self:sub(1, i-1)), rima.repr(current.value), object.type(current.value)))
+      format(rima.repr(base), rima.repr(self:sub(1, i)), rima.repr(base), rima.repr(self:sub(1, i-1)), rima.repr(current), object.type(current.value)))
   end
 
   local function index(t, j, b)
