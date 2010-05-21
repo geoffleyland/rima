@@ -485,9 +485,9 @@ end
 
 -- Iterating -------------------------------------------------------------------
 
-local function copy(t0, t1)
+local function copy(to, from)
   local function z(k, v)
-    local c = t0[k]
+    local c = to[k]
     if c then
       if type(c) == "table" and not getmetatable(c) then
         copy(c, v)
@@ -495,16 +495,16 @@ local function copy(t0, t1)
     else
       if type(v) == "table" and not getmetatable(v) then
         local c = {}
-        t0[k] = c
+        to[k] = c
         copy(c, v)
       else
-        t0[k] = v
+        to[k] = v
       end
     end
   end
 
-  for k, v in pairs(t1) do z(k, v.value) end
-  local d = prototypes[t1]
+  for k, v in pairs(from) do z(k, v.value) end
+  local d = prototypes[from]
   if d then z(free_index_marker, d) end
 end
 
