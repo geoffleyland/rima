@@ -102,17 +102,15 @@ end
 
 function index.__eval(args, S, eval)
   local status, value, base, address = resolve(args, S, eval)
-  value = scope.unpack(value)
-  if not status or
-     value == scope.hidden or
-     object.isa(value, undefined_t) then
+  if not status or value.hidden or
+     object.isa(value.value, undefined_t) then
     if address[1] then
       return expression:new(index, base, address)
     else
       return base
     end
   else
-    return value
+    return value.value
   end
 end
 

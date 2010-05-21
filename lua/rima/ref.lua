@@ -82,13 +82,11 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function ref.proxy_mt.__bind(r, S)
-  local e, found_scope, hidden = scope.lookup(S, r.name, r.scope)
+  local e, found_scope = scope.lookup(S, r.name, r.scope)
   if not e then
-    if hidden then
-      return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
-    else
-      return ref:new{ name=r.name, type=r.type, scope=r.scope or scope.scope_for_undefined(S) }
-    end
+    return ref:new{ name=r.name, type=r.type, scope=r.scope or scope.scope_for_undefined(S) }
+  elseif e.hidden then
+    return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
   elseif expression.defined(e.value) then
     return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
   else
@@ -100,7 +98,7 @@ end
 function ref.proxy_mt.__eval(r, S)
   -- look the ref up in the scope
   local e, found_scope = scope.lookup(S, r.name, r.scope)
-  if not e then                                 -- remain unbound
+  if not e or e.hidden then                     -- remain unbound
     return ref:new{name=r.name, type=r.type, scope=r.scope}
   end
 
@@ -134,7 +132,7 @@ end
 function ref.proxy_mt.__type(r, S)
   -- look the ref up in the scope
   local e = scope.lookup(S, r.name, r.scope)
-  if not e or not object.isa(e.value, undefined_t) then
+  if not e or e.hidden or not object.isa(e.value, undefined_t) then
     error(("No type information available for '%s'"):format(r.name))
   else
     return e.value

@@ -266,7 +266,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
       local values = scope.find(RS, R.name, "read")
 
       -- Give up if there's none or it's hidden
-      if not values or values[1][1].value == scope.hidden then
+      if not values or values[1][1].hidden then
         return false, nil, new_base, new_address, collected
       end
 
@@ -320,8 +320,8 @@ function address:resolve(S, current, i, base, eval, collected, used)
     return false, current, base, self, collected
 
   -- if it's hidden then stop here
-  elseif current.value == scope.hidden then
-    return true, scope.hidden, base, self, collected
+  elseif current.hidden then
+    return true, current, base, self, collected
 
   -- handle tables and things we can index just by indexing
   elseif (mt and mt.__index) or type(current.value) == "table" then

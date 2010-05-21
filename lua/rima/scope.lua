@@ -112,7 +112,6 @@ end
 
 local scope = object:new(_M, "scope")
 scope_proxy_mt = setmetatable({}, scope)
-scope.hidden = {}
 
 
 function scope._new(S)
@@ -270,7 +269,7 @@ function scope_proxy_mt.__index(s, name)
       -- the variable was found in (this will come into play with function
       -- scopes, but I haven't worked out how to test it yet)
       return ref:new{name=name, type=c.value, scope=s}
-    elseif c.value == hidden then
+    elseif c.hidden then
       return nil
     elseif type(c.value) == "table" and not getmetatable(c.value) then
       return ref:new{name=name, scope=s}
@@ -307,11 +306,7 @@ function scope.lookup(s, name, bound_scope)
   if not s then return end
   local r = find(s, name, "read")
   if r then
-    if r[1][1].value ~= hidden then
-      return r[1][1], r[1][2]                   -- returning multiple values so no if..and..or
-    else
-      return nil, r[1][2], true
-    end
+    return r[1][1], r[1][2]
   end
 end
 
@@ -469,7 +464,7 @@ end
 -- Hide ------------------------------------------------------------------------
 
 function scope.hide(S, name)
-  proxy.O(S).values[name] = scope.pack(scope.hidden)
+  proxy.O(S).values[name] = svalue:new{hidden=true}
 end
 
 
