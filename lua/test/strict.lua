@@ -28,21 +28,22 @@ local function make_environment_metatable_strict(E)
 
   if not mt.__newindex then
     mt.__newindex = function (t, n, v)
-      -- only check newindexes in the global scope
+      -- only check newindex in the global scope
       if t == GLOBAL_SCOPE and not mt.__declared[n] then
         local w = what()
         if w ~= "main" and w ~= "C" then
           error("assign to undeclared variable '"..n.."'", 2)
         end
-        mt.__declared[n] = true
       end
+      mt.__declared[n] = true
       rawset(t, n, v)
     end
   end
 
   if not mt.__index then
     mt.__index = function (t, n)
-      if not mt.__declared[n] and what() ~= "C" then
+      -- only check if the table appears to be the caller's env
+      if t == getfenv(2) and not mt.__declared[n] and what() ~= "C" then
         error("variable '"..n.."' is not declared", 2)
       end
       return rawget(t, n)
