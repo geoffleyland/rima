@@ -72,7 +72,7 @@ function index.resolve(args, S, eval)
   -- might work because it's not a scalar type or it might fail.  Maybe
   -- we could just check that first?
   if expression.defined(e) or v then
-    local status, r = rima.packs(xpcall(function() return address:resolve(S, b, 1, b, eval) end, debug.traceback))
+    local status, r = rima.packs(xpcall(function() return address:resolve(S, scope.pack(b), 1, b, eval) end, debug.traceback))
     if not status then
       error(("index: error evaluating '%s' as '%s%s':\n  %s"):
         format(__repr(args), rima.repr(b), rima.repr(address), r[1]:gsub("\n", "\n  ")), 0)
@@ -87,6 +87,7 @@ end
 
 function index.__bind(args, S, eval)
   local status, value, base, address = resolve(args, S, expression.bind)
+  value = scope.unpack(value)
   if not status or expression.defined(value) then
     if address[1] then
       return expression:new(index, base, address)
@@ -101,6 +102,7 @@ end
 
 function index.__eval(args, S, eval)
   local status, value, base, address = resolve(args, S, eval)
+  value = scope.unpack(value)
   if not status or
      value == scope.hidden or
      object.isa(value, undefined_t) then
@@ -117,6 +119,7 @@ end
 
 function index.__type(args, S)
   local status, value, base, address = resolve(args, S, expression.eval)
+  value = scope.unpack(value)
   if not status or not object.isa(value, undefined_t) then
     error(("No type information available for '%s'"):format(__repr(args)))
   else

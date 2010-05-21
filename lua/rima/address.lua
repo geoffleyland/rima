@@ -2,6 +2,7 @@
 -- see license.txt for license information
 
 local debug = require("debug")
+local assert = assert
 local ipairs, rawget, require = ipairs, rawget, require
 local getmetatable = getmetatable
 local error, xpcall = error, xpcall
@@ -187,21 +188,22 @@ end
 --   address - the address of the expression it finally resolved to
 --   collected - any free indexes it might have picked up
 function address:resolve(S, current, i, base, eval, collected, used)
+  assert(object.isa(current, scope.svalue))
 
   -- if we've got something that wants to resolve itself, then give it the
   -- collected indexes
-  local mt = getmetatable(current)
+  local mt = getmetatable(current.value)
   if mt and rawget(mt, "__address") then
     -- We only want to bind to the result...
-    local status, v, j = xpcall(function() return mt.__address(current, S, collected:sub(used or 1), 1, expression.bind) end, debug.traceback)
+    local status, v, j = xpcall(function() return mt.__address(current.value, S, collected:sub(used or 1), 1, expression.bind) end, debug.traceback)
     if not status then
       error(("address: error evaluating '%s%s' as '%s':\n  %s"):
-        format(rima.repr(base), rima.repr(self), rima.repr(current), v:gsub("\n", "\n  ")), 0)
+        format(rima.repr(base), rima.repr(self), rima.repr(current.value), v:gsub("\n", "\n  ")), 0)
     end
     -- ... and then, if there are no more indexes left, we'll evaluate it.
     -- otherwise we leave it as a ref for the next call to index.
     if i > #self then v = eval(v, S) end
-    return self:resolve(S, v, i, base, eval, collected, #collected)
+    return self:resolve(S, scope.pack(v), i, base, eval, collected, #collected)
   end
 
   -- Otherwise, move on to the next index
@@ -212,7 +214,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
   local function fail()
     error(("address: error resolving '%s%s': '%s%s' is not indexable (got '%s' %s)"):
-      format(rima.repr(base), rima.repr(self:sub(1, i)), rima.repr(base), rima.repr(self:sub(1, i-1)), rima.repr(current), object.type(current)))
+      format(rima.repr(base), rima.repr(self:sub(1, i)), rima.repr(base), rima.repr(self:sub(1, i-1)), rima.repr(current.value), object.type(current.value)))
   end
 
   local function index(t, j, b)
@@ -220,6 +222,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
     local k = tags.key
     local v = tags.value
     local result
+    t = t.value
     if not k then
       result = t[j]
     elseif type(k) == "number" and not t[1] then
@@ -229,7 +232,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
       self[i].value = k
       result = t[k]
     end
-    return result and result.value
+    return result
   end
 
   -- What do we do when we come across an expression?
@@ -279,7 +282,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
         end
 
         -- try to resolve the address with this version of the ref as a base
-        results[#results+1] = try_current(v[1])
+        results[#results+1] = try_current(scope.pack(v[1]))
         -- and if we find something good, return it
         if results[#results][1] then
           return rima.unpackn(results[#results])
@@ -296,7 +299,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
       if not expression.defined(new_current) then
         return false, nil, new_base, new_address, collected
       end
-      return rima.unpackn(try_current(new_current))
+      return rima.unpackn(try_current(scope.pack(new_current)))
     end
   end
 
@@ -305,23 +308,23 @@ function address:resolve(S, current, i, base, eval, collected, used)
   -- How should we treat it?
 
   -- if it's a ref or an expression, evaluate it (and recursively tidy up the remaining indices)
-  if not expression.defined(current) then
-    return handle_expression(current, i)
+  if not expression.defined(current.value) then
+    return handle_expression(current.value, i)
 
   -- if we're trying to index what has to be a scalar, give up
-  elseif object.isa(current, number_t) then
+  elseif object.isa(current.value, number_t) then
     fail()
 
   -- if we're trying to index an undefined type, return it and say we didn't get to the end
-  elseif object.isa(current, undefined_t) then
+  elseif object.isa(current.value, undefined_t) then
     return false, current, base, self, collected
 
   -- if it's hidden then stop here
-  elseif current == scope.hidden then
+  elseif current.value == scope.hidden then
     return true, scope.hidden, base, self, collected
 
   -- handle tables and things we can index just by indexing
-  elseif (mt and mt.__index) or type(current) == "table" then
+  elseif (mt and mt.__index) or type(current.value) == "table" then
     local next = index(current, a, b)
     local r1
     if next then
@@ -329,12 +332,12 @@ function address:resolve(S, current, i, base, eval, collected, used)
       if r1[1] then return rima.unpackn(r1) end
     end
     -- including any values from prototypes
-    next = scope.prototype(current)
+    next = scope.prototype(current.value)
     local r2
     if next then
       local new_collected = object.new(address, {{value=a, exp=b}})
       if collected then new_collected = collected + new_collected end
-      r2 = rima.packn(self:resolve(S, next, i+1, base, eval, new_collected, used))
+      r2 = rima.packn(self:resolve(S, scope.pack(next), i+1, base, eval, new_collected, used))
       if r2[1] then return rima.unpackn(r2) end
     end
     if r1 then

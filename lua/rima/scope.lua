@@ -108,26 +108,6 @@ local function check_name(S)
 end
 
 
--- Scope values ----------------------------------------------------------------
-
-local svalue = object:new({}, "svalue")
-
-
-function svalue:new(v)
-  if object.isa(v, self) then
-    return v
-  else
-    return object.new(self, {value=v})
-  end
-end
-
-
-function svalue:__repr(f)
-  return "svalue{ value = "..rima.repr(self.value, f).." }"
-end
-svalue.__tostring = svalue.__repr
-
-
 -- Constructor -----------------------------------------------------------------
 
 local scope = object:new(_M, "scope")
@@ -194,6 +174,30 @@ end
 
 function scope.clear_parent(S)
   proxy.O(S).parent = false
+end
+
+
+-- Scope values ----------------------------------------------------------------
+
+svalue = object:new({}, "svalue")
+
+function svalue:new(o)
+  return object.new(self, o)
+end
+
+
+function svalue:__repr(f)
+  return "svalue{ value = "..rima.repr(self.value, f).." }"
+end
+svalue.__tostring = svalue.__repr
+
+
+function scope.pack(v)
+  return (object.isa(v, svalue) and v) or svalue:new{value=v}
+end
+
+function scope.unpack(v)
+  return (object.isa(v, svalue) and v.value) or v
 end
 
 
@@ -320,8 +324,8 @@ function scope.check(s, name, address, value)
     local collected
     if address then
       local status, nc
-      status, nc, _, _, collected = address:resolve(s, c, 1, r, expression.eval)
-      c = status and nc or nil
+      status, nc, _, _, collected = address:resolve(s, pack(c), 1, r, expression.eval)
+      c = status and unpack(nc) or nil
     end
     if c then
       if type(value) == "table" and not getmetatable(value) and
@@ -356,12 +360,12 @@ function scope_proxy_mt.__newindex(s, name, value)
   local S = proxy.O(s)
 
   if type(value) == "table" and not getmetatable(value) then
-    S.values[name] = S.values[name] or svalue:new({})
+    S.values[name] = S.values[name] or scope.pack{}
     for k, v in pairs(value) do
       scope.newindex(s, name, nil, k, v)
     end
   else
-    S.values[name] = svalue:new(value)
+    S.values[name] = scope.pack(value)
   end
 end
 
@@ -407,7 +411,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
       -- just a normal index: t...["index"]... = value
       local z = t[index]
       if not z then
-        z = svalue:new({})
+        z = scope.pack{}
         t[index] = z
       end
       return z.value
@@ -452,7 +456,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     if type(index) == "ref" or (type(index) == "table" and not getmetatable(index)) then
       prototypes[c] = value
     else
-      c[index] = svalue:new(value)
+      c[index] = scope.pack(value)
     end
   end
 end
@@ -461,7 +465,7 @@ end
 -- Hide ------------------------------------------------------------------------
 
 function scope.hide(S, name)
-  proxy.O(S).values[name] = svalue:new(scope.hidden)
+  proxy.O(S).values[name] = scope.pack(scope.hidden)
 end
 
 
