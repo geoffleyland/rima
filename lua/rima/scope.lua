@@ -240,7 +240,7 @@ function scope.find(s, name, op, results)
   local c = S.values[name]
   if c then
     results = results or {}
-    results[#results+1] = { c.value, s }
+    results[#results+1] = { c, s }
   end
 
   -- We have to keep looking if there's a parent scope and
@@ -263,19 +263,19 @@ function scope_proxy_mt.__index(s, name)
   local results = find(s, name, "read")
   if results then
     local c, fs = unpack(results[1])
-    if object.isa(c, undefined_t) then
+    if object.isa(c.value, undefined_t) then
       -- There is a value (and it's not hidden), return a reference that I
       -- think should be bound to the top scope.
       -- I'm not sure about this though.  Maybe it should be bound to the scope
       -- the variable was found in (this will come into play with function
       -- scopes, but I haven't worked out how to test it yet)
-      return ref:new{name=name, type=c, scope=s}
-    elseif c == hidden then
+      return ref:new{name=name, type=c.value, scope=s}
+    elseif c.value == hidden then
       return nil
-    elseif type(c) == "table" and not getmetatable(c) then
+    elseif type(c.value) == "table" and not getmetatable(c.value) then
       return ref:new{name=name, scope=s}
     else
-      return c
+      return c.value
     end
   else
     return ref:new{name=name, scope=s}
@@ -307,8 +307,8 @@ function scope.lookup(s, name, bound_scope)
   if not s then return end
   local r = find(s, name, "read")
   if r then
-    if r[1][1] ~= hidden then
-      return unpack(r[1])                     -- returning multiple values so no if..and..or
+    if r[1][1].value ~= hidden then
+      return r[1][1].value, r[1][2]             -- returning multiple values so no if..and..or
     else
       return nil, r[1][2], true
     end
@@ -328,20 +328,20 @@ function scope.check(s, name, address, value)
     local collected
     if address then
       local status, nc
-      status, nc, _, _, collected = address:resolve(s, pack(c), 1, r, expression.eval)
-      c = status and unpack(nc) or nil
+      status, nc, _, _, collected = address:resolve(s, c, 1, r, expression.eval)
+      c = status and nc or nil
     end
     if c then
       if type(value) == "table" and not getmetatable(value) and
-         type(c) == "table" and not getmetatable(c) then
+         type(c.value) == "table" and not getmetatable(c.value) then
         -- this is ok - we can merge two tables
       elseif collected and #collected > 0 then
         -- this is ok, we can override a prototype
       elseif cs == s and not S.rewrite then
         error(("scope: cannot set '%s%s' to '%s': existing definition as '%s'"):
           format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
-      elseif cs ~= s and object.isa(c, undefined_t) then
-        if not c:includes(value) then
+      elseif cs ~= s and object.isa(c.value, undefined_t) then
+        if not c.value:includes(value) then
           error(("scope: cannot set '%s%s' to '%s': violates existing constraint '%s'"):
             format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
         end

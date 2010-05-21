@@ -266,7 +266,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
       local values = scope.find(RS, R.name, "read")
 
       -- Give up if there's none or it's hidden
-      if not values or values[1][1] == scope.hidden then
+      if not values or values[1][1].value == scope.hidden then
         return false, nil, new_base, new_address, collected
       end
 
@@ -276,13 +276,13 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
         -- By now we should have bare refs that don't reference other objects.
         -- This should never happen, but I could be wrong.
-        if not expression.defined(v[1]) then
+        if not expression.defined(v[1].value) then
           error(("address: internal error evaluating '%s%s' as '%s%s':\n  Got an undefined expression (%s) when I shouldn't"):
             format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), rima.repr(v[1])), 0)
         end
 
         -- try to resolve the address with this version of the ref as a base
-        results[#results+1] = try_current(scope.pack(v[1]))
+        results[#results+1] = try_current(v[1])
         -- and if we find something good, return it
         if results[#results][1] then
           return rima.unpackn(results[#results])
