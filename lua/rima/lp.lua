@@ -31,6 +31,7 @@ local function find_constraints(S, f)
           index = undefined[undefined_index]
           undefined_index = undefined_index + 1
         else
+          index = index.value
           set_index = set_index + 1
         end
       end
@@ -166,7 +167,7 @@ function write(S, values, f)
   local sense = sense(S)
   local objective = scope.lookup(S, "objective")
   if objective and sense then
-    local o = rima.E(objective, S)
+    local o = rima.E(objective.value, S)
     f:write(("%s:\n  %s\n"):format((sense == "minimise" and "Minimise") or "Maximise", rima.repr(o)))
   else
     f:write("No objective defined\n")

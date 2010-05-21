@@ -308,7 +308,7 @@ function scope.lookup(s, name, bound_scope)
   local r = find(s, name, "read")
   if r then
     if r[1][1].value ~= hidden then
-      return r[1][1].value, r[1][2]             -- returning multiple values so no if..and..or
+      return r[1][1], r[1][2]                   -- returning multiple values so no if..and..or
     else
       return nil, r[1][2], true
     end

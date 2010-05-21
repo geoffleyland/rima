@@ -89,10 +89,10 @@ function ref.proxy_mt.__bind(r, S)
     else
       return ref:new{ name=r.name, type=r.type, scope=r.scope or scope.scope_for_undefined(S) }
     end
-  elseif expression.defined(e) then
+  elseif expression.defined(e.value) then
     return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
   else
-    return expression.bind(e, S)
+    return expression.bind(e.value, S)
   end
 end
 
@@ -105,7 +105,7 @@ function ref.proxy_mt.__eval(r, S)
   end
 
   -- evaluate the result of the lookup - it might be an expression, or another ref
-  local status, v = pcall(function() return expression.eval(e, S) end)
+  local status, v = pcall(function() return expression.eval(e.value, S) end)
   if not status then
     error(("error evaluating '%s' as '%s':\n  %s"):
       format(r.name, rima.repr(e), v:gsub("\n", "\n  ")), 0)
@@ -134,10 +134,10 @@ end
 function ref.proxy_mt.__type(r, S)
   -- look the ref up in the scope
   local e = scope.lookup(S, r.name, r.scope)
-  if not object.isa(e, undefined_t) then
+  if not e or not object.isa(e.value, undefined_t) then
     error(("No type information available for '%s'"):format(r.name))
   else
-    return e
+    return e.value
   end
 end
 
