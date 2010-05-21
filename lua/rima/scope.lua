@@ -68,7 +68,6 @@ local tabulate_type = require("rima.values.tabulate")
 -- Scope names -----------------------------------------------------------------
 
 local scope_names = setmetatable({}, { __mode="v" })
-local prototypes = setmetatable({}, { __mode="k" })
 free_index_marker = {}
 
 local function new_name(prefix)
@@ -213,12 +212,6 @@ scope_proxy_mt.__tostring = scope_proxy_mt.__repr
 
 
 -- Accessing and setting -------------------------------------------------------
-
-
-function scope.prototype(t)
-  return prototypes[t]
-end
-
 
 function scope.scope_for_undefined(s)
   if not s then return nil end
@@ -386,10 +379,10 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
   end
 
   local function get_prototype(t)
-    local p = prototypes[t]
+    local p = t.prototype
     if not p then
-      p = {}
-      prototypes[t] = p
+      p = scope.pack{}
+      t.prototype = p
     end
     return p
   end
@@ -408,16 +401,20 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
       return get_prototype(t)
     else
       -- just a normal index: t...["index"]... = value
-      local z = t[index]
+      local z = t.value[index]
       if not z then
         z = scope.pack{}
-        t[index] = z
+        t.value[index] = z
       end
-      return z.value
+      return z
     end
   end
 
-  local c = apply_index(S.values, name)
+  local c = S.values[name]
+  if not c then
+    c = scope.pack{}
+    S.values[name] = c
+  end
 
   -- we can be fairly cavalier about resolving the address because
   -- check() made sure it's ok for us.  Here we're just building any
@@ -453,9 +450,9 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     end
 
     if type(index) == "ref" or (type(index) == "table" and not getmetatable(index)) then
-      prototypes[c] = value
+      c.prototype = scope.pack(value)
     else
-      c[index] = scope.pack(value)
+      c.value[index] = scope.pack(value)
     end
   end
 end
@@ -493,18 +490,19 @@ local function copy(to, from)
         copy(c, v)
       end
     else
-      if type(v) == "table" and not getmetatable(v) then
+      if type(v.value) == "table" and not getmetatable(v.value) then
         local c = {}
         to[k] = c
         copy(c, v)
       else
-        to[k] = v
+        to[k] = v.value
       end
     end
   end
 
-  for k, v in pairs(from) do z(k, v.value) end
-  local d = prototypes[from]
+  local f = pack(from)
+  for k, v in pairs(f.value) do z(k, v) end
+  local d = f.prototype
   if d then z(free_index_marker, d) end
 end
 

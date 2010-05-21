@@ -332,12 +332,12 @@ function address:resolve(S, current, i, base, eval, collected, used)
       if r1[1] then return rima.unpackn(r1) end
     end
     -- including any values from prototypes
-    next = scope.prototype(current.value)
+    next = current.prototype
     local r2
     if next then
       local new_collected = object.new(address, {{value=a, exp=b}})
       if collected then new_collected = collected + new_collected end
-      r2 = rima.packn(self:resolve(S, scope.pack(next), i+1, base, eval, new_collected, used))
+      r2 = rima.packn(self:resolve(S, next, i+1, base, eval, new_collected, used))
       if r2[1] then return rima.unpackn(r2) end
     end
     if r1 then
