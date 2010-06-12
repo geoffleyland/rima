@@ -4,7 +4,7 @@
 local math = require("math")
 local error = error
 
-local args = require("rima.args")
+local args = require("rima.lib.args")
 local undefined_t = require("rima.types.undefined_t")
 require("rima.private")
 local rima = rima

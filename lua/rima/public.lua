@@ -7,7 +7,7 @@ local error, xpcall = error, xpcall
 
 module(...)
 
-local args = require("rima.args")
+local args = require("rima.lib.args")
 local object = require("rima.lib.object")
 local ref = require("rima.ref")
 local expression = require("rima.expression")
