@@ -18,7 +18,7 @@ Because we wish to be able to index references, we have to hide the real working
 of the reference somewhere tricky.  This is a giant pain in the ass.
 --]]
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local proxy = require("rima.proxy")
 local args = require("rima.args")
 local undefined_t = require("rima.types.undefined_t")

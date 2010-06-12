@@ -4,7 +4,7 @@
 local error, ipairs, require = error, ipairs, require
 
 local args = require("rima.args")
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local call = require("rima.operators.call")
 require("rima.private")
 local rima = rima

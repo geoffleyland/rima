@@ -6,7 +6,7 @@
 local debug = require("debug")
 local error, ipairs, type = error, ipairs, type
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 
 module(...)
 

@@ -1,7 +1,7 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 
 module(...)
 

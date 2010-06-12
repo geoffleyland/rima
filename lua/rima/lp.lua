@@ -4,7 +4,7 @@
 local assert, error, io, getmetatable, math = assert, error, io, getmetatable, math
 local require, table, type = require, table, type
 local ipairs, pairs = ipairs, pairs
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
 local constraint = require("rima.constraint")

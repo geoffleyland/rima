@@ -4,7 +4,7 @@
 local error, ipairs, require = error, ipairs, require
 local getmetatable = getmetatable
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local proxy = require("rima.proxy")
 local types = require("rima.types")
 local rima = rima

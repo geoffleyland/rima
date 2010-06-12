@@ -3,7 +3,7 @@
 
 local assert, ipairs = assert, ipairs
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 require("rima.private")
 local rima = rima
 local expression = rima.expression

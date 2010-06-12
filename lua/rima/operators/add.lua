@@ -6,6 +6,7 @@ local error, require = error, require
 local ipairs, pairs = ipairs, pairs
 local getmetatable = getmetatable
 
+local object = require("rima.lib.object")
 local proxy = require("rima.proxy")
 require("rima.private")
 local rima = rima
@@ -17,7 +18,7 @@ local mul = require("rima.operators.mul")
 
 -- Addition --------------------------------------------------------------------
 
-local add = rima.object:new(_M, "add")
+local add = object:new(_M, "add")
 add.precedence = 5
 
 

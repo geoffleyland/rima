@@ -4,7 +4,7 @@
 local math = require("math")
 local assert, ipairs, type = assert, ipairs, type
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local expression = require("rima.expression")
 local rima = rima
 

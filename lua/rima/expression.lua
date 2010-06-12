@@ -7,7 +7,7 @@ local require, rawtype, tostring, unpack = require, type, tostring, unpack
 local getmetatable, setmetatable = getmetatable, setmetatable
 local rawget, rawset = rawget, rawset
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local proxy = require("rima.proxy")
 local rima = rima
 

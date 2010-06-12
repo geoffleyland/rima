@@ -4,7 +4,7 @@
 local setmetatable, type = setmetatable, type
 
 local series = require("test.series")
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local address = require("rima.address")
 require("rima.public")
 local rima = rima

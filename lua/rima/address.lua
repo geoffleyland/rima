@@ -7,7 +7,7 @@ local ipairs, rawget, require = ipairs, rawget, require
 local getmetatable = getmetatable
 local error, xpcall = error, xpcall
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local proxy = require("rima.proxy")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")

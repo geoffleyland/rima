@@ -3,7 +3,7 @@
 
 local ipairs, rawget = ipairs, rawget
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local expression = require("rima.expression")
 local rima = rima
 

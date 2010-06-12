@@ -5,7 +5,7 @@ local coroutine, table = require("coroutine"), require("table")
 local ipairs, next, pairs, rawget = ipairs, next, pairs, rawget
 local error, getmetatable, require, type = error, getmetatable, require, type
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local proxy = require("rima.proxy")
 local types = require("rima.types")
 local index_op = require("rima.operators.index")

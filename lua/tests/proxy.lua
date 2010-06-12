@@ -3,7 +3,7 @@
 
 local series = require("test.series")
 local proxy = require("rima.proxy")
-local object = require("rima.object")
+local object = require("rima.lib.object")
 
 module(...)
 

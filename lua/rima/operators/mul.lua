@@ -6,7 +6,7 @@ local error, require, unpack = error, require, unpack
 local ipairs, pairs = ipairs, pairs
 local getmetatable = getmetatable
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local proxy = require("rima.proxy")
 local expression = require("rima.expression")
 require("rima.private")

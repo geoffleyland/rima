@@ -3,6 +3,7 @@
 
 local error = error
 
+local object = require("rima.lib.object")
 local expression = require("rima.expression")
 require("rima.private")
 local rima = rima
@@ -12,7 +13,7 @@ module(...)
 
 -- Exponentiation --------------------------------------------------------------
 
-local pow = rima.object:new(_M, "pow")
+local pow = object:new(_M, "pow")
 pow.precedence = 0
 
 

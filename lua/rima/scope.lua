@@ -51,7 +51,7 @@ local error, require, unpack = error, require, unpack
 local getmetatable, setmetatable = getmetatable, setmetatable
 local ipairs, next, pairs = ipairs, next, pairs
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local proxy = require("rima.proxy")
 local args = require("rima.args")
 local undefined_t = require("rima.types.undefined_t")

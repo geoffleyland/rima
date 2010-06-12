@@ -2,7 +2,7 @@
 -- see LICENSE for license information
 
 local series = require("test.series")
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
 local function_v = require("rima.values.function_v")

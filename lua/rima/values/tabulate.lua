@@ -5,7 +5,7 @@ local debug = require("debug")
 local error, xpcall = error, xpcall
 local ipairs, require = ipairs, require
 
-local object = require("rima.object")
+local object = require("rima.lib.object")
 local scope = require("rima.scope")
 local rima = rima
 
