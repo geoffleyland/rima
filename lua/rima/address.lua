@@ -36,7 +36,7 @@ end
 -- string representation -------------------------------------------------------
 
 function address:__repr(format)
-  if not rawget(self, 1) then
+  if not self[1] then
     return ""
   else
     if format and format.dump then
