@@ -46,7 +46,7 @@ local function default_global_scope()
 end
 
 
-function rima.E(e, S) -- create an expression
+function rima.E(e, S) -- evaluate an expression
   local fname, usage =
     "rima.E",
     "E(e:expression, S:nil, table or scope)"
