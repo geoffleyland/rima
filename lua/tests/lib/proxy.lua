@@ -2,7 +2,7 @@
 -- see LICENSE for license information
 
 local series = require("test.series")
-local proxy = require("rima.proxy")
+local proxy = require("rima.lib.proxy")
 local object = require("rima.lib.object")
 
 module(...)

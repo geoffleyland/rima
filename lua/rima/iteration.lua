@@ -6,7 +6,7 @@ local ipairs, next, pairs, rawget = ipairs, next, pairs, rawget
 local error, getmetatable, require, type = error, getmetatable, require, type
 
 local object = require("rima.lib.object")
-local proxy = require("rima.proxy")
+local proxy = require("rima.lib.proxy")
 local types = require("rima.types")
 local index_op = require("rima.operators.index")
 require("rima.private")

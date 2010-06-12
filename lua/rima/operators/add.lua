@@ -7,7 +7,7 @@ local ipairs, pairs = ipairs, pairs
 local getmetatable = getmetatable
 
 local object = require("rima.lib.object")
-local proxy = require("rima.proxy")
+local proxy = require("rima.lib.proxy")
 require("rima.private")
 local rima = rima
 

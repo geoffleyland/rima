@@ -6,7 +6,7 @@ local error, xpcall = error, xpcall
 local getmetatable, require, type = getmetatable, require, type
 
 local object = require("rima.lib.object")
-local proxy = require("rima.proxy")
+local proxy = require("rima.lib.proxy")
 local undefined_t = require("rima.types.undefined_t")
 require("rima.private")
 local rima = rima

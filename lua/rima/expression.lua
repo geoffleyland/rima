@@ -8,7 +8,7 @@ local getmetatable, setmetatable = getmetatable, setmetatable
 local rawget, rawset = rawget, rawset
 
 local object = require("rima.lib.object")
-local proxy = require("rima.proxy")
+local proxy = require("rima.lib.proxy")
 local rima = rima
 
 module(...)
