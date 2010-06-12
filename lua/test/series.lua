@@ -31,18 +31,21 @@ function series:close()
 end
 
 
+local function test_source_line(depth)
+  local info = debug.getinfo(depth, "Sl")
+  return ("%s:%d"):format(info.short_src, info.currentline)
+end
+
 function series:test(pass, description, message, depth)
   depth = depth or 2
   self.tests = self.tests + 1
   if not pass then
-    local info = debug.getinfo(depth, "Sl")
-    io.write(("%s test, %s:%s%s: *****FAIL*****%s\n"):format(self.name, info.short_src, info.currentline,
+    io.write(("%s test, %s%s: *****FAIL*****%s\n"):format(self.name, test_source_line(depth+1),
       description and (" (%s)"):format(description) or "",
       message and (": %s"):format(message) or ""))
     self.fails = self.fails + 1
   elseif self.show_passes then
-    local info = debug.getinfo(depth, "Sl")
-    io.write(("%s test, %s:%s%s: pass%s\n"):format(self.name, info.short_src, info.currentline,
+    io.write(("%s test, %s:%s%s: pass%s\n"):format(self.name, test_source_line(depth+1),
       description and (" (%s)"):format(description) or "",
       message and (": %s"):format(message) or ""))
   end
@@ -67,17 +70,20 @@ end
 
 
 function series:expect_error(f, expected, description, depth)
+  depth = (depth or 0) + 3
+  expected = expected:gsub("%%L", test_source_line(depth):gsub("%.", "%."))
+
   local status, message = xpcall(f, debug.traceback)
 
   if status then
     return self:test(false, description,
-      ("got ok, expected error:\n  \"%s\""):format(expected:gsub("\n", "\n   ")), (depth or 0) + 3)
+      ("got ok, expected error:\n  \"%s\""):format(expected:gsub("\n", "\n   ")), depth)
   elseif not message:match(expected) then
     return self:test(false, description, ("expected error:\n  \"%s\"\ngot error:\n  \"%s\""):
-      format(expected:gsub("\n", "\n   "), message:gsub("\n", "\n   ")), (depth or 0) + 3)
+      format(expected:gsub("\n", "\n   "), message:gsub("\n", "\n   ")), depth)
   else
     return self:test(true, description,
-      ("got expected error:\n  \"%s\""):format(message:gsub("\n", "\n   ")), (depth or 0) + 3)
+      ("got expected error:\n  \"%s\""):format(message:gsub("\n", "\n   ")), depth)
   end
 end
 
