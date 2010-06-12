@@ -20,7 +20,7 @@ function test(show_passes)
   local B = expression.bind
   local E = expression.eval
 
-  T:test(object.isa(scope.new(), scope), "isa(scope.new(), scope)")
+  T:test(scope:isa(scope.new()), "isa(scope.new(), scope)")
   T:check_equal(object.type(scope.new()), "scope", "type(scope.new()) == 'scope'")
 
   local S1 = scope.new()

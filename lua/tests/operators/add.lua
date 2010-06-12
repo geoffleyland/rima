@@ -27,7 +27,7 @@ function test(show_passes)
   local OB = function(e, S) return add.__eval(e, S, B) end
   local OE = function(e, S) return add.__eval(e, S, E) end
 
-  T:test(object.isa(add:new(), add), "isa(add, add:new())")
+  T:test(add:isa(add:new()), "isa(add, add:new())")
   T:check_equal(object.type(add:new()), "add", "type(add:new()) == 'add'")
 
 --  T:expect_ok(function() add:check({}) end)

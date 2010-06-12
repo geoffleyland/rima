@@ -7,6 +7,7 @@ local error = error
 
 module(...)
 
+
 -- Types -----------------------------------------------------------------------
 
 local object = _M
@@ -21,29 +22,32 @@ function object:new(o, typename)
 end
 
 
-function object.isa(o, mt)
+function object.isa(mt, o)
   if rawtype(mt) ~= "table" then
-    error(("bad argument #2 to 'rima.object.isa' (table expected, got %s)"):format(rawtype(mt)), 0)
+    error(("bad argument #1 to 'rima.lib.object.isa' (table expected, got %s)"):format(rawtype(mt)), 0)
   end
 
   repeat
-     o = getmetatable(o)
-     if o == mt then return true end
+     local o2 = getmetatable(o)
+     if o2 == mt then return true end
+     if o2 == o then return false end -- avoid recursion if a table is its own metatable
+     o = o2
   until not o
   return false
 end
 
 
 function object.type(o)
-  local function z(p)
-    if rawtype(p) == "table" then
-      local t = rawget(p, "__typename")
-      if t then return t end
-    end
-    local q = getmetatable(p)
-    return p == q and rawtype(o) or z(q)
+  local t = rawtype(o)
+  if t ~= "table" then return t end
+  
+  while true do
+    t = rawget(o, "__typename")
+    if t then return t end
+    local o2 = getmetatable(o)
+    if not o2 or o2 == o then return "table" end  -- avoid recursion again
+    o = o2
   end
-  return z(o)
 end
 
 

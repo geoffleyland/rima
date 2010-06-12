@@ -195,11 +195,11 @@ svalue.__tostring = svalue.__repr
 
 
 function scope.pack(v)
-  return (object.isa(v, svalue) and v) or svalue:new{value=v}
+  return (svalue:isa(v) and v) or svalue:new{value=v}
 end
 
 function scope.unpack(v)
-  return (object.isa(v, svalue) and v.value) or v
+  return (svalue:isa(v) and v.value) or v
 end
 
 
@@ -255,7 +255,7 @@ function scope_proxy_mt.__index(s, name)
   local results = find(s, name, "read")
   if results then
     local c, fs = unpack(results[1])
-    if object.isa(c.value, undefined_t) then
+    if undefined_t:isa(c.value) then
       -- There is a value (and it's not hidden), return a reference that I
       -- think should be bound to the top scope.
       -- I'm not sure about this though.  Maybe it should be bound to the scope
@@ -328,7 +328,7 @@ function scope.check(s, name, address, value)
       elseif cs == s and not S.rewrite then
         error(("scope: cannot set '%s%s' to '%s': existing definition as '%s'"):
           format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
-      elseif cs ~= s and object.isa(c.value, undefined_t) then
+      elseif cs ~= s and undefined_t:isa(c.value) then
         if not c.value:includes(value) then
           error(("scope: cannot set '%s%s' to '%s': violates existing constraint '%s'"):
             format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)

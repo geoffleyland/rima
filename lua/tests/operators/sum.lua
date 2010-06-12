@@ -21,7 +21,7 @@ function test(show_passes)
   local D = expression.dump
   local E = expression.eval
 
-  T:test(object.isa(sum:new(), sum), "isa(sum, sum:new())")
+  T:test(sum:isa(sum:new()), "isa(sum, sum:new())")
   T:check_equal(object.type(sum:new()), "sum", "type(sum:new()) == 'sum'")
 
   local U = expression_tester(T, "x, y, z, Q, q, R, r, V, v", { R={"a", "b", "c"}, V={"d", "e"}, y={1, 2, 3}, z={{1,2},{3,4},{5,6}} })

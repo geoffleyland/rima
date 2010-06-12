@@ -23,7 +23,7 @@ function test(show_passes)
 
   local S = scope.new{ a = rima.free(), b = rima.free(), x = rima.free() }
 
-  T:test(object.isa(expression:new(call), call), "isa(call, call)")
+  T:test(object.isa(call, expression:new(call)), "isa(call, call)")
   T:check_equal(object.type(expression:new(call)), "call")
 
   T:check_equal(D(S.a(S.b)), "call(ref(a), ref(b))")

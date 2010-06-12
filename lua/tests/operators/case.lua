@@ -19,7 +19,7 @@ function test(show_passes)
   local D = expression.dump
   local E = rima.E
 
-  T:test(object.isa(rima.case(1, {1, 1}), case), "isa(case, case)")
+  T:test(object.isa(case, rima.case(1, {1, 1})), "isa(case, case)")
   T:check_equal(object.type(rima.case(1, {1, 1})), "case", "type(case) == 'case'")
   
   do

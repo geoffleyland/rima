@@ -315,7 +315,7 @@ function set_list:new(sets)
       it = iterator:new(rima.R(set), "a", "elements", names)
     elseif not expression.defined(set) then
       it = iterator:new(set, "a", "elements", names)
-    elseif object.isa(set, iterator) then
+    elseif iterator:isa(set) then
       set:set_names(names)
       it = set
     else

@@ -14,7 +14,7 @@ module(...)
 function test(show_passes)
   local T = series:new(_M, show_passes)
 
-  T:test(object.isa(undefined_t:new(), undefined_t), "isa(undefined_t:new(), undefined_t)")
+  T:test(undefined_t:isa(undefined_t:new()), "isa(undefined_t:new(), undefined_t)")
   T:check_equal(object.type(undefined_t:new()), 'undefined_t', "type(undefined_t:new()) == 'undefined_t'")
   T:check_equal(undefined_t:new(), 'undefined', "repr(undefined_t:new()) == 'undefined'")
 

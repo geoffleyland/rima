@@ -15,7 +15,7 @@ function test(show_passes)
   local mt = {}
 
   local p = proxy:new({}, mt, "my_type")
-  T:test(object.isa(p, mt), "isa(o, mt)")
+  T:test(object.isa(mt, p), "isa(mt, p)")
   T:check_equal(object.type(p), "my_type", "type(proxy) == 'my_type'")
   
   local o = {}

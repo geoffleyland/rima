@@ -104,14 +104,14 @@ __tostring = __repr
 
 function address.__add(a, b)
   local z = {}
-  if object.isa(a, address) then
+  if address:isa(a) then
     for i, a in ipairs(a) do
       z[i] = { exp=a.exp, value=a.value }
     end
   else
     z[1] = { exp=a, value=a }
   end
-  if object.isa(b, address) then
+  if address:isa(b) then
     for _, a in ipairs(b) do
       z[#z+1] = { exp=a.exp, value=a.value }
     end
@@ -188,7 +188,7 @@ end
 --   address - the address of the expression it finally resolved to
 --   collected - any free indexes it might have picked up
 function address:resolve(S, current, i, base, eval, collected, used)
-  assert(object.isa(current, scope.svalue))
+  assert(scope.svalue:isa(current))
 
   -- if we've got something that wants to resolve itself, then give it the
   -- collected indexes
@@ -312,11 +312,11 @@ function address:resolve(S, current, i, base, eval, collected, used)
     return handle_expression(current.value, i)
 
   -- if we're trying to index what has to be a scalar, give up
-  elseif object.isa(current.value, number_t) then
+  elseif number_t:isa(current.value) then
     fail()
 
   -- if we're trying to index an undefined type, return it and say we didn't get to the end
-  elseif object.isa(current.value, undefined_t) then
+  elseif undefined_t:isa(current.value) then
     return false, current, base, self, collected
 
   -- if it's hidden then stop here

@@ -109,7 +109,7 @@ function ref.proxy_mt.__eval(r, S)
       format(r.name, rima.repr(e), v:gsub("\n", "\n  ")), 0)
   end
 
-  if object.isa(v, undefined_t) then
+  if undefined_t:isa(v) then
     if not v:includes(r.type) and not r.type:includes(v) then
       error(("the type of '%s' (%s) and the type of the reference (%s) are mutually exclusive"):
         format(r.name, v:describe(r.name), r.type:describe(r.name)), 0)
@@ -132,7 +132,7 @@ end
 function ref.proxy_mt.__type(r, S)
   -- look the ref up in the scope
   local e = scope.lookup(S, r.name, r.scope)
-  if not e or e.hidden or not object.isa(e.value, undefined_t) then
+  if not e or e.hidden or not undefined_t:isa(e.value) then
     error(("No type information available for '%s'"):format(r.name))
   else
     return e.value

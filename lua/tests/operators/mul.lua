@@ -26,7 +26,7 @@ function test(show_passes)
   local OB = function(e, S) return mul.__eval(e, S, B) end
   local OE = function(e, S) return mul.__eval(e, S, E) end
 
-  T:test(object.isa(mul:new(), mul), "isa(mul:new(), mul)")
+  T:test(mul:isa(mul:new()), "isa(mul:new(), mul)")
   T:check_equal(object.type(mul:new()), "mul", "type(mul:new()) == 'mul'")
 
 --  T:expect_ok(function() mul:check({}) end)

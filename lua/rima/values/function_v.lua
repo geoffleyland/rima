@@ -25,13 +25,13 @@ function function_v:new(inputs, expression, S, ...)
 
   args.check_types(S, "S", {"nil", "table", {rima.scope, "scope"}}, usage, fname)
 
-  if S and not isa(S, rima.scope) then S = rima.scope.new(S) end
+  if S and not rima.scope:isa(S) then S = rima.scope.new(S) end
 
   local new_inputs = {}
   for i, v in ipairs(inputs) do
     if type(v) == "string" then
       new_inputs[i] = rima.R(v)
-    elseif isa(v, ref) then
+    elseif ref:isa(v) then
       if ref.is_simple(v) then
         new_inputs[i] = v
       else

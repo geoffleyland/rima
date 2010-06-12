@@ -57,7 +57,7 @@ function index.resolve(args, S, eval)
     return false, nil, expression.bind(args[1], S), address
   end
   local b = expression.bind(args[1], S)
-  if object.isa(b, index) then
+  if object.isa(index, b) then
     local B = proxy.O(b)
     b = B[1]
     address = B[2] + address
@@ -103,7 +103,7 @@ end
 function index.__eval(args, S, eval)
   local status, value, base, address = resolve(args, S, eval)
   if not status or value.hidden or
-     object.isa(value.value, undefined_t) then
+     undefined_t:isa(value.value) then
     if address[1] then
       return expression:new(index, base, address)
     else
@@ -118,7 +118,7 @@ end
 function index.__type(args, S)
   local status, value, base, address = resolve(args, S, expression.eval)
   value = scope.unpack(value)
-  if not status or not object.isa(value, undefined_t) then
+  if not status or not undefined_t:isa(value) then
     error(("No type information available for '%s'"):format(__repr(args)))
   else
     return value

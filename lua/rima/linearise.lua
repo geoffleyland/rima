@@ -27,7 +27,7 @@ function linearise(l, S)
       error(("the reference '%s' appears more than once"):format(s), 0)
     end
     local t = expression.type(v, S)
-    if not object.isa(t, rima.types.number_t) then
+    if not rima.types.number_t:isa(t) then
       error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
     end
     terms[s] = { variable=v, coeff=coeff, lower=t.lower, upper=t.upper, integer=t.integer }

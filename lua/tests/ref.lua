@@ -21,7 +21,7 @@ function test(show_passes)
   local E = expression.eval
   local D = expression.dump
 
-  T:test(object.isa(ref:new{name="a"}, ref), "isa(ref:new(), ref)")
+  T:test(ref:isa(ref:new{name="a"}), "isa(ref:new(), ref)")
 
   local function check_strings(v, s, d)
     T:check_equal(v, s, "repr(ref)")

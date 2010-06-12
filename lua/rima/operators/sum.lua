@@ -17,7 +17,7 @@ sum.precedence = 1
 
 function sum.construct(args)
   local sets = args[1]
-  if not object.isa(sets, rima.iteration.set_list) then
+  if not rima.iteration.set_list:isa(sets) then
     sets = rima.iteration.set_list:new(sets)
   end
   return { sets, args[2] }

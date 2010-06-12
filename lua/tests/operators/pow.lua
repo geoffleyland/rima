@@ -17,7 +17,7 @@ module(...)
 function test(show_passes)
   local T = series:new(_M, show_passes)
 
-  T:test(object.isa(pow:new(), pow), "isa(pow, pow:new())")
+  T:test(pow:isa(pow:new()), "isa(pow, pow:new())")
   T:check_equal(object.type(pow:new()), "pow", "type(pow:new()) == 'pow'")
 
 --  T:expect_error(function() pow:check(1) end, "expecting a table for 'args', got 'number'") 

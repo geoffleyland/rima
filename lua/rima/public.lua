@@ -55,7 +55,7 @@ function rima.E(e, S) -- evaluate an expression
 
   if not S then
     S = scope.spawn(default_global_scope(), nil, {no_undefined=true})
-  elseif not object.isa(S, scope) then
+  elseif not scope:isa(S) then
     S = scope.spawn(default_global_scope(), S, {no_undefined=true})
   end
 

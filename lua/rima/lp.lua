@@ -45,11 +45,11 @@ local function find_constraints(S, f)
       current_address[#current_address+1] = k
       if type(v) == "table" and not getmetatable(v) then
         search(v)
-      elseif object.isa(v, constraint) then
+      elseif constraint:isa(v) then
         if not v:trivial(S) then
           constraints[#constraints+1] = { ref=build_ref(S), f(v, S) }
         end
-      elseif object.isa(v, tabulate) and object.isa(v.expression, constraint) then
+      elseif tabulate:isa(v) and constraint:isa(v.expression) then
         for S2, undefined in v.indexes:iterate(S) do
           if not v.expression:trivial(S2) then
             constraints[#constraints+1] = { ref=build_ref(S2, v.indexes, undefined), f(v.expression, S2, undefined) }

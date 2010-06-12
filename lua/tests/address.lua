@@ -16,7 +16,7 @@ module(...)
 function test(show_passes)
   local T = series:new(_M, show_passes)
 
-  T:test(object.isa(address:new{"a"}, address), "isa(address:new(), address)")
+  T:test(address:isa(address:new{"a"}), "isa(address:new(), address)")
   T:check_equal(object.type(address:new{"a"}), "address")
 
   T:check_equal(address:new{}, "")

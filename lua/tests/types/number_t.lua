@@ -13,8 +13,8 @@ module(...)
 function test(show_passes)
   local T = series:new(_M, show_passes)
 
-  T:test(object.isa(number_t:new(), number_t), "isa(number_t:new(), number_t)")
-  T:test(object.isa(number_t:new(), rima.types.undefined_t), "isa(number_t:new(), undefined_t)")
+  T:test(number_t:isa(number_t:new()), "isa(number_t:new(), number_t)")
+  T:test(rima.types.undefined_t:isa(number_t:new()), "isa(number_t:new(), undefined_t)")
   T:check_equal(object.type(number_t:new()), "number_t", "type(number_t:new()) == 'number_t'")
 
   T:expect_error(function() number_t:new("lower") end, "expecting a number for 'lower_bound', got 'string'")

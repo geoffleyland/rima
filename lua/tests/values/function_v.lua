@@ -20,7 +20,7 @@ function test(show_passes)
   local B = expression.bind
   local E = expression.eval
 
-  T:test(object.isa(function_v:new({"a"}, 3), function_v),
+  T:test(object.isa(function_v, function_v:new({"a"}, 3)),
     "isa(function_v:new(), function_v)")
   T:check_equal(object.type(function_v:new({"a"}, 3)),
     "function_v", "type(function_v:new()) == 'function_v'")
