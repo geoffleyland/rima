@@ -1,5 +1,5 @@
--- Copyright (c) 2009 Incremental IP Limited
--- see license.txt for license information
+-- Copyright (c) 2009-2010 Incremental IP Limited
+-- see LICENSE for license information
 
 local coroutine, table = require("coroutine"), require("table")
 local ipairs, next, pairs, rawget = ipairs, next, pairs, rawget

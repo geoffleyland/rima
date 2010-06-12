@@ -1,5 +1,5 @@
--- Copyright (c) 2009 Incremental IP Limited
--- see license.txt for license information
+-- Copyright (c) 2009-2010 Incremental IP Limited
+-- see LICENSE for license information
 
 local series = require("test.series")
 local number_t = require("rima.types.number_t")

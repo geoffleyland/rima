@@ -2,8 +2,8 @@
 
 rima_clp_core.cpp
 
-Copyright (c) 2009 Incremental IP Limited
-see license.txt for license information
+Copyright (c) 2009-2010 Incremental IP Limited
+see LICENSE for license information
 
 *******************************************************************************/
 
