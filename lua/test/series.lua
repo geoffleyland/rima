@@ -45,7 +45,7 @@ function series:test(pass, description, message, depth)
       message and (": %s"):format(message) or ""))
     self.fails = self.fails + 1
   elseif self.show_passes then
-    io.write(("%s test, %s:%s%s: pass%s\n"):format(self.name, test_source_line(depth+1),
+    io.write(("%s test, %s%s: pass%s\n"):format(self.name, test_source_line(depth+1),
       description and (" (%s)"):format(description) or "",
       message and (": %s"):format(message) or ""))
   end
