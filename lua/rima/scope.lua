@@ -363,7 +363,7 @@ end
 
 
 function scope.newindex(s, name, addr, index, value, free_indexes)
-  local new_address = addr and addr+index or address:new{index}
+  local new_address = addr and addr+index or address:new(index)
   scope.check(s, name, new_address, value)
 
   local S = proxy.O(s)

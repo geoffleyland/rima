@@ -34,7 +34,7 @@ function index.construct(args)
   elseif getmetatable(i) == address then
     return { a, i }
   end
-  return { a, address:new{i} }
+  return { a, address:new(i) }
 end
 
 

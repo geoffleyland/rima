@@ -16,15 +16,15 @@ module(...)
 function test(show_passes)
   local T = series:new(_M, show_passes)
 
-  T:test(address:isa(address:new{"a"}), "isa(address:new(), address)")
-  T:check_equal(object.type(address:new{"a"}), "address")
+  T:test(address:isa(address:new("a")), "isa(address:new(), address)")
+  T:check_equal(object.type(address:new("a")), "address")
 
-  T:check_equal(address:new{}, "")
-  T:check_equal(address:new{"a"}, ".a")
-  T:check_equal(address:new{"a"}+1, ".a[1]")
-  T:check_equal(1+address:new{"a"}, "[1].a")
+  T:check_equal(address:new(), "")
+  T:check_equal(address:new("a"), ".a")
+  T:check_equal(address:new("a")+1, ".a[1]")
+  T:check_equal(1+address:new("a"), "[1].a")
 
-  local a = address:new{"a", 1, 2}
+  local a = address:new("a", 1, 2)
   T:check_equal(a, ".a[1, 2]")
   T:check_equal(a+a, ".a[1, 2].a[1, 2]")
   T:check_equal(rima.repr(a, { dump=true }), "address(string(a), number(1), number(2))")
@@ -49,7 +49,7 @@ function test(show_passes)
   T:check_equal(a:sub(-2, -1), "[1, 2]")
   T:check_equal(a:sub(-1, -1), "[2]")
 
-  local a = address:new{"a", "index b"}
+  local a = address:new("a", "index b")
   T:check_equal(a, ".a['index b']")
 
   return T:close()

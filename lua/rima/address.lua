@@ -2,10 +2,8 @@
 -- see LICENSE for license information
 
 local debug = require("debug")
-local assert = assert
-local ipairs, rawget, require = ipairs, rawget, require
-local getmetatable = getmetatable
-local error, xpcall = error, xpcall
+local assert, error, getmetatable, ipairs, next, rawget, require, select, xpcall =
+      assert, error, getmetatable, ipairs, next, rawget, require, select, xpcall
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -20,16 +18,57 @@ local scope = require("rima.scope")
 local expression = require("rima.expression")
 local iteration = require("rima.iteration")
 
---------------------------------------------------------------------------------
+-- Constructor -----------------------------------------------------------------
 
 local address = object:new(_M, "address")
 
-function address:new(a)
-  local a2 = {}
-  for i, v in ipairs(a) do
-    a2[i] = { exp=v, value=v }
+
+local function add_element(a, e, v)
+  a[#a+1] = { exp=e, value=v }
+end
+
+function address:new(...)
+  local a = {}
+  
+  for i = 1, select("#", ...) do
+    local e = select(i, ...)
+    local t = type(e)
+
+    if t == "address" then
+      for i, v in ipairs(e) do
+        add_element(a, v.exp, v.value)
+      end
+    elseif t ~= "nil" then
+      add_element(a, e, e)
+    end
   end
-  return object.new(self, a2)
+
+  return object.new(self, a)
+end
+
+
+-- Substrings ------------------------------------------------------------------
+
+function address:sub(i, j)
+  local length = #self
+  i = i or 1
+  j = j or length
+  if i < 0 then i = length + i + 1 end
+  if j < 0 then j = length + j + 1 end
+
+  local a = {}
+  for k = i, j do
+    local sk = self[k]
+    add_element(a, sk.exp, sk.value)
+  end
+  return object.new(address, a)
+end
+
+
+-- Appending -------------------------------------------------------------------
+
+function address.__add(a, b)
+  return address:new(a, b)
 end
 
 
@@ -100,42 +139,7 @@ end
 __tostring = __repr
 
 
--- lengthening and shortening --------------------------------------------------
-
-function address.__add(a, b)
-  local z = {}
-  if address:isa(a) then
-    for i, a in ipairs(a) do
-      z[i] = { exp=a.exp, value=a.value }
-    end
-  else
-    z[1] = { exp=a, value=a }
-  end
-  if address:isa(b) then
-    for _, a in ipairs(b) do
-      z[#z+1] = { exp=a.exp, value=a.value }
-    end
-  else
-    z[#z+1] = { exp=b, value=b }
-  end
-  return object.new(address, z)
-end
-
-
-function address:sub(i, j)
-  local l = #self
-  i = i or 1
-  j = j or l
-  if i < 0 then i = l + i + 1 end
-  if j < 0 then j = l + j + 1 end
-
-  local z = {}
-  for k = i, j do
-    z[#z+1] = { exp=self[k].exp, value=self[k].value }
-  end
-  return object.new(address, z)
-end
-
+-- Element access --------------------------------------------------------------
 
 function address:value(i)
   return self[i].value
@@ -144,7 +148,7 @@ end
 
 local function avnext(a, i)
   i = i + 1
-  local v = rawget(a, i)
+  local v = a[i]
   if v then
     return i, v.value
   end
