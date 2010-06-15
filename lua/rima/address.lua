@@ -72,6 +72,28 @@ function address.__add(a, b)
 end
 
 
+-- Element access --------------------------------------------------------------
+
+function address:value(i)
+  return self[i].value
+end
+
+
+-- Iterating -------------------------------------------------------------------
+
+local function avnext(a, i)
+  i = i + 1
+  local v = a[i]
+  if v then
+    return i, v.value
+  end
+end
+
+function address:values()
+  return avnext, self, 0
+end
+
+
 -- string representation -------------------------------------------------------
 
 function address:__repr(format)
@@ -137,27 +159,6 @@ function address:__repr(format)
   end
 end
 __tostring = __repr
-
-
--- Element access --------------------------------------------------------------
-
-function address:value(i)
-  return self[i].value
-end
-
-
-local function avnext(a, i)
-  i = i + 1
-  local v = a[i]
-  if v then
-    return i, v.value
-  end
-end
-
-
-function address:values()
-  return avnext, self, 0
-end
 
 
 -- evaluation ------------------------------------------------------------------
@@ -360,3 +361,4 @@ end
 
 
 -- EOF -------------------------------------------------------------------------
+
