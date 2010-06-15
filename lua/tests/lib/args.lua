@@ -10,8 +10,8 @@ module(...)
 
 -- Tests -----------------------------------------------------------------------
 
-function test(show_passes)
-  local T = series:new(_M, show_passes)
+function test(options)
+  local T = series:new(_M, options)
 
   -- fail
   T:expect_error(function() args.fail("number" ,"arg", "string", "fn()", "fname") end,

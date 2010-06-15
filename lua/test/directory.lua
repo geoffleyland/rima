@@ -10,7 +10,7 @@ module(...)
 
 --------------------------------------------------------------------------------
 
-local function run_one(T, path, show_passes, patterns)
+local function run_one(T, path, options, patterns)
   path = path:gsub("/", "."):gsub("%.lua$", "")
 
   local to_run = 1
@@ -41,17 +41,17 @@ local function run_one(T, path, show_passes, patterns)
 end
 
 
-function test(name, path, show_passes, patterns)
-  local T = series:new(name, show_passes)
+function test(name, path, options, patterns)
+  local T = series:new(name, options)
 
   for f in lfs.dir(path) do
     if not f:match("^%.") then
       f = path.."/"..f
       local mode = lfs.attributes(f, "mode")
       if mode == "directory" then
-        T:run(function(show_passes) return test(f:gsub("/", "."), f, show_passes, patterns) end)
+        T:run(function(options) return test(f:gsub("/", "."), f, options, patterns) end)
       elseif f:match("%.lua$") then
-        run_one(T, f, show_passes, patterns)
+        run_one(T, f, options, patterns)
       end
     end
   end

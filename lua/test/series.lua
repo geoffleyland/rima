@@ -11,22 +11,26 @@ module(...)
 
 series = _M
 
-function series:new(name_or_module, show_passes)
+function series:new(name_or_module, options)
   if type(name_or_module) == "table" then
     name_or_module = name_or_module._NAME
   end
 
-  io.write(("Testing %s...\n"):format(name_or_module))
+  if not options.quiet then
+    io.write(("Testing %s...\n"):format(name_or_module))
+  end
 
   self.__index = self
-  return setmetatable({ name=name_or_module, show_passes=show_passes and true or false, tests=0, fails=0 }, self)
+  return setmetatable({ name=name_or_module, options=options, tests=0, fails=0 }, self)
 end
 
 
 function series:close()
-  io.write(("%s: %s - passed %d/%d tests\n"):format(
-           self.name, self.fails == 0 and "pass" or "*****FAIL*****",
-           self.tests - self.fails, self.tests))
+  if not self.options.quiet then
+    io.write(("%s: %s - passed %d/%d tests\n"):format(
+             self.name, self.fails == 0 and "pass" or "*****FAIL*****",
+             self.tests - self.fails, self.tests))
+  end
   return self.fails == 0, self.tests, self.fails
 end
 
@@ -39,12 +43,12 @@ end
 function series:test(pass, description, message, depth)
   depth = depth or 2
   self.tests = self.tests + 1
-  if not pass then
+  if not pass and not self.options.dont_show_fails then
     io.write(("%s test, %s%s: *****FAIL*****%s\n"):format(self.name, test_source_line(depth+1),
       description and (" (%s)"):format(description) or "",
       message and (": %s"):format(message) or ""))
     self.fails = self.fails + 1
-  elseif self.show_passes then
+  elseif self.options.show_passes then
     io.write(("%s test, %s%s: pass%s\n"):format(self.name, test_source_line(depth+1),
       description and (" (%s)"):format(description) or "",
       message and (": %s"):format(message) or ""))
@@ -89,7 +93,7 @@ end
 
 
 function series:run(T)
-  local _, t, f = T(self.show_passes)
+  local _, t, f = T(self.options)
   self.tests = self.tests + t
   self.fails = self.fails + f
 end

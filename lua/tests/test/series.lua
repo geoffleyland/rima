@@ -1,7 +1,7 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local assert, error = assert, error
+local assert, error, pairs = assert, error, pairs
 
 local series = require("test.series")
 
@@ -9,11 +9,17 @@ module(...)
 
 -- Tests -----------------------------------------------------------------------
 
-function test(show_passes)
-  local T = series:new(_M, show_passes)
+function test(options)
+  local o2 = {}
+  for k, v in pairs(options) do o2[k] = v end
+  o2.dont_show_fails = true
+  local T = series:new(_M, o2)
 
-  local function a(show_passes)
-    local LT = series:new("test test", not show_passes)
+  local function a(options)
+    local o2 = {}
+    for k, v in pairs(options) do o2[k] = v end
+    if not (options.quiet) then o2.show_passes = true end
+    local LT = series:new("test test", o2)
     local ok, t, f = LT:close()
     T:expect_ok(function() assert(ok == true and t == 0 and f == 0, "empty test") end, "empty test ok")
     LT:test(true, "showing a pass")
@@ -21,7 +27,7 @@ function test(show_passes)
   end
   T:run(a)
 
-  local LT = series:new("NOT REAL ERRORS", false)
+  local LT = series:new("NOT REAL ERRORS", o2)
 
   -- series:test()    
   T:expect_ok(function() LT:test(true, "description", "message") end, "series:test")

@@ -14,8 +14,8 @@ module(...)
 
 -- Tests -----------------------------------------------------------------------
 
-function test(show_passes)
-  local T = series:new(_M, show_passes)
+function test(options)
+  local T = series:new(_M, options)
 
   T:test(pow:isa(pow:new()), "isa(pow, pow:new())")
   T:check_equal(object.type(pow:new()), "pow", "type(pow:new()) == 'pow'")

@@ -10,8 +10,8 @@ module(...)
 
 -- Tests -----------------------------------------------------------------------
 
-function test(show_passes)
-  local T = series:new(_M, show_passes)
+function test(options)
+  local T = series:new(_M, options)
 
   T:test(number_t:isa(number_t:new()), "isa(number_t:new(), number_t)")
   T:test(rima.types.undefined_t:isa(number_t:new()), "isa(number_t:new(), undefined_t)")

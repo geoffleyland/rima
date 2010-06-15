@@ -14,8 +14,8 @@ module(...)
 
 -- Tests -----------------------------------------------------------------------
 
-function test(show_passes)
-  local T = series:new(_M, show_passes)
+function test(options)
+  local T = series:new(_M, options)
 
 
   local a, b, c, d = rima.R"a, b, c, d"

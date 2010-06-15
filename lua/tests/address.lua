@@ -13,8 +13,8 @@ module(...)
 
 -- Tests -----------------------------------------------------------------------
 
-function test(show_passes)
-  local T = series:new(_M, show_passes)
+function test(options)
+  local T = series:new(_M, options)
 
   T:test(address:isa(address:new("a")), "isa(address:new(), address)")
   T:check_equal(object.type(address:new("a")), "address")

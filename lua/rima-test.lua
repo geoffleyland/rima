@@ -4,13 +4,17 @@
 
 --------------------------------------------------------------------------------
 
-local patterns = {}
-local show_passes = false
 local strict = true
+local patterns = {}
+local options = {}
 
 for _, v in ipairs{...} do
   if v == "--show-passes" then
-    show_passes = true
+    options.show_passes = true
+  elseif v == "--quiet" then
+    options.quiet = true
+  elseif v == "--dont-show-fails" then
+    options.dont_show_fails = true
   elseif v == "--no-strict" then
     strict = false
   else
@@ -23,11 +27,12 @@ if strict then
   require("test.strict")
 end
 
-local passed, tests, fails = test.directory.test("rima", "tests", show_passes, patterns)
+local passed, tests, fails = test.directory.test("rima", "tests", options, patterns)
 if passed then
   io.stderr:write("All tests completed successfully\n")
   os.exit(0)
 else
+  io.stderr:write(("Failed %d/%d tests\n"):format(fails, tests))
   os.exit(fails)
 end
 

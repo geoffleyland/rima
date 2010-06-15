@@ -30,8 +30,8 @@ local function equal(T, expected, got)
   T:check_equal(g, e, nil, 1)
 end
 
-function test(show_passes)
-  local T = series:new(_M, show_passes)
+function test(options)
+  local T = series:new(_M, options)
 
 --  local o = operators.operator:new()
 
