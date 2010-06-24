@@ -431,7 +431,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     -- Clearly a waste of time, there must be a better way to do this...
     for k, v in pairs(value) do
       local f
-      if free_indexes then for i, j in ipairs(free_indexes) do f[i] = j end end
+      if free_indexes then f = {} for i, j in ipairs(free_indexes) do f[i] = j end end
       scope.newindex(s, name, new_address, k, v, f)
     end
   else
