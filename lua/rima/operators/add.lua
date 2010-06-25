@@ -8,7 +8,7 @@ local getmetatable = getmetatable
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
-require("rima.private")
+local lib = require("rima.lib")
 local rima = rima
 
 module(...)
@@ -42,7 +42,7 @@ end
 function add.__repr(args, format)
   if format and format.dump then
     return "+("..
-      rima.concat(args, ", ",
+      lib.concat(args, ", ",
         function(a) return expression.simple_repr(a[1], format).."*"..rima.repr(a[2], format) end)..
       ")"
   end
@@ -81,7 +81,7 @@ function add.__eval(args, S, eval)
   -- sum.
 
   -- evaluate or bind all arguments
-  args = rima.imap(function(a) return { a[1], eval(a[2], S) } end, args)
+  args = lib.imap(function(a) return { a[1], eval(a[2], S) } end, args)
 
   local constant, terms = 0, {}
   

@@ -4,6 +4,7 @@
 local ipairs, pairs = ipairs, pairs
 
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local expression = require("rima.expression")
 local add = require("rima.operators.add")
 local rima = rima
@@ -51,7 +52,7 @@ function sum.__eval(args, S, eval)
     if undefined and undefined[1] then
       -- Undefined terms are stored in groups based on the undefined sum
       -- indices (so we can group them back into sums over the same indices)
-      local name = rima.concat(undefined, ",", rima.repr)
+      local name = lib.concat(undefined, ",", rima.repr)
       local terms
       local udn = undefined_terms[name]
       if not udn then

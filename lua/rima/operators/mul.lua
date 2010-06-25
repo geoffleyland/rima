@@ -8,8 +8,8 @@ local getmetatable = getmetatable
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
+local lib = require("rima.lib")
 local expression = require("rima.expression")
-require("rima.private")
 local rima = rima
 
 module(...)
@@ -44,7 +44,7 @@ end
 function mul.__repr(args, format)
   if format and format.dump then
     return "*("..
-      rima.concat(args, ", ",
+      lib.concat(args, ", ",
         function(a) return rima.repr(a[2], format).."^"..expression.simple_repr(a[1], format) end)..
       ")"
   end
@@ -85,7 +85,7 @@ function mul.__eval(args, S, eval)
   -- the constant and see if what's left is a product.
 
   -- evaluate or bind all arguments
-  return simplify(rima.imap(function(a) return { a[1], eval(a[2], S) } end, args))
+  return simplify(lib.imap(function(a) return { a[1], eval(a[2], S) } end, args))
 end
 
 function mul.simplify(args)

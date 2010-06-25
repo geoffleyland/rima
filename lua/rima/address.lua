@@ -7,9 +7,9 @@ local assert, error, getmetatable, ipairs, next, rawget, require, select, xpcall
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
+local lib = require("rima.lib")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
-require("rima.private")
 local rima = rima
 
 module(...)
@@ -101,7 +101,7 @@ function address:__repr(format)
     return ""
   else
     if format and format.dump then
-      return ("address(%s)"):format(rima.concat(self, ", ",
+      return ("address(%s)"):format(lib.concat(self, ", ",
         function(a)
           local t = expression.tags(a.exp)
           if t.key then

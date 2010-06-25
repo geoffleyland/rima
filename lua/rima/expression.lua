@@ -9,6 +9,7 @@ local rawget, rawset = rawget, rawset
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
+local lib = require("rima.lib")
 local rima = rima
 
 module(...)
@@ -96,7 +97,7 @@ end
 
 
 function expression.concat(t, format)
-  return rima.concat(t, ", ", function(i) return repr(i, format) end)
+  return lib.concat(t, ", ", function(i) return repr(i, format) end)
 end
 
 

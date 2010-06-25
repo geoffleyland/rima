@@ -1,27 +1,13 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local table = require("table")
-local getfenv, ipairs = getfenv, ipairs
+local getfenv = getfenv
 local select, unpack = select, unpack
 
 module(...)
 local rima = getfenv(0).rima
 
 -- Private functionality -------------------------------------------------------
-
-function rima.imap(f, t)
-  local r = {}
-  for i, v in ipairs(t) do r[i] = f(v) end
-  return r
-end
-
-
-function rima.concat(t, s, f)
-  if f then return table.concat(rima.imap(f, t), s)
-  else return table.concat(t, s)
-  end
-end
 
 function rima.packn(...)
   return { n=select("#", ...), ... }

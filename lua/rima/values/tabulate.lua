@@ -6,6 +6,7 @@ local error, xpcall = error, xpcall
 local ipairs, require = ipairs, require
 
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local scope = require("rima.scope")
 local rima = rima
 
@@ -55,7 +56,7 @@ function tabulate_type:__address(S, a, i, eval)
   status, r = xpcall(function() return eval(self.expression, S2) end, debug.traceback)
   if not status then
     local i = 0
-    local args = rima.concat(self.indexes, ", ",
+    local args = lib.concat(self.indexes, ", ",
       function(si) i = i + 1; return ("%s=%s"):format(si.names[1], rima.repr(a:value(i))) end)
     error(("tabulate: error evaluating '%s' as '%s' where %s:\n  %s"):
       format(__repr(self), rima.repr(self.expression), args, r:gsub("\n", "\n  ")), 0)
