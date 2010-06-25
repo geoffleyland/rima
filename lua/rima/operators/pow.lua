@@ -5,7 +5,6 @@ local error = error
 
 local object = require("rima.lib.object")
 local expression = require("rima.expression")
-require("rima.private")
 local rima = rima
 
 module(...)

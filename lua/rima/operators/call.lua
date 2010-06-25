@@ -6,7 +6,6 @@ local error, xpcall = error, xpcall
 local ipairs, type, unpack  = ipairs, type, unpack
 
 local expression = require("rima.expression")
-require("rima.private")
 local rima = rima
 
 module(...)

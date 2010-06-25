@@ -7,8 +7,8 @@ local getmetatable, require, type = getmetatable, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
+local lib = require("rima.lib")
 local undefined_t = require("rima.types.undefined_t")
-require("rima.private")
 local rima = rima
 
 module(...)
@@ -72,12 +72,12 @@ function index.resolve(args, S, eval)
   -- might work because it's not a scalar type or it might fail.  Maybe
   -- we could just check that first?
   if expression.defined(e) or v then
-    local status, r = rima.packs(xpcall(function() return address:resolve(S, scope.pack(b), 1, b, eval) end, debug.traceback))
+    local status, r = lib.packs(xpcall(function() return address:resolve(S, scope.pack(b), 1, b, eval) end, debug.traceback))
     if not status then
       error(("index: error evaluating '%s' as '%s%s':\n  %s"):
         format(__repr(args), rima.repr(b), rima.repr(address), r[1]:gsub("\n", "\n  ")), 0)
     else
-      return rima.unpackn(r)
+      return lib.unpackn(r)
     end
   end
 

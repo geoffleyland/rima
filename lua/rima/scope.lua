@@ -55,7 +55,6 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local args = require("rima.lib.args")
 local undefined_t = require("rima.types.undefined_t")
-require("rima.private")
 local rima = rima
 
 module(...)

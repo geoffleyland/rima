@@ -253,7 +253,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
     end
 
     local function try_current(c)
-      local status, r = rima.packs(xpcall(function() return new_address:resolve(S, c, 1, new_base, eval) end, debug.traceback))
+      local status, r = lib.packs(xpcall(function() return new_address:resolve(S, c, 1, new_base, eval) end, debug.traceback))
       if not status then
         error(("address: error evaluating '%s%s' as '%s%s':\n  %s"):
           format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), r[1]:gsub("\n", "\n  ")), 0)
@@ -290,12 +290,12 @@ function address:resolve(S, current, i, base, eval, collected, used)
         results[#results+1] = try_current(v[1])
         -- and if we find something good, return it
         if results[#results][1] then
-          return rima.unpackn(results[#results])
+          return lib.unpackn(results[#results])
         end
       end
       -- We found nothing good, return the first thing we found (I think we
       -- could return any of the results.
-      return rima.unpackn(results[1])
+      return lib.unpackn(results[1])
 
     else
       -- Otherwise, the new base is not a ref.  I'm not sure this can actually happen --
@@ -304,7 +304,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
       if not expression.defined(new_current) then
         return false, nil, new_base, new_address, collected
       end
-      return rima.unpackn(try_current(scope.pack(new_current)))
+      return lib.unpackn(try_current(scope.pack(new_current)))
     end
   end
 
@@ -333,8 +333,8 @@ function address:resolve(S, current, i, base, eval, collected, used)
     local next = index(current, a, b)
     local r1
     if next then
-      r1 = rima.packn(self:resolve(S, next, i+1, base, eval, collected, used))
-      if r1[1] then return rima.unpackn(r1) end
+      r1 = lib.packn(self:resolve(S, next, i+1, base, eval, collected, used))
+      if r1[1] then return lib.unpackn(r1) end
     end
     -- including any values from prototypes
     next = current.prototype
@@ -342,13 +342,13 @@ function address:resolve(S, current, i, base, eval, collected, used)
     if next then
       local new_collected = object.new(address, {{value=a, exp=b}})
       if collected then new_collected = collected + new_collected end
-      r2 = rima.packn(self:resolve(S, next, i+1, base, eval, new_collected, used))
-      if r2[1] then return rima.unpackn(r2) end
+      r2 = lib.packn(self:resolve(S, next, i+1, base, eval, new_collected, used))
+      if r2[1] then return lib.unpackn(r2) end
     end
     if r1 then
-      return rima.unpackn(r1)
+      return lib.unpackn(r1)
     elseif r2 then
-      return rima.unpackn(r2)
+      return lib.unpackn(r2)
     else
       return false, nil, base, self
     end

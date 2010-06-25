@@ -9,7 +9,6 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local types = require("rima.types")
 local index_op = require("rima.operators.index")
-require("rima.private")
 local rima = rima
 
 module(...)
