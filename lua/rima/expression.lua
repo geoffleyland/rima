@@ -95,7 +95,10 @@ function expression.concat(t, format)
 end
 
 
-expression.proxy_mt.__repr = {}
+function expression.proxy_mt.__repr(e, format)
+  local mt = getmetatable(proxy.P(e))
+  return object.type(mt).."("..concat(e, format)..")"
+end
 
 local no_format = {}
 
@@ -105,11 +108,7 @@ function expression.repr(e, format)
   local mt = getmetatable(e)
   local f = mt and rawget(mt, "__repr")
   if f then
-    if f == proxy_mt.__repr then
-      return object.type(mt).."("..concat(proxy.O(e), format)..")"
-    else
-      return f(proxy.O(e), format)
-    end
+    return f(proxy.O(e), format)
   elseif format and format.dump then
     return object.type(e).."("..lib.simple_repr(e, format)..")"
   else
