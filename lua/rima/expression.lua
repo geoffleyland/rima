@@ -90,12 +90,6 @@ end
 
 -- String representation -------------------------------------------------------
 
-local number_format = "%.4g"
-function expression.set_number_format(f)
-  number_format = f
-end
-
-
 function expression.concat(t, format)
   return lib.concat(t, ", ", function(i) return repr(i, format) end)
 end
@@ -103,16 +97,11 @@ end
 
 expression.proxy_mt.__repr = {}
 
-function expression.simple_repr(e, format)
-  if rawtype(e) == "number" then
-    local nf = (format and format.numbers) or number_format
-    return nf:format(e)
-  else
-    return tostring(e)
-  end
-end
+local no_format = {}
 
 function expression.repr(e, format)
+  format = format or no_format
+
   local mt = getmetatable(e)
   local f = mt and rawget(mt, "__repr")
   if f then
@@ -122,9 +111,9 @@ function expression.repr(e, format)
       return f(proxy.O(e), format)
     end
   elseif format and format.dump then
-    return object.type(e).."("..simple_repr(e)..")"
+    return object.type(e).."("..lib.simple_repr(e, format)..")"
   else
-    return simple_repr(e)
+    return lib.simple_repr(e, format)
   end
 end
 expression.proxy_mt.__tostring = repr

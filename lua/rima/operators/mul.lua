@@ -45,7 +45,7 @@ function mul.__repr(args, format)
   if format and format.dump then
     return "*("..
       lib.concat(args, ", ",
-        function(a) return rima.repr(a[2], format).."^"..expression.simple_repr(a[1], format) end)..
+        function(a) return rima.repr(a[2], format).."^"..lib.simple_repr(a[1], format) end)..
       ")"
   end
 

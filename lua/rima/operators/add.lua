@@ -43,7 +43,7 @@ function add.__repr(args, format)
   if format and format.dump then
     return "+("..
       lib.concat(args, ", ",
-        function(a) return expression.simple_repr(a[1], format).."*"..rima.repr(a[2], format) end)..
+        function(a) return lib.simple_repr(a[1], format).."*"..rima.repr(a[2], format) end)..
       ")"
   end
 
