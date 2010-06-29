@@ -86,5 +86,10 @@ function __tostring(o)
 end
 
 
+function concat_repr(t, format)
+  return concat(t, ", ", function(i) return repr(i, format) end)
+end
+
+
 -- EOF -------------------------------------------------------------------------
 

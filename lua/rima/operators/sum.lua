@@ -33,9 +33,9 @@ function sum.__repr(args, format)
   local sets, e = args[1], args[2]
   local name = (format and format.readable and "rima.sum") or "sum"
   if format and format.dump then
-    return name.."({"..expression.concat(sets, format).."}, "..rima.repr(e, format)..")"
+    return name.."({"..lib.concat_repr(sets, format).."}, "..rima.repr(e, format)..")"
   else
-    return name.."{"..expression.concat(sets, format).."}("..rima.repr(e, format)..")"
+    return name.."{"..lib.concat_repr(sets, format).."}("..rima.repr(e, format)..")"
   end
 end
 

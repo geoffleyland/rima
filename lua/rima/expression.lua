@@ -90,13 +90,8 @@ end
 
 -- String representation -------------------------------------------------------
 
-function expression.concat(t, format)
-  return lib.concat(t, ", ", function(i) return lib.repr(i, format) end)
-end
-
-
 function expression.proxy_mt.__repr(e, format)
-  return object.type(e).."("..concat(proxy.O(e), format)..")"
+  return object.type(e).."("..lib.concat_repr(proxy.O(e), format)..")"
 end
 expression.proxy_mt.__tostring = lib.__tostring
 

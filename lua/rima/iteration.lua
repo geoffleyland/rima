@@ -336,7 +336,7 @@ end
 
 
 function set_list:__repr(format)
-  return "{"..expression.concat(self, format).."}"
+  return "{"..lib.concat_repr(self, format).."}"
 end
 set_list.__tostring = lib.__tostring
 

@@ -7,6 +7,7 @@ local ipairs, type, unpack  = ipairs, type, unpack
 
 local expression = require("rima.expression")
 local proxy = require("rima.lib.proxy")
+local lib = require("rima.lib")
 local rima = rima
 
 module(...)
@@ -30,9 +31,9 @@ end
 function call.__repr(args, format)
   args = proxy.O(args)
   if format and format.dump then
-    return "call("..expression.concat(args, format)..")"
+    return "call("..lib.concat_repr(args, format)..")"
   else
-    return expression.parenthise(args[1], format, 0).."("..expression.concat({unpack(args, 2)}, format)..")"
+    return expression.parenthise(args[1], format, 0).."("..lib.concat_repr({unpack(args, 2)}, format)..")"
   end
 end
 
@@ -57,7 +58,7 @@ function call.__eval(args, S, eval)
 
     if not status then
       error(("call: error evaluating '%s' as '%s' with arguments (%s):\n  %s"):
-        format(__repr(args), rima.repr(f), expression.concat({unpack(args, 2)}), r:gsub("\n", "\n  ")), 0)
+        format(__repr(args), rima.repr(f), lib.concat_repr({unpack(args, 2)}), r:gsub("\n", "\n  ")), 0)
     end
     return r
   end
