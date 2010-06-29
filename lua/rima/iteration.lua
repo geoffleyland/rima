@@ -7,6 +7,7 @@ local error, getmetatable, require, type = error, getmetatable, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
+local lib = require("rima.lib")
 local types = require("rima.types")
 local index_op = require("rima.operators.index")
 local rima = rima
@@ -48,7 +49,7 @@ end
 function range_type:__repr(format)
   return ("range(%s, %s)"):format(rima.repr(self.low, format), rima.repr(self.high, format))
 end
-range_type.__tostring = range_type.__repr
+range_type.__tostring = lib.__tostring
 
 
 function range_type:__iterate()
@@ -108,7 +109,7 @@ function iterator:__repr(format)
     end
   end
 end
-iterator.__tostring = iterator.__repr
+iterator.__tostring = lib.__tostring
 
 
 function iterator:eval(S)
@@ -337,7 +338,7 @@ end
 function set_list:__repr(format)
   return "{"..expression.concat(self, format).."}"
 end
-set_list.__tostring = set_list.__repr
+set_list.__tostring = lib.__tostring
 
 
 function set_list:iterate(S)

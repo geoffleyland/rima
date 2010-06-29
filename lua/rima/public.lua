@@ -9,6 +9,7 @@ module(...)
 
 local args = require("rima.lib.args")
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local ref = require("rima.ref")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
@@ -20,7 +21,7 @@ local rima = getfenv(0).rima
 -- Module functionality --------------------------------------------------------
 
 rima.set_number_format = expression.set_number_format
-rima.repr = expression.repr
+rima.repr = lib.repr
 
 
 function rima.R(names, type) -- create a reference

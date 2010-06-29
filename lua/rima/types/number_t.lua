@@ -5,6 +5,7 @@ local math = require("math")
 local error = error
 
 local args = require("rima.lib.args")
+local lib = require("rima.lib")
 local undefined_t = require("rima.types.undefined_t")
 local rima = rima
 
@@ -57,7 +58,7 @@ function number_t:__repr(format)
   return ("%s <= * <= %s, * %s"):format(
     rima.repr(self.lower, format), rima.repr(self.upper, format), self.integer and "integer" or "real")
 end
-number_t.__tostring = number_t.__repr
+number_t.__tostring = lib.__tostring
 
 
 function number_t:describe(vars)

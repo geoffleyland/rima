@@ -91,40 +91,24 @@ end
 -- String representation -------------------------------------------------------
 
 function expression.concat(t, format)
-  return lib.concat(t, ", ", function(i) return repr(i, format) end)
+  return lib.concat(t, ", ", function(i) return lib.repr(i, format) end)
 end
 
 
 function expression.proxy_mt.__repr(e, format)
   return object.type(e).."("..concat(proxy.O(e), format)..")"
 end
-
-local no_format = {}
-
-function expression.repr(e, format)
-  format = format or no_format
-
-  local mt = getmetatable(e)
-  local f = mt and rawget(mt, "__repr")
-  if f then
-    return f(e, format)
-  elseif format and format.dump then
-    return object.type(e).."("..lib.simple_repr(e, format)..")"
-  else
-    return lib.simple_repr(e, format)
-  end
-end
-expression.proxy_mt.__tostring = repr
+expression.proxy_mt.__tostring = lib.__tostring
 
 
 function expression.dump(e)
-  return repr(e, { dump=true })
+  return lib.repr(e, { dump=true })
 end
 
 
 function expression.parenthise(e, format, parent_precedence)
   parent_precedence = parent_precedence or 1
-  local s = repr(e, format)
+  local s = lib.repr(e, format)
   local mt = getmetatable(e)
   local precedence = (mt and rawget(mt, "precedence")) or 0
   if precedence > parent_precedence then

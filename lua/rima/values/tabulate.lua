@@ -31,7 +31,7 @@ function tabulate_type:__repr(format)
     rima.repr(self.indexes, format),
     rima.repr(self.expression, format))
 end
-__tostring = __repr
+__tostring = lib.__tostring
 
 
 function tabulate_type:__address(S, a, i, eval)

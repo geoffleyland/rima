@@ -2,6 +2,7 @@
 -- see LICENSE for license information
 
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 
 module(...)
 
@@ -15,7 +16,7 @@ local undefined_t = object:new(_M, "undefined_t")
 function undefined_t:__repr(format)
   return "undefined"
 end
-__tostring = __repr
+__tostring = lib.__tostring
 
 
 function undefined_t:describe(s)

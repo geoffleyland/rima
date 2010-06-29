@@ -54,6 +54,7 @@ local ipairs, next, pairs = ipairs, next, pairs
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local args = require("rima.lib.args")
+local lib = require("rima.lib")
 local undefined_t = require("rima.types.undefined_t")
 local rima = rima
 
@@ -190,7 +191,7 @@ function svalue:__repr(format)
     return rima.repr(self.value, format)
   end
 end
-svalue.__tostring = svalue.__repr
+svalue.__tostring = lib.__tostring
 
 
 function scope.pack(v)

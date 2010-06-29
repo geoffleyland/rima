@@ -21,6 +21,7 @@ of the reference somewhere tricky.  This is a giant pain in the ass.
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local args = require("rima.lib.args")
+local lib = require("rima.lib")
 local undefined_t = require("rima.types.undefined_t")
 local rima = rima
 
@@ -69,7 +70,7 @@ function ref.proxy_mt.__repr(r, format)
     return name
   end
 end
-ref.proxy_mt.__tostring = ref.proxy_mt.__repr
+ref.proxy_mt.__tostring = lib.__tostring
 
 
 function ref.describe(r)

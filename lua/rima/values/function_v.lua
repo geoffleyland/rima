@@ -5,6 +5,7 @@ local error, ipairs, require = error, ipairs, require
 
 local args = require("rima.lib.args")
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local call = require("rima.operators.call")
 local rima = rima
 
@@ -63,7 +64,7 @@ function function_v:__repr(format)
   end
 --]]
 end
-__tostring = __repr
+__tostring = lib.__tostring
 
 
 function function_v:check_args(args)

@@ -56,10 +56,10 @@ local function expression_tester(T, variables, scope)
         T:check_equal(expression.dump(expression.eval(e, S)), t.ED, "evaluated dump", 1)
       end
       
-      local s2 = expression.repr(e, { readable=true })
+      local s2 = rima.repr(e, { readable=true })
       local e2 = load_expression(T, s2, V)
       if e2 then
-        local s3 = expression.repr(e2, { readable=true })
+        local s3 = rima.repr(e2, { readable=true })
         T:check_equal(s3, s2, "rereading unevaluated", 1)
         T:check_equal(expression.eval(e2, S), expression.eval(e, S), "rereading evaluated", 1)
       end

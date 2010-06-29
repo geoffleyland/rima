@@ -158,7 +158,7 @@ function address:__repr(format)
     end
   end
 end
-__tostring = __repr
+__tostring = lib.__tostring
 
 
 -- evaluation ------------------------------------------------------------------
