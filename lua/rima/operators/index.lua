@@ -41,6 +41,7 @@ end
 -- String Representation -------------------------------------------------------
 
 function index.__repr(args, format)
+  args = proxy.O(args)
   if format and format.dump then
     return ("index(%s, %s)"):format(rima.repr(args[1], format), rima.repr(args[2], format))
   else

@@ -42,6 +42,7 @@ end
 -- String Representation -------------------------------------------------------
 
 function add.__repr(args, format)
+  args = proxy.O(args)
   if format and format.dump then
     return "+("..
       lib.concat(args, ", ",

@@ -4,6 +4,7 @@
 local ipairs, rawget = ipairs, rawget
 
 local object = require("rima.lib.object")
+local proxy = require("rima.lib.proxy")
 local expression = require("rima.expression")
 local rima = rima
 
@@ -22,6 +23,7 @@ end
 -- String Representation -------------------------------------------------------
 
 function case.__repr(args, format)
+  args = proxy.O(args)
   local s = ("case %s ("):format(rima.repr(args[1], format))
   for _, v in ipairs(args[2]) do
     s = s..("%s: %s; "):format(rima.repr(v[1], format), rima.repr(v[2], format))

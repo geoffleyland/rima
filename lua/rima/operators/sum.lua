@@ -4,6 +4,7 @@
 local ipairs, pairs = ipairs, pairs
 
 local object = require("rima.lib.object")
+local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local expression = require("rima.expression")
 local add = require("rima.operators.add")
@@ -28,6 +29,7 @@ end
 -- String Representation -------------------------------------------------------
 
 function sum.__repr(args, format)
+  args = proxy.O(args)
   local sets, e = args[1], args[2]
   local name = (format and format.readable and "rima.sum") or "sum"
   if format and format.dump then

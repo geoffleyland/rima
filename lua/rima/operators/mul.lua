@@ -43,6 +43,7 @@ end
 -- String Representation -------------------------------------------------------
 
 function mul.__repr(args, format)
+  args = proxy.O(args)
   if format and format.dump then
     return "*("..
       lib.concat(args, ", ",

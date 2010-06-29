@@ -6,6 +6,7 @@ local error, xpcall = error, xpcall
 local ipairs, type, unpack  = ipairs, type, unpack
 
 local expression = require("rima.expression")
+local proxy = require("rima.lib.proxy")
 local rima = rima
 
 module(...)
@@ -27,6 +28,7 @@ end
 -- String Representation -------------------------------------------------------
 
 function call.__repr(args, format)
+  args = proxy.O(args)
   if format and format.dump then
     return "call("..expression.concat(args, format)..")"
   else
