@@ -5,6 +5,7 @@ local series = require("test.series")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local rima = require("rima")
 
 module(...)
@@ -18,7 +19,7 @@ local function equal(T, expected, got)
       for i = 3, #z do
         local arg = z[2]
         arg = (arg ~= "" and arg) or nil
-        e = expression[z[i]](e, arg)
+        e = z[i](e, arg)
       end
       return e
     else
@@ -33,6 +34,9 @@ end
 function test(options)
   local T = series:new(_M, options)
 
+  local E = expression.eval
+  local D = lib.dump
+
 --  local o = operators.operator:new()
 
 --  T:expect_error(function() expression:new({}) end,
@@ -46,21 +50,21 @@ function test(options)
   local S = scope.new()
 
   -- literals
-  equal(T, "number(1)", {1, "", "dump"})
-  equal(T, 1, {1, S, "eval"})
+  equal(T, "number(1)", {1, "", D})
+  equal(T, 1, {1, S, E})
 
   -- variables
   local a = rima.R"a"
-  equal(T, "ref(a)", {a, "", "dump"})
+  equal(T, "ref(a)", {a, "", D})
   T:expect_ok(function() rima.E(a, S) end)
-  equal(T, "ref(a)", {a, S, "dump"})
-  equal(T, "a", {a, S, "eval"})
+  equal(T, "ref(a)", {a, S, D})
+  equal(T, "a", {a, S, E})
   S.a = rima.free()
-  equal(T, "a", {a, S, "eval"})
-  equal(T, 5, {a, scope.spawn(S, { a=5 }), "eval"})
+  equal(T, "a", {a, S, E})
+  equal(T, 5, {a, scope.spawn(S, { a=5 }), E})
 
   -- repr
-  T:check_equal(expression.dump(1), "number(1)")
+  T:check_equal(lib.dump(1), "number(1)")
 
   -- eval
   T:expect_ok(function() expression.eval(expression:new({}), {}) end)
@@ -70,38 +74,38 @@ function test(options)
   do
     local a, b = rima.R"a, b"
     local S = rima.scope.new{ ["a,b"]=rima.free() }
-    equal(T, "+(1*number(3), 4*ref(a))", {3 + 4 * a, S, "eval", "dump"})
-    equal(T, "3 - 4*a", {4 * -a + 3, S, "eval"})
-    equal(T, "+(1*number(3), 4**(ref(a)^1, ref(b)^1))", {3 + 4 * a * b, S, "eval", "dump"})
-    equal(T, "3 - 4*a*b", {3 - 4 * a * b, S, "eval"})
+    equal(T, "+(1*number(3), 4*ref(a))", {3 + 4 * a, S, E, D})
+    equal(T, "3 - 4*a", {4 * -a + 3, S, E})
+    equal(T, "+(1*number(3), 4**(ref(a)^1, ref(b)^1))", {3 + 4 * a * b, S, E, D})
+    equal(T, "3 - 4*a*b", {3 - 4 * a * b, S, E})
 
-    equal(T, "*(number(6)^1, ref(a)^1)", {3 * (a + a), S, "eval", "dump"})
-    equal(T, "6*a", {3 * (a + a), S, "eval"})
-    equal(T, "+(1*number(1), 6*ref(a))", {1 + 3 * (a + a), S, "eval", "dump"})
-    equal(T, "1 + 6*a", {1 + 3 * (a + a), S, "eval"})
+    equal(T, "*(number(6)^1, ref(a)^1)", {3 * (a + a), S, E, D})
+    equal(T, "6*a", {3 * (a + a), S, E})
+    equal(T, "+(1*number(1), 6*ref(a))", {1 + 3 * (a + a), S, E, D})
+    equal(T, "1 + 6*a", {1 + 3 * (a + a), S, E})
 
-    equal(T, "*(number(1.5)^1, ref(a)^-1)", {3 / (a + a), S, "eval", "dump"})
-    equal(T, "1.5/a", {3 / (a + a), S, "eval"})
-    equal(T, "+(1*number(1), 1.5**(ref(a)^-1))", {1 + 3 / (a + a), S, "eval", "dump"})
-    equal(T, "1 + 1.5/a", {1 + 3 / (a + a), S, "eval"})
+    equal(T, "*(number(1.5)^1, ref(a)^-1)", {3 / (a + a), S, E, D})
+    equal(T, "1.5/a", {3 / (a + a), S, E})
+    equal(T, "+(1*number(1), 1.5**(ref(a)^-1))", {1 + 3 / (a + a), S, E, D})
+    equal(T, "1 + 1.5/a", {1 + 3 / (a + a), S, E})
 
 
-    equal(T, "*(number(3)^1, ^(ref(a), number(2))^1)", {3 * a^2, "", "dump"})
-    equal(T, "*(number(3)^1, ref(a)^2)", {3 * a^2, S, "eval", "dump"})
-    equal(T, "*(number(3)^1, +(1*number(1), 1*ref(a))^2)", {3 * (a+1)^2, S, "eval", "dump"})
+    equal(T, "*(number(3)^1, ^(ref(a), number(2))^1)", {3 * a^2, "", D})
+    equal(T, "*(number(3)^1, ref(a)^2)", {3 * a^2, S, E, D})
+    equal(T, "*(number(3)^1, +(1*number(1), 1*ref(a))^2)", {3 * (a+1)^2, S, E, D})
   end
 
   -- tests with references to expressions
   do
     local a, b = rima.R"a,b"
     local S = rima.scope.new{ a = rima.free(), b = 3 * (a + 1)^2 }
-    equal(T, {b, S, "eval", "dump"}, {3 * (a + 1)^2, S, "eval", "dump"})
-    equal(T, {5 * b, S, "eval", "dump"}, {5 * (3 * (a + 1)^2), S, "eval", "dump"} )
+    equal(T, {b, S, E, D}, {3 * (a + 1)^2, S, E, D})
+    equal(T, {5 * b, S, E, D}, {5 * (3 * (a + 1)^2), S, E, D} )
     
     local c, d = rima.R"c,d"
     S.d = 3 + (c * 5)^2
     T:expect_ok(function() expression.eval(5 * d, S) end)
-    equal(T, "5*(3 + (5*c)^2)", {5 * d, S, "eval"})
+    equal(T, "5*(3 + (5*c)^2)", {5 * d, S, E})
   end
 
   -- references to functions

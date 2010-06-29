@@ -5,6 +5,7 @@ local series = require("test.series")
 local expression_tester = require("test.expression_tester")
 local case = require("rima.operators.case")
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local expression = require("rima.expression")
 require("rima.public")
 local rima = rima
@@ -16,7 +17,7 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local D = expression.dump
+  local D = lib.dump
   local E = rima.E
 
   T:test(object.isa(case, rima.case(1, {1, 1})), "isa(case, case)")

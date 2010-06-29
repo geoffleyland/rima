@@ -91,5 +91,11 @@ function concat_repr(t, format)
 end
 
 
+local dump_format = { dump=true }
+function dump(e)
+  return repr(e, dump_format)
+end
+
+
 -- EOF -------------------------------------------------------------------------
 

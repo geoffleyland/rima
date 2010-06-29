@@ -4,6 +4,7 @@
 local string = require("string")
 local series = require("test.series")
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local call = require("rima.operators.call")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
@@ -17,7 +18,7 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local D = expression.dump
+  local D = lib.dump
   local B = expression.bind
   local E = expression.eval
 

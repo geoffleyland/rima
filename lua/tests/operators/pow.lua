@@ -5,6 +5,7 @@ local series = require("test.series")
 require("rima.ref")
 local pow = require("rima.operators.pow")
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local expression = require("rima.expression")
 require("rima.public")
 local rima = rima
@@ -31,18 +32,18 @@ function test(options)
 
   local a, b = rima.R"a, b"
   local S = rima.scope.new{ a = 5 }
-  T:check_equal(expression.dump(a^2), "^(ref(a), number(2))")
+  T:check_equal(lib.dump(a^2), "^(ref(a), number(2))")
   T:check_equal(a^2, "a^2")
   T:check_equal(a^b, "a^b")
   T:check_equal(expression.eval(a^2, S), 25)
-  T:check_equal(expression.dump(2^a), "^(number(2), ref(a))")
+  T:check_equal(lib.dump(2^a), "^(number(2), ref(a))")
   T:check_equal(expression.eval(2^a, S), 32)
 
   -- Identities
   T:check_equal(expression.eval(0^b, S), 0)
   T:check_equal(expression.eval(1^b, S), 1)
   T:check_equal(expression.eval(b^0, S), 1)
-  T:check_equal(expression.dump(expression.eval(b^1, S)), "ref(b)")
+  T:check_equal(lib.dump(expression.eval(b^1, S)), "ref(b)")
 
   -- Tests including add and mul are in rima.expression
 

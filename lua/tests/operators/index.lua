@@ -4,6 +4,7 @@
 local series = require("test.series")
 local expression = require("rima.expression")
 local iteration = require("rima.iteration")
+local lib = require("rima.lib")
 require("rima.public")
 local rima = rima
 
@@ -16,7 +17,7 @@ function test(options)
 
   local B = expression.bind
   local E = expression.eval
-  local D = expression.dump
+  local D = lib.dump
 
   local a, b, c = rima.R"a, b, c"
 

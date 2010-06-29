@@ -95,12 +95,6 @@ function expression.proxy_mt.__repr(e, format)
 end
 expression.proxy_mt.__tostring = lib.__tostring
 
-
-function expression.dump(e)
-  return lib.repr(e, { dump=true })
-end
-
-
 function expression.parenthise(e, format, parent_precedence)
   parent_precedence = parent_precedence or 1
   local s = lib.repr(e, format)
