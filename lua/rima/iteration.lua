@@ -8,6 +8,7 @@ local error, getmetatable, require, type = error, getmetatable, require, type
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local types = require("rima.types")
 local index_op = require("rima.operators.index")
 local rima = rima
@@ -126,7 +127,7 @@ function iterator:eval(S)
   
   while S do
     local e = expression.eval(self.exp, S)
-    if not expression.defined(e) and not es[1] then
+    if not core.defined(e) and not es[1] then
       r = e
       break
     end
@@ -157,13 +158,13 @@ function iterator:eval(S)
 end
 
 
-function iterator:defined()
+function iterator:__defined()
   -- we're looking for a table (or something iterable)
   -- if the table is empty, we'll call it undefined.
   -- This could be wrong in some cases (I hope not), but usually
   -- it means we're being evaluated with partial data.
   local r = self.result
-  if expression.defined(r) then
+  if core.defined(r) then
     local m = getmetatable(r)
     local i = m and m.__iterate
     if i then
@@ -313,11 +314,11 @@ function set_list:new(sets)
     local it
     if type(set) == "string" then
       it = iterator:new(rima.R(set), "a", "elements", names)
-    elseif not expression.defined(set) then
-      it = iterator:new(set, "a", "elements", names)
     elseif iterator:isa(set) then
       set:set_names(names)
       it = set
+    elseif not core.defined(set) then
+      it = iterator:new(set, "a", "elements", names)
     else
       local m = getmetatable(set)
       local i = m and m.__iterate
@@ -354,7 +355,7 @@ function set_list:iterate(S)
       coroutine.yield(cS, ud)        
     else
       local it = self[i]:eval(cS)
-      if it:defined() then
+      if core.defined(it) then
         local results = it:results()
         for variables in it:iterate() do
           local nS = scope.spawn(cS, nil, {overwrite=true, no_undefined=true})

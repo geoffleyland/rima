@@ -8,6 +8,7 @@ local getmetatable, require, type = getmetatable, require, type
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 local rima = rima
 
@@ -54,7 +55,7 @@ end
 
 function index.resolve(args, S, eval)
   local address = expression.eval(args[2], S)
-  if not address:defined() then
+  if not core.defined(address) then
     return false, nil, expression.bind(args[1], S), address
   end
   local b = expression.bind(args[1], S)
@@ -72,7 +73,7 @@ function index.resolve(args, S, eval)
   -- is a scalar type, we can't index it.  Here we try to index it - it
   -- might work because it's not a scalar type or it might fail.  Maybe
   -- we could just check that first?
-  if expression.defined(e) or v then
+  if core.defined(e) or v then
     local status, r = lib.packs(xpcall(function() return address:resolve(S, scope.pack(b), 1, b, eval) end, debug.traceback))
     if not status then
       error(("index: error evaluating '%s' as '%s%s':\n  %s"):
@@ -89,7 +90,7 @@ end
 function index.__bind(args, S, eval)
   local status, value, base, address = resolve(args, S, expression.bind)
   value = scope.unpack(value)
-  if not status or expression.defined(value) then
+  if not status or core.defined(value) then
     if address[1] then
       return expression:new(index, base, address)
     else

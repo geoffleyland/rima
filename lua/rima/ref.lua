@@ -22,6 +22,7 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local args = require("rima.lib.args")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 local rima = rima
 
@@ -87,7 +88,7 @@ function ref.proxy_mt.__bind(r, S)
     return ref:new{ name=r.name, type=r.type, scope=r.scope or scope.scope_for_undefined(S) }
   elseif e.hidden then
     return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
-  elseif expression.defined(e.value) then
+  elseif core.defined(e.value) then
     return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
   else
     return expression.bind(e.value, S)
@@ -117,7 +118,7 @@ function ref.proxy_mt.__eval(r, S)
       -- update the address and bind the reference to the scope if it doesn't already have one
       return ref:new{name=r.name, type=r.type, scope=r.scope or found_scope}, v
     end
-  elseif not expression.defined(v) then
+  elseif not core.defined(v) then
     return v
   else
     if not r.type:includes(v) then

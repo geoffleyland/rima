@@ -10,6 +10,7 @@ module(...)
 local args = require("rima.lib.args")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local ref = require("rima.ref")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
@@ -34,7 +35,7 @@ end
 
 
 function rima.D(e) -- check if an expression is defined
-  return expression.defined(e)
+  return core.defined(e)
 end
 
 

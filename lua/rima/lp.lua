@@ -5,6 +5,7 @@ local assert, error, io, getmetatable, math = assert, error, io, getmetatable, m
 local require, table, type = require, table, type
 local ipairs, pairs = ipairs, pairs
 local object = require("rima.lib.object")
+local core = require("rima.core")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
 local constraint = require("rima.constraint")
@@ -96,7 +97,7 @@ end
 
 local function sense(S)
   local sense = S.sense
-  if not expression.defined(sense) then return end
+  if not core.defined(sense) then return end
   assert(type(sense) == "string", "Optimisation sense must be a string")
   sense = sense:lower():gsub("z", "s")
   assert(sense == "minimise" or sense == "maximise", "Optimisation sense must be 'minimise' or 'maximise'")

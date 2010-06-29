@@ -5,6 +5,7 @@ local ipairs, rawget = ipairs, rawget
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
+local core = require("rima.core")
 local expression = require("rima.expression")
 local rima = rima
 
@@ -50,9 +51,9 @@ function case.__eval(args, S, eval)
   local remaining_cases = {}
   local matched = false
 
-  if expression.defined(value) then
+  if core.defined(value) then
     for i, v in ipairs(cases) do
-      if expression.defined(v[1]) then
+      if core.defined(v[1]) then
         if value == v[1] then
           if remaining_cases[1] then
             remaining_cases[#remaining_cases+1] = v

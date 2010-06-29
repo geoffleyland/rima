@@ -8,6 +8,7 @@ local assert, error, getmetatable, ipairs, next, rawget, require, select, xpcall
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
 local rima = rima
@@ -173,9 +174,9 @@ function address:__eval(S, eval)
 end
 
 
-function address:defined()
+function address:__defined()
   for _, a in ipairs(self) do
-    if not expression.defined(a.value) and not expression.tags(a.exp).key then
+    if not core.defined(a.value) and not expression.tags(a.exp).key then
       return false
     end
   end
@@ -281,7 +282,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
         -- By now we should have bare refs that don't reference other objects.
         -- This should never happen, but I could be wrong.
-        if not expression.defined(v[1].value) then
+        if not core.defined(v[1].value) then
           error(("address: internal error evaluating '%s%s' as '%s%s':\n  Got an undefined expression (%s) when I shouldn't"):
             format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), rima.repr(v[1])), 0)
         end
@@ -301,7 +302,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
       -- Otherwise, the new base is not a ref.  I'm not sure this can actually happen --
       -- I'll have to write more tests...
       local new_current = expression.eval(new_base, S)
-      if not expression.defined(new_current) then
+      if not core.defined(new_current) then
         return false, nil, new_base, new_address, collected
       end
       return lib.unpackn(try_current(scope.pack(new_current)))
@@ -313,7 +314,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
   -- How should we treat it?
 
   -- if it's a ref or an expression, evaluate it (and recursively tidy up the remaining indices)
-  if not expression.defined(current.value) then
+  if not core.defined(current.value) then
     return handle_expression(current.value, i)
 
   -- if we're trying to index what has to be a scalar, give up

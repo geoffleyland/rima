@@ -8,6 +8,7 @@ local ipairs, type, unpack  = ipairs, type, unpack
 local expression = require("rima.expression")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local rima = rima
 
 module(...)
@@ -42,7 +43,7 @@ end
 
 function call.__eval(args, S, eval)
   local f = expression.eval(args[1], S)
-  if not expression.defined(f) then
+  if not core.defined(f) then
     return expression:new(call, f, unpack(args, 2))
   else
     local status, r

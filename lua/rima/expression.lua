@@ -10,6 +10,7 @@ local rawget, rawset = rawget, rawset
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local rima = rima
 
 module(...)
@@ -107,14 +108,6 @@ function expression.parenthise(e, format, parent_precedence)
 end
 
 
--- Status ----------------------------------------------------------------------
-
-function expression.defined(e)
-  local mt = getmetatable(e)
-  return not mt or not rawget(mt, "__eval")
-end
-
-
 -- Evaluation ------------------------------------------------------------------
 
 function expression.bind(e, S)
@@ -134,7 +127,7 @@ function expression.bind(e, S)
     end
     
     if r then
-      if t and not defined(r[1]) then tag(r[1], t) end
+      if t and not core.defined(r[1]) then tag(r[1], t) end
       return unpack(r)
     end
     
@@ -150,7 +143,7 @@ function expression.eval(e, S)
     local E = proxy.O(e)
     local t = rawget(E, "_tags")
     local r = { f(E, S, eval) }
-    if t and not defined(r[1]) then tag(r[1], t) end
+    if t and not core.defined(r[1]) then tag(r[1], t) end
     return unpack(r)
   else
     return e
