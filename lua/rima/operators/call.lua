@@ -19,10 +19,10 @@ call.precedence = 0
 
 
 -- Argument Checking -----------------------------------------------------------
-
+--[[
 function call:check(args)
 end
-
+--]]
 
 -- String Representation -------------------------------------------------------
 

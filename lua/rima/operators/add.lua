@@ -23,7 +23,7 @@ add.precedence = 5
 
 
 -- Argument Checking -----------------------------------------------------------
-
+--[[
 function add:check(args)
   for i, a in ipairs(args) do
     if not expression.result_type_match(a[2], rima.free()) then
@@ -36,6 +36,8 @@ end
 function add:result_type(args)
   return rima.free()
 end
+--]]
+
 
 -- String Representation -------------------------------------------------------
 

@@ -17,7 +17,7 @@ pow.precedence = 0
 
 
 -- Argument Checking -----------------------------------------------------------
-
+--[[
 function pow:check(a)
   if not expression.result_type_match(a[1], types.number_t) then
     error(("base (%s) of power expression '%s' is not in %s"):
@@ -33,6 +33,7 @@ end
 function pow:result_type(args)
   return types.number_t
 end
+--]]
 
 
 -- String Representation -------------------------------------------------------

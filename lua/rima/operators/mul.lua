@@ -24,7 +24,7 @@ mul.precedence = 3
 
 
 -- Argument Checking -----------------------------------------------------------
-
+--[[
 function mul:check(args)
   for i, a in ipairs(args) do
     if not expression.result_type_match(a[2], types.number_t) then
@@ -37,6 +37,7 @@ end
 function mul:result_type(args)
   return types.number_t
 end
+--]]
 
 
 -- String Representation -------------------------------------------------------
