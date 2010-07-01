@@ -10,6 +10,15 @@ module(...)
 
 --------------------------------------------------------------------------------
 
+function append(t, ...)
+  local l = #t+1
+  for i = 1, select("#", ...) do
+    t[l] = select(i, ...)
+    l = l + 1
+  end
+end
+
+
 function imap(f, t)
   local r = {}
   for i, v in ipairs(t) do r[i] = f(v) end

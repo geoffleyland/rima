@@ -16,6 +16,14 @@ module(...)
 
 local scope = require("rima.scope")
 
+
+-- Utilities -------------------------------------------------------------------
+
+local function is_identifier_string(v)
+  return type(v) == "string" and v:match("^[_%a][_%w]*$")
+end
+
+
 -- Constructor -----------------------------------------------------------------
 
 local address = object:new(_M, "address")
@@ -95,60 +103,61 @@ end
 -- string representation -------------------------------------------------------
 
 function address:__repr(format)
-  if not self[1] then
-    return ""
-  else
-    if format and format.dump then
-      return ("address{%s}"):format(lib.concat(self, ", ",
-        function(a)
-          local v, e = lib.repr(a.value, format), lib.repr(a.exp, format)
-          if v == e then
-            return v
-          else
-            return ("{value=%s, exp=%s}"):format(v, e)
-          end
-        end))
+  if not self[1] then return "" end
+
+  local append, repr = lib.append, lib.repr
+
+  if format.dump then
+    return ("address{%s}"):format(lib.concat(self, ", ",
+      function(a)
+        local v, e = repr(a.value, format), repr(a.exp, format)
+        if v == e then
+          return v
+        else
+          return ("{value=%s, exp=%s}"):format(v, e)
+        end
+      end))
+  end
+
+  local readable = format.readable
+  local mode = "s"
+  local r = {}
+
+  for _, a in ipairs(self) do
+    local v
+    if type(a.exp) == "iterator" and lib.repr(a.value, format):sub(1,5) == "table" then
+      v = a.exp.key
     else
-      local mode = "s"
-      local count = 0
-      local s = ""
-      for _, a in ipairs(self) do
-        if type(a.exp) == "iterator" and lib.repr(a.value, format):sub(1,5) == "table" then
-          a = a.exp.key
-        else
-          a = a.value
-        end
-        if type(a) == "string" and a:match("^[_%a][_%w]*$") then
-          if mode ~= "s" then
-            mode = "s"
-            s = s.."]"
-          end
-          s = s.."."..lib.repr(a, format)
-        else
-          if mode ~= "v" then
-            mode = "v"
-            s = s.."["
-            count = 0
-          end
-          if count > 0 then
-            if format and format.readable then
-              s = s.."]["
-            else
-              s = s..", "
-            end
-          end
-          count = count + 1
-          if type(a) == "string" then
-            s = s.."'"..a.."'"
-          else
-            s = s..lib.repr(a, format)
-          end
-        end
+      v = a.value
+    end
+    if is_identifier_string(v) then
+      -- for strings that can be identifiers, format as a.b
+      if mode ~= "s" then
+        mode = "s"
+        append(r, "]")
       end
-      if mode == "v" then s = s.."]" end
-      return s
+      append(r, ".")
+      append(r, repr(v, format))
+    else
+      -- otherwise format with square braces
+      if mode ~= "v" then
+        mode = "v"
+        append(r, "[")
+      else
+        -- lua-readable format is [x][y], otherwise it's [x, y] for mathematicans
+        append(r, (readable and "][") or ", ")
+      end
+      if type(v) == "string" then
+        -- non-identifier strings are ['1 str.ing']
+        append(r, "'", v, "'")
+      else
+        append(r, repr(v, format))
+      end
     end
   end
+
+  if mode == "v" then append(r, "]") end
+  return lib.concat(r)
 end
 __tostring = lib.__tostring
 
@@ -156,12 +165,12 @@ __tostring = lib.__tostring
 -- evaluation ------------------------------------------------------------------
 
 function address:__eval(S, eval)
-  local a = {}
-  for i, v in ipairs(self) do
-    local b = core.bind(v.exp, S)
-    a[i] = { exp=b, value=eval(v.value, S) }
+  local new_address = {}
+  for i, a in ipairs(self) do
+    local b = core.bind(a.exp, S)
+    new_address[i] = { exp=b, value=eval(a.value, S) }
   end
-  return object.new(address, a)
+  return object.new(address, new_address)
 end
 
 
