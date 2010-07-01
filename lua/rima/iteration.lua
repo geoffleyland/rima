@@ -83,19 +83,19 @@ end
 
 -- Iterator --------------------------------------------------------------------
 
-iterator = object:new({}, "iterator")
+sequence = object:new({}, "sequence")
 
-function iterator:new(exp, order, values, names, result)
+function sequence:new(exp, order, values, names, result)
   return object.new(self, {exp=exp, order=order, values=values, names=names, result=result})
 end
 
 
-function iterator:set_names(names)
+function sequence:set_names(names)
   self.names = names
 end
 
 
-function iterator:__repr(format)
+function sequence:__repr(format)
   local e = rima.repr(self.exp, format)
   local n = table.concat(self.names, ", ")
   if self.order ~= "a" or self.values ~= "elements" then
@@ -110,10 +110,10 @@ function iterator:__repr(format)
     end
   end
 end
-iterator.__tostring = lib.__tostring
+sequence.__tostring = lib.__tostring
 
 
-function iterator:eval(S)
+function sequence:eval(S)
   -- We're looking to evaluate to a table.
   -- Unfortunately, the elements of the table might be spread over several
   -- layers of scope, so we have to work backwards through the scopes
@@ -154,11 +154,11 @@ function iterator:eval(S)
     end
   end
 
-  return iterator:new(b, self.order, self.values, self.names, r)
+  return sequence:new(b, self.order, self.values, self.names, r)
 end
 
 
-function iterator:__defined()
+function sequence:__defined()
   -- we're looking for a table (or something iterable)
   -- if the table is empty, we'll call it undefined.
   -- This could be wrong in some cases (I hope not), but usually
@@ -180,7 +180,7 @@ function iterator:__defined()
 end
 
 
-function iterator:iterate()
+function sequence:iterate()
   local function iiter(a, e)
     local i = e[1] + 1
     local v = a[i]
@@ -215,7 +215,7 @@ function iterator:iterate()
 end
 
 
-function iterator:results()
+function sequence:results()
   local names = self.names
   local exp = self.exp
 
@@ -313,17 +313,17 @@ function set_list:new(sets)
     -- what was l?
     local it
     if type(set) == "string" then
-      it = iterator:new(rima.R(set), "a", "elements", names)
-    elseif iterator:isa(set) then
+      it = sequence:new(rima.R(set), "a", "elements", names)
+    elseif sequence:isa(set) then
       set:set_names(names)
       it = set
     elseif not core.defined(set) then
-      it = iterator:new(set, "a", "elements", names)
+      it = sequence:new(set, "a", "elements", names)
     else
       local m = getmetatable(set)
       local i = m and m.__iterate
       if i then
-        it = iterator:new(set, "a", "elements", names)
+        it = sequence:new(set, "a", "elements", names)
       else
         error(("set_list error: didn't understand set argument #%d.  Expected a string, expression or iterable object.  Got '%s'")
           :format(i, rima.repr(set)))
@@ -378,15 +378,15 @@ function set_list:iterate(S)
 end
 
 
--- Top-level iterators ---------------------------------------------------------
+-- Top-level sequences ---------------------------------------------------------
 
 function rima.pairs(exp)
-  return iterator:new(exp, "", "pairs")
+  return sequence:new(exp, "", "pairs")
 end
 
 
 function rima.ipairs(exp)
-  return iterator:new(exp, "i", "pairs")
+  return sequence:new(exp, "i", "pairs")
 end
 
 
