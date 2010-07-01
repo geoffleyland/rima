@@ -6,7 +6,6 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local expression = require("rima.expression")
 local function_v = require("rima.values.function_v")
 require("rima.public")
 local rima = rima

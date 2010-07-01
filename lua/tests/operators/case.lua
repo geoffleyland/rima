@@ -6,7 +6,6 @@ local expression_tester = require("test.expression_tester")
 local case = require("rima.operators.case")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
-local expression = require("rima.expression")
 require("rima.public")
 local rima = rima
 

@@ -13,7 +13,6 @@ local rima = rima
 module(...)
 
 local ref = require("rima.ref")
-local expression = require("rima.expression")
 local iteration = require("rima.iteration")
 
 -- Tabulation ------------------------------------------------------------------

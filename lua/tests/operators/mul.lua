@@ -7,7 +7,6 @@ local mul = require("rima.operators.mul")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local expression = require("rima.expression")
 require("rima.types.number_t")
 require("rima.public")
 local rima = rima

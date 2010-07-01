@@ -4,7 +4,6 @@
 local assert, ipairs = assert, ipairs
 
 local core = require("rima_lpsolve_core")
-local expression = require("rima.expression")
 
 module(...)
 
