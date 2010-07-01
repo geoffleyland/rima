@@ -65,8 +65,8 @@ function test(options)
 
     if not pass then
       local s = ""
-      s = s..("error linearising %s:\n"):format(rima.repr(e))
-      s = s..("  Evaluated to %s\n"): format(rima.repr(core.eval(e, S)))
+      s = s..("error linearising %s:\n"):format(lib.repr(e))
+      s = s..("  Evaluated to %s\n"): format(lib.repr(core.eval(e, S)))
       s = s..("  Constant: %.4g %s %.4g\n"):format(expected_constant,
         (expected_constant==got_constant and "==") or "~=", got_constant)
       local all = {}
@@ -77,7 +77,7 @@ function test(options)
       table.sort(ordered)
       for _, k in ipairs(ordered) do
         local a, b = expected_terms[k], got_terms[k]
-        s = s..("  %s: %s %s %s\n"):format(k, rima.repr(a), (a==b and "==") or "~=", rima.repr(b))
+        s = s..("  %s: %s %s %s\n"):format(k, lib.repr(a), (a==b and "==") or "~=", lib.repr(b))
       end
       T:test(false, s)
     else

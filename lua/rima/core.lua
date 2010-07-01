@@ -123,7 +123,7 @@ function set(e, t, v)
     f(e, t, v)
   else
     error(("error setting result field '%s' to '%s': the object used as a field index doesn't support setting"):
-      format(rima.repr(e), rima.repr(v)))
+      format(lib.repr(e), lib.repr(v)))
   end
 end
 

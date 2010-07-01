@@ -5,6 +5,7 @@ local ipairs, rawget = ipairs, rawget
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
+local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
 local rima = rima
@@ -25,12 +26,12 @@ end
 
 function case.__repr(args, format)
   args = proxy.O(args)
-  local s = ("case %s ("):format(rima.repr(args[1], format))
+  local s = ("case %s ("):format(lib.repr(args[1], format))
   for _, v in ipairs(args[2]) do
-    s = s..("%s: %s; "):format(rima.repr(v[1], format), rima.repr(v[2], format))
+    s = s..("%s: %s; "):format(lib.repr(v[1], format), lib.repr(v[2], format))
   end
   if rawget(args, 3) then
-    s = s..("default: %s; "):format(rima.repr(args[3]))
+    s = s..("default: %s; "):format(lib.repr(args[3]))
   end
   s = s..")"
   return s

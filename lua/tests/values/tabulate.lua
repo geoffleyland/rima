@@ -4,7 +4,6 @@
 local series = require("test.series")
 local scope = require("rima.scope")
 local core = require("rima.core")
-local expression = require("rima.expression")
 require("rima.public")
 local rima = rima
 

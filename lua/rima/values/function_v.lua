@@ -36,11 +36,11 @@ function function_v:new(inputs, expression, S, ...)
         new_inputs[i] = v
       else
         error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
-          format(i, rima.repr(v), type(v)), 0)
+          format(i, lib.repr(v), type(v)), 0)
       end
     else
       error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
-        format(i, rima.repr(v), type(v)), 0)
+        format(i, lib.repr(v), type(v)), 0)
     end
   end
 
@@ -52,13 +52,13 @@ end
 
 function function_v:__repr(format)
   return ("function(%s) return %s"):
-    format(lib.concat_repr(self.inputs, format), rima.repr(self.expression, format))
+    format(lib.concat_repr(self.inputs, format), lib.repr(self.expression, format))
 --[[
   if self.outputs[1] then
     s = s.." where {"
     for i, a in ipairs(self.outputs) do
       if i > 1 then s = s..", " end
-      s = s..a.name.." = "..rima.repr(self.S:_value(a.name))
+      s = s..a.name.." = "..lib.repr(self.S:_value(a.name))
     end
     s = s.."}"
   end
@@ -96,19 +96,19 @@ function function_v:call(args, S, eval)
   local function_scope = (self.inputs[1] and rima.scope.spawn(self.S or S, nil, {overwrite=true, rewrite=true, no_undefined=true})) or S
 
   for i, a in ipairs(outputs) do
-    caller_scope[rima.repr(a)] = 0
+    caller_scope[lib.repr(a)] = 0
   end
 
   for i, a in ipairs(self.inputs) do
-    function_scope[rima.repr(a)] = 0
+    function_scope[lib.repr(a)] = 0
   end
 
   for i, a in ipairs(outputs) do
-    caller_scope[rima.repr(a)] = core.bind(self.outputs[i], function_scope)
+    caller_scope[lib.repr(a)] = core.bind(self.outputs[i], function_scope)
   end
 
   for i, a in ipairs(self.inputs) do
-    function_scope[rima.repr(a)] = core.bind(args[i], caller_scope)
+    function_scope[lib.repr(a)] = core.bind(args[i], caller_scope)
   end
 
   return eval(self.expression, function_scope)

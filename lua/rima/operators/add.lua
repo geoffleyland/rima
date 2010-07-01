@@ -10,7 +10,6 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local rima = rima
 
 module(...)
 
@@ -29,7 +28,7 @@ function add:check(args)
   for i, a in ipairs(args) do
     if not expression.result_type_match(a[2], rima.free()) then
       error(("argument %d (%s, '%s') to add expression '%s' is not in %s"):
-        format(i, rima.repr(a[2]), type(a[2]), self.__repr(args), rima.repr(rima.free())), 0)
+        format(i, lib.repr(a[2]), type(a[2]), self.__repr(args), lib.repr(rima.free())), 0)
     end
   end
 end
@@ -47,7 +46,7 @@ function add.__repr(args, format)
   if format and format.dump then
     return "+("..
       lib.concat(args, ", ",
-        function(a) return lib.simple_repr(a[1], format).."*"..rima.repr(a[2], format) end)..
+        function(a) return lib.simple_repr(a[1], format).."*"..lib.repr(a[2], format) end)..
       ")"
   end
 
@@ -91,8 +90,8 @@ function add.__eval(args, S, eval)
   local constant, terms = 0, {}
   
   local function add_term(c, e)
-    local n = rima.repr(e)
-    local s = rima.repr(e, { scopes = true })
+    local n = lib.repr(e)
+    local s = lib.repr(e, { scopes = true })
     local t = terms[s]
     if t then
       t.coeff = t.coeff + c

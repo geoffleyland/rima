@@ -186,9 +186,9 @@ end
 
 function svalue:__repr(format)
   if format and format.dump then
-    return "svalue{ value = "..rima.repr(self.value, format).." }"
+    return "svalue{ value = "..lib.repr(self.value, format).." }"
   else
-    return rima.repr(self.value, format)
+    return lib.repr(self.value, format)
   end
 end
 svalue.__tostring = lib.__tostring
@@ -327,15 +327,15 @@ function scope.check(s, name, address, value)
         -- this is ok, we can override a prototype
       elseif cs == s and not S.rewrite then
         error(("scope: cannot set '%s%s' to '%s': existing definition as '%s'"):
-          format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
+          format(name, address and lib.repr(address) or "", lib.repr(value), lib.repr(c)), 0)
       elseif cs ~= s and undefined_t:isa(c.value) then
         if not c.value:includes(value) then
           error(("scope: cannot set '%s%s' to '%s': violates existing constraint '%s'"):
-            format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
+            format(name, address and lib.repr(address) or "", lib.repr(value), lib.repr(c)), 0)
         end
       elseif cs ~= s then
         error(("scope: cannot set '%s%s' to '%s': existing definition as '%s'"):
-          format(name, address and rima.repr(address) or "", rima.repr(value), rima.repr(c)), 0)
+          format(name, address and lib.repr(address) or "", lib.repr(value), lib.repr(c)), 0)
       end
     end
   end
@@ -373,7 +373,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     if type(set) == "string" then
       set = rima.R(set)
     end
-    name = rima.repr(name)
+    name = lib.repr(name)
     free_indexes = free_indexes or {}
     free_indexes[#free_indexes+1] = { [name] = set }
   end

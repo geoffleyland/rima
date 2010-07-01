@@ -34,15 +34,15 @@ function number_t:new(lower, upper, integer)
 
   if type(lower) == "number" and type(upper) == "number" and lower > upper then
     error(("%s: lower bound must be <= upper bound, got %s and %s.\n  Usage: %s"):format(
-          fname, rima.repr(lower), rima.repr(upper), usage))
+          fname, lib.repr(lower), lib.repr(upper), usage))
   end
   if type(lower) == "number" and integer and math.floor(lower) ~= lower then
     error(("%s: lower bound is not integer, got %s.\n  Usage: %s"):format(
-          fname, rima.repr(lower), usage))
+          fname, lib.repr(lower), usage))
   end
   if type(upper) == "number" and integer and math.floor(upper) ~= upper then
     error(("%s: upper bound is not integer, got %s.\n  Usage: %s"):format(
-          fname, rima.repr(upper), usage))
+          fname, lib.repr(upper), usage))
   end
 
   return undefined_t.new(self, { lower=lower, upper=upper, integer=integer })
@@ -54,9 +54,9 @@ end
 function number_t:__repr(format)
   if self.integer and self.lower == 0 and self.upper == 1 then return "binary" end
 --  return ("%s <= V <= %s, V %s"):format(
---    rima.repr(self.lower), rima.repr(self.upper), self.integer and "integer" or "real")
+--    lib.repr(self.lower), lib.repr(self.upper), self.integer and "integer" or "real")
   return ("%s <= * <= %s, * %s"):format(
-    rima.repr(self.lower, format), rima.repr(self.upper, format), self.integer and "integer" or "real")
+    lib.repr(self.lower, format), lib.repr(self.upper, format), self.integer and "integer" or "real")
 end
 number_t.__tostring = lib.__tostring
 
@@ -65,7 +65,7 @@ function number_t:describe(vars)
 --  local lower, upper = rima.eval(self.lower, env), rima.eval(self.upper, env)
   if self.integer and self.lower == 0 and self.upper == 1 then return vars.." binary" end
   return ("%s <= %s <= %s, %s %s"):format(
-    rima.repr(self.lower), vars, rima.repr(self.upper), vars, self.integer and "integer" or "real")
+    lib.repr(self.lower), vars, lib.repr(self.upper), vars, self.integer and "integer" or "real")
 end
 
 --[[
@@ -73,7 +73,7 @@ function number_t:describe(vars, env)
   local lower, upper = rima.eval(self.lower, env), rima.eval(self.upper, env)
   if self.integer and self.lower == 0 and self.upper == 1 then return vars.." binary" end
   return ("%s <= %s <= %s, %s %s"):format(
-    rima.repr(lower), vars, rima.repr(upper), vars, self.integer and "integer" or "real")
+    lib.repr(lower), vars, lib.repr(upper), vars, self.integer and "integer" or "real")
 end
 --]]
 -- Checks ----------------------------------------------------------------------

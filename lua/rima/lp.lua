@@ -5,6 +5,7 @@ local assert, error, io, getmetatable, math = assert, error, io, getmetatable, m
 local require, table, type = require, table, type
 local ipairs, pairs = ipairs, pairs
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
 local constraint = require("rima.constraint")
@@ -122,7 +123,7 @@ function sparse_form(S)
   -- Check all the variables in the objective appear in the constraints
   for name in pairs(objective) do
     if not variables[name] then
-      error(("The variable '%s' is not involved in any constraint, but is in the objective\n"):format(rima.repr(name)))
+      error(("The variable '%s' is not involved in any constraint, but is in the objective\n"):format(lib.repr(name)))
     end
   end
 
@@ -168,7 +169,7 @@ function write(S, values, f)
   local objective = scope.lookup(S, "objective")
   if objective and sense then
     local o = rima.E(objective.value, S)
-    f:write(("%s:\n  %s\n"):format((sense == "minimise" and "Minimise") or "Maximise", rima.repr(o)))
+    f:write(("%s:\n  %s\n"):format((sense == "minimise" and "Minimise") or "Maximise", lib.repr(o)))
   else
     f:write("No objective defined\n")
   end
@@ -178,7 +179,7 @@ function write(S, values, f)
   local constraints = tostring_constraints(S)
   local maxlen = 0
   for _, c in ipairs(constraints) do
-    c.name = rima.repr(c.ref)
+    c.name = lib.repr(c.ref)
     maxlen = math.max(maxlen, c.name:len())
   end
   for i, c in ipairs(constraints) do

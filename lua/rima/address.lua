@@ -11,7 +11,6 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
-local rima = rima
 
 module(...)
 
@@ -102,7 +101,7 @@ function address:__repr(format)
     if format and format.dump then
       return ("address{%s}"):format(lib.concat(self, ", ",
         function(a)
-          local v, e = rima.repr(a.value, format), rima.repr(a.exp, format)
+          local v, e = lib.repr(a.value, format), lib.repr(a.exp, format)
           if v == e then
             return v
           else
@@ -114,7 +113,7 @@ function address:__repr(format)
       local count = 0
       local s = ""
       for _, a in ipairs(self) do
-        if type(a.exp) == "iterator" and rima.repr(a.value, format):sub(1,5) == "table" then
+        if type(a.exp) == "iterator" and lib.repr(a.value, format):sub(1,5) == "table" then
           a = a.exp.key
         else
           a = a.value
@@ -124,7 +123,7 @@ function address:__repr(format)
             mode = "s"
             s = s.."]"
           end
-          s = s.."."..rima.repr(a, format)
+          s = s.."."..lib.repr(a, format)
         else
           if mode ~= "v" then
             mode = "v"
@@ -142,7 +141,7 @@ function address:__repr(format)
           if type(a) == "string" then
             s = s.."'"..a.."'"
           else
-            s = s..rima.repr(a, format)
+            s = s..lib.repr(a, format)
           end
         end
       end
@@ -197,7 +196,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
     local status, v, j = xpcall(function() return mt.__address(current.value, S, collected:sub(used or 1), 1, core.bind) end, debug.traceback)
     if not status then
       error(("address: error evaluating '%s%s' as '%s':\n  %s"):
-        format(rima.repr(base), rima.repr(self), rima.repr(current), v:gsub("\n", "\n  ")), 0)
+        format(lib.repr(base), lib.repr(self), lib.repr(current), v:gsub("\n", "\n  ")), 0)
     end
     -- ... and then, if there are no more indexes left, we'll evaluate it.
     -- otherwise we leave it as a ref for the next call to index.
@@ -213,7 +212,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
   local function fail()
     error(("address: error resolving '%s%s': '%s%s' is not indexable (got '%s' %s)"):
-      format(rima.repr(base), rima.repr(self:sub(1, i)), rima.repr(base), rima.repr(self:sub(1, i-1)), rima.repr(current), object.type(current.value)))
+      format(lib.repr(base), lib.repr(self:sub(1, i)), lib.repr(base), lib.repr(self:sub(1, i-1)), lib.repr(current), object.type(current.value)))
   end
 
   local function index(t, j, b)
@@ -255,7 +254,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
       local status, r = lib.packs(xpcall(function() return new_address:resolve(S, c, 1, new_base, eval) end, debug.traceback))
       if not status then
         error(("address: error evaluating '%s%s' as '%s%s':\n  %s"):
-          format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), r[1]:gsub("\n", "\n  ")), 0)
+          format(lib.repr(base), lib.repr(self), lib.repr(new_base), lib.repr(new_address), r[1]:gsub("\n", "\n  ")), 0)
       end
       return r
     end
@@ -282,7 +281,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
         -- This should never happen, but I could be wrong.
         if not core.defined(v[1].value) then
           error(("address: internal error evaluating '%s%s' as '%s%s':\n  Got an undefined expression (%s) when I shouldn't"):
-            format(rima.repr(base), rima.repr(self), rima.repr(new_base), rima.repr(new_address), rima.repr(v[1])), 0)
+            format(lib.repr(base), lib.repr(self), lib.repr(new_base), lib.repr(new_address), lib.repr(v[1])), 0)
         end
 
         -- try to resolve the address with this version of the ref as a base

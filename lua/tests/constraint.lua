@@ -3,6 +3,7 @@
 
 local series = require("test.series")
 local constraint = require("rima.constraint")
+local lib = require("rima.lib")
 local scope = require("rima.scope")
 require("rima.public")
 local rima = rima
@@ -21,7 +22,7 @@ function test(options)
   S.c = rima.free()
   S.d = 5
   T:expect_ok(function() S.e = constraint:new(a * b + c * d, "<=", 3) end)
-  T:check_equal(rima.repr(S.e), "a*b + c*d <= 3")
+  T:check_equal(lib.repr(S.e), "a*b + c*d <= 3")
 
   return T:close()
 end

@@ -5,9 +5,8 @@ local setmetatable, type = setmetatable, type
 
 local series = require("test.series")
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local address = require("rima.address")
-require("rima.public")
-local rima = rima
 
 module(...)
 
@@ -27,7 +26,7 @@ function test(options)
   local a = address:new("a", 1, 2)
   T:check_equal(a, ".a[1, 2]")
   T:check_equal(a+a, ".a[1, 2].a[1, 2]")
-  T:check_equal(rima.repr(a, { dump=true }), "address{\"a\", 1, 2}")
+  T:check_equal(lib.repr(a, { dump=true }), "address{\"a\", 1, 2}")
 
   T:check_equal(a:sub(1), ".a[1, 2]")
   T:check_equal(a:sub(2), "[1, 2]")

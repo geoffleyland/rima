@@ -22,11 +22,11 @@ pow.precedence = 0
 function pow:check(a)
   if not expression.result_type_match(a[1], types.number_t) then
     error(("base (%s) of power expression '%s' is not in %s"):
-      format(rima.repr(a[1]), __repr(args), rima.repr(types.number_t)), 0)
+      format(lib.repr(a[1]), __repr(args), lib.repr(types.number_t)), 0)
   end
   if not expression.result_type_match(a[2], types.number_t) then
     error(("base (%s) of power expression '%s' is not in %s"):
-      format(rima.repr(a[2]), __repr(args), rima.repr(types.number_t)), 0)
+      format(lib.repr(a[2]), __repr(args), lib.repr(types.number_t)), 0)
   end
 end
 

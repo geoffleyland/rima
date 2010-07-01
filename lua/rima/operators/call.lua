@@ -9,7 +9,6 @@ local expression = require("rima.expression")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local rima = rima
 
 module(...)
 
@@ -60,7 +59,7 @@ function call.__eval(args, S, eval)
 
     if not status then
       error(("call: error evaluating '%s' as '%s' with arguments (%s):\n  %s"):
-        format(__repr(args), rima.repr(f), lib.concat_repr({unpack(args, 2)}), r:gsub("\n", "\n  ")), 0)
+        format(__repr(args), lib.repr(f), lib.concat_repr({unpack(args, 2)}), r:gsub("\n", "\n  ")), 0)
     end
     return r
   end

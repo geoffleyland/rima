@@ -59,7 +59,7 @@ function ref.proxy_mt.__repr(r, format)
 
   local name
   if R.scope and format and format.scopes then
-    name = R.name.."@"..rima.repr(R.scope, format)
+    name = R.name.."@"..lib.repr(R.scope, format)
   else
     name = R.name
   end
@@ -109,7 +109,7 @@ function ref.proxy_mt.__eval(r, S)
   local status, v = pcall(function() return core.eval(e.value, S) end)
   if not status then
     error(("error evaluating '%s' as '%s':\n  %s"):
-      format(r.name, rima.repr(e), v:gsub("\n", "\n  ")), 0)
+      format(r.name, lib.repr(e), v:gsub("\n", "\n  ")), 0)
   end
 
   if undefined_t:isa(v) then
@@ -125,7 +125,7 @@ function ref.proxy_mt.__eval(r, S)
   else
     if not r.type:includes(v) then
       error(("'%s' (%s) is not of type '%s'"):
-        format(r.name, rima.repr(v), r.type:describe(r.name)), 0)
+        format(r.name, lib.repr(v), r.type:describe(r.name)), 0)
     end
     return v
   end
@@ -152,7 +152,7 @@ function ref.proxy_mt.__set(r, t, v)
   local cv = t[name]
   if cv then
     error(("error setting '%s' to %s: field already exists (%s)"):
-      format(name, rima.repr(v), rima.repr(cv)), 0)
+      format(name, lib.repr(v), lib.repr(cv)), 0)
   else
     t[name] = v
   end

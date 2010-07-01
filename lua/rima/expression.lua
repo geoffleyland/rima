@@ -11,7 +11,6 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local rima = rima
 
 module(...)
 
@@ -165,7 +164,7 @@ function expression.proxy_mt.__newindex(e, i, v)
   end
   if err then
     error(("expression new index: error setting '%s' as '%s' to %s: '%s' %s"):
-      format(rima.repr(e[i]), rima.repr(r[i]), rima.repr(v), rima.repr(r), err), 0)
+      format(lib.repr(e[i]), lib.repr(r[i]), lib.repr(v), lib.repr(r), err), 0)
   end
 end
 

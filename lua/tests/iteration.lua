@@ -3,6 +3,7 @@
 
 local series = require("test.series")
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
 local core = require("rima.core")
 local ref = require("rima.ref")
 local scope = require("rima.scope")

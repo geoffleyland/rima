@@ -30,7 +30,7 @@ function mul:check(args)
   for i, a in ipairs(args) do
     if not expression.result_type_match(a[2], types.number_t) then
       error(("argument #d to mul (%s) is not in %s"):
-        format(i, rima.repr(a[2]), rima.repr(types.number_t)), 0)
+        format(i, lib.repr(a[2]), lib.repr(types.number_t)), 0)
     end
   end
 end
@@ -48,7 +48,7 @@ function mul.__repr(args, format)
   if format and format.dump then
     return "*("..
       lib.concat(args, ", ",
-        function(a) return rima.repr(a[2], format).."^"..lib.simple_repr(a[1], format) end)..
+        function(a) return lib.repr(a[2], format).."^"..lib.simple_repr(a[1], format) end)..
       ")"
   end
 
@@ -71,7 +71,7 @@ function mul.__repr(args, format)
     -- If the constant's not 1, write the constant
     local ac = math.abs(c)
     if ac ~= 1 then
-      s = s.."^"..rima.repr(ac, format)
+      s = s.."^"..lib.repr(ac, format)
     end
   end
   return s
@@ -96,8 +96,8 @@ function mul.simplify(args)
   local coeff, terms = 1, {}
   
   local function add_term(exp, e)
-    local n = rima.repr(e)
-    local s = rima.repr(e, { scopes = true })
+    local n = lib.repr(e)
+    local s = lib.repr(e, { scopes = true })
     local t = terms[s]
     if t then
       t.exponent = t.exponent + exp

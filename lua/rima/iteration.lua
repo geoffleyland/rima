@@ -53,7 +53,7 @@ end
 
 
 function range_type:__repr(format)
-  return ("range(%s, %s)"):format(rima.repr(self.low, format), rima.repr(self.high, format))
+  return ("range(%s, %s)"):format(lib.repr(self.low, format), lib.repr(self.high, format))
 end
 range_type.__tostring = lib.__tostring
 
@@ -102,7 +102,7 @@ end
 
 
 function sequence:__repr(format)
-  local e = rima.repr(self.exp, format)
+  local e = lib.repr(self.exp, format)
   local n = table.concat(self.names, ", ")
   if self.order ~= "a" or self.values ~= "elements" then
     local f = (format and format.readable and "%s=rima.%s%s(%s)") or "%s in %s%s(%s)"
@@ -296,7 +296,7 @@ function set_list:new(sets)
       if type(s[2]) == "string" then -- '"l"'
         namestring, set = s[2], s[2]
       elseif object.type(s[2]) == "ref" then -- 'l'
-        namestring, set = rima.repr(s[2]), s[2]
+        namestring, set = lib.repr(s[2]), s[2]
       else -- assume it's a table '{a=l}'
         namestring, set = next(s[2])
       end
@@ -305,7 +305,7 @@ function set_list:new(sets)
       set = s[2]
     else
       error(("set_list error: didn't understand set argument #%d.  Got '%s'")
-        :format(i, rima.repr(s)))
+        :format(i, lib.repr(s)))
     end
 
     -- did we get "['a, b']=l"?
@@ -330,7 +330,7 @@ function set_list:new(sets)
         it = sequence:new(set, "a", "elements", names)
       else
         error(("set_list error: didn't understand set argument #%d.  Expected a string, expression or iterable object.  Got '%s'")
-          :format(i, rima.repr(set)))
+          :format(i, lib.repr(set)))
       end
     end
     clean_sets[i] = it

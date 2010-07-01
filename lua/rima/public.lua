@@ -66,7 +66,7 @@ function rima.E(e, S) -- evaluate an expression
     return r
   else
     core.reset_depth()
-    error(("evaluate: error evaluating '%s':\n  %s"):format(rima.repr(e), r:gsub("\n", "\n  ")), 0)
+    error(("evaluate: error evaluating '%s':\n  %s"):format(lib.repr(e), r:gsub("\n", "\n  ")), 0)
   end
 end
 
@@ -112,7 +112,7 @@ function rima.linearise(e, S)
   local status, constant, terms = xpcall(function() return linearise.linearise(l, S) end, debug.traceback)
   if not status then
     error(("error while linearising '%s':\n  linear form: %s\n  error:\n    %s"):
-      format(rima.repr(e), rima.repr(l), constant:gsub("\n", "\n    ")), 0)
+      format(lib.repr(e), lib.repr(l), constant:gsub("\n", "\n    ")), 0)
   else
     return constant, terms
   end

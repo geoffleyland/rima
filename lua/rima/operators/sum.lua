@@ -33,9 +33,9 @@ function sum.__repr(args, format)
   local sets, e = args[1], args[2]
   local name = (format and format.readable and "rima.sum") or "sum"
   if format and format.dump then
-    return name.."({"..lib.concat_repr(sets, format).."}, "..rima.repr(e, format)..")"
+    return name.."({"..lib.concat_repr(sets, format).."}, "..lib.repr(e, format)..")"
   else
-    return name.."{"..lib.concat_repr(sets, format).."}("..rima.repr(e, format)..")"
+    return name.."{"..lib.concat_repr(sets, format).."}("..lib.repr(e, format)..")"
   end
 end
 
@@ -55,7 +55,7 @@ function sum.__eval(args, S, eval)
     if undefined and undefined[1] then
       -- Undefined terms are stored in groups based on the undefined sum
       -- indices (so we can group them back into sums over the same indices)
-      local name = lib.concat(undefined, ",", rima.repr)
+      local name = lib.concat(undefined, ",", lib.repr)
       local terms
       local udn = undefined_terms[name]
       if not udn then
