@@ -7,7 +7,6 @@ local ipairs, pairs = ipairs, pairs
 local object = require("rima.lib.object")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local expression = require("rima.expression")
 local constraint = require("rima.constraint")
 local tabulate = require("rima.values.tabulate")
 require("rima.public")
@@ -222,10 +221,10 @@ function solve(solver, S, values)
 
   local r2 = {}
   for i, v in ipairs(r.variables) do
-    expression.set(variables[i].ref, r2, v)
+    core.set(variables[i].ref, r2, v)
   end
   for i, v in ipairs(r.constraints) do
-    expression.set(constraints[i].ref, r2, v)
+    core.set(constraints[i].ref, r2, v)
   end
   return r.objective, r2
 end

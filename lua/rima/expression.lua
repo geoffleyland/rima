@@ -108,20 +108,6 @@ function expression.parenthise(e, format, parent_precedence)
 end
 
 
--- Evaluation ------------------------------------------------------------------
-
-
-function expression.set(e, t, v)
-  local mt = getmetatable(e)
-  local f = mt and rawget(mt, "__set")
-  if not f then
-    error(("error setting result field '%s' to '%s': the object used as a field index doesn't support setting"):
-      format(rima.repr(e), rima.repr(v)))
-  end
-  f(proxy.O(e), t, v)
-end
-
-
 -- Overloaded operators --------------------------------------------------------
 
 function expression.proxy_mt.__add(a, b)

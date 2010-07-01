@@ -147,6 +147,7 @@ end
 -- Setting ---------------------------------------------------------------------
 
 function ref.proxy_mt.__set(r, t, v)
+  r = proxy.O(r)
   local name = r.name
   local cv = t[name]
   if cv then

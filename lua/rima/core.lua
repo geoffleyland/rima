@@ -115,5 +115,18 @@ function type(e, S)
 end
 
 
+-- Setting ---------------------------------------------------------------------
+
+function set(e, t, v)
+  local f = lib.getmetamethod(e, "__set")
+  if f then
+    f(e, t, v)
+  else
+    error(("error setting result field '%s' to '%s': the object used as a field index doesn't support setting"):
+      format(rima.repr(e), rima.repr(v)))
+  end
+end
+
+
 -- EOF -------------------------------------------------------------------------
 

@@ -132,6 +132,7 @@ end
 
 
 function index.__set(args, t, v)
+  args = proxy.O(args)
   local base, address = proxy.O(args[1]), args[2]
   local name = base.name
 

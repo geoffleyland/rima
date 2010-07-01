@@ -6,7 +6,6 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local expression = require("rima.expression")
 local ref = require("rima.ref")
 local iteration = require("rima.iteration")
 require("rima.public")
@@ -86,7 +85,7 @@ function test(options)
   do
     local a, b = rima.R"a, b"
     local t = {}
-    expression.set(a, t, 10)
+    core.set(a, t, 10)
     T:check_equal(t.a, 10)
   end
 
