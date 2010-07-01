@@ -93,6 +93,16 @@ function test(options)
   check_linear(1 + rima.sum({c=d}, c*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
   check_linear(1 + rima.sum({c=d}, d[c]*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
 
+  do
+    local d, D = rima.R"d, D"
+    T:expect_ok(LF(rima.sum{d=D}(d), rima.scope.new{ D = { rima.free() }}))
+    T:expect_ok(LF(rima.sum{d=D}(d.a), rima.scope.new{ D = { {a=rima.free()} }}))
+    local S = rima.scope.new{ D = { {a=1} }}
+    S.D[d].b = rima.free()
+    T:expect_ok(LF(rima.sum{d=D}(d.b), S))
+    T:expect_ok(LF(rima.sum{d=D}(d.a * d.b), S))
+  end
+
   return T:close()
 end
 

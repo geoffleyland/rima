@@ -21,10 +21,18 @@ function test(options)
   local E = rima.E
   
   local x, y, z, Q, R, r = rima.R"x, y, z, Q, R, r"
-  local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = rima.range(2, r) }
-  
   T:check_equal(rima.sum{Q}(x[Q]), "sum{Q}(x[Q])")
   T:check_equal(E(rima.sum{Q}(x[Q])), "sum{Q}(x[Q])")
+
+  do
+    local S = scope.new{ x = {10}, Q = {"a"}, y={{z=13}} }
+    T:check_equal(E(rima.sum({r=Q}, x[r]), S), 10)
+    T:check_equal(E(rima.sum({r=x}, r), S), 10)
+    T:check_equal(E(rima.sum({r=x}, r+1), S), 11)
+    T:check_equal(E(rima.sum({r=y}, r.z), S), 13)
+  end
+
+  local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = rima.range(2, r) }  
   T:check_equal(E(rima.sum({r=Q}, x[r]), S), 60)
   T:check_equal(E(rima.sum({Q}, x[Q]), S), 60)
   T:check_equal(rima.sum{y=Q}(x[y]), "sum{y in Q}(x[y])")
@@ -37,6 +45,18 @@ function test(options)
   T:check_equal(E(rima.sum{y=x}(x[y]), S), 60)
   T:check_equal(E(rima.sum{y=x}(x[y] + y), S), 120)
   T:check_equal(E(rima.sum{y=Q}(x[y] + z[y]), S), 660)
+
+  do
+    local S = scope.new{ Q = {"a"}, x = { rima.free() }, z = { a=rima.free() } }
+    T:check_equal(E(rima.sum{y=x}(y), S), "x[1]")
+    T:check_equal(E(rima.sum{y=z}(y), S), "z.a")
+    T:check_equal(E(rima.sum{y=Q}(y), S), "a")
+    T:check_equal(E(rima.sum{y=Q}(Q[y]), S), "a")
+    T:check_equal(E(rima.sum{y=x}(x[y]), S), "x[1]")
+    T:check_equal(E(rima.sum{y=z}(z[y]), S), "z.a")
+    T:check_equal(E(rima.sum{y=Q}(x[y]), S), "x[1]")
+    T:check_equal(E(rima.sum{y=Q}(x[y] + z[y]), S), "x[1] + z.a")
+  end
 
   do
     local S = scope.new{ Q = {"a", "b", "c"}, x = { rima.free(), rima.free(), rima.free() }, z = { a=rima.free(), b=rima.free(), c=rima.free() } }
@@ -98,6 +118,24 @@ function test(options)
     T:check_equal(B(rima.sum{r}(r * x[r]), S), "r*x[1] + r*x[2] + r*x[3]")
     T:check_equal(E(B(rima.sum{r}(r * x[r]), S)), "x[1] + 2*x[2] + 3*x[3]")
     T:check_equal(E(rima.sum{r}(r * x[r]), S), "x[1] + 2*x[2] + 3*x[3]")
+  end
+
+  do
+    local d, D = rima.R"d, D"
+    T:check_equal(E(rima.sum{d=D}(d), rima.scope.new{D={7}}), 7)
+    T:check_equal(E(rima.sum{d=D}(d.a), rima.scope.new{D={{a=13}}}), 13)
+    local S = rima.scope.new{D={{a=17}}}
+    S.D[d].b = 19
+    local e = rima.sum{d=D}(d.b)
+    T:check_equal(E(e, S), 19)
+    T:check_equal(E(rima.sum{d=D}(d.a * d.b), S), 17*19)
+  end
+
+  do
+    local a, d, D = rima.R"a, d, D"
+    T:check_equal(E(rima.sum{d=D}(d^2), rima.scope.new{}), "sum{d in D}(d^2)")
+    T:check_equal(E(rima.sum{d=D}(d^2), rima.scope.new{D={7}}), 49)
+    T:check_equal(E(rima.sum{d=D}(d^2), rima.scope.new{D={a}}), "a^2")
   end
 
   return T:close()
