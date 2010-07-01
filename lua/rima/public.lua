@@ -65,7 +65,7 @@ function rima.E(e, S) -- evaluate an expression
   if status then
     return r
   else
-    expression.reset_depth()
+    core.reset_depth()
     error(("evaluate: error evaluating '%s':\n  %s"):format(rima.repr(e), r:gsub("\n", "\n  ")), 0)
   end
 end

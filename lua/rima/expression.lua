@@ -6,7 +6,6 @@ local ipairs, pairs = ipairs, pairs
 local require, rawtype, tostring, unpack = require, type, tostring, unpack
 local getmetatable, setmetatable = getmetatable, setmetatable
 local rawget, rawset = rawget, rawset
-local debug, io = require("debug"), require("io")
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -111,35 +110,8 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
--- Eval tracing...
-local trace = false
-local depth = 0
-function expression.tron()
-  trace = true
-end
-
-function expression.troff()
-  trace = false
-end
-
-function expression.reset_depth()
-  depth = 0
-end
-
-local function tracein(f, e)
-  local f2 = debug.getinfo(3, "Sln")
-  io.write(("%s>: %s%s {%s} from %s (%s:%d)\n"):format(f, ("  "):rep(depth), lib.repr(e), lib.dump(e), f2.name or "?", f2.short_src, f2.currentline))
-  depth = depth + 1
-end
-
-local function traceout(f, e, r)
-  depth = depth - 1
-  io.write(("%s<: %s%s = %s\n"):format(f, ("  "):rep(depth), lib.repr(e), lib.repr(r)))
-end
-
-
 function expression.bind(e, S)
-  if trace then tracein("bind", e) end
+  if core.trace then core.tracein("bind", e) end
 
   local mt = getmetatable(e)
   if mt then
@@ -158,18 +130,18 @@ function expression.bind(e, S)
     
     if r then
       if t and not core.defined(r[1]) then tag(r[1], t) end
-      if trace then traceout("bind", e, r[1]) end
+      if core.trace then core.traceout("bind", e, r[1]) end
       return unpack(r)
     end
     
   end
-  if trace then traceout("bind", e, e) end
+  if core.trace then core.traceout("bind", e, e) end
   return e
 end
 
 
 function expression.eval(e, S, context)
-  if trace then tracein("eval", e) end
+  if core.trace then core.tracein("eval", e) end
 
   local mt = getmetatable(e)
   local f = mt and rawget(mt, "__eval")
@@ -178,10 +150,10 @@ function expression.eval(e, S, context)
     local t = rawget(E, "_tags")
     local r = { f(E, S, eval) }
     if t and not core.defined(r[1]) then tag(r[1], t) end
-    if trace then traceout("eval", e, r[1]) end
+    if core.trace then core.traceout("eval", e, r[1]) end
     return unpack(r)
   else
-    if trace then traceout("eval", e, e) end
+    if core.trace then core.traceout("eval", e, e) end
     return e
   end
 end

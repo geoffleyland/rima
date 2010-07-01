@@ -1,6 +1,7 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
+local core = require("rima.core")
 
 --------------------------------------------------------------------------------
 
@@ -17,6 +18,8 @@ for _, v in ipairs{...} do
     options.dont_show_fails = true
   elseif v == "--no-strict" then
     strict = false
+  elseif v == "--tron" then
+    core.tron()
   else
     patterns[#patterns+1] = v
   end
