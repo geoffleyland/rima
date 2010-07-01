@@ -30,7 +30,6 @@ module(...)
 
 local expression = require("rima.expression")
 local scope = require("rima.scope")
-local iteration = require("rima.iteration")
 
 -- References to values --------------------------------------------------------
 

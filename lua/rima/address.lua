@@ -17,7 +17,6 @@ module(...)
 
 local scope = require("rima.scope")
 local expression = require("rima.expression")
-local iteration = require("rima.iteration")
 
 -- Constructor -----------------------------------------------------------------
 
@@ -104,10 +103,6 @@ function address:__repr(format)
     if format and format.dump then
       return ("address{%s}"):format(lib.concat(self, ", ",
         function(a)
-          local t = expression.tags(a.exp)
-          if t.key then
-            return "element("..rima.repr(t.set_expression, format)..", "..rima.repr(t.key, format)..", "..rima.repr(t.value, format)..")"
-          end
           local v, e = rima.repr(a.value, format), rima.repr(a.exp, format)
           if v == e then
             return v
@@ -120,15 +115,8 @@ function address:__repr(format)
       local count = 0
       local s = ""
       for _, a in ipairs(self) do
-        local t = expression.tags(a.exp)
-        if t.key then
-          if format and format.readable then
-            a = "rima.element("..rima.repr(t.set_expression, format)..", "..rima.repr(t.key, format)..", "..rima.repr(t.value, format)..")"
-          elseif rima.repr(a.value, format):sub(1,5) == "table" then
-            a = t.key
-          else
-            a = a.value
-          end
+        if type(a.exp) == "iterator" and rima.repr(a.value, format):sub(1,5) == "table" then
+          a = a.exp.key
         else
           a = a.value
         end
@@ -181,7 +169,8 @@ end
 
 function address:__defined()
   for _, a in ipairs(self) do
-    if not core.defined(a.value) and not expression.tags(a.exp).key then
+    if not core.defined(a.value) and
+       type(a.exp) ~= "iterator" then
       return false
     end
   end
@@ -229,9 +218,11 @@ function address:resolve(S, current, i, base, eval, collected, used)
   end
 
   local function index(t, j, b)
-    local tags = expression.tags(b)
-    local k = tags.key
-    local v = tags.value
+
+    local k, v
+    if type(b) == "iterator" then
+      k, v = b.key, b.value
+    end
     local result
     t = t.value
     if not k then
@@ -248,6 +239,9 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
   -- What do we do when we come across an expression?
   local function handle_expression(c, j)
+    if object.type(c) == "iterator" then
+      c = c.exp
+    end
     local new_base = expression.bind(c, S)
     local new_address = self:sub(j)
 

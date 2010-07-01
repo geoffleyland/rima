@@ -11,6 +11,7 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local types = require("rima.types")
 local index_op = require("rima.operators.index")
+local iterator = require("rima.iteration.iterator")
 local rima = rima
 
 module(...)
@@ -24,12 +25,15 @@ ord = object:new({}, "ord")
 
 
 function ord.__eval(args, S, eval)
-  local a = expression.bind(args[1], S)
-  local k = expression.tags(a).key
-  if not k or eval == expression.bind then
-    return expression:new(ord, a)
+  local e = expression.bind(args[1], S)
+  if iterator:isa(e) and eval ~= expression.bind then
+    return e.key
   else
-    return k
+    if core.defined(e) then
+      error("ord can only be applied to iterators")
+    else
+      return expression:new(ord, e)
+    end
   end
 end
 
@@ -81,7 +85,7 @@ function rima.range(l, h)
 end
 
 
--- Iterator --------------------------------------------------------------------
+-- Sequence --------------------------------------------------------------------
 
 sequence = object:new({}, "sequence")
 
@@ -229,9 +233,7 @@ function sequence:results()
     local i = m and m.__iterate
     if not i then
       return function(v, S)
-        local e = expression:new(index_op, exp, v[1])
-        expression.tag(e, { set_expression=exp, set=self.result, key=v[1], value=v[2] })
-        S[names[1]] = e
+        S[names[1]] = iterator:new(exp, expression:new(index_op, exp, v[1]), v[1], v[2], self.result)
       end
     else
       return function(v, S)
