@@ -131,7 +131,7 @@ function test(options)
     T:check_equal(E(e, S), 10)
 
     T:check_equal(D(s(1).z),
-      "index(call(ref(s), 1), address(\"z\"))")
+      "index(call(ref(s), 1), address{\"z\"})")
     T:check_equal(s(1).z, "s(1).z")
     T:expect_ok(function() B(s(1).z, S) end, "binding")
     T:check_equal(B(s(1).z, S), "a.w[1].y.z")

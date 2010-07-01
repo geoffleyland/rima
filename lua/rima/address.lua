@@ -102,13 +102,18 @@ function address:__repr(format)
     return ""
   else
     if format and format.dump then
-      return ("address(%s)"):format(lib.concat(self, ", ",
+      return ("address{%s}"):format(lib.concat(self, ", ",
         function(a)
           local t = expression.tags(a.exp)
           if t.key then
             return "element("..rima.repr(t.set_expression, format)..", "..rima.repr(t.key, format)..", "..rima.repr(t.value, format)..")"
           end
-          return rima.repr(a.value, format)
+          local v, e = rima.repr(a.value, format), rima.repr(a.exp, format)
+          if v == e then
+            return v
+          else
+            return ("{value=%s, exp=%s}"):format(v, e)
+          end
         end))
     else
       local mode = "s"
