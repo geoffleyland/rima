@@ -5,6 +5,7 @@ local math = require("math")
 local assert, ipairs, type = assert, ipairs, type
 
 local object = require("rima.lib.object")
+local proxy = require("rima.lib.proxy")
 local expression = require("rima.expression")
 local rima = rima
 
@@ -26,6 +27,7 @@ local function make_math_function(name)
   local op = object:new({ precedence=0 }, name) 
 
   op.__eval = function(args, S, eval)
+    args = proxy.O(args)
     local r = eval(args[1], S)
     if type(r) == "number" then
       return f(r)

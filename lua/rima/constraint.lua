@@ -4,8 +4,10 @@
 local assert, ipairs = assert, ipairs
 
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
+local core = require("rima.core")
+require("rima.public")
 local rima = rima
-local expression = rima.expression
 
 module(...)
 
@@ -22,7 +24,7 @@ function constraint:new(lhs, rel, rhs)
 end
 
 function constraint:trivial(S)
-  local e = expression.eval(self.lhs - self.rhs, S)
+  local e = core.eval(self.lhs - self.rhs, S)
   return e == 0
 end
 
@@ -33,14 +35,14 @@ end
 
 
 function constraint:tostring(S)
-  local lhs = rima.repr(expression.eval(self.lhs, S))
-  local rhs = rima.repr(expression.eval(self.rhs, S))
+  local lhs = lib.repr(core.eval(self.lhs, S))
+  local rhs = lib.repr(core.eval(self.rhs, S))
   local s = lhs.." "..self.type.." "..rhs
   return s
 end
 
 function constraint:__tostring()
-  local lhs, rhs = rima.repr(self.lhs), rima.repr(self.rhs)
+  local lhs, rhs = lib.repr(self.lhs), lib.repr(self.rhs)
   local s = lhs.." "..self.type.." "..rhs
   return s
 end

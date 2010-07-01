@@ -7,6 +7,7 @@ require("rima.ref")
 local add = require("rima.operators.add")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local expression = require("rima.expression")
 require("rima.public")
 local rima = rima
@@ -21,7 +22,7 @@ function test(options)
 
   local D = lib.dump
   local B = expression.bind
-  local E = expression.eval
+  local E = core.eval
 
   local OD = function(e) return add.__repr(e, { dump=true }) end
   local OS = function(e) return add.__repr(e) end

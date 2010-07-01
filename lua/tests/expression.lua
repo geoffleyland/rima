@@ -6,6 +6,7 @@ local expression = require("rima.expression")
 local scope = require("rima.scope")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local rima = require("rima")
 
 module(...)
@@ -34,7 +35,7 @@ end
 function test(options)
   local T = series:new(_M, options)
 
-  local E = expression.eval
+  local E = core.eval
   local D = lib.dump
 
 --  local o = operators.operator:new()
@@ -67,8 +68,8 @@ function test(options)
   T:check_equal(lib.dump(1), "1")
 
   -- eval
-  T:expect_ok(function() expression.eval(expression:new({}), {}) end)
-  T:check_equal(expression.eval(expression:new({}), {}), "table()")
+  T:expect_ok(function() E(expression:new({}), {}) end)
+  T:check_equal(E(expression:new({}), {}), "table()")
 
   -- tests with add, mul and pow
   do
@@ -104,7 +105,7 @@ function test(options)
     
     local c, d = rima.R"c,d"
     S.d = 3 + (c * 5)^2
-    T:expect_ok(function() expression.eval(5 * d, S) end)
+    T:expect_ok(function() E(5 * d, S) end)
     equal(T, "5*(3 + (5*c)^2)", {5 * d, S, E})
   end
 

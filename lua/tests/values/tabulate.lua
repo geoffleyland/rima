@@ -3,6 +3,7 @@
 
 local series = require("test.series")
 local scope = require("rima.scope")
+local core = require("rima.core")
 local expression = require("rima.expression")
 require("rima.public")
 local rima = rima
@@ -15,7 +16,7 @@ function test(options)
   local T = series:new(_M, options)
 
   local B = expression.bind
-  local E = expression.eval
+  local E = core.eval
 
   local b = rima.R"b"
   local S = scope.new{ a = rima.free() }

@@ -55,6 +55,7 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local args = require("rima.lib.args")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 local rima = rima
 
@@ -62,7 +63,6 @@ module(...)
 
 local ref = require("rima.ref")
 local address = require("rima.address")
-local expression = require("rima.expression")
 local tabulate_type = require("rima.values.tabulate")
 
 -- Scope names -----------------------------------------------------------------
@@ -316,7 +316,7 @@ function scope.check(s, name, address, value)
     local collected
     if address then
       local status, nc
-      status, nc, _, _, collected = address:resolve(s, c, 1, r, expression.eval)
+      status, nc, _, _, collected = address:resolve(s, c, 1, r, core.eval)
       c = status and nc or nil
     end
     if c then

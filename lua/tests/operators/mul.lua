@@ -6,6 +6,7 @@ require("rima.ref")
 local mul = require("rima.operators.mul")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local expression = require("rima.expression")
 require("rima.types.number_t")
 require("rima.public")
@@ -20,7 +21,7 @@ function test(options)
 
   local D = lib.dump
   local B = expression.bind
-  local E = expression.eval
+  local E = core.eval
 
   local OD = function(e) return mul.__repr(e, { dump=true }) end
   local OS = function(e) return mul.__repr(e) end

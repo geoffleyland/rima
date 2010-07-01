@@ -300,7 +300,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
     else
       -- Otherwise, the new base is not a ref.  I'm not sure this can actually happen --
       -- I'll have to write more tests...
-      local new_current = expression.eval(new_base, S)
+      local new_current = core.eval(new_base, S)
       if not core.defined(new_current) then
         return false, nil, new_base, new_address, collected
       end

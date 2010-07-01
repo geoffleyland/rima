@@ -42,7 +42,8 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function call.__eval(args, S, eval)
-  local f = expression.eval(args[1], S)
+  args = proxy.O(args)
+  local f = core.eval(args[1], S)
   if not core.defined(f) then
     return expression:new(call, f, unpack(args, 2))
   else
@@ -50,7 +51,7 @@ function call.__eval(args, S, eval)
     if type(f) == "function" then
       local fargs = {}
       for i = 2, #args do
-        fargs[i-1] = expression.eval(args[i], S)
+        fargs[i-1] = core.eval(args[i], S)
       end
       status, r = xpcall(function() return f(unpack(fargs)) end, debug.traceback)
     else

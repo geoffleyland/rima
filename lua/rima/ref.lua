@@ -96,6 +96,8 @@ end
 
 
 function ref.proxy_mt.__eval(r, S)
+  r = proxy.O(r)
+
   -- look the ref up in the scope
   local e, found_scope = scope.lookup(S, r.name, r.scope)
   if not e or e.hidden then                     -- remain unbound
@@ -103,7 +105,7 @@ function ref.proxy_mt.__eval(r, S)
   end
 
   -- evaluate the result of the lookup - it might be an expression, or another ref
-  local status, v = pcall(function() return expression.eval(e.value, S) end)
+  local status, v = pcall(function() return core.eval(e.value, S) end)
   if not status then
     error(("error evaluating '%s' as '%s':\n  %s"):
       format(r.name, rima.repr(e), v:gsub("\n", "\n  ")), 0)

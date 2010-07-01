@@ -4,6 +4,7 @@
 local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local types = require("rima.types")
 local scope = require("rima.scope")
 local ref = require("rima.ref")
@@ -19,7 +20,7 @@ function test(options)
 
   local D = lib.dump
   local B = expression.bind
-  local E = expression.eval
+  local E = core.eval
 
   T:test(scope:isa(scope.new()), "isa(scope.new(), scope)")
   T:check_equal(object.type(scope.new()), "scope", "type(scope.new()) == 'scope'")

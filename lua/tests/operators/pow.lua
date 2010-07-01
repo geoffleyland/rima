@@ -6,7 +6,7 @@ require("rima.ref")
 local pow = require("rima.operators.pow")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
-local expression = require("rima.expression")
+local core = require("rima.core")
 require("rima.public")
 local rima = rima
 
@@ -17,6 +17,8 @@ module(...)
 
 function test(options)
   local T = series:new(_M, options)
+
+  local E = core.eval
 
   T:test(pow:isa(pow:new()), "isa(pow, pow:new())")
   T:check_equal(object.type(pow:new()), "pow", "type(pow:new()) == 'pow'")
@@ -35,15 +37,15 @@ function test(options)
   T:check_equal(lib.dump(a^2), "^(ref(a), 2)")
   T:check_equal(a^2, "a^2")
   T:check_equal(a^b, "a^b")
-  T:check_equal(expression.eval(a^2, S), 25)
+  T:check_equal(E(a^2, S), 25)
   T:check_equal(lib.dump(2^a), "^(2, ref(a))")
-  T:check_equal(expression.eval(2^a, S), 32)
+  T:check_equal(E(2^a, S), 32)
 
   -- Identities
-  T:check_equal(expression.eval(0^b, S), 0)
-  T:check_equal(expression.eval(1^b, S), 1)
-  T:check_equal(expression.eval(b^0, S), 1)
-  T:check_equal(lib.dump(expression.eval(b^1, S)), "ref(b)")
+  T:check_equal(E(0^b, S), 0)
+  T:check_equal(E(1^b, S), 1)
+  T:check_equal(E(b^0, S), 1)
+  T:check_equal(lib.dump(E(b^1, S)), "ref(b)")
 
   -- Tests including add and mul are in rima.expression
 

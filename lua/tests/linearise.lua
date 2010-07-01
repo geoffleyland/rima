@@ -6,7 +6,7 @@ local table = require("table")
 
 local series = require("test.series")
 local scope = require("rima.scope")
-local expression = require("rima.expression")
+local core = require("rima.core")
 require("rima.public")
 local rima = rima
 
@@ -66,7 +66,7 @@ function test(options)
     if not pass then
       local s = ""
       s = s..("error linearising %s:\n"):format(rima.repr(e))
-      s = s..("  Evaluated to %s\n"): format(rima.repr(expression.eval(e, S)))
+      s = s..("  Evaluated to %s\n"): format(rima.repr(core.eval(e, S)))
       s = s..("  Constant: %.4g %s %.4g\n"):format(expected_constant,
         (expected_constant==got_constant and "==") or "~=", got_constant)
       local all = {}

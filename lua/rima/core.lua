@@ -1,6 +1,7 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
+local unpack = unpack
 local debug, io = require("debug"), require("io")
 
 local lib = require("rima.lib")
@@ -54,6 +55,23 @@ function defined(e)
   end
   if trace then traceout("defd", e, d) end
   return d
+end
+
+
+-- Evaluation ------------------------------------------------------------------
+
+function eval(e, S, context)
+  if trace then tracein("eval", e) end
+
+  local f = lib.getmetamethod(e, "__eval")
+  if f then
+    local r = { f(e, S, eval) }
+    if trace then traceout("eval", e, r[1]) end
+    return unpack(r)
+  else
+    if trace then traceout("eval", e, e) end
+    return e
+  end
 end
 
 

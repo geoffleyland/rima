@@ -54,7 +54,7 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function index.resolve(args, S, eval)
-  local address = expression.eval(args[2], S)
+  local address = core.eval(args[2], S)
   if not core.defined(address) then
     return false, nil, expression.bind(args[1], S), address
   end
@@ -67,7 +67,7 @@ function index.resolve(args, S, eval)
 
   -- eval can return a reference and a type if we're evaluating a ref, we need
   -- the type...
-  local e, v = expression.eval(b, S)
+  local e, v = core.eval(b, S)
 
   -- ...because if the first return value from eval is a ref, and the second
   -- is a scalar type, we can't index it.  Here we try to index it - it
@@ -103,6 +103,7 @@ end
 
 
 function index.__eval(args, S, eval)
+  args = proxy.O(args)
   local status, value, base, address = resolve(args, S, eval)
   if not status or value.hidden or
      undefined_t:isa(value.value) then
@@ -118,7 +119,7 @@ end
 
 
 function index.__type(args, S)
-  local status, value, base, address = resolve(args, S, expression.eval)
+  local status, value, base, address = resolve(args, S, core.eval)
   value = scope.unpack(value)
   if not status or not undefined_t:isa(value) then
     error(("No type information available for '%s'"):format(__repr(args)))

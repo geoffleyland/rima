@@ -61,7 +61,7 @@ function rima.E(e, S) -- evaluate an expression
     S = scope.spawn(default_global_scope(), S, {no_undefined=true})
   end
 
-  local status, r = xpcall(function() return expression.eval(e, S) end, debug.traceback)
+  local status, r = xpcall(function() return core.eval(e, S) end, debug.traceback)
   if status then
     return r
   else
@@ -108,7 +108,7 @@ end
 
 
 function rima.linearise(e, S)
-  local l = expression.eval(0 + e, S)
+  local l = core.eval(0 + e, S)
   local status, constant, terms = xpcall(function() return linearise.linearise(l, S) end, debug.traceback)
   if not status then
     error(("error while linearising '%s':\n  linear form: %s\n  error:\n    %s"):

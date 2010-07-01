@@ -5,7 +5,7 @@ local ipairs, loadstring, pcall, setfenv = ipairs, loadstring, pcall, setfenv
 
 require("rima.ref")
 local lib = require("rima.lib")
-local expression = require("rima.expression")
+local core = require("rima.core")
 require("rima.public")
 local rima = rima
 
@@ -51,18 +51,18 @@ local function expression_tester(T, variables, scope)
         T:check_equal(lib.dump(e), t.D, "unevaluated dump", 1)
       end
       if t.ES then
-        T:check_equal(expression.eval(e, S), t.ES, "evaluated", 1)
+        T:check_equal(core.eval(e, S), t.ES, "evaluated", 1)
       end
       if t.ED then
-        T:check_equal(lib.dump(expression.eval(e, S)), t.ED, "evaluated dump", 1)
+        T:check_equal(lib.dump(core.eval(e, S)), t.ED, "evaluated dump", 1)
       end
       
-      local s2 = rima.repr(e, { readable=true })
+      local s2 = lib.repr(e, { readable=true })
       local e2 = load_expression(T, s2, V)
       if e2 then
-        local s3 = rima.repr(e2, { readable=true })
+        local s3 = lib.repr(e2, { readable=true })
         T:check_equal(s3, s2, "rereading unevaluated", 1)
-        T:check_equal(expression.eval(e2, S), expression.eval(e, S), "rereading evaluated", 1)
+        T:check_equal(core.eval(e2, S), core.eval(e, S), "rereading evaluated", 1)
       end
     end
   end

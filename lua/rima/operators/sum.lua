@@ -44,6 +44,7 @@ end
 
 
 function sum.__eval(args, S, eval)
+  args = proxy.O(args)
   local sets, e = args[1], args[2]
   local defined_terms, undefined_terms = {}, {}
 

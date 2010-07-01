@@ -82,6 +82,7 @@ function add.__eval(args, S, eval)
   -- If any subexpressions are sums, we dive into them, and if any are
   -- products, we try to hoist out the constant and see if what's left is a
   -- sum.
+  args = proxy.O(args)
 
   -- evaluate or bind all arguments
   args = lib.imap(function(a) return { a[1], eval(a[2], S) } end, args)

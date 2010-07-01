@@ -85,6 +85,7 @@ function mul.__eval(args, S, eval)
   -- If any subexpressions are products, we dive into them, if any are
   -- sums with one term we pull it up and if any are pows, we try to hoist out
   -- the constant and see if what's left is a product.
+  args = proxy.O(args)
 
   -- evaluate or bind all arguments
   return simplify(lib.imap(function(a) return { a[1], eval(a[2], S) } end, args))

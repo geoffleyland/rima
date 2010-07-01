@@ -5,6 +5,7 @@ local string = require("string")
 local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local call = require("rima.operators.call")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
@@ -20,7 +21,7 @@ function test(options)
 
   local D = lib.dump
   local B = expression.bind
-  local E = expression.eval
+  local E = core.eval
 
   local S = scope.new{ a = rima.free(), b = rima.free(), x = rima.free() }
 

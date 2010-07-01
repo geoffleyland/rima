@@ -57,6 +57,7 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function pow.__eval(args, S, eval)
+  args = proxy.O(args)
   local base, exponent = eval(args[1], S), eval(args[2], S)
   
   if type(exponent) == "number" then

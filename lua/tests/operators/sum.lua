@@ -6,6 +6,7 @@ local expression_tester = require("test.expression_tester")
 local sum = require("rima.operators.sum")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
 require("rima.iteration")
@@ -20,7 +21,7 @@ function test(options)
   local T = series:new(_M, options)
 
   local D = lib.dump
-  local E = expression.eval
+  local E = core.eval
 
   T:test(sum:isa(sum:new()), "isa(sum, sum:new())")
   T:check_equal(object.type(sum:new()), "sum", "type(sum:new()) == 'sum'")

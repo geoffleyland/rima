@@ -4,6 +4,7 @@
 local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
 local ref = require("rima.ref")
@@ -19,7 +20,7 @@ function test(options)
   local T = series:new(_M, options)
 
   local B = expression.bind
-  local E = expression.eval
+  local E = core.eval
   local D = lib.dump
 
   T:test(ref:isa(ref:new{name="a"}), "isa(ref:new(), ref)")

@@ -6,6 +6,7 @@ local error, ipairs, require = error, ipairs, require
 local args = require("rima.lib.args")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local call = require("rima.operators.call")
 local rima = rima
 
@@ -117,7 +118,7 @@ end
 
 function function_v:__call(...)
   local S = rima.scope.new()
-  return self:call({...}, S, expression.eval)
+  return self:call({...}, S, core.eval)
 end
 
 -- EOF -------------------------------------------------------------------------

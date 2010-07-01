@@ -25,6 +25,7 @@ ord = object:new({}, "ord")
 
 
 function ord.__eval(args, S, eval)
+  args = proxy.O(args)
   local e = expression.bind(args[1], S)
   if iterator:isa(e) and eval ~= expression.bind then
     return e.key
@@ -71,6 +72,7 @@ end
 
 local range_op = object:new({}, "range")
 function range_op.__eval(args, S, eval)
+  args = proxy.O(args)
   local l, h = eval(args[1], S), eval(args[2], S)
   if type(l) == "number" and type(h) == "number" then
     return range_type:new(l, h)
@@ -130,7 +132,7 @@ function sequence:eval(S)
   local r
   
   while S do
-    local e = expression.eval(self.exp, S)
+    local e = core.eval(self.exp, S)
     if not core.defined(e) and not es[1] then
       r = e
       break

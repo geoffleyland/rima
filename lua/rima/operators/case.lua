@@ -40,6 +40,7 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function case.__eval(args, S, eval)
+  args = proxy.O(args)
   local value = eval(args[1], S)
   local cases = {}
   for i, v in ipairs(args[2]) do
