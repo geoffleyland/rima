@@ -46,7 +46,7 @@ function index.__repr(args, format)
   if format and format.dump then
     return ("index(%s, %s)"):format(rima.repr(args[1], format), rima.repr(args[2], format))
   else
-    return expression.parenthise(args[1], format, 0)..rima.repr(args[2], format)
+    return core.parenthise(args[1], format, 0)..rima.repr(args[2], format)
   end
 end
 

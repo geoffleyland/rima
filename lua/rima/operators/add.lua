@@ -9,6 +9,7 @@ local getmetatable = getmetatable
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local rima = rima
 
 module(...)
@@ -68,7 +69,7 @@ function add.__repr(args, format)
     e = ac == 1 and e or mul.simplify({{1, ac}, {1, e}})
 
     -- If the constant's not 1 then we need to parenthise (almost) like a multiplication
-    s = s..expression.parenthise(e, format, (c == 1 and 5) or 4)
+    s = s..core.parenthise(e, format, (c == 1 and 5) or 4)
   end
   return s
 end

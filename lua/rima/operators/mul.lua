@@ -9,6 +9,7 @@ local getmetatable = getmetatable
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local expression = require("rima.expression")
 local rima = rima
 
@@ -65,7 +66,7 @@ function mul.__repr(args, format)
     end
     
     -- If the constant's not 1 then we need to parenthise (almost) like an exponentiation
-    s = s..expression.parenthise(e, format, (c == 1 and 3) or 2)
+    s = s..core.parenthise(e, format, (c == 1 and 3) or 2)
 
     -- If the constant's not 1, write the constant
     local ac = math.abs(c)

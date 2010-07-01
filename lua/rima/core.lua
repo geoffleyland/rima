@@ -128,5 +128,18 @@ function set(e, t, v)
 end
 
 
+-- Pretty strings --------------------------------------------------------------
+
+function parenthise(e, format, parent_precedence)
+  parent_precedence = parent_precedence or 1
+  local s = lib.repr(e, format)
+  local precedence = lib.getmetamethod(e, "precedence") or 0
+  if precedence > parent_precedence then
+    s = "("..s..")"
+  end
+  return s
+end
+
+
 -- EOF -------------------------------------------------------------------------
 

@@ -5,8 +5,8 @@ local error = error
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
-local expression = require("rima.expression")
-local rima = rima
+local lib = require("rima.lib")
+local core = require("rima.core")
 
 module(...)
 
@@ -42,8 +42,8 @@ end
 function pow.__repr(args, format)
   args = proxy.O(args)
   local base, exponent = args[1], args[2]
-  local repr = rima.repr
-  local paren = expression.parenthise
+  local repr = lib.repr
+  local paren = core.parenthise
   local prec = pow.precedence
 
   if format and format.dump then

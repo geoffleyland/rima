@@ -96,17 +96,6 @@ function expression.proxy_mt.__repr(e, format)
 end
 expression.proxy_mt.__tostring = lib.__tostring
 
-function expression.parenthise(e, format, parent_precedence)
-  parent_precedence = parent_precedence or 1
-  local s = lib.repr(e, format)
-  local mt = getmetatable(e)
-  local precedence = (mt and rawget(mt, "precedence")) or 0
-  if precedence > parent_precedence then
-    s = "("..s..")"
-  end
-  return s
-end
-
 
 -- Overloaded operators --------------------------------------------------------
 

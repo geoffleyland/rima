@@ -34,7 +34,7 @@ function call.__repr(args, format)
   if format and format.dump then
     return "call("..lib.concat_repr(args, format)..")"
   else
-    return expression.parenthise(args[1], format, 0).."("..lib.concat_repr({unpack(args, 2)}, format)..")"
+    return core.parenthise(args[1], format, 0).."("..lib.concat_repr({unpack(args, 2)}, format)..")"
   end
 end
 
