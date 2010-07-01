@@ -117,7 +117,6 @@ function expression.bind(e, S)
   if mt then
     local r
     local E = proxy.O(e)
-    local t = rawtype(E) == "table" and rawget(E, "_tags")
     local f = rawget(mt, "__bind")
     if f then
       r = { f(E, S) }
@@ -129,7 +128,6 @@ function expression.bind(e, S)
     end
     
     if r then
-      if t and not core.defined(r[1]) then tag(r[1], t) end
       if core.trace then core.traceout("bind", e, r[1]) end
       return unpack(r)
     end
@@ -147,9 +145,7 @@ function expression.eval(e, S, context)
   local f = mt and rawget(mt, "__eval")
   if f then
     local E = proxy.O(e)
-    local t = rawget(E, "_tags")
     local r = { f(E, S, eval) }
-    if t and not core.defined(r[1]) then tag(r[1], t) end
     if core.trace then core.traceout("eval", e, r[1]) end
     return unpack(r)
   else
@@ -180,32 +176,6 @@ function expression.type(e, S)
   return f(proxy.O(e), S)
 end
 
-
--- Tags ------------------------------------------------------------------------
-
-function expression.tag(e, t)
-  local mt = getmetatable(e)
-  local f = mt and rawget(mt, "__eval")
-  if not f then
-    error(("error tagging '%s': the object isn't an expression"):
-      format(rima.repr(e)))
-  end
-  local E = proxy.O(e)
-  E._tags = rawget(E, "_tags") or {}
-  local et = E._tags
-  for k,v in pairs(t) do et[k] = v end
-end
-
-
-function expression.tags(e)
-  local r
-  local mt = getmetatable(e)
-  local f = mt and rawget(mt, "__eval")
-  if f then
-    r = rawget(proxy.O(e), "_tags")
-  end
-  return r or {}
-end
 
 -- Overloaded operators --------------------------------------------------------
 
