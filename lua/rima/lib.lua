@@ -80,17 +80,6 @@ function repr(o, format)
   local f = getmetamethod(o, "__repr")
   if f then
     return f(o, format)
---[[
-  elseif format.dump then
-    local t = object.type(o)
-    if t == "number" then
-      return simple_repr(o, format)
-    elseif t == "string" then
-      return ("%q"):format(o)
-    else
-      return object.type(o).."("..simple_repr(o, format)..")"
-    end
---]]
   else
     return simple_repr(o, format)
   end
