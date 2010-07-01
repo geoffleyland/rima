@@ -19,7 +19,7 @@ function test(options)
   local T = series:new(_M, options)
 
   local D = lib.dump
-  local B = expression.bind
+  local B = core.bind
   local E = core.eval
 
   T:test(object.isa(function_v, function_v:new({"a"}, 3)),

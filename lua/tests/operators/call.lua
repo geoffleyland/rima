@@ -20,7 +20,7 @@ function test(options)
   local T = series:new(_M, options)
 
   local D = lib.dump
-  local B = expression.bind
+  local B = core.bind
   local E = core.eval
 
   local S = scope.new{ a = rima.free(), b = rima.free(), x = rima.free() }

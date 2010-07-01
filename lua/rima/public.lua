@@ -21,7 +21,7 @@ local rima = getfenv(0).rima
 
 -- Module functionality --------------------------------------------------------
 
-rima.set_number_format = expression.set_number_format
+rima.set_number_format = lib.set_number_format
 rima.repr = lib.repr
 
 

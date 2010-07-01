@@ -105,11 +105,11 @@ function function_v:call(args, S, eval)
   end
 
   for i, a in ipairs(outputs) do
-    caller_scope[rima.repr(a)] = expression.bind(self.outputs[i], function_scope)
+    caller_scope[rima.repr(a)] = core.bind(self.outputs[i], function_scope)
   end
 
   for i, a in ipairs(self.inputs) do
-    function_scope[rima.repr(a)] = expression.bind(args[i], caller_scope)
+    function_scope[rima.repr(a)] = core.bind(args[i], caller_scope)
   end
 
   return eval(self.expression, function_scope)

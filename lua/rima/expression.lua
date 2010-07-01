@@ -110,33 +110,6 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function expression.bind(e, S)
-  if core.trace then core.tracein("bind", e) end
-
-  local mt = getmetatable(e)
-  if mt then
-    local r
-    local E = proxy.O(e)
-    local f = rawget(mt, "__bind")
-    if f then
-      r = { f(E, S) }
-    else
-      f = rawget(mt, "__eval")
-      if f then
-        r = { f(E, S, bind) }
-      end
-    end
-    
-    if r then
-      if core.trace then core.traceout("bind", e, r[1]) end
-      return unpack(r)
-    end
-    
-  end
-  if core.trace then core.traceout("bind", e, e) end
-  return e
-end
-
 
 function expression.set(e, t, v)
   local mt = getmetatable(e)
@@ -203,7 +176,7 @@ end
 
 function expression.proxy_mt.__newindex(e, i, v)
   local err
-  r = bind(e)
+  r = core.bind(e)
   local R = proxy.O(r)
   if object.type(r) == "ref" then
     if R.scope then

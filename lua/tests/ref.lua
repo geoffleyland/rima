@@ -19,7 +19,7 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local B = expression.bind
+  local B = core.bind
   local E = core.eval
   local D = lib.dump
 

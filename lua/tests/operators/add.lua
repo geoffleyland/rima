@@ -21,7 +21,7 @@ function test(options)
   local T = series:new(_M, options)
 
   local D = lib.dump
-  local B = expression.bind
+  local B = core.bind
   local E = core.eval
 
   local OD = function(e) return add.__repr(e, { dump=true }) end

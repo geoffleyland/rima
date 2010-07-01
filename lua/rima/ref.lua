@@ -82,6 +82,7 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function ref.proxy_mt.__bind(r, S)
+  r = proxy.O(r)
   local e, found_scope = scope.lookup(S, r.name, r.scope)
   if not e then
     return ref:new{ name=r.name, type=r.type, scope=r.scope or scope.scope_for_undefined(S) }
@@ -90,7 +91,7 @@ function ref.proxy_mt.__bind(r, S)
   elseif core.defined(e.value) then
     return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
   else
-    return expression.bind(e.value, S)
+    return core.bind(e.value, S)
   end
 end
 

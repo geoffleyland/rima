@@ -26,8 +26,8 @@ ord = object:new({}, "ord")
 
 function ord.__eval(args, S, eval)
   args = proxy.O(args)
-  local e = expression.bind(args[1], S)
-  if iterator:isa(e) and eval ~= expression.bind then
+  local e = core.bind(args[1], S)
+  if iterator:isa(e) and eval ~= core.bind then
     return e.key
   else
     if core.defined(e) then
@@ -126,7 +126,7 @@ function sequence:eval(S)
   -- looking for other versions of the table.
   -- This might get easier if resolve was rewritten, but I'm just not ready
   -- to face that yet...
-  local b = expression.bind(self.exp, S)
+  local b = core.bind(self.exp, S)
   local found = {}
   local es = {}
   local r

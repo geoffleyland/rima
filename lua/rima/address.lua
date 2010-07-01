@@ -16,7 +16,6 @@ local rima = rima
 module(...)
 
 local scope = require("rima.scope")
-local expression = require("rima.expression")
 
 -- Constructor -----------------------------------------------------------------
 
@@ -160,7 +159,7 @@ __tostring = lib.__tostring
 function address:__eval(S, eval)
   local a = {}
   for i, v in ipairs(self) do
-    local b = expression.bind(v.exp, S)
+    local b = core.bind(v.exp, S)
     a[i] = { exp=b, value=eval(v.value, S) }
   end
   return object.new(address, a)
@@ -195,7 +194,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
   local mt = getmetatable(current.value)
   if mt and rawget(mt, "__address") then
     -- We only want to bind to the result...
-    local status, v, j = xpcall(function() return mt.__address(current.value, S, collected:sub(used or 1), 1, expression.bind) end, debug.traceback)
+    local status, v, j = xpcall(function() return mt.__address(current.value, S, collected:sub(used or 1), 1, core.bind) end, debug.traceback)
     if not status then
       error(("address: error evaluating '%s%s' as '%s':\n  %s"):
         format(rima.repr(base), rima.repr(self), rima.repr(current), v:gsub("\n", "\n  ")), 0)
@@ -242,7 +241,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
     if object.type(c) == "iterator" then
       c = c.exp
     end
-    local new_base = expression.bind(c, S)
+    local new_base = core.bind(c, S)
     local new_address = self:sub(j)
 
     -- if the base is an index, use its base and glue the two addresses together

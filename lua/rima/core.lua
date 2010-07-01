@@ -75,5 +75,32 @@ function eval(e, S, context)
 end
 
 
+-- Binding ---------------------------------------------------------------------
+
+function bind(e, S)
+  if trace then tracein("bind", e) end
+
+  local result
+  
+  local b = lib.getmetamethod(e, "__bind")
+  if b then
+    result = { b(e, S) }
+  else
+    local f = lib.getmetamethod(e, "__eval")
+    if f then
+      result = { f(e, S, bind) }
+    end
+  end
+  
+  if result then
+    if trace then traceout("bind", e, result[1]) end
+    return unpack(result)
+  else
+    if trace then traceout("bind", e, e) end
+    return e
+  end
+end
+
+
 -- EOF -------------------------------------------------------------------------
 

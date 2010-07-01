@@ -56,9 +56,9 @@ end
 function index.resolve(args, S, eval)
   local address = core.eval(args[2], S)
   if not core.defined(address) then
-    return false, nil, expression.bind(args[1], S), address
+    return false, nil, core.bind(args[1], S), address
   end
-  local b = expression.bind(args[1], S)
+  local b = core.bind(args[1], S)
   if object.isa(index, b) then
     local B = proxy.O(b)
     b = B[1]
@@ -88,7 +88,8 @@ end
 
 
 function index.__bind(args, S, eval)
-  local status, value, base, address = resolve(args, S, expression.bind)
+  args = proxy.O(args)
+  local status, value, base, address = resolve(args, S, core.bind)
   value = scope.unpack(value)
   if not status or core.defined(value) then
     if address[1] then
