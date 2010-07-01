@@ -133,6 +133,7 @@ end
 
 
 function ref.proxy_mt.__type(r, S)
+  r = proxy.O(r)
   -- look the ref up in the scope
   local e = scope.lookup(S, r.name, r.scope)
   if not e or e.hidden or not undefined_t:isa(e.value) then

@@ -6,14 +6,14 @@ local getmetatable = getmetatable
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
+local lib = require("rima.lib")
+local core = require("rima.core")
 local types = require("rima.types")
-local rima = rima
 
 module(...)
 
 local scope = require("rima.scope")
 local operators = require("rima.operators")
-local expression = require("rima.expression")
 
 -- Getting a linear form -------------------------------------------------------
 
@@ -22,12 +22,12 @@ function linearise(l, S)
   local fail = false
 
   local function add_variable(n, v, coeff)
-    local s = rima.repr(n)
+    local s = lib.repr(n)
     if terms[s] then
       error(("the reference '%s' appears more than once"):format(s), 0)
     end
-    local t = expression.type(v, S)
-    if not rima.types.number_t:isa(t) then
+    local t = core.type(v, S)
+    if not types.number_t:isa(t) then
       error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
     end
     terms[s] = { variable=v, coeff=coeff, lower=t.lower, upper=t.upper, integer=t.integer }
@@ -48,11 +48,11 @@ function linearise(l, S)
       if object.type(x) == "number" then
         if i ~= 1 then
           error(("term %d is constant (%s).  Only the first term should be constant"):
-            format(i, rima.repr(x)), 0)
+            format(i, lib.repr(x)), 0)
         end
         if constant ~= 0 then
           error(("term %d is constant (%s), and so is an earlier term.  There can only be one constant in the expression"):
-            format(i, rima.repr(x)), 0)
+            format(i, lib.repr(x)), 0)
         end
         constant = c * x
       elseif object.type(x) == "ref" then
@@ -62,7 +62,7 @@ function linearise(l, S)
       elseif object.type(x) == "iterator" then
         add_variable(x.exp, x.exp, c)
       else
-        error(("term %d is not linear (got '%s', %s)"):format(i, rima.repr(x), object.type(x)), 0)
+        error(("term %d is not linear (got '%s', %s)"):format(i, lib.repr(x), object.type(x)), 0)
       end
     end
   else

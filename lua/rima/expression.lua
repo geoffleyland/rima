@@ -122,17 +122,6 @@ function expression.set(e, t, v)
 end
 
 
-function expression.type(e, S)
-  local mt = getmetatable(e)
-  local f = mt and rawget(mt, "__type")
-  if not f then
-    error(("error getting type information for '%s': the object doesn't support type queries"):
-      format(rima.repr(e)))
-  end
-  return f(proxy.O(e), S)
-end
-
-
 -- Overloaded operators --------------------------------------------------------
 
 function expression.proxy_mt.__add(a, b)

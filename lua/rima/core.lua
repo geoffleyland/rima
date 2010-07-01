@@ -102,5 +102,18 @@ function bind(e, S)
 end
 
 
+-- Types -----------------------------------------------------------------------
+
+function type(e, S)
+  local f = lib.getmetamethod(e, "__type")
+  if f then
+    return f(e, S)
+  else
+    error(("error getting type information for '%s': the object doesn't support type queries"):
+      format(lib.repr(e)))
+  end
+end
+
+
 -- EOF -------------------------------------------------------------------------
 

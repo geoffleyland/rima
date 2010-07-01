@@ -8,7 +8,6 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local expression = require("rima.expression")
 require("rima.iteration")
 require("rima.public")
 local rima = rima
@@ -22,6 +21,7 @@ function test(options)
 
   local D = lib.dump
   local E = core.eval
+  local TYPE = core.type
 
   T:test(sum:isa(sum:new()), "isa(sum, sum:new())")
   T:check_equal(object.type(sum:new()), "sum", "type(sum:new()) == 'sum'")
@@ -68,7 +68,7 @@ function test(options)
     local S2 = scope.spawn(S, { X={{y=1},{y=2},{y=3}} })
     local e1 = rima.sum({["_, x"]=rima.ipairs(X)}, x.y)
 
-    T:check_equal(expression.type(X[1].y, S), rima.free())
+    T:check_equal(TYPE(X[1].y, S), rima.free())
     T:check_equal(E(X[1].y, S), "X[1].y")
 
     T:check_equal(e1, "sum{_, x in ipairs(X)}(x.y)")
@@ -95,7 +95,7 @@ function test(options)
     S.X[i].y = rima.free()
     local S2 = scope.spawn(S, { X={{y=1},{y=2},{y=3}} })
     
-    T:check_equal(expression.type(X[1].y, S), rima.free())
+    T:check_equal(TYPE(X[1].y, S), rima.free())
     T:check_equal(E(X[1].y, S), "X[1].y")
     
     local e1 = rima.sum({["_, x"]=rima.ipairs(X)}, x.y)
@@ -123,9 +123,9 @@ function test(options)
     S.X[i].y = rima.free()
     local S2 = scope.spawn(S, { X={{z=11},{z=13},{z=17}} })
     
-    T:check_equal(expression.type(X[1].y, S), rima.free())
+    T:check_equal(TYPE(X[1].y, S), rima.free())
     T:check_equal(E(X[1].y, S), "X[1].y")
-    T:check_equal(expression.type(X[1].y, S2), rima.free())
+    T:check_equal(TYPE(X[1].y, S2), rima.free())
     T:check_equal(E(X[1].y, S2), "X[1].y")
     
     local e1 = rima.sum({["_, x"]=rima.ipairs(X)}, x.y * x.z)

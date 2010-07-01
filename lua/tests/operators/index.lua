@@ -18,6 +18,7 @@ function test(options)
 
   local B = core.bind
   local E = core.eval
+  local TYPE = core.type
   local D = lib.dump
 
   local a, b, c = rima.R"a, b, c"
@@ -133,10 +134,10 @@ function test(options)
     S.g[i][j] = rima.free()
     S.h[i][j][k] = rima.free()
 
-    T:check_equal(expression.type(e, S), "-inf <= * <= inf, * real")
-    T:check_equal(expression.type(f[1], S), "-inf <= * <= inf, * real")
-    T:check_equal(expression.type(g.a[2], S), "-inf <= * <= inf, * real")
-    T:check_equal(expression.type(h[3].b[8], S), "-inf <= * <= inf, * real")
+    T:check_equal(TYPE(e, S), "-inf <= * <= inf, * real")
+    T:check_equal(TYPE(f[1], S), "-inf <= * <= inf, * real")
+    T:check_equal(TYPE(g.a[2], S), "-inf <= * <= inf, * real")
+    T:check_equal(TYPE(h[3].b[8], S), "-inf <= * <= inf, * real")
   end
 
   return T:close()

@@ -120,6 +120,7 @@ end
 
 
 function index.__type(args, S)
+  args = proxy.O(args)
   local status, value, base, address = resolve(args, S, core.eval)
   value = scope.unpack(value)
   if not status or not undefined_t:isa(value) then
