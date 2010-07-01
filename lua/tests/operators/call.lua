@@ -53,7 +53,7 @@ function test(options)
   local c = rima.R"f"(3 + S.x)
   T:check_equal(c, "f(3 + x)")
 
-  T:check_equal(D(c), "call(ref(f), +(1*number(3), 1*ref(x)))")
+  T:check_equal(D(c), "call(ref(f), +(1*3, 1*ref(x)))")
   T:check_equal(E(c, S), "2*(3 + x)")
   T:check_equal(E(c, scope.spawn(S, { x=5 })), 16)
 

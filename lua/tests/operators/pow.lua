@@ -32,11 +32,11 @@ function test(options)
 
   local a, b = rima.R"a, b"
   local S = rima.scope.new{ a = 5 }
-  T:check_equal(lib.dump(a^2), "^(ref(a), number(2))")
+  T:check_equal(lib.dump(a^2), "^(ref(a), 2)")
   T:check_equal(a^2, "a^2")
   T:check_equal(a^b, "a^b")
   T:check_equal(expression.eval(a^2, S), 25)
-  T:check_equal(lib.dump(2^a), "^(number(2), ref(a))")
+  T:check_equal(lib.dump(2^a), "^(2, ref(a))")
   T:check_equal(expression.eval(2^a, S), 32)
 
   -- Identities

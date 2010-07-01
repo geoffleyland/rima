@@ -50,7 +50,7 @@ function test(options)
   local S = scope.new()
 
   -- literals
-  equal(T, "number(1)", {1, "", D})
+  equal(T, "1", {1, "", D})
   equal(T, 1, {1, S, E})
 
   -- variables
@@ -64,7 +64,7 @@ function test(options)
   equal(T, 5, {a, scope.spawn(S, { a=5 }), E})
 
   -- repr
-  T:check_equal(lib.dump(1), "number(1)")
+  T:check_equal(lib.dump(1), "1")
 
   -- eval
   T:expect_ok(function() expression.eval(expression:new({}), {}) end)
@@ -74,25 +74,25 @@ function test(options)
   do
     local a, b = rima.R"a, b"
     local S = rima.scope.new{ ["a,b"]=rima.free() }
-    equal(T, "+(1*number(3), 4*ref(a))", {3 + 4 * a, S, E, D})
+    equal(T, "+(1*3, 4*ref(a))", {3 + 4 * a, S, E, D})
     equal(T, "3 - 4*a", {4 * -a + 3, S, E})
-    equal(T, "+(1*number(3), 4**(ref(a)^1, ref(b)^1))", {3 + 4 * a * b, S, E, D})
+    equal(T, "+(1*3, 4**(ref(a)^1, ref(b)^1))", {3 + 4 * a * b, S, E, D})
     equal(T, "3 - 4*a*b", {3 - 4 * a * b, S, E})
 
-    equal(T, "*(number(6)^1, ref(a)^1)", {3 * (a + a), S, E, D})
+    equal(T, "*(6^1, ref(a)^1)", {3 * (a + a), S, E, D})
     equal(T, "6*a", {3 * (a + a), S, E})
-    equal(T, "+(1*number(1), 6*ref(a))", {1 + 3 * (a + a), S, E, D})
+    equal(T, "+(1*1, 6*ref(a))", {1 + 3 * (a + a), S, E, D})
     equal(T, "1 + 6*a", {1 + 3 * (a + a), S, E})
 
-    equal(T, "*(number(1.5)^1, ref(a)^-1)", {3 / (a + a), S, E, D})
+    equal(T, "*(1.5^1, ref(a)^-1)", {3 / (a + a), S, E, D})
     equal(T, "1.5/a", {3 / (a + a), S, E})
-    equal(T, "+(1*number(1), 1.5**(ref(a)^-1))", {1 + 3 / (a + a), S, E, D})
+    equal(T, "+(1*1, 1.5**(ref(a)^-1))", {1 + 3 / (a + a), S, E, D})
     equal(T, "1 + 1.5/a", {1 + 3 / (a + a), S, E})
 
 
-    equal(T, "*(number(3)^1, ^(ref(a), number(2))^1)", {3 * a^2, "", D})
-    equal(T, "*(number(3)^1, ref(a)^2)", {3 * a^2, S, E, D})
-    equal(T, "*(number(3)^1, +(1*number(1), 1*ref(a))^2)", {3 * (a+1)^2, S, E, D})
+    equal(T, "*(3^1, ^(ref(a), 2)^1)", {3 * a^2, "", D})
+    equal(T, "*(3^1, ref(a)^2)", {3 * a^2, S, E, D})
+    equal(T, "*(3^1, +(1*1, 1*ref(a))^2)", {3 * (a+1)^2, S, E, D})
   end
 
   -- tests with references to expressions

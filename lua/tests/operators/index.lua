@@ -34,20 +34,20 @@ function test(options)
   do
     local S = rima.scope.new{ a=rima.types.undefined_t:new(), b = 2}
     T:check_equal(D(a[b]), "index(ref(a), address(ref(b)))")
-    T:check_equal(D(E(a[b], S)), "index(ref(a), address(number(2)))")
+    T:check_equal(D(E(a[b], S)), "index(ref(a), address(2))")
     local e = E(a[b], S)
-    T:check_equal(D(e), "index(ref(a), address(number(2)))")
+    T:check_equal(D(e), "index(ref(a), address(2))")
     S2 = rima.scope.spawn(S, {a = { "x" }})
     T:check_equal(D(S2.a), "ref(a)")
     T:check_equal(S2.a[1], "x")
-    T:check_equal(D(S2.a[2]), "index(ref(a), address(number(2)))")
-    T:check_equal(D(E(e, S2)), "index(ref(a), address(number(2)))")
+    T:check_equal(D(S2.a[2]), "index(ref(a), address(2))")
+    T:check_equal(D(E(e, S2)), "index(ref(a), address(2))")
     T:expect_ok(function() S2.a[2] = "yes" end, "setting a table field")
-    T:check_equal(D(E(e, S2)), "string(yes)")
+    T:check_equal(D(E(e, S2)), "\"yes\"")
 
     S3 = rima.scope.spawn(S, {a = { b="x" }})
-    T:check_equal(D(E(a.b, S)), "index(ref(a), address(string(b)))")
-    T:check_equal(D(E(a.b, S3)), "string(x)")
+    T:check_equal(D(E(a.b, S)), "index(ref(a), address(\"b\"))")
+    T:check_equal(D(E(a.b, S3)), "\"x\"")
   end
 
   do
@@ -75,23 +75,23 @@ function test(options)
   do
     local a, b, c = rima.R"a, b, c"
     local S = rima.scope.new{ a={x={y={z=3}}}, b={s={t=a.x.y}}, c={s={t=a.q}} }  -- note that c is undefined
-    T:check_equal(D(b.s.t), "index(ref(b), address(string(s), string(t)))")
+    T:check_equal(D(b.s.t), "index(ref(b), address(\"s\", \"t\"))")
     T:check_equal(b.s.t, "b.s.t")
-    T:check_equal(D(B(b.s.t, S)), "index(ref(a), address(string(x), string(y)))")
+    T:check_equal(D(B(b.s.t, S)), "index(ref(a), address(\"x\", \"y\"))")
     T:check_equal(B(b.s.t, S), "a.x.y")
     T:check_equal(E(b.s.t, S), "a.x.y")
 
-    T:check_equal(D(b.s.t.z), "index(ref(b), address(string(s), string(t), string(z)))")
+    T:check_equal(D(b.s.t.z), "index(ref(b), address(\"s\", \"t\", \"z\"))")
     T:check_equal(b.s.t.z, "b.s.t.z")
-    T:check_equal(D(B(b.s.t.z, S)), "index(ref(a), address(string(x), string(y), string(z)))")
+    T:check_equal(D(B(b.s.t.z, S)), "index(ref(a), address(\"x\", \"y\", \"z\"))")
     T:check_equal(B(b.s.t.z, S), "a.x.y.z")
     T:check_equal(E(b.s.t.z, S), 3)
 
-    T:check_equal(D(B(c.s.t, S)), "index(ref(a), address(string(q)))")
+    T:check_equal(D(B(c.s.t, S)), "index(ref(a), address(\"q\"))")
     T:check_equal(B(c.s.t, S), "a.q")
     T:check_equal(E(c.s.t, S), "a.q")
 
-    T:check_equal(D(B(c.s.t.z, S)), "index(ref(a), address(string(q), string(z)))")
+    T:check_equal(D(B(c.s.t.z, S)), "index(ref(a), address(\"q\", \"z\"))")
     T:check_equal(B(c.s.t.z, S), "a.q.z")
     T:check_equal(E(c.s.t.z, S), "a.q.z")
   end

@@ -120,7 +120,7 @@ function test(options)
       s=rima.F({b}, a.w[b].y),
       u=rima.F({b}, a.q[b].y) }
 
-    T:check_equal(D(t(1)), "call(ref(t), number(1))")
+    T:check_equal(D(t(1)), "call(ref(t), 1)")
     T:check_equal(t(1), "t(1)")
     T:expect_ok(function() B(t(1), S) end, "binding")
     T:check_equal(B(t(1), S), "a.w[1].x")
@@ -131,7 +131,7 @@ function test(options)
     T:check_equal(E(e, S), 10)
 
     T:check_equal(D(s(1).z),
-      "index(call(ref(s), number(1)), address(string(z)))")
+      "index(call(ref(s), 1), address(\"z\"))")
     T:check_equal(s(1).z, "s(1).z")
     T:expect_ok(function() B(s(1).z, S) end, "binding")
     T:check_equal(B(s(1).z, S), "a.w[1].y.z")
