@@ -2,7 +2,6 @@
 -- see LICENSE for license information
 
 local series = require("test.series")
-local iteration = require("rima.iteration")
 local lib = require("rima.lib")
 local core = require("rima.core")
 require("rima.public")

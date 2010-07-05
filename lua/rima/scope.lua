@@ -63,7 +63,7 @@ module(...)
 
 local ref = require("rima.ref")
 local address = require("rima.address")
-local iteration = require("rima.iteration")
+local set_list = require("rima.iteration.set_list")
 local tabulate_type = require("rima.values.tabulate")
 
 -- Scope names -----------------------------------------------------------------
@@ -375,7 +375,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
   end
 
   local function append_free_index(index)
-    free_indexes = free_indexes or iteration.set_list:new()
+    free_indexes = free_indexes or set_list:new()
     free_indexes:append(index)
   end
 
@@ -423,7 +423,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     -- Go through all of this again with one extra index.
     -- Clearly a waste of time, there must be a better way to do this...
     for k, v in pairs(value) do
-      scope.newindex(s, name, new_address, k, v, free_indexes and iteration.set_list:copy(free_indexes))
+      scope.newindex(s, name, new_address, k, v, free_indexes and set_list:copy(free_indexes))
     end
   else
     if is_free_index(index) then

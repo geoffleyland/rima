@@ -8,7 +8,7 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local expression = require("rima.expression")
 local add = require("rima.operators.add")
-local rima = rima
+local set_list = require("rima.iteration.set_list")
 
 module(...)
 
@@ -19,8 +19,8 @@ sum.precedence = 1
 
 function sum.construct(args)
   local sets = args[1]
-  if not rima.iteration.set_list:isa(sets) then
-    sets = rima.iteration.set_list:new(sets)
+  if not set_list:isa(sets) then
+    sets = set_list:new(sets)
   end
   return { sets, args[2] }
 end
