@@ -63,6 +63,7 @@ module(...)
 
 local ref = require("rima.ref")
 local address = require("rima.address")
+local iteration = require("rima.iteration")
 local tabulate_type = require("rima.values.tabulate")
 
 -- Scope names -----------------------------------------------------------------
@@ -368,14 +369,14 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
 
   local S = proxy.O(s)
 
-  local function record_free_index(name, set)
-    set = set or name
-    if type(set) == "string" then
-      set = rima.R(set)
-    end
-    name = lib.repr(name)
-    free_indexes = free_indexes or {}
-    free_indexes[#free_indexes+1] = { [name] = set }
+  local function is_free_index(index)
+    local ti = type(index)
+    return ti == "ref" or (ti == "table" and not getmetatable(index))
+  end
+
+  local function append_free_index(index)
+    free_indexes = free_indexes or iteration.set_list:new()
+    free_indexes:append(index)
   end
 
   local function get_prototype(t)
@@ -388,16 +389,8 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
   end
 
   local function apply_index(t, index)
-    if type(index) == "ref" then
-      -- index is a reference: t...[index]... = value
-      -- return the prototype  table, and record the name of our index
-      record_free_index(index)
-      return get_prototype(t)
-    elseif type(index) == "table" and getmetatable(index) == nil then
-      -- index is a named member of a set: t...[{i=I}]... = value
-      -- write to the prototype table, and record i as the name and I as the set of our index
-      local n, s = next(index)
-      record_free_index(n, s)
+    if is_free_index(index) then
+      append_free_index(index)
       return get_prototype(t)
     else
       -- just a normal index: t...["index"]... = value
@@ -430,27 +423,16 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     -- Go through all of this again with one extra index.
     -- Clearly a waste of time, there must be a better way to do this...
     for k, v in pairs(value) do
-      local f
-      if free_indexes then f = {} for i, j in ipairs(free_indexes) do f[i] = j end end
-      scope.newindex(s, name, new_address, k, v, f)
+      scope.newindex(s, name, new_address, k, v, free_indexes and iteration.set_list:copy(free_indexes))
     end
   else
-    if type(index) == "ref" then
-      -- s.name[addr1][addr2]...[addrN][index] = value
-      record_free_index(index)
-    elseif type(index) == "table" and not getmetatable(index) then
-      -- s.name[addr1][addr2]...[addrN][{i=I}] = value
-      local n, s = next(index)
-      record_free_index(n, s)
+    if is_free_index(index) then
+      append_free_index(index)
     end
 
     -- if there are any free indexes, then wrap their details up with the value
     if free_indexes then
-      value = tabulate_type:new(free_indexes, value)
-    end
-
-    if type(index) == "ref" or (type(index) == "table" and not getmetatable(index)) then
-      c.prototype = scope.pack(value)
+      c.prototype = scope.pack(tabulate_type:new(free_indexes, value))
     else
       c.value[index] = scope.pack(value)
     end

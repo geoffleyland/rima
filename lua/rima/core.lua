@@ -60,7 +60,7 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function eval(e, S, context)
+function eval(e, S)
   if trace then tracein("eval", e) end
 
   local f = lib.getmetamethod(e, "__eval")

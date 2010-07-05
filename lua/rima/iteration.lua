@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local coroutine, table = require("coroutine"), require("table")
-local ipairs, next, pairs, rawget = ipairs, next, pairs, rawget
-local error, getmetatable, require, type = error, getmetatable, require, type
+local error, getmetatable, ipairs, next, pairs, pcall, rawget, require, type =
+      error, getmetatable, ipairs, next, pairs, pcall, rawget, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -93,6 +93,47 @@ sequence = object:new({}, "sequence")
 
 function sequence:new(exp, order, values, names, result)
   return object.new(self, {exp=exp, order=order, values=values, names=names, result=result})
+end
+
+
+function sequence:read(s)
+  -- did we get 'S', '"S"' or '{n=S}'?
+  local namestring, set
+  local t = object.type(s)
+  if t == "ref" then -- 's'
+    namestring, set = lib.repr(s), s
+  elseif t == "string" then -- '"s"'
+    namestring, set = s, s
+  elseif t == "table" and not getmetatable(s) then -- '{n=S}'
+    namestring, set = next(s)
+  else
+    error(("Got '%s'"):format(lib.repr(s)))
+  end
+
+  -- did we get "['a, b']=l"?
+  local names = {}
+  for n in namestring:gmatch("[%a_][%w_]*") do
+    names[#names+1] = n
+  end
+
+  -- what was l?
+  local seq
+  if type(set) == "string" then
+    seq = sequence:new(rima.R(set), "a", "elements", names)
+  elseif sequence:isa(set) then
+    set:set_names(names)
+    seq = set
+  elseif not core.defined(set) then
+    seq = sequence:new(set, "a", "elements", names)
+  else
+    local im = lib.getmetamethod(set, "__iterate")
+    if im then
+      seq = sequence:new(set, "a", "elements", names)
+    else
+      error(("Expected a string, expression or iterable object.  Got '%s'"):format(lib.repr(set)))
+    end
+  end
+  return seq
 end
 
 
@@ -264,12 +305,27 @@ end
 
 
 function set_list:new(sets)
-  -- first sort the sets - numbered entries first, in numerical order,
-  -- and then string keys in alphabetical order
+  if not sets then return object.new(self, {}) end
+
   local sorted_sets = {}
+
   for k, s in pairs(sets) do
-    sorted_sets[#sorted_sets+1] = { k, s }
+    local status, seq = pcall(function()
+      if type(k) == "number" then
+        return sequence:read(s)
+      else
+        return sequence:read({[k]=s})
+      end
+    end)
+    if not status then
+      error(("error: set_list:new: didn't understand set argument %s.  %s")
+        :format(lib.repr(k), seq))
+    end
+    sorted_sets[#sorted_sets+1] = { k, seq }
   end
+
+  -- sort the sets - numbered entries first, in numerical order,
+  -- and then string keys in alphabetical order
   table.sort(sorted_sets, function(a, b)
     a, b = a[1], b[1]
     if type(a) == "number" then
@@ -287,56 +343,19 @@ function set_list:new(sets)
     end
   end)
 
-  -- now work through the sets to see how to handle each one
-  local clean_sets = {}
-  for i, s in ipairs(sorted_sets) do
-    -- did we get 'l', '"l"', 'a=l' or '{a=l}'?
-    local namestring, set
-    if type(s[1]) == "number" then
-      if type(s[2]) == "string" then -- '"l"'
-        namestring, set = s[2], s[2]
-      elseif object.type(s[2]) == "ref" then -- 'l'
-        namestring, set = lib.repr(s[2]), s[2]
-      else -- assume it's a table '{a=l}'
-        namestring, set = next(s[2])
-      end
-    elseif type(s[1]) == "string" then -- 'a=l'
-      namestring = s[1]
-      set = s[2]
-    else
-      error(("set_list error: didn't understand set argument #%d.  Got '%s'")
-        :format(i, lib.repr(s)))
-    end
+  local result = {}
+  for i, v in ipairs(sorted_sets) do result[i] = v[2] end
+  return object.new(self, result)
+end
 
-    -- did we get "['a, b']=l"?
-    local names = {}
-    for n in namestring:gmatch("[%a_][%w_]*") do
-      names[#names+1] = n
-    end
 
-    -- what was l?
-    local it
-    if type(set) == "string" then
-      it = sequence:new(rima.R(set), "a", "elements", names)
-    elseif sequence:isa(set) then
-      set:set_names(names)
-      it = set
-    elseif not core.defined(set) then
-      it = sequence:new(set, "a", "elements", names)
-    else
-      local m = getmetatable(set)
-      local i = m and m.__iterate
-      if i then
-        it = sequence:new(set, "a", "elements", names)
-      else
-        error(("set_list error: didn't understand set argument #%d.  Expected a string, expression or iterable object.  Got '%s'")
-          :format(i, lib.repr(set)))
-      end
-    end
-    clean_sets[i] = it
+function set_list:append(s)
+  local status, message = pcall(function()
+    self[#self+1] = sequence:read(s)
+    end)
+  if not status then
+    error(("error: set_list:append: didn't understand set.  %s") :format(message))
   end
-
-  return object.new(self, clean_sets)
 end
 
 

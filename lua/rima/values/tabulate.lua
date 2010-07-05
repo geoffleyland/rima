@@ -8,12 +8,9 @@ local ipairs, require = ipairs, require
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local scope = require("rima.scope")
-local rima = rima
 
 module(...)
 
-local ref = require("rima.ref")
-local iteration = require("rima.iteration")
 
 -- Tabulation ------------------------------------------------------------------
 
@@ -21,7 +18,7 @@ local tabulate_type = object:new(_M, "tabulate")
 
 
 function tabulate_type:new(indexes, e)
-  return object.new(self, { expression=e, indexes=iteration.set_list:new(indexes) })
+  return object.new(self, {expression=e, indexes=indexes})
 end
 
 
