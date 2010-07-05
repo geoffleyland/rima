@@ -432,7 +432,11 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
 
     -- if there are any free indexes, then wrap their details up with the value
     if free_indexes then
-      c.prototype = scope.pack(tabulate_type:new(free_indexes, value))
+      value = tabulate_type:new(free_indexes, value)
+    end
+
+    if is_free_index(index) then
+      c.prototype = scope.pack(value)
     else
       c.value[index] = scope.pack(value)
     end
