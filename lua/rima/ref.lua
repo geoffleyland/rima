@@ -43,7 +43,8 @@ function ref:new(r)
   args.check_types(r.type, "r.type", {"nil", {undefined_t, "type"}}, usage, fname)
   args.check_types(r.scope, "r.scope", {"nil", "boolean", {scope, "scope" }}, usage, fname)
 
-  return proxy:new(object.new(ref, { name=r.name, type=r.type or undefined_t:new(), scope=r.scope or false }), ref.proxy_mt)
+  r.type = r.type or undefined_t:new()
+  return proxy:new(object.new(ref, r), ref.proxy_mt)
 end
 
 function ref.is_simple(r)
