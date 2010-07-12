@@ -157,26 +157,28 @@ function sequence:__defined()
 end
 
 
+local function seq_iiter(a, e)
+  local i = e[1] + 1
+  local v = a[i]
+  if v then
+    return { i, v.value }
+  end
+end
+
+
+local function seq_iter(a, e)
+  local i, v = next(a, e[1])
+  if v then
+    return { i, v.value }
+  end
+end
+
+
 function sequence:iterate()
-  local function iiter(a, e)
-    local i = e[1] + 1
-    local v = a[i]
-    if v then
-      return { i, v.value }
-    end
-  end
-
-  local function iter(a, e)
-    local i, v = next(a, e[1])
-    if v then
-      return { i, v.value }
-    end
-  end
-
   if self.order == "i" then
-    return iiter, self.result, { 0 }
+    return seq_iiter, self.result, { 0 }
   elseif self.order == "" then
-    return iter, self.result, {}
+    return seq_iter, self.result, {}
   else -- self.order == "a"
     local m = getmetatable(self.result)
     local i = m and m.__iterate
@@ -184,9 +186,9 @@ function sequence:iterate()
       self.values = "all"
       return i(self.result)
     elseif self.result[1] then
-      return iiter, self.result, { 0 }
+      return seq_iiter, self.result, { 0 }
     else
-      return iter, self.result, {}
+      return seq_iter, self.result, {}
     end
   end
 end
