@@ -15,7 +15,6 @@ local ref = require("rima.ref")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
 local function_v = require("rima.values.function_v")
-local linearise = require("rima.linearise")
 
 local rima = getfenv(0).rima
 
@@ -104,18 +103,6 @@ function rima.instance(S, ...) -- create a new instance of a scope
     scope.set(S2, v)
   end
   return S2
-end
-
-
-function rima.linearise(e, S)
-  local l = core.eval(0 + e, S)
-  local status, constant, terms = xpcall(function() return linearise.linearise(l, S) end, debug.traceback)
-  if not status then
-    error(("error while linearising '%s':\n  linear form: %s\n  error:\n    %s"):
-      format(lib.repr(e), lib.repr(l), constant:gsub("\n", "\n    ")), 0)
-  else
-    return constant, terms
-  end
 end
 
 

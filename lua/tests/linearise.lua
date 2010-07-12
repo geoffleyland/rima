@@ -7,7 +7,7 @@ local table = require("table")
 local series = require("test.series")
 local scope = require("rima.scope")
 local core = require("rima.core")
-require("rima.public")
+local linearise = require("rima.linearise")
 local rima = rima
 
 module(...)
@@ -22,17 +22,17 @@ function test(options)
   local S = rima.scope.new{ ["a,b"] = rima.free(), c=rima.types.undefined_t:new() }
   S.d = { rima.free(), rima.free() }
   
-  local L = function(e, _S) return rima.linearise(e, _S or S) end
-  local LF = function(e, _S) return function() rima.linearise(e, _S or S) end end
+  local L = function(e, _S) return linearise.linearise(e, _S or S) end
+  local LF = function(e, _S) return function() linearise.linearise(e, _S or S) end end
 
   T:expect_ok(LF(a))
   T:expect_ok(LF(1 + a))
   T:expect_error(LF(1 + (3 + a^2)),
-    "error while linearising '1 %+ 3 %+ a^2'.-linear form: 4 %+ a^2.-term 2 is not linear %(got 'a^2', pow%)")
+    "linear form: '4 %+ a^2'.-term 2 is not linear %(got 'a^2', pow%)")
   T:expect_error(LF(1 + c),
-    "error while linearising '1 %+ c'.-linear form: 1 %+ c.-expecting a number type for 'c', got 'c undefined'")
+    "linear form: '1 %+ c'.-expecting a number type for 'c', got 'c undefined'")
   T:expect_error(LF(a * b),
-    "error while linearising 'a%*b'.-linear form: a%*b.-the expression does not evaluate to a sum of terms")
+    "linear form: 'a%*b'.-the expression does not evaluate to a sum of terms")
   T:expect_error(LF(1 + a[2]*5), "'a' is not indexable")
   T:expect_error(LF(1 + c[2]*5), "No type information available for 'c%[2%]'")
   T:expect_ok(LF(1 + d[2]*5), "d[2] is a number")
@@ -40,11 +40,11 @@ function test(options)
   T:expect_ok(LF(d[2]), "d[2] is an index")
 
   local function check_nonlinear(e, S)
-    T:expect_error(function() rima.linearise(e, S) end, "error while linearising")
+    T:expect_error(function() linearise.linearise(e, S) end, "linear form:")
   end
 
   local function check_linear(e, expected_constant, expected_terms, S)
-    local got_constant, got_terms = rima.linearise(e, S)
+    local got_constant, got_terms = linearise.linearise(e, S)
     for v, c in pairs(got_terms) do got_terms[v] = c.coeff end
     
     local pass = true

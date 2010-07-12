@@ -1,8 +1,8 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, ipairs, require = error, ipairs, require
-local getmetatable = getmetatable
+local error, getmetatable, ipairs, pcall, require =
+      error, getmetatable, ipairs, pcall, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -17,7 +17,8 @@ local operators = require("rima.operators")
 
 -- Getting a linear form -------------------------------------------------------
 
-function linearise(l, S)
+function _linearise(l, S)
+
   local constant, terms = 0, {}
   local fail = false
 
@@ -69,6 +70,16 @@ function linearise(l, S)
     error("the expression does not evaluate to a sum of terms", 0)
   end
   
+  return constant, terms
+end
+
+
+function linearise(e, S)
+  local l = core.eval(e, S)
+  local status, constant, terms = pcall(_linearise, l, S)
+  if not status then
+    error(("linear form: '%s':\n  %s"):format(lib.repr(l), constant:gsub("\n", "\n    ")), 0)
+  end
   return constant, terms
 end
 

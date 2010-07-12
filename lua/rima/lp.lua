@@ -1,15 +1,17 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local assert, error, io, getmetatable, math = assert, error, io, getmetatable, math
-local require, table, type = require, table, type
-local ipairs, pairs = ipairs, pairs
+local io, math = require("io"), require("math")
+local assert, error, ipairs, getmetatable, pairs, pcall, require, table, type =
+      assert, error, ipairs, getmetatable, pairs, pcall, require, table, type
+
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
 local constraint = require("rima.constraint")
 local tabulate = require("rima.values.tabulate")
+local linearise = require("rima.linearise")
 require("rima.public")
 local rima = rima
 
@@ -41,20 +43,24 @@ local function find_constraints(S, f)
     return r
   end
 
+  local function add_constraint(e, S, sets, undefined)
+    local r1, r2, r3, r4, r5 = f(e, S, undefined)
+    if r1 then
+      constraints[#constraints+1] = { ref=build_ref(S, sets, undefined), r1, r2, r3, r4, r5 }
+    end
+  end
+
+
   local function search(t)
     for k, v in pairs(t) do
       current_address[#current_address+1] = k
       if type(v) == "table" and not getmetatable(v) then
         search(v)
       elseif constraint:isa(v) then
-        if not v:trivial(S) then
-          constraints[#constraints+1] = { ref=build_ref(S), f(v, S) }
-        end
+        add_constraint(v, S)
       elseif tabulate:isa(v) and constraint:isa(v.expression) then
         for S2, undefined in v.indexes:iterate(S) do
-          if not v.expression:trivial(S2) then
-            constraints[#constraints+1] = { ref=build_ref(S2, v.indexes, undefined), f(v.expression, S2, undefined) }
-          end
+          add_constraint(v.expression, S2, v.indexes, undefined)
         end
       end
       current_address[#current_address] = nil
@@ -70,15 +76,22 @@ local function linearise_constraints(S)
   local result = find_constraints(S,
     function(c, S, undefined)
       if undefined and undefined[1] then
-        error("Some of the constraint's indices are undefined")
+        error(("error while linearising the constraint '%s': Some of the constraint's indices are undefined"):
+          format(lib.repr(c)), 0)
+      end
+      local status, lhs, type, constant = pcall(c.linearise, c, S)
+      if not status then
+        error(("error while linearising the constraint '%s':\n   %s"):
+          format(lib.repr(c), lhs:gsub("\n", "\n    ")), 0)
       end
       count = count + 1
       io.stderr:write(("\rGenerated %d constraints..."):format(count))
-      return c:linearise(S)
+      return lhs, type, constant
     end)
   io.stderr:write("\n")
   return result
 end
+
 
 local function tostring_constraints(S)
   return find_constraints(S,
@@ -114,7 +127,7 @@ end
 
 function sparse_form(S)
 
-  local constant, objective = rima.linearise(S.objective, S)
+  local constant, objective = linearise.linearise(S.objective, S)
   local constraints = linearise_constraints(S)
   
   -- Find all the variables in the constraints

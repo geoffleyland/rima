@@ -6,8 +6,7 @@ local assert, ipairs = assert, ipairs
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-require("rima.public")
-local rima = rima
+local linearise = require("rima.linearise")
 
 module(...)
 
@@ -23,13 +22,9 @@ function constraint:new(lhs, rel, rhs)
   return object.new(self, o)
 end
 
-function constraint:trivial(S)
-  local e = core.eval(self.lhs - self.rhs, S)
-  return e == 0
-end
 
 function constraint:linearise(S)
-  local constant, lhs = rima.linearise(self.lhs - self.rhs, S)
+  local constant, lhs = linearise.linearise(0 + self.lhs - self.rhs, S)
   return lhs, self.type, -constant
 end
 
