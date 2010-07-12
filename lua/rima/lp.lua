@@ -28,7 +28,7 @@ local function find_constraints(S, f)
       local index = current_address[i]
       if index == scope.free_index_marker then
         index = scope.lookup(S, sets[set_index].names[1])
-        if not index then
+        if not index or not index.value then
           index = undefined[undefined_index]
           undefined_index = undefined_index + 1
         else
