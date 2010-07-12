@@ -88,7 +88,6 @@ set_list.__tostring = lib.__tostring
 
 
 function set_list:iterate(S)
-  local scopes = {}
   local undefined_sets = {}
 
   local function z(i, cS)
