@@ -66,13 +66,18 @@ local function find_constraints(S, f)
 end
 
 local function linearise_constraints(S)
-  return find_constraints(S,
+  local count = 0
+  local result = find_constraints(S,
     function(c, S, undefined)
       if undefined and undefined[1] then
         error("Some of the constraint's indices are undefined")
       end
+      count = count + 1
+      io.stderr:write(("\rGenerated %d constraints..."):format(count))
       return c:linearise(S)
     end)
+  io.stderr:write("\n")
+  return result
 end
 
 local function tostring_constraints(S)
@@ -217,6 +222,7 @@ function solve(solver, S, values)
   S = new_scope(S, values)
   local solve_mod = require("rima.solvers."..solver)
   local variables, constraints = sparse_form(S, S.objective)
+  io.stderr:write(("Problem generated: %d variables, %d constraints.  Solving...\n"):format(#variables, #constraints))
   
   local r = solve_mod.solve(sense(S), variables, constraints)
 
