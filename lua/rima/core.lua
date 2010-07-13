@@ -1,7 +1,6 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local unpack = unpack
 local debug, io = require("debug"), require("io")
 
 local lib = require("rima.lib")
