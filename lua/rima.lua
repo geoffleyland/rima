@@ -11,7 +11,7 @@ require("rima.ref")
 require("rima.expression")
 require("rima.constraint")
 require("rima.values.function_v")
-require("rima.iteration")
+require("rima.sets")
 require("rima.lp")
 require("rima.public")
 
