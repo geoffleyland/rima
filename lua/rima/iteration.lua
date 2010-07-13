@@ -8,6 +8,7 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local iterator = require("rima.sets.iterator")
+local set_ref = require("rima.sets.ref")
 local expression = require("rima.expression")
 local rima = rima
 
@@ -85,12 +86,12 @@ end
 -- Top-level sequences ---------------------------------------------------------
 
 function rima.pairs(exp)
-  return sequence:new(exp, "", "pairs")
+  return set_ref:new(exp, "", "pairs")
 end
 
 
 function rima.ipairs(exp)
-  return sequence:new(exp, "i", "pairs")
+  return set_ref:new(exp, "i", "pairs")
 end
 
 

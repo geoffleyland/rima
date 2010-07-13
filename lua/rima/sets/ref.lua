@@ -17,17 +17,16 @@ local rima = rima
 module(...)
 
 
-
 -- Sequence --------------------------------------------------------------------
 
-sequence = object:new(_M, "sequence")
+ref = object:new(_M, "sets.ref")
 
-function sequence:new(exp, order, values, names, result)
+function ref:new(exp, order, values, names, result)
   return object.new(self, {exp=exp, order=order, values=values, names=names, result=result})
 end
 
 
-function sequence:read(s)
+function ref:read(s)
   -- did we get 'S', '"S"' or '{n=S}'?
   local namestring, set
   local t = object.type(s)
@@ -48,32 +47,32 @@ function sequence:read(s)
   end
 
   -- what was l?
-  local seq
+  local result
   if type(set) == "string" then
-    seq = sequence:new(rima.R(set), "a", "elements", names)
-  elseif sequence:isa(set) then
+    result = ref:new(rima.R(set), "a", "elements", names)
+  elseif ref:isa(set) then
     set:set_names(names)
-    seq = set
+    result = set
   elseif not core.defined(set) then
-    seq = sequence:new(set, "a", "elements", names)
+    result = ref:new(set, "a", "elements", names)
   else
     local im = lib.getmetamethod(set, "__iterate")
     if im then
-      seq = sequence:new(set, "a", "elements", names)
+      result = ref:new(set, "a", "elements", names)
     else
       error(("Expected a string, expression or iterable object.  Got '%s'"):format(lib.repr(set)))
     end
   end
-  return seq
+  return result
 end
 
 
-function sequence:set_names(names)
+function ref:set_names(names)
   self.names = names
 end
 
 
-function sequence:__repr(format)
+function ref:__repr(format)
   local e = lib.repr(self.exp, format)
   local n = table.concat(self.names, ", ")
   if self.order ~= "a" or self.values ~= "elements" then
@@ -88,10 +87,10 @@ function sequence:__repr(format)
     end
   end
 end
-sequence.__tostring = lib.__tostring
+ref.__tostring = lib.__tostring
 
 
-function sequence:eval(S)
+function ref:eval(S)
   -- We're looking to evaluate to a table.
   -- Unfortunately, the elements of the table might be spread over several
   -- layers of scope, so we have to work backwards through the scopes
@@ -131,11 +130,11 @@ function sequence:eval(S)
     end
   end
 
-  return sequence:new(b, self.order, self.values, self.names, r)
+  return ref:new(b, self.order, self.values, self.names, r)
 end
 
 
-function sequence:__defined()
+function ref:__defined()
   -- we're looking for a table (or something iterable)
   -- if the table is empty, we'll call it undefined.
   -- This could be wrong in some cases (I hope not), but usually
@@ -157,7 +156,7 @@ function sequence:__defined()
 end
 
 
-local function seq_iiter(a, e)
+local function set_ref_iiter(a, e)
   local i = e[1] + 1
   local v = a[i]
   if v then
@@ -166,7 +165,7 @@ local function seq_iiter(a, e)
 end
 
 
-local function seq_iter(a, e)
+local function set_ref_iter(a, e)
   local i, v = next(a, e[1])
   if v then
     return { i, v.value }
@@ -174,11 +173,11 @@ local function seq_iter(a, e)
 end
 
 
-function sequence:iterate()
+function ref:iterate()
   if self.order == "i" then
-    return seq_iiter, self.result, { 0 }
+    return set_ref_iiter, self.result, { 0 }
   elseif self.order == "" then
-    return seq_iter, self.result, {}
+    return set_ref_iter, self.result, {}
   else -- self.order == "a"
     local m = getmetatable(self.result)
     local i = m and m.__iterate
@@ -186,15 +185,15 @@ function sequence:iterate()
       self.values = "all"
       return i(self.result)
     elseif self.result[1] then
-      return seq_iiter, self.result, { 0 }
+      return set_ref_iiter, self.result, { 0 }
     else
-      return seq_iter, self.result, {}
+      return set_ref_iter, self.result, {}
     end
   end
 end
 
 
-function sequence:results()
+function ref:results()
   local names = self.names
   local exp = self.exp
 

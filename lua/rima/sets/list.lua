@@ -8,7 +8,7 @@ local error, ipairs, pairs, pcall, rawget =
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local sequence = require("rima.iteration.sequence")
+local set_ref = require("rima.sets.ref")
 local scope = require("rima.scope")
 
 module(...)
@@ -34,9 +34,9 @@ function list:new(sets)
   for k, s in pairs(sets) do
     local status, seq = pcall(function()
       if type(k) == "number" then
-        return sequence:read(s)
+        return set_ref:read(s)
       else
-        return sequence:read({[k]=s})
+        return set_ref:read({[k]=s})
       end
     end)
     if not status then
@@ -73,7 +73,7 @@ end
 
 function list:append(s)
   local status, message = pcall(function()
-    self[#self+1] = sequence:read(s)
+    self[#self+1] = set_ref:read(s)
     end)
   if not status then
     error(("error: sets.list:append: didn't understand set.  %s") :format(message))
