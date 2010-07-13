@@ -14,7 +14,6 @@ local scope = require("rima.scope")
 module(...)
 
 
-
 -- Set list --------------------------------------------------------------------
 
 list = object:new(_M, "sets.list")
@@ -87,6 +86,12 @@ end
 list.__tostring = lib.__tostring
 
 
+-- Iteration -------------------------------------------------------------------
+
+-- It seems we need a new scope for every iteration because bind might
+-- be used, and any indexes might need to be remembered for a later evaluation
+-- bind is evil.
+
 function list:iterate(S)
   local undefined_sets = {}
 
@@ -100,10 +105,7 @@ function list:iterate(S)
     else
       local it = self[i]:eval(cS)
       if core.defined(it) then
-        local results = it:results()
-        for variables in it:iterate() do
-          local nS = scope.spawn(cS, nil, {overwrite=true, no_undefined=true})
-          results(variables, nS)
+        for _, nS in it:iterate(cS) do
           z(i+1, nS)
         end
       else
@@ -117,7 +119,7 @@ function list:iterate(S)
       end
     end
   end
-  
+
   return coroutine.wrap(z)
 end
 

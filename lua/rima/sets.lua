@@ -54,15 +54,13 @@ end
 range_type.__tostring = lib.__tostring
 
 
+local function range_type_iter(high, i)
+  i = i + 1
+  if i <= high then return i end
+end
+
 function range_type:__iterate()
-  local function iter(a, e)
-    local i = e[1] + 1
-    if i <= a.high then
-      return { i }
-    end
-  end
-  
-  return iter, self, { self.low-1 }
+  return range_type_iter, self.high, self.low-1
 end
 
 

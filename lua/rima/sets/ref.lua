@@ -1,9 +1,9 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local table = require("table")
-local error, getmetatable, ipairs, next, pairs =
-      error, getmetatable, ipairs, next, pairs
+local math, table = require("math"), require("table")
+local error, getmetatable, ipairs, next, pairs, select =
+      error, getmetatable, ipairs, next, pairs, select
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -12,6 +12,7 @@ local core = require("rima.core")
 local index_op = require("rima.operators.index")
 local iterator = require("rima.sets.iterator")
 local expression = require("rima.expression")
+local scope = require("rima.scope")
 local rima = rima
 
 module(...)
@@ -21,8 +22,14 @@ module(...)
 
 ref = object:new(_M, "sets.ref")
 
+
 function ref:new(exp, order, values, names, result)
   return object.new(self, {exp=exp, order=order, values=values, names=names, result=result})
+end
+
+
+function ref:set_names(names)
+  self.names = names
 end
 
 
@@ -64,11 +71,6 @@ function ref:read(s)
     end
   end
   return result
-end
-
-
-function ref:set_names(names)
-  self.names = names
 end
 
 
@@ -156,70 +158,106 @@ function ref:__defined()
 end
 
 
-local function set_ref_iiter(a, e)
-  local i = e[1] + 1
-  local v = a[i]
-  if v then
-    return { i, v.value }
-  end
+-- Iteration -------------------------------------------------------------------
+
+-- It seems we need a new scope for every iteration because bind might
+-- be used, and any indexes might need to be remembered for a later evaluation
+-- bind is evil.
+
+local function set_ref_ipairs(state, i)
+  i = i + 1
+  local v = state.resolved_set[i]
+  if not v then return end
+  local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
+  local n1, n2 = state.names[1], state.names[2]
+  if n1 and n1 ~= "_" then S[n1] = i end
+  if n2 and n2 ~= "_" then S[n2] = state.set[i] end
+  return i, S
 end
 
 
-local function set_ref_iter(a, e)
-  local i, v = next(a, e[1])
-  if v then
-    return { i, v.value }
-  end
+local function set_ref_pairs(state, k)
+  k = next(state.resolved_set, k)
+  if not k then return end
+  local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
+  local n1, n2 = state.names[1], state.names[2]
+  if n1 and n1 ~= "_" then S[n1] = k end
+  if n2 and n2 ~= "_" then S[n2] = state.set[k] end
+  return k, S
 end
 
 
-function ref:iterate()
-  if self.order == "i" then
-    return set_ref_iiter, self.result, { 0 }
-  elseif self.order == "" then
-    return set_ref_iter, self.result, {}
-  else -- self.order == "a"
-    local m = getmetatable(self.result)
-    local i = m and m.__iterate
-    if i then
-      self.values = "all"
-      return i(self.result)
-    elseif self.result[1] then
-      return set_ref_iiter, self.result, { 0 }
+local function set_ref_ielements(state, i)
+  local rs = state.resolved_set
+  i = i + 1
+  local v = rs[i]
+  if not v then return end
+  v = v.value
+  local s = state.set
+  local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
+  S[state.names[1]] = iterator:new(s, expression:new(index_op, s, i), i, v, rs)
+  return i, S
+end
+
+
+local function set_ref_elements(state, k)
+  local rs = state.resolved_set
+  local v
+  k, v = next(rs, k)
+  if not k then return end
+  v = v.value
+  local s = state.set
+  local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
+  S[state.names[1]] = iterator:new(s, expression:new(index_op, s, k), k, v, rs)
+  return k, S
+end
+
+
+local function set_ref_subiterate2(state, ...)
+  local k = select(1, ...)
+  if not k then return end
+
+  local names = state.names
+  local name_count = #names
+  local arg_count = select("#", ...) + 1
+  
+  local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
+
+  for i = 1, math.min(name_count, arg_count) do
+    local n = names[i]
+    if n and n ~= "_" then
+      S[n] = select(i, ...)
+    end
+  end
+  return k, S
+end
+
+local function set_ref_subiterate(state, k)
+  return set_ref_subiterate2(state, state.iterate_function(state.iterate_state, k))
+end
+
+
+function ref:iterate(S)
+  local state = { scope=S, set=self.exp, names=self.names, resolved_set=self.result }
+  local iterate_function = lib.getmetamethod(self.result, "__iterate")
+
+  if self.order == "i" or (self.order == "a" and not iterate_function and self.result[1]) then
+    if self.values == "pairs" then
+      return set_ref_ipairs, state, 0
     else
-      return set_ref_iter, self.result, {}
+      return set_ref_ielements, state, 0
     end
-  end
-end
-
-
-function ref:results()
-  local names = self.names
-  local exp = self.exp
-
-  if self.values == "pairs" then
-    return function(v, S)
-      if names[1] and names[1] ~= "_" then S[names[1]] = v[1] end
-      if names[2] and names[2] ~= "_" then S[names[2]] = exp[v[1]] end
-    end
-  elseif self.values == "elements" then
-    local m = getmetatable(self.result)
-    local i = m and m.__iterate
-    if not i then
-      return function(v, S)
-        S[names[1]] = iterator:new(exp, expression:new(index_op, exp, v[1]), v[1], v[2], self.result)
-      end
+  elseif not iterate_function then
+    if self.values == "pairs" then
+      return set_ref_pairs, state, nil
     else
-      return function(v, S)
-        local j = #v
-        for i, n in ipairs(names) do
-          if i > j then return end
-          if n ~= "_" then
-            S[n] = v[i]
-          end
-        end
-      end
+      return set_ref_elements, state, nil
     end
+  else
+    self.values = "all"
+    local initial
+    state.iterate_function, state.iterate_state, initial = iterate_function(self.result)
+    return set_ref_subiterate, state, initial
   end
 end
 
