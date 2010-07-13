@@ -8,7 +8,7 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local expression = require("rima.expression")
 local add = require("rima.operators.add")
-local set_list = require("rima.iteration.set_list")
+local set_list = require("rima.sets.list")
 
 module(...)
 

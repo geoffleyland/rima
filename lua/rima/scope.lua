@@ -63,7 +63,7 @@ module(...)
 
 local ref = require("rima.ref")
 local address = require("rima.address")
-local set_list = require("rima.iteration.set_list")
+local set_list = require("rima.sets.list")
 local tabulate_type = require("rima.values.tabulate")
 
 -- Scope names -----------------------------------------------------------------

@@ -17,16 +17,16 @@ module(...)
 
 -- Set list --------------------------------------------------------------------
 
-set_list = object:new(_M, "set_list")
+list = object:new(_M, "sets.list")
 
-function set_list:copy(sets)
+function list:copy(sets)
   local o = {}
   for i, s in ipairs(sets) do o[i] = s end
   return object.new(self, o)
 end
 
 
-function set_list:new(sets)
+function list:new(sets)
   if not sets then return object.new(self, {}) end
 
   local sorted_sets = {}
@@ -40,7 +40,7 @@ function set_list:new(sets)
       end
     end)
     if not status then
-      error(("error: set_list:new: didn't understand set argument %s.  %s")
+      error(("error: sets.list:new: didn't understand set argument %s.  %s")
         :format(lib.repr(k), seq))
     end
     sorted_sets[#sorted_sets+1] = { k, seq }
@@ -71,23 +71,23 @@ function set_list:new(sets)
 end
 
 
-function set_list:append(s)
+function list:append(s)
   local status, message = pcall(function()
     self[#self+1] = sequence:read(s)
     end)
   if not status then
-    error(("error: set_list:append: didn't understand set.  %s") :format(message))
+    error(("error: sets.list:append: didn't understand set.  %s") :format(message))
   end
 end
 
 
-function set_list:__repr(format)
+function list:__repr(format)
   return "{"..lib.concat_repr(self, format).."}"
 end
-set_list.__tostring = lib.__tostring
+list.__tostring = lib.__tostring
 
 
-function set_list:iterate(S)
+function list:iterate(S)
   local undefined_sets = {}
 
   local function z(i, cS)
@@ -95,8 +95,8 @@ function set_list:iterate(S)
     cS = cS or S
     if not rawget(self, i) then
       local ud
-      if undefined_sets[1] then ud = set_list:copy(undefined_sets) end
-      coroutine.yield(cS, ud)        
+      if undefined_sets[1] then ud = list:copy(undefined_sets) end
+      coroutine.yield(cS, ud)
     else
       local it = self[i]:eval(cS)
       if core.defined(it) then
