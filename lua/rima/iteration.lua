@@ -7,7 +7,7 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local iterator = require("rima.iteration.iterator")
+local iterator = require("rima.sets.iterator")
 local expression = require("rima.expression")
 local rima = rima
 
