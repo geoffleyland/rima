@@ -2,6 +2,7 @@
 -- see LICENSE for license information
 
 local debug, io = require("debug"), require("io")
+local error = error
 
 local lib = require("rima.lib")
 
