@@ -117,12 +117,12 @@ function mul.simplify(args)
         local E = proxy.O(e)
         local mt = getmetatable(e)
         if type(e) == "number" then             -- if the term evaluated to a number, then multiply the coefficient by it
-          coeff = coeff * math.pow(e, exp)
+          coeff = coeff * e ^ exp
         elseif mt == mul then                   -- if the term is another product, hoist its terms
           prod(E, exp)
         elseif mt == add and                    -- if the term is a sum with a single term, hoist it
                #E == 1 then
-          coeff = coeff * math.pow(E[1][1], exp)
+          coeff = coeff * E[1][1] ^ exp
           simplify(exp, E[1][2])
         elseif mt == pow and                    -- if the term is an exponentiation to a constant power, hoist it
           type(E[2]) == "number" then
