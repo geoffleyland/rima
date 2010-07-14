@@ -62,8 +62,6 @@ function test(options)
     local S = scope.new{ Q = {"a", "b", "c"}, x = { rima.free(), rima.free(), rima.free() }, z = { a=rima.free(), b=rima.free(), c=rima.free() } }
     T:check_equal(E(rima.sum{y=x}(y), S), "x[1] + x[2] + x[3]")
     T:check_equal(E(rima.sum{y=z}(y), S), "z.a + z.b + z.c")
-    T:check_equal(E(rima.sum{y=Q}(y), S), "a + b + c")
-    T:check_equal(E(rima.sum{y=Q}(Q[y]), S), "a + b + c")
     T:check_equal(E(rima.sum{y=x}(x[y]), S), "x[1] + x[2] + x[3]")
     T:check_equal(E(rima.sum{y=z}(z[y]), S), "z.a + z.b + z.c")
     T:check_equal(E(rima.sum{y=Q}(x[y]), S), "x[1] + x[2] + x[3]")
