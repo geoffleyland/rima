@@ -15,6 +15,7 @@ local ref = require("rima.ref")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
 local function_v = require("rima.values.function_v")
+local sets = require("rima.sets")
 
 local rima = getfenv(0).rima
 
