@@ -33,7 +33,7 @@ function test(options)
 
   U{"rima.sum{r=R}(y[r])", S="sum{r in R}(y[r])", ES=6}
 
-  U{"rima.sum{q=Q}(x*y)", S="sum{q in Q}(x*y)" }
+  U{"rima.sum{q=Q}(x*v)", S="sum{q in Q}(x*v)" }
   U{"rima.sum{q=Q}(x[q]*y[q])", S="sum{q in Q}(x[q]*y[q])"}  
   U{"rima.sum{r=R}(x[r]*y[r])", S="sum{r in R}(x[r]*y[r])", ES="x.a + 2*x.b + 3*x.c"}
   U{"rima.sum{q=Q, R}(x[q][R])", S="sum{R, q in Q}(x[q, R])", ES="sum{q in Q}(x[q].a + x[q].b + x[q].c)"}
