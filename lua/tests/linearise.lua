@@ -1,13 +1,15 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local ipairs, pairs = ipairs, pairs
+local ipairs, pairs, pcall = ipairs, pairs, pcall
 local table = require("table")
 
 local series = require("test.series")
 local scope = require("rima.scope")
 local core = require("rima.core")
+local lib = require("rima.lib")
 local linearise = require("rima.linearise")
+require("rima.public")
 local rima = rima
 
 module(...)
@@ -44,10 +46,16 @@ function test(options)
   end
 
   local function check_linear(e, expected_constant, expected_terms, S)
-    local got_constant, got_terms = linearise.linearise(e, S)
+    local pass, got_constant, got_terms = pcall(linearise.linearise, e, S)
+
+    if not pass then
+      local s = ("error linearising %s:\n  %s"):
+        format(lib.repr(e), got_constant:gsub("\n", "\n  "))
+      T:test(false, s)
+      return
+    end
+
     for v, c in pairs(got_terms) do got_terms[v] = c.coeff end
-    
-    local pass = true
     if expected_constant ~= got_constant then
       pass = false
     else
@@ -101,6 +109,14 @@ function test(options)
     S.D[d].b = rima.free()
     T:expect_ok(LF(rima.sum{d=D}(d.b), S))
     T:expect_ok(LF(rima.sum{d=D}(d.a * d.b), S))
+  end
+
+  -- iterator times variable
+  do
+    local i, x, q, Q = rima.R"i, x, q, Q"
+    local S = scope.new{ Q = { 3, 7, 11, 13 } }
+    S.x[i] = rima.free()
+    check_linear(rima.sum{q=Q}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
   end
 
   return T:close()
