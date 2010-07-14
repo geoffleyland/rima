@@ -11,6 +11,7 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
+local iterator = require("rima.sets.iterator")
 
 module(...)
 
@@ -127,6 +128,8 @@ function address:__repr(format)
     local v
     if type(a.exp) == "iterator" and lib.repr(a.value, format):sub(1,5) == "table" then
       v = a.exp.key
+    elseif type(a.value) == "iterator" then
+      v = a.value.value
     else
       v = a.value
     end
@@ -229,6 +232,9 @@ function address:resolve(S, current, i, base, eval, collected, used)
     local k, v
     if type(b) == "iterator" then
       k, v = b.key, b.value
+    end
+    if type(j) == "iterator" then
+      k, v = j.key, j.value
     end
     local result
     t = t.value

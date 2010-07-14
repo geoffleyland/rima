@@ -4,7 +4,6 @@
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local expression = require("rima.expression")
 
 module(...)
 
@@ -20,11 +19,12 @@ end
 
 function iterator:__eval(S, eval)
   local exp = eval(self.exp, S)
-  if core.defined(exp) then
-    return exp
-  else
-    return iterator:new(self.base, exp, self.key, self.value, self.set)
-  end
+  return iterator:new(self.base, exp, self.key, self.value, self.set)
+end
+
+
+function iterator:__defined()
+  return core.defined(self.exp)
 end
 
 
@@ -41,17 +41,19 @@ iterator.__tostring = lib.__tostring
 
 -- Operators -------------------------------------------------------------------
 
--- these being functions rather than direct assignments are a stopgap until
--- I can get some cyclic requires fixed.
-iterator.__add = function(...) return expression.proxy_mt.__add(...) end
-iterator.__sub = function(...) return expression.proxy_mt.__sub(...) end
-iterator.__unm = function(...) return expression.proxy_mt.__unm(...) end
-iterator.__mul = function(...) return expression.proxy_mt.__mul(...) end
-iterator.__div = function(...) return expression.proxy_mt.__div(...) end
-iterator.__pow = function(...) return expression.proxy_mt.__pow(...) end
-iterator.__call = function(...) return expression.proxy_mt.__call(...) end
-iterator.__index = function(...) return expression.proxy_mt.__index(...) end
-iterator.__newindex = function(...) return expression.proxy_mt.__newindex(...) end
+local function extract(a)
+  if iterator:isa(a) then return a.value end
+  return a
+end
+
+function iterator.__add(a, b) return extract(a) + extract(b) end
+function iterator.__sub(a, b) return extract(a) - extract(b) end
+function iterator.__mul(a, b) return extract(a) * extract(b) end
+function iterator.__div(a, b) return extract(a) / extract(b) end
+function iterator.__pow(a, b) return extract(a) ^ extract(b) end
+
+function iterator:__unm() return -self.value end
+function iterator:__index(i) return self.value[i] end
 
 
 -- EOF -------------------------------------------------------------------------
