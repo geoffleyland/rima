@@ -24,7 +24,7 @@ function ord.__eval(args, S, eval)
   args = proxy.O(args)
   local e = eval(args[1], S)
   if iterator:isa(e) then
-    return e.key
+    return iterator.key(e)
   else
     if core.defined(e) then
       error("ord can only be applied to iterators")

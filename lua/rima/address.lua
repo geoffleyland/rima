@@ -126,10 +126,10 @@ function address:__repr(format)
 
   for _, a in ipairs(self) do
     local v
-    if type(a.exp) == "iterator" and lib.repr(a.value, format):sub(1,5) == "table" then
-      v = a.exp.key
-    elseif type(a.value) == "iterator" then
-      v = a.value.value
+    if iterator:isa(a.exp) and lib.repr(a.value, format):sub(1,5) == "table" then
+      v = iterator.key(a.exp)
+    elseif iterator:isa(a.value) then
+      v = iterator.value(a.value)
     else
       v = a.value
     end
@@ -230,11 +230,11 @@ function address:resolve(S, current, i, base, eval, collected, used)
   local function index(t, j, b)
 
     local k, v
-    if type(b) == "iterator" then
-      k, v = b.key, b.value
+    if iterator:isa(b) then
+      k, v = iterator.key(b), iterator.value(b)
     end
-    if type(j) == "iterator" then
-      k, v = j.key, j.value
+    if iterator:isa(j) then
+      k, v = iterator.key(j), iterator.value(j)
     end
     local result
     t = t.value
@@ -252,8 +252,8 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
   -- What do we do when we come across an expression?
   local function handle_expression(c, j)
-    if object.type(c) == "iterator" then
-      c = c.exp
+    if iterator:isa(c) then
+      c = iterator.expression(c)
     end
     local new_base = core.bind(c, S)
     local new_address = self:sub(j)
