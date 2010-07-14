@@ -60,7 +60,8 @@ local function range_type_iter(high, i)
 end
 
 function range_type:__iterate()
-  return range_type_iter, self.high, self.low-1
+  -- Cast self.high to a number by adding zero
+  return range_type_iter, self.high+0, self.low-1
 end
 
 
@@ -68,7 +69,7 @@ local range_op = object:new({}, "range")
 function range_op.__eval(args, S, eval)
   args = proxy.O(args)
   local l, h = eval(args[1], S), eval(args[2], S)
-  if type(l) == "number" and type(h) == "number" then
+  if core.defined(l) and core.defined(h) then
     return range_type:new(l, h)
   else
     return expression:new(range_op, l, h)

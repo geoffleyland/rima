@@ -116,7 +116,7 @@ function mul.simplify(args)
       local function simplify(exp, e)
         local E = proxy.O(e)
         local mt = getmetatable(e)
-        if type(e) == "number" then             -- if the term evaluated to a number, then multiply the coefficient by it
+        if core.defined(e) then                 -- if the term evaluated to a number, then multiply the coefficient by it
           coeff = coeff * e ^ exp
         elseif mt == mul then                   -- if the term is another product, hoist its terms
           prod(E, exp)

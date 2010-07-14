@@ -110,7 +110,7 @@ function add.__eval(args, S, eval)
       local function simplify(c, e)
         local E = proxy.O(e)
         local mt = getmetatable(e)
-        if type(e) == "number" then             -- if the term evaluated to a number, then add it to the constant
+        if core.defined(e) then                 -- if the term evaluated to a number, then add it to the constant
           constant = constant + e * c
         elseif mt == add then                   -- if the term is another sum, hoist its terms
           sum(E, c)
