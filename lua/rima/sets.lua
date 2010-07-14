@@ -22,8 +22,8 @@ ord = object:new({}, "ord")
 
 function ord.__eval(args, S, eval)
   args = proxy.O(args)
-  local e = core.bind(args[1], S)
-  if iterator:isa(e) and eval ~= core.bind then
+  local e = eval(args[1], S)
+  if iterator:isa(e) then
     return e.key
   else
     if core.defined(e) then
