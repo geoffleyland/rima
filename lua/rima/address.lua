@@ -30,8 +30,8 @@ end
 local address = object:new(_M, "address")
 
 
-local function add_element(a, e, v)
-  a[#a+1] = { exp=e, value=v }
+local function add_element(a, v)
+  a[#a+1] = { value=v }
 end
 
 function address:new(...)
@@ -43,10 +43,10 @@ function address:new(...)
 
     if t == "address" then
       for i, v in ipairs(e) do
-        add_element(a, v.exp, v.value)
+        add_element(a, v.value)
       end
     elseif t ~= "nil" then
-      add_element(a, e, e)
+      add_element(a, e)
     end
   end
 
@@ -66,7 +66,7 @@ function address:sub(i, j)
   local a = {}
   for k = i, j do
     local sk = self[k]
-    add_element(a, sk.exp, sk.value)
+    add_element(a, sk.value)
   end
   return object.new(address, a)
 end
@@ -110,14 +110,7 @@ function address:__repr(format)
 
   if format.dump then
     return ("address{%s}"):format(lib.concat(self, ", ",
-      function(a)
-        local v, e = repr(a.value, format), repr(a.exp, format)
-        if v == e then
-          return v
-        else
-          return ("{value=%s, exp=%s}"):format(v, e)
-        end
-      end))
+      function(a) return repr(a.value, format) end))
   end
 
   local readable = format.readable
@@ -126,9 +119,7 @@ function address:__repr(format)
 
   for _, a in ipairs(self) do
     local v
-    if iterator:isa(a.exp) and lib.repr(a.value, format):sub(1,5) == "table" then
-      v = iterator.key(a.exp)
-    elseif iterator:isa(a.value) then
+    if iterator:isa(a.value) then
       v = iterator.value(a.value)
     else
       v = a.value
@@ -170,8 +161,7 @@ __tostring = lib.__tostring
 function address:__eval(S, eval)
   local new_address = {}
   for i, a in ipairs(self) do
-    local b = core.bind(a.exp, S)
-    new_address[i] = { exp=b, value=eval(a.value, S) }
+    new_address[i] = { value=eval(a.value, S) }
   end
   return object.new(address, new_address)
 end
@@ -179,8 +169,7 @@ end
 
 function address:__defined()
   for _, a in ipairs(self) do
-    if not core.defined(a.value) and
-       type(a.exp) ~= "iterator" then
+    if not core.defined(a.value) and type(a.value) ~= "iterator" then
       return false
     end
   end
@@ -220,19 +209,14 @@ function address:resolve(S, current, i, base, eval, collected, used)
   local si = rawget(self, i)
   if not si then return true, current, base, self, collected end
   local a = si.value
-  local b = si.exp
 
   local function fail()
     error(("address: error resolving '%s%s': '%s%s' is not indexable (got '%s' %s)"):
       format(lib.repr(base), lib.repr(self:sub(1, i)), lib.repr(base), lib.repr(self:sub(1, i-1)), lib.repr(current), object.type(current.value)))
   end
 
-  local function index(t, j, b)
-
+  local function index(t, j)
     local k, v
-    if iterator:isa(b) then
-      k, v = iterator.key(b), iterator.value(b)
-    end
     if iterator:isa(j) then
       k, v = iterator.key(j), iterator.value(j)
     end
@@ -343,7 +327,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
   -- handle tables and things we can index just by indexing
   elseif (mt and mt.__index) or type(current.value) == "table" then
-    local next = index(current, a, b)
+    local next = index(current, a)
     local r1
     if next then
       r1 = lib.packn(self:resolve(S, next, i+1, base, eval, collected, used))
@@ -353,7 +337,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
     next = current.prototype
     local r2
     if next then
-      local new_collected = object.new(address, {{value=a, exp=b}})
+      local new_collected = object.new(address, {{value=a}})
       if collected then new_collected = collected + new_collected end
       r2 = lib.packn(self:resolve(S, next, i+1, base, eval, new_collected, used))
       if r2[1] then return lib.unpackn(r2) end

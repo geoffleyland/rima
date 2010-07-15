@@ -34,14 +34,14 @@ function test(options)
   do
     local S = rima.scope.new{ a=rima.types.undefined_t:new(), b = 2}
     T:check_equal(D(a[b]), "index(ref(a), address{ref(b)})")
-    T:check_equal(D(E(a[b], S)), "index(ref(a), address{{value=2, exp=ref(b)}})")
+    T:check_equal(D(E(a[b], S)), "index(ref(a), address{2})")
     local e = E(a[b], S)
-    T:check_equal(D(e), "index(ref(a), address{{value=2, exp=ref(b)}})")
+    T:check_equal(D(e), "index(ref(a), address{2})")
     S2 = rima.scope.spawn(S, {a = { "x" }})
     T:check_equal(D(S2.a), "ref(a)")
     T:check_equal(S2.a[1], "x")
     T:check_equal(D(S2.a[2]), "index(ref(a), address{2})")
-    T:check_equal(D(E(e, S2)), "index(ref(a), address{{value=2, exp=ref(b)}})")
+    T:check_equal(D(E(e, S2)), "index(ref(a), address{2})")
     T:expect_ok(function() S2.a[2] = "yes" end, "setting a table field")
     T:check_equal(D(E(e, S2)), "\"yes\"")
 
