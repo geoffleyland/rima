@@ -31,8 +31,9 @@ local address = object:new(_M, "address")
 
 
 local function add_element(a, v)
-  a[#a+1] = { value=v }
+  a[#a+1] = v
 end
+
 
 function address:new(...)
   local a = {}
@@ -43,7 +44,7 @@ function address:new(...)
 
     if t == "address" then
       for i, v in ipairs(e) do
-        add_element(a, v.value)
+        add_element(a, v)
       end
     elseif t ~= "nil" then
       add_element(a, e)
@@ -65,8 +66,7 @@ function address:sub(i, j)
 
   local a = {}
   for k = i, j do
-    local sk = self[k]
-    add_element(a, sk.value)
+    add_element(a, self[k])
   end
   return object.new(address, a)
 end
@@ -82,7 +82,7 @@ end
 -- Element access --------------------------------------------------------------
 
 function address:value(i)
-  return self[i].value
+  return self[i]
 end
 
 
@@ -92,7 +92,7 @@ local function avnext(a, i)
   i = i + 1
   local v = a[i]
   if v then
-    return i, v.value
+    return i, v
   end
 end
 
@@ -104,34 +104,28 @@ end
 -- string representation -------------------------------------------------------
 
 function address:__repr(format)
-  if not self[1] then return "" end
-
-  local append, repr = lib.append, lib.repr
-
   if format.dump then
-    return ("address{%s}"):format(lib.concat(self, ", ",
-      function(a) return repr(a.value, format) end))
+    return ("address{%s}"):format(lib.concat_repr(self, format))
   end
 
+  if not self[1] then return "" end
+  local append, repr = lib.append, lib.repr
   local readable = format.readable
   local mode = "s"
   local r = {}
 
   for _, a in ipairs(self) do
-    local v
-    if iterator:isa(a.value) then
-      v = iterator.value(a.value)
-    else
-      v = a.value
+    if iterator:isa(a) then
+      a = iterator.value(a)
     end
-    if is_identifier_string(v) then
+    if is_identifier_string(a) then
       -- for strings that can be identifiers, format as a.b
       if mode ~= "s" then
         mode = "s"
         append(r, "]")
       end
       append(r, ".")
-      append(r, repr(v, format))
+      append(r, repr(a, format))
     else
       -- otherwise format with square braces
       if mode ~= "v" then
@@ -141,11 +135,11 @@ function address:__repr(format)
         -- lua-readable format is [x][y], otherwise it's [x, y] for mathematicans
         append(r, (readable and "][") or ", ")
       end
-      if type(v) == "string" then
+      if type(a) == "string" then
         -- non-identifier strings are ['1 str.ing']
-        append(r, "'", v, "'")
+        append(r, "'", a, "'")
       else
-        append(r, repr(v, format))
+        append(r, repr(a, format))
       end
     end
   end
@@ -161,7 +155,7 @@ __tostring = lib.__tostring
 function address:__eval(S, eval)
   local new_address = {}
   for i, a in ipairs(self) do
-    new_address[i] = { value=eval(a.value, S) }
+    new_address[i] = eval(a, S)
   end
   return object.new(address, new_address)
 end
@@ -169,7 +163,7 @@ end
 
 function address:__defined()
   for _, a in ipairs(self) do
-    if not core.defined(a.value) and type(a.value) ~= "iterator" then
+    if not core.defined(a) and type(a) ~= "iterator" then
       return false
     end
   end
@@ -206,9 +200,10 @@ function address:resolve(S, current, i, base, eval, collected, used)
   end
 
   -- Otherwise, move on to the next index
-  local si = rawget(self, i)
-  if not si then return true, current, base, self, collected end
-  local a = si.value
+  local a = rawget(self, i)
+  if not a then
+    return true, current, base, self, collected
+  end
 
   local function fail()
     error(("address: error resolving '%s%s': '%s%s' is not indexable (got '%s' %s)"):
@@ -225,10 +220,10 @@ function address:resolve(S, current, i, base, eval, collected, used)
     if not k then
       result = t[j]
     elseif type(k) == "number" and not t[1] then
-      self[i].value = v
+      self[i] = v
       result = t[v]
     else
-      self[i].value = k
+      self[i] = k
       result = t[k]
     end
     return result
@@ -337,8 +332,12 @@ function address:resolve(S, current, i, base, eval, collected, used)
     next = current.prototype
     local r2
     if next then
-      local new_collected = object.new(address, {{value=a}})
-      if collected then new_collected = collected + new_collected end
+      local new_collected
+      if collected then
+        new_collected = collected + a
+      else
+        new_collected = address:new(a)
+      end
       r2 = lib.packn(self:resolve(S, next, i+1, base, eval, new_collected, used))
       if r2[1] then return lib.unpackn(r2) end
     end
