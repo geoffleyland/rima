@@ -86,7 +86,7 @@ function ref.proxy_mt.__bind(r, S)
   r = proxy.O(r)
   local e, found_scope = scope.lookup(S, r.name, r.scope)
   if not e then
-    return ref:new{ name=r.name, type=r.type, scope=r.scope or scope.scope_for_undefined(S) }
+    return ref:new{ name=r.name, type=r.type, scope=r.scope }
   elseif e.hidden then
     return ref:new{ name=r.name, type=r.type, scope=r.scope or found_scope }
   elseif core.defined(e.value) then

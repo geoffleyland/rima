@@ -214,19 +214,6 @@ scope_proxy_mt.__tostring = scope_proxy_mt.__repr
 
 -- Accessing and setting -------------------------------------------------------
 
-function scope.scope_for_undefined(s)
-  if not s then return nil end
-  local S = proxy.O(s)
-  if S.no_undefined then
-    if S.parent then
-      return scope_for_undefined(S.parent)
-    end
-  else
-    return s
-  end
-end
-
-
 function scope.find(s, name, op, results)
   -- return all the values that could bind to the name in this and parent scopes
   local S = proxy.O(s)
