@@ -66,7 +66,7 @@ function eval(e, S)
   local f = lib.getmetamethod(e, "__eval")
   if f then
     local exp, type = f(e, S, eval)
-    if trace then traceout("eval", e, r[1]) end
+    if trace then traceout("eval", e, exp) end
     if type then return exp, type else return exp end
   else
     if trace then traceout("eval", e, e) end
@@ -93,7 +93,7 @@ function bind(e, S)
   end
   
   if exp then
-    if trace then traceout("bind", e, result[1]) end
+    if trace then traceout("bind", e, exp) end
     if type then return exp, type else return exp end
   else
     if trace then traceout("bind", e, e) end
