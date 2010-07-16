@@ -56,7 +56,7 @@ end
 function index.resolve(args, S, eval)
   local address = core.eval(args[2], S)
   if not core.defined(address) then
-    return false, nil, core.bind(args[1], S), address
+    return false, nil, args[1], address
   end
   local b = core.bind(args[1], S)
   if object.isa(index, b) then
