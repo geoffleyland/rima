@@ -11,8 +11,8 @@ module(...)
 
 -- Evaluation tracing ----------------------------------------------------------
 
-trace = false
-depth = 0
+local trace = false
+local depth = 0
 
 function tron()
   trace = true
