@@ -5,6 +5,8 @@ local ipairs, getmetatable, select, tostring, type, unpack =
       ipairs, getmetatable, select, tostring, type, unpack
 local table = require("table")
 
+local object = require("rima.lib.object")
+
 module(...)
 
 
@@ -72,6 +74,10 @@ function simple_repr(o, format)
     local t = object.type(o)
     if t == "string" then
       return ("%q"):format(o)
+    elseif t == "table" or t == "boolean" then
+      return tostring(o)
+    elseif t == "nil" then
+      return "nil"
     else
       return t.."("..tostring(o)..")"
     end
