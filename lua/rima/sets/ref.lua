@@ -18,13 +18,14 @@ local rima = rima
 module(...)
 
 
--- Sequence --------------------------------------------------------------------
+-- Set references --------------------------------------------------------------
 
 ref = object:new(_M, "sets.ref")
 
 
-function ref:new(exp, order, values, names, result)
-  return object.new(self, {exp=exp, order=order, values=values, names=names, result=result})
+function ref:new(set, order, values, names, literal)
+  return object.new(self,
+    { set=set, order=order, values=values, names=names, literal=literal })
 end
 
 
@@ -44,7 +45,7 @@ function ref:read(s)
   elseif t == "table" and not getmetatable(s) then -- '{n=S}'
     namestring, set = next(s)
   else
-    error(("Got '%s'"):format(lib.repr(s)))
+    error(("Got '%s', (%s)"):format(lib.repr(s), type(s)))
   end
 
   -- did we get "['a, b']=l"?
@@ -74,23 +75,27 @@ function ref:read(s)
 end
 
 
+-- String representation -------------------------------------------------------
+
 function ref:__repr(format)
-  local e = lib.repr(self.exp, format)
+  local s = lib.repr(self.set, format)
   local n = table.concat(self.names, ", ")
   if self.order ~= "a" or self.values ~= "elements" then
-    local f = (format and format.readable and "%s=rima.%s%s(%s)") or "%s in %s%s(%s)"
-    return f:format(n, self.order, self.values, e)
+    local f = (format.readable and "%s=rima.%s%s(%s)") or "%s in %s%s(%s)"
+    return f:format(n, self.order, self.values, s)
   else
-    if n == e then
+    if n == s then
       return n
     else
       local f = (format and format.readable and "%s=%s") or "%s in %s"
-      return f:format(n, e)
+      return f:format(n, s)
     end
   end
 end
 ref.__tostring = lib.__tostring
 
+
+-- Evaluation ------------------------------------------------------------------
 
 function ref:eval(S)
   -- We're looking to evaluate to a table.
@@ -99,13 +104,13 @@ function ref:eval(S)
   -- looking for other versions of the table.
   -- This might get easier if resolve was rewritten, but I'm just not ready
   -- to face that yet...
-  local b = core.bind(self.exp, S)
+  local b = core.bind(self.set, S)
   local found = {}
   local es = {}
   local r
   
   while S do
-    local e = core.eval(self.exp, S)
+    local e = core.eval(self.set, S)
     if not core.defined(e) and not es[1] then
       r = e
       break
@@ -141,7 +146,7 @@ function ref:__defined()
   -- if the table is empty, we'll call it undefined.
   -- This could be wrong in some cases (I hope not), but usually
   -- it means we're being evaluated with partial data.
-  local r = self.result
+  local r = self.literal
   if core.defined(r) then
     local m = getmetatable(r)
     local i = m and m.__iterate
@@ -166,7 +171,7 @@ end
 
 local function set_ref_ipairs(state, i)
   i = i + 1
-  local v = state.resolved_set[i]
+  local v = state.literal[i]
   if not v then return end
   local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
   local n1, n2 = state.names[1], state.names[2]
@@ -177,7 +182,7 @@ end
 
 
 local function set_ref_pairs(state, k)
-  k = next(state.resolved_set, k)
+  k = next(state.literal, k)
   if not k then return end
   local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
   local n1, n2 = state.names[1], state.names[2]
@@ -188,7 +193,7 @@ end
 
 
 local function set_ref_ielements(state, i)
-  local rs = state.resolved_set
+  local rs = state.literal
   i = i + 1
   local v = rs[i]
   if not v then return end
@@ -201,7 +206,7 @@ end
 
 
 local function set_ref_elements(state, k)
-  local rs = state.resolved_set
+  local rs = state.literal
   local v
   k, v = next(rs, k)
   if not k then return end
@@ -238,10 +243,10 @@ end
 
 
 function ref:iterate(S)
-  local state = { scope=S, set=self.exp, names=self.names, resolved_set=self.result }
-  local iterate_function = lib.getmetamethod(self.result, "__iterate")
+  local state = { scope=S, set=self.set, names=self.names, literal=self.literal }
+  local iterate_function = lib.getmetamethod(self.literal, "__iterate")
 
-  if self.order == "i" or (self.order == "a" and not iterate_function and self.result[1]) then
+  if self.order == "i" or (self.order == "a" and not iterate_function and self.literal[1]) then
     if self.values == "pairs" then
       return set_ref_ipairs, state, 0
     else
@@ -256,7 +261,7 @@ function ref:iterate(S)
   else
     self.values = "all"
     local initial
-    state.iterate_function, state.iterate_state, initial = iterate_function(self.result)
+    state.iterate_function, state.iterate_state, initial = iterate_function(self.literal)
     return set_ref_subiterate, state, initial
   end
 end
