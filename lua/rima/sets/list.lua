@@ -102,7 +102,7 @@ function list:iterate(S)
       if undefined_sets[1] then ud = list:copy(undefined_sets) end
       coroutine.yield(cS, ud)
     else
-      local it = self[i]:eval(cS)
+      local it = core.eval(self[i], cS)
       if core.defined(it) then
         for _, nS in it:iterate(cS) do
           z(i+1, nS)

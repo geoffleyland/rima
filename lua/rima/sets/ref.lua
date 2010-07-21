@@ -97,7 +97,7 @@ ref.__tostring = lib.__tostring
 
 -- Evaluation ------------------------------------------------------------------
 
-function ref:eval(S)
+function ref:__eval(S)
   -- We're looking to evaluate to a table.
   -- Unfortunately, the elements of the table might be spread over several
   -- layers of scope, so we have to work backwards through the scopes
