@@ -1,9 +1,9 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local series = require("test.series")
 local expression = require("rima.expression")
-local scope = require("rima.scope")
+
+local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
@@ -37,39 +37,6 @@ function test(options)
 
   local E = core.eval
   local D = lib.dump
-
---  local o = operators.operator:new()
-
---  T:expect_error(function() expression:new({}) end,
---    "rima.expression:new: expecting an operator, variable or number for 'operator', got 'table'")
---  T:expect_error(function() expression:new("a") end,
---    "expecting an operator, variable or number for 'operator', got 'string'")
---  T:expect_ok(function() expression:new(o) end)
---  T:test(isa(expression:new(o), expression), "isa(expression:new(), expression)")
---  T:check_equal(type(expression:new(o)), "expression", "type(expression:new() == 'expression'")
-
-  local S = scope.new()
-
-  -- literals
-  equal(T, "1", {1, "", D})
-  equal(T, 1, {1, S, E})
-
-  -- variables
-  local a = rima.R"a"
-  equal(T, "ref(a)", {a, "", D})
-  T:expect_ok(function() rima.E(a, S) end)
-  equal(T, "ref(a)", {a, S, D})
-  equal(T, "a", {a, S, E})
-  S.a = rima.free()
-  equal(T, "a", {a, S, E})
-  equal(T, 5, {a, scope.spawn(S, { a=5 }), E})
-
-  -- repr
-  T:check_equal(lib.dump(1), "1")
-
-  -- eval
-  T:expect_ok(function() E(expression:new({}), {}) end)
-  T:check_equal(E(expression:new({}), {}), "table()")
 
   -- tests with add, mul and pow
   do
