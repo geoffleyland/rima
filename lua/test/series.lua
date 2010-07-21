@@ -62,7 +62,9 @@ function series:check_equal(got, expected, description, depth)
   local pass = got == expected
   return self:test(pass, description,
     pass and ("got expected string \"%s\""):format(got) or
-      ("result mismatch:\n  expected: \"%s\"\n  got:      \"%s\""):format(expected, got), (depth or 0) + 3)
+      ("result mismatch:\n  expected: \"%s\"\n  got:      \"%s\""):format(
+        expected:gsub("\n", "\n             "),
+        got:gsub("\n", "\n             ")), (depth or 0) + 3)
 end
 
 
