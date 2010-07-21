@@ -1,7 +1,10 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
+local setmetatable = setmetatable
+
 local object = require("rima.lib.object")
+local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 
@@ -11,53 +14,58 @@ module(...)
 -- Elements -------------------------------------------------------------------
 
 element = object:new(_M, "element")
+proxy_mt = setmetatable({}, element)
 
 function element:new(base, exp, key, value, set)
-  return object.new(self, { base_=base, exp_=exp, key_=key, value_=value, set_=set })
+  return proxy:new(object.new(self, { base=base, exp=exp, key=key, value=value, set=set }), proxy_mt)
 end
 
 
-function element:key() return self.key_ end
-function element:value() return self.value_ end
-function element:expression() return self.exp_ end
+function element:key() return proxy.O(self).key end
+function element:value() return proxy.O(self).value end
+function element:expression() return proxy.O(self).exp end
 
 
 function element:__eval(S, eval)
-  local exp = eval(self.exp_, S)
-  return element:new(self.base_, exp, self.key_, self.value_, self.set_)
+  self = proxy.O(self)
+  local exp = eval(self.exp, S)
+  return element:new(self.base, exp, self.key, self.value, self.set)
 end
 
 
 function element:__defined()
-  return core.defined(self.exp_)
+  self = proxy.O(self)
+  return core.defined(self.exp)
 end
 
 
 function element:__repr(format)
+  self = proxy.O(self)
   if format.dump then
     return ("element(%s, key=%s, value=%s)"):
-      format(lib.repr(self.exp_, format), lib.repr(self.key_, format), lib.repr(self.value_, format))
+      format(lib.repr(self.exp, format), lib.repr(self.key, format), lib.repr(self.value, format))
   else
-    return lib.repr(self.exp_, format)
+    return lib.repr(self.exp, format)
   end
 end
+proxy_mt.__tostring = lib.__tostring
 element.__tostring = lib.__tostring
 
 
 -- Operators -------------------------------------------------------------------
 
 local function extract(a)
-  if element:isa(a) then return a.value_ end
+  if element:isa(a) then return proxy.O(a).value end
   return a
 end
 
-function element.__add(a, b) return extract(a) + extract(b) end
-function element.__sub(a, b) return extract(a) - extract(b) end
-function element.__mul(a, b) return extract(a) * extract(b) end
-function element.__div(a, b) return extract(a) / extract(b) end
-function element.__pow(a, b) return extract(a) ^ extract(b) end
+function proxy_mt.__add(a, b) return extract(a) + extract(b) end
+function proxy_mt.__sub(a, b) return extract(a) - extract(b) end
+function proxy_mt.__mul(a, b) return extract(a) * extract(b) end
+function proxy_mt.__div(a, b) return extract(a) / extract(b) end
+function proxy_mt.__pow(a, b) return extract(a) ^ extract(b) end
 
-function element:__unm() return -self.value_ end
+function proxy_mt:__unm() return -proxy.O(self).value end
 
 -- Elements don't have an __index, because indexing is more complex than
 -- indexing the element's value - there might be default values to deal with.
