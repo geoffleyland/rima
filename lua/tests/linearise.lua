@@ -111,7 +111,7 @@ function test(options)
     T:expect_ok(LF(rima.sum{d=D}(d.a * d.b), S))
   end
 
-  -- iterator times variable
+  -- element times variable
   do
     local i, x, q, Q = rima.R"i, x, q, Q"
     local S = scope.new{ Q = { 3, 7, 11, 13 } }

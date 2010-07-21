@@ -7,7 +7,7 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local iterator = require("rima.sets.iterator")
+local element = require("rima.sets.element")
 local set_ref = require("rima.sets.ref")
 local expression = require("rima.expression")
 local rima = rima
@@ -23,11 +23,11 @@ ord = object:new({}, "ord")
 function ord.__eval(args, S, eval)
   args = proxy.O(args)
   local e = eval(args[1], S)
-  if iterator:isa(e) then
-    return iterator.key(e)
+  if element:isa(e) then
+    return element.key(e)
   else
     if core.defined(e) then
-      error("ord can only be applied to iterators")
+      error("ord can only be applied to elements")
     else
       return expression:new(ord, e)
     end

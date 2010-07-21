@@ -1,7 +1,7 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local iterator = require("rima.sets.iterator")
+local element = require("rima.sets.element")
 
 local series = require("test.series")
 local object = require("rima.lib.object")
@@ -19,14 +19,14 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
   
-  local function N(...) return iterator:new(...) end
+  local function N(...) return element:new(...) end
 --  local B = core.bind
   local E = rima.E
   local D = lib.dump
   
   -- Constructors
-  T:test(iterator:isa(N()), "iterator:isa(iterator:new())")
-  T:check_equal(object.type(N()), "iterator", "type(iterator:new()) == 'iterator'")
+  T:test(element:isa(N()), "element:isa(element:new())")
+  T:check_equal(object.type(N()), "element", "type(element:new()) == 'element'")
   
   do
     local it

@@ -10,7 +10,7 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index_op = require("rima.operators.index")
-local iterator = require("rima.sets.iterator")
+local element = require("rima.sets.element")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
 local rima = rima
@@ -200,7 +200,7 @@ local function set_ref_ielements(state, i)
   v = v.value
   local s = state.set
   local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
-  S[state.names[1]] = iterator:new(s, expression:new(index_op, s, i), i, v, rs)
+  S[state.names[1]] = element:new(s, expression:new(index_op, s, i), i, v, rs)
   return i, S
 end
 
@@ -213,7 +213,7 @@ local function set_ref_elements(state, k)
   v = v.value
   local s = state.set
   local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
-  S[state.names[1]] = iterator:new(s, expression:new(index_op, s, k), k, v, rs)
+  S[state.names[1]] = element:new(s, expression:new(index_op, s, k), k, v, rs)
   return k, S
 end
 

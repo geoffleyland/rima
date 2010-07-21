@@ -8,6 +8,7 @@ local getmetatable, require, type = getmetatable, require, type
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
+local element = require("rima.sets.element")
 local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 local rima = rima
@@ -137,7 +138,7 @@ function index.__set(args, t, v)
   local name = base.name
 
   function s(t, name, i)
-    if object.type(name) == "element" then name = name.key end
+    if element:isa(name) then name = element.key(name) end
     local cv = t[name]
     if #address == i then
       if cv then

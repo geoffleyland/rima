@@ -9,7 +9,7 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local types = require("rima.types")
-local iterator = require("rima.sets.iterator")
+local element = require("rima.sets.element")
 
 module(...)
 
@@ -41,8 +41,8 @@ function _linearise(l, S)
     add_variable(l, l, 1)
   elseif object.type(l) == "index" then
     add_variable(l, l, 1)
-  elseif iterator:isa(l) then
-    local exp = iterator.expression(l)
+  elseif element:isa(l) then
+    local exp = element.expression(l)
     add_variable(exp, exp, 1)
   elseif getmetatable(l) == operators.add then
     for i, a in ipairs(proxy.O(l)) do
@@ -62,8 +62,8 @@ function _linearise(l, S)
         add_variable(x, x, c)
       elseif object.type(x) == "index" then
         add_variable(x, x, c)
-      elseif iterator:isa(x) then
-        local exp = iterator.expression(x)
+      elseif element:isa(x) then
+        local exp = element.expression(x)
         add_variable(exp, exp, c)
       else
         error(("term %d is not linear (got '%s', %s)"):format(i, lib.repr(x), object.type(x)), 0)

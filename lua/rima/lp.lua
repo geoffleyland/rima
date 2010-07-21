@@ -15,15 +15,21 @@ local linearise = require("rima.linearise")
 require("rima.public")
 local rima = rima
 
+local print = print
+local os = os
+
 module(...)
 
 -- Constraint Handling ---------------------------------------------------------
+
+local build_ref_time, tabulate_time, inner_time = 0, 0, 0
 
 local function find_constraints(S, f)
   local constraints = {}
   local current_address = {}
 
   local function build_ref(S, sets, undefined)
+    local brt = os.clock()
     local r = rima.R(current_address[1])
     local set_index, undefined_index = 1, 1
     for i = 2, #current_address do
@@ -40,6 +46,7 @@ local function find_constraints(S, f)
       end
       r = r[index]
     end
+    build_ref_time = build_ref_time + os.clock() - brt
     return r
   end
 
@@ -59,9 +66,14 @@ local function find_constraints(S, f)
       elseif constraint:isa(v) then
         add_constraint(v, S)
       elseif tabulate:isa(v) and constraint:isa(v.expression) then
+        local tt = os.clock()
         for S2, undefined in v.indexes:iterate(S) do
+          local itt = os.clock()
+          inner_time = inner_time + os.clock() - itt
           add_constraint(v.expression, S2, v.indexes, undefined)
+          inner_time = inner_time + os.clock() - itt
         end
+        tabulate_time = tabulate_time + os.clock() - tt
       end
       current_address[#current_address] = nil
     end
@@ -73,22 +85,29 @@ end
 
 local function linearise_constraints(S)
   local count = 0
+  local search_time, linearise_time = os.clock(), 0
+  build_ref_time, tabulate_time, inner_time = 0, 0, 0
   local result = find_constraints(S,
     function(c, S, undefined)
       if undefined and undefined[1] then
         error(("error while linearising the constraint '%s': Some of the constraint's indices are undefined"):
           format(lib.repr(c)), 0)
       end
+      local st = os.clock()
       local status, lhs, type, constant = pcall(c.linearise, c, S)
       if not status then
         error(("error while linearising the constraint '%s':\n   %s"):
           format(lib.repr(c), lhs:gsub("\n", "\n    ")), 0)
       end
+      linearise_time = linearise_time + os.clock() - st
       count = count + 1
       io.stderr:write(("\rGenerated %d constraints..."):format(count))
       return lhs, type, constant
     end)
   io.stderr:write("\n")
+  search_time = os.clock() - search_time
+  io.write(("Search time: %f, linearise time: %f, build_ref time: %f, tabulate time %f, inner_time %f\n"):
+    format(search_time, linearise_time, build_ref_time, tabulate_time, inner_time))
   return result
 end
 

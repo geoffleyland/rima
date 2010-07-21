@@ -11,7 +11,7 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
-local iterator = require("rima.sets.iterator")
+local element = require("rima.sets.element")
 
 module(...)
 
@@ -115,8 +115,8 @@ function address:__repr(format)
   local r = {}
 
   for _, a in ipairs(self) do
-    if iterator:isa(a) then
-      a = iterator.value(a)
+    if element:isa(a) then
+      a = element.value(a)
     end
     if is_identifier_string(a) then
       -- for strings that can be identifiers, format as a.b
@@ -163,7 +163,7 @@ end
 
 function address:__defined()
   for _, a in ipairs(self) do
-    if not core.defined(a) and type(a) ~= "iterator" then
+    if not core.defined(a) and not element:isa(a) then
       return false
     end
   end
@@ -212,8 +212,8 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
   local function index(t, j)
     local k, v
-    if iterator:isa(j) then
-      k, v = iterator.key(j), iterator.value(j)
+    if element:isa(j) then
+      k, v = element.key(j), element.value(j)
     end
     local result
     t = t.value
@@ -231,8 +231,8 @@ function address:resolve(S, current, i, base, eval, collected, used)
 
   -- What do we do when we come across an expression?
   local function handle_expression(c, j)
-    if iterator:isa(c) then
-      c = iterator.expression(c)
+    if element:isa(c) then
+      c = element.expression(c)
     end
     local new_base = core.bind(c, S)
     local new_address = self:sub(j)
