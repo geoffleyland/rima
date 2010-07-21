@@ -12,6 +12,7 @@ local set_list = require("rima.sets.list")
 
 module(...)
 
+
 -- Subscripts ------------------------------------------------------------------
 
 local sum = object:new(_M, "sum")
@@ -20,7 +21,7 @@ sum.precedence = 1
 function sum.construct(args)
   local sets = args[1]
   if not set_list:isa(sets) then
-    sets = set_list:new(sets)
+    sets = set_list:read(sets)
   end
   return { sets, args[2] }
 end
@@ -31,8 +32,8 @@ end
 function sum.__repr(args, format)
   args = proxy.O(args)
   local sets, e = args[1], args[2]
-  local name = (format and format.readable and "rima.sum") or "sum"
-  if format and format.dump then
+  local name = (format.readable and "rima.sum") or "sum"
+  if format.dump then
     return name.."({"..lib.concat_repr(sets, format).."}, "..lib.repr(e, format)..")"
   else
     return name.."{"..lib.concat_repr(sets, format).."}("..lib.repr(e, format)..")"
@@ -41,7 +42,6 @@ end
 
 
 -- Evaluation ------------------------------------------------------------------
-
 
 function sum.__eval(args, S, eval)
   args = proxy.O(args)
