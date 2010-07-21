@@ -1,7 +1,7 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local core = require("rima.core")
+local trace = require("rima.lib.trace")
 
 --------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ for _, v in ipairs{...} do
   elseif v == "--no-strict" then
     strict = false
   elseif v == "--tron" then
-    core.tron()
+    trace.tron()
   else
     patterns[#patterns+1] = v
   end

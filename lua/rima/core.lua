@@ -1,59 +1,25 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local debug, io = require("debug"), require("io")
-local error = error
-
 local lib = require("rima.lib")
+local trace = require("rima.lib.trace")
 
 module(...)
-
-
--- Evaluation tracing ----------------------------------------------------------
-
-local trace = false
-local depth = 0
-
-function tron()
-  trace = true
-end
-
-
-function troff()
-  trace = false
-end
-
-
-function reset_depth()
-  depth = 0
-end
-
-
-function tracein(f, e)
-  local f2 = debug.getinfo(3, "Sln")
-  io.write(("%s%s>: %s {%s} from %s (%s:%d)\n"):format(("|  "):rep(depth), f, lib.repr(e), lib.dump(e), f2.name or "?", f2.short_src, f2.currentline))
-  depth = depth + 1
-end
-
-
-function traceout(f, e, r)
-  depth = depth - 1
-  io.write(("%s%s<: %s = %s {%s}\n"):format(("|  "):rep(depth), f, lib.repr(e), lib.repr(r), lib.dump(r)))
-end
 
 
 -- Is an expression defined? ---------------------------------------------------
 
 function defined(e)
-  if trace then tracein("defd", e) end
-  local d
   local f = lib.getmetamethod(e, "__defined")
+  if trace.on then trace.enter("defd", 1, f, e) end
+  local d
+
   if f then
     d = f(e)
   else
     d = not lib.getmetamethod(e, "__eval")
   end
-  if trace then traceout("defd", e, d) end
+  if trace.on then trace.leave("defd", 1, e, d) end
   return d
 end
 
@@ -61,15 +27,15 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function eval(e, S)
-  if trace then tracein("eval", e) end
-
   local f = lib.getmetamethod(e, "__eval")
+  if trace.on then trace.enter("eval", 1, f, e) end
+
   if f then
     local exp, type = f(e, S, eval)
-    if trace then traceout("eval", e, exp) end
+    if trace.on then trace.leave("eval", 1, e, exp) end
     if type then return exp, type else return exp end
   else
-    if trace then traceout("eval", e, e) end
+    if trace.on then trace.leave("eval", 1, e, e) end
     return e
   end
 end
@@ -78,11 +44,11 @@ end
 -- Binding ---------------------------------------------------------------------
 
 function bind(e, S)
-  if trace then tracein("bind", e) end
+  local b = lib.getmetamethod(e, "__bind")
+  if trace.on then trace.enter("bind", 1, b, e) end
 
   local exp, type
 
-  local b = lib.getmetamethod(e, "__bind")
   if b then
     exp, type = b(e, S)
   else
@@ -93,10 +59,10 @@ function bind(e, S)
   end
   
   if exp then
-    if trace then traceout("bind", e, exp) end
+    if trace.on then trace.leave("bind", 1, e, exp) end
     if type then return exp, type else return exp end
   else
-    if trace then traceout("bind", e, e) end
+    if trace.on then trace.leave("bind", 1, e, e) end
     return e
   end
 end

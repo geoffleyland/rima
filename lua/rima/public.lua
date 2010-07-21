@@ -10,6 +10,7 @@ module(...)
 local args = require("rima.lib.args")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local trace = require("rima.lib.trace")
 local core = require("rima.core")
 local ref = require("rima.ref")
 local expression = require("rima.expression")
@@ -65,7 +66,7 @@ function rima.E(e, S) -- evaluate an expression
   if status then
     return r
   else
-    core.reset_depth()
+    trace.reset_depth()
     error(("evaluate: error evaluating '%s':\n  %s"):format(lib.repr(e), r:gsub("\n", "\n  ")), 0)
   end
 end
