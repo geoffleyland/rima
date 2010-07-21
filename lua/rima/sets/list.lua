@@ -8,7 +8,7 @@ local error, ipairs, pairs, pcall =
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local set_ref = require("rima.sets.ref")
+local ref = require("rima.sets.ref")
 local scope = require("rima.scope")
 
 module(...)
@@ -25,7 +25,7 @@ function list:new(l)
 end
 
 
-function list:copy(sets)
+function list.copy(sets)
   local new_list = {}
   for i, s in ipairs(sets) do new_list[i] = s end
   return list:new(new_list)
@@ -40,9 +40,9 @@ function list:read(sets)
   for k, s in pairs(sets) do
     local status, seq = pcall(function()
       if type(k) == "number" then
-        return set_ref:read(s)
+        return ref:read(s)
       else
-        return set_ref:read({[k]=s})
+        return ref:read({[k]=s})
       end
     end)
     if not status then
@@ -71,7 +71,7 @@ end
 
 function list:append(s)
   local status, message = pcall(function()
-    self[#self+1] = set_ref:read(s)
+    self[#self+1] = ref:read(s)
     end)
   if not status then
     error(("error: sets.list:append: didn't understand set.  %s") :format(message))
@@ -99,7 +99,7 @@ function list:iterate(S)
     cS = cS or S
     if not self[i] then
       local ud
-      if undefined_sets[1] then ud = list:copy(undefined_sets) end
+      if undefined_sets[1] then ud = list.copy(undefined_sets) end
       coroutine.yield(cS, ud)
     else
       local it = core.eval(self[i], cS)

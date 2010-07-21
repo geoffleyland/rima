@@ -410,7 +410,7 @@ function scope.newindex(s, name, addr, index, value, free_indexes)
     -- Go through all of this again with one extra index.
     -- Clearly a waste of time, there must be a better way to do this...
     for k, v in pairs(value) do
-      scope.newindex(s, name, new_address, k, v, free_indexes and set_list:copy(free_indexes))
+      scope.newindex(s, name, new_address, k, v, free_indexes and set_list.copy(free_indexes))
     end
   else
     if is_free_index(index) then
