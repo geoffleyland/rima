@@ -20,12 +20,6 @@ call.__typename = "call"
 call.precedence = 0
 
 
--- Argument Checking -----------------------------------------------------------
---[[
-function call:check(args)
-end
---]]
-
 -- String Representation -------------------------------------------------------
 
 function call.__repr(args, format)

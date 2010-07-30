@@ -22,23 +22,6 @@ local add = object:new(_M, "add")
 add.precedence = 5
 
 
--- Argument Checking -----------------------------------------------------------
---[[
-function add:check(args)
-  for i, a in ipairs(args) do
-    if not expression.result_type_match(a[2], rima.free()) then
-      error(("argument %d (%s, '%s') to add expression '%s' is not in %s"):
-        format(i, lib.repr(a[2]), type(a[2]), self.__repr(args), lib.repr(rima.free())), 0)
-    end
-  end
-end
-
-function add:result_type(args)
-  return rima.free()
-end
---]]
-
-
 -- String Representation -------------------------------------------------------
 
 function add.__repr(args, format)

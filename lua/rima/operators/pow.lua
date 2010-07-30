@@ -17,26 +17,6 @@ local pow = object:new(_M, "pow")
 pow.precedence = 0
 
 
--- Argument Checking -----------------------------------------------------------
---[[
-function pow:check(a)
-  if not expression.result_type_match(a[1], types.number_t) then
-    error(("base (%s) of power expression '%s' is not in %s"):
-      format(lib.repr(a[1]), __repr(args), lib.repr(types.number_t)), 0)
-  end
-  if not expression.result_type_match(a[2], types.number_t) then
-    error(("base (%s) of power expression '%s' is not in %s"):
-      format(lib.repr(a[2]), __repr(args), lib.repr(types.number_t)), 0)
-  end
-end
-
-
-function pow:result_type(args)
-  return types.number_t
-end
---]]
-
-
 -- String Representation -------------------------------------------------------
 
 function pow.__repr(args, format)
