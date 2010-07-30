@@ -12,8 +12,7 @@ local scope = require("rima.scope")
 local constraint = require("rima.constraint")
 local tabulate = require("rima.values.tabulate")
 local linearise = require("rima.linearise")
-require("rima.public")
-local rima = rima
+local rima = require("rima")
 
 local print = print
 local os = os

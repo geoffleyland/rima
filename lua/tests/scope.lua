@@ -8,7 +8,7 @@ local core = require("rima.core")
 local types = require("rima.types")
 local scope = require("rima.scope")
 local ref = require("rima.ref")
-local rima = rima
+local rima = require("rima")
 
 module(...)
 

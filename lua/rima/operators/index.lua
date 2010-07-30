@@ -11,7 +11,6 @@ local lib = require("rima.lib")
 local element = require("rima.sets.element")
 local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
-local rima = rima
 
 module(...)
 

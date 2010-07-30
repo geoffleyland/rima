@@ -5,7 +5,7 @@ local series = require("test.series")
 local constraint2 = require("rima.constraint")
 local scope = require("rima.scope")
 local lp = require("rima.lp")
-local rima = rima
+local rima = require("rima")
 
 module(...)
 

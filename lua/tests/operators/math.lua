@@ -8,8 +8,7 @@ local scope = require("rima.scope")
 local lib = require("rima.lib")
 local core = require("rima.core")
 require("rima.operators.math")
-require("rima.public")
-local rima = rima
+local rima = require("rima")
 
 module(...)
 

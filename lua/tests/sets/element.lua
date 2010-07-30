@@ -7,10 +7,8 @@ local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
---local ref = require("rima.ref")
 local scope = require("rima.scope")
-require("rima.public")
-local rima = rima
+local rima = require("rima")
 
 module(...)
 
@@ -20,7 +18,6 @@ function test(options)
   local T = series:new(_M, options)
   
   local function N(...) return element:new(...) end
---  local B = core.bind
   local E = rima.E
   local D = lib.dump
   

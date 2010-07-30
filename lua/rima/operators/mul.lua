@@ -11,7 +11,6 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
-local rima = rima
 
 module(...)
 

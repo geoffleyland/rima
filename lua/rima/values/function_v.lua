@@ -9,7 +9,6 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local call = require("rima.operators.call")
 local scope = require("rima.scope")
-local rima = rima
 
 module(...)
 
@@ -32,7 +31,7 @@ function function_v:new(inputs, exp, S)
   local new_inputs = {}
   for i, v in ipairs(inputs) do
     if type(v) == "string" then
-      new_inputs[i] = rima.R(v)
+      new_inputs[i] = ref:new{name=v}
     elseif ref:isa(v) then
       if ref.is_simple(v) then
         new_inputs[i] = v
@@ -50,7 +49,7 @@ function function_v:new(inputs, exp, S)
   if new_inputs[1] then
     S = S or scope.new()
     for i, a in ipairs(new_inputs) do
-      S[lib.repr(a)] = rima.R("_"..i)
+      S[lib.repr(a)] = ref:new{name="_"..i}
     end
     exp = core.eval(exp, S)
   end
@@ -101,7 +100,7 @@ end
 
 
 function function_v:__call(...)
-  local S = rima.scope.new()
+  local S = scope.new()
   return self:call({...}, S, core.eval)
 end
 

@@ -24,7 +24,6 @@ local args = require("rima.lib.args")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
-local rima = rima
 
 module(...)
 

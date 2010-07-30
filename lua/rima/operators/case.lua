@@ -8,18 +8,14 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
-local rima = rima
 
 module(...)
+
 
 -- Subscripts ------------------------------------------------------------------
 
 local case = object:new(_M, "case")
 case.precedence = 1
-
-rima.case = function(value, cases, default)
-  return expression:new(case, value, cases, default)
-end
 
 
 -- String Representation -------------------------------------------------------
@@ -72,12 +68,12 @@ function case.__eval(args, S, eval)
       end
     end
     if remaining_cases[1] then
-      return rima.case(value, remaining_cases, default)
+      return expression:new(case, value, remaining_cases, default)
     else
       return default
     end
   else
-    return rima.case(value, cases, default)
+    return expression:new(case, value, cases, default)
   end
 end
 

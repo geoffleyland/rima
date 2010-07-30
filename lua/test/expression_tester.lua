@@ -6,8 +6,7 @@ local ipairs, loadstring, pcall, setfenv = ipairs, loadstring, pcall, setfenv
 require("rima.ref")
 local lib = require("rima.lib")
 local core = require("rima.core")
-require("rima.public")
-local rima = rima
+local rima = require("rima")
 
 module(...)
 

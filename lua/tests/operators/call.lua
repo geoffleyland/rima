@@ -9,8 +9,7 @@ local core = require("rima.core")
 local call = require("rima.operators.call")
 local scope = require("rima.scope")
 local expression = require("rima.expression")
-require("rima.public")
-local rima = rima
+local rima = require("rima")
 
 module(...)
 

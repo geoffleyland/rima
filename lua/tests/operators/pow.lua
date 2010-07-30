@@ -7,8 +7,7 @@ local pow = require("rima.operators.pow")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-require("rima.public")
-local rima = rima
+local rima = require("rima")
 
 module(...)
 

@@ -10,17 +10,16 @@ local core = require("rima.core")
 local element = require("rima.sets.element")
 local set_ref = require("rima.sets.ref")
 local expression = require("rima.expression")
-local rima = rima
 
 module(...)
 
 
 -- Ord -------------------------------------------------------------------------
 
-ord = object:new({}, "ord")
+ord_op = object:new({}, "ord")
 
 
-function ord.__eval(args, S, eval)
+function ord_op.__eval(args, S, eval)
   args = proxy.O(args)
   local e = eval(args[1], S)
   if element:isa(e) then
@@ -29,14 +28,9 @@ function ord.__eval(args, S, eval)
     if core.defined(e) then
       error("ord can only be applied to elements")
     else
-      return expression:new(ord, e)
+      return expression:new(ord_op, e)
     end
   end
-end
-
-
-function rima.ord(e)
-  return expression:new(ord, e)
 end
 
 
@@ -65,7 +59,7 @@ function range_type:__iterate()
 end
 
 
-local range_op = object:new({}, "range")
+range_op = object:new({}, "range")
 function range_op.__eval(args, S, eval)
   args = proxy.O(args)
   local l, h = eval(args[1], S), eval(args[2], S)
@@ -74,23 +68,6 @@ function range_op.__eval(args, S, eval)
   else
     return expression:new(range_op, l, h)
   end
-end
-
-
-function rima.range(l, h)
-  return expression:new(range_op, l, h)
-end
-
-
--- Top-level sequences ---------------------------------------------------------
-
-function rima.pairs(exp)
-  return set_ref:new(exp, "", "pairs")
-end
-
-
-function rima.ipairs(exp)
-  return set_ref:new(exp, "i", "pairs")
 end
 
 

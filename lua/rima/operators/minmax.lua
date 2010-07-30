@@ -7,7 +7,6 @@ local ipairs, type = ipairs, type
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local expression = require("rima.expression")
-local rima = rima
 
 module(...)
 
@@ -40,10 +39,6 @@ function min.__eval(args, S, eval)
   end
 end
 
-function rima.min(...)
-  return expression:new(min, ...)
-end
-
 
 -- Max -------------------------------------------------------------------------
 
@@ -71,10 +66,6 @@ function max.__eval(args, S, eval)
   else
     return m
   end
-end
-
-function rima.max(...)
-  return expression:new(max, ...)
 end
 
 

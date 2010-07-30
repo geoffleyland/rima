@@ -11,9 +11,9 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local index_op = require("rima.operators.index")
 local element = require("rima.sets.element")
+local rima_ref = require("rima.ref")
 local expression = require("rima.expression")
 local scope = require("rima.scope")
-local rima = rima
 
 module(...)
 
@@ -57,7 +57,7 @@ function ref:read(s)
   -- what was l?
   local result
   if type(set) == "string" then
-    result = ref:new(rima.R(set), "a", "elements", names)
+    result = ref:new(rima_ref:new{name=set}, "a", "elements", names)
   elseif ref:isa(set) then
     set:set_names(names)
     result = set
