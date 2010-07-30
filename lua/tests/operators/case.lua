@@ -1,11 +1,12 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local series = require("test.series")
-local expression_tester = require("test.expression_tester")
 local case = require("rima.operators.case")
+
+local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local rima = require("rima")
 
 module(...)

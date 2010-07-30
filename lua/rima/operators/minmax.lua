@@ -13,7 +13,7 @@ module(...)
 
 -- Min -------------------------------------------------------------------------
 
-local min = object:new({}, "min")
+min = object:new({}, "min")
 min.precedence = 0
 
 function min.__eval(args, S, eval)
@@ -42,7 +42,7 @@ end
 
 -- Max -------------------------------------------------------------------------
 
-local max = object:new({}, "max")
+max = object:new({}, "max")
 max.precedence = 0
 
 function max.__eval(args, S, eval)
