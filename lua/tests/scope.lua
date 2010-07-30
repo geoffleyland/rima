@@ -81,7 +81,20 @@ function test(options)
   T:check_equal(r.b, 7)
   T:check_equal(r.c, "3 <= * <= 5, * integer")
   T:check_equal(r.c2, "c")
-  
+
+  -- references to references
+  do
+    local a, b, c = rima.R"a, b, c"
+    local S = rima.scope.new{ a={x=b}, b={y=7} }
+    S.a.q = S.c
+    S.c.r = 13
+    T:check_equal(E(a.x.y, S), 7)
+    T:expect_error(function() S.a.x.z = 17 end, "expression new index: error setting 'b%.z' to 17: 'b' is not bound to a scope")
+    T:check_equal(E(a.q.r, S), 13)
+    T:expect_ok(function() S.a.q.s = 19 end)
+    T:check_equal(E(c.s, S), 19)
+  end
+
   do
     local S1 = scope.new{ a = { b = 1 } }
     local S2 = scope.spawn(S1, { a = { c = 2 } })
