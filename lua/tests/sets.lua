@@ -54,6 +54,8 @@ function test(options)
     T:check_equal(E(rima.sum{y=x}(x[y]), S), "x[1]")
     T:check_equal(E(rima.sum{y=z}(z[y]), S), "z.a")
     T:check_equal(E(rima.sum{y=Q}(x[y]), S), "x[1]")
+    T:check_equal(lib.dump(E(rima.sum{y=Q}(x[y]), S)), "index(ref(x), address{1})")
+    T:check_equal(lib.dump(E(rima.sum{y=Q}(z[y]), S)), "index(ref(z), address{\"a\"})")
     T:check_equal(E(rima.sum{y=Q}(x[y] + z[y]), S), "x[1] + z.a")
   end
 
