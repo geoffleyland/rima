@@ -7,9 +7,9 @@ local error = error
 local args = require("rima.lib.args")
 local lib = require("rima.lib")
 local undefined_t = require("rima.types.undefined_t")
-local rima = rima
 
 module(...)
+
 
 -- Number type -----------------------------------------------------------------
 
@@ -131,15 +131,13 @@ end
 --]]
 -- Standard number types and shortcuts -----------------------------------------
 
-local _free
-local _positive
-local _negative
-local _integer
-local _binary
+local _free = number_t:new()
+local _positive = number_t:new(0)
+local _negative = number_t:new(nil, 0)
+local _integer = number_t:new(0, math.huge, true)
+local _binary = number_t:new(0, 1, true)
 
-function rima.free(lower, upper)
-  _free = _free or number_t:new()
-
+function free(lower, upper)
 --  lower, upper = rima.eval(lower), rima.eval(upper)
   if not lower and not upper then
     return _free
@@ -148,45 +146,33 @@ function rima.free(lower, upper)
   end
 end
 
-function rima.positive(lower, upper)
-  local fname, usage =
-    "rima.positive",
-    "positive([lower_bound [, upper_bound]])"
-  _positive = _positive or number_t:new(0)
-
+function positive(lower, upper)
 --  lower, upper = rima.eval(lower), rima.eval(upper)
   if not lower and not upper then
     return _positive
   else
     local n = number_t:new(lower, upper)
     if not _positive:includes(n) then
-      error(("%s: bounds for positive variables must be positive"):format(fname, usage))
+      error("bounds for positive variables must be positive", 1)
     end
     return n
   end
 end
 
-function rima.negative(lower, upper)
-  local fname, usage =
-    "rima.negative",
-    "negative([lower_bound [, upper_bound]])"
-
-  _negative = _negative or number_t:new(nil, 0)
+function negative(lower, upper)
 --  lower, upper = rima.eval(lower), rima.eval(upper)
   if not lower and not upper then
     return _negative
   else
     local n = number_t:new(lower, upper)
     if not _negative:includes(n) then
-      error(("%s: bounds for negative variables must be negative"):format(fname, usage))
+      error("bounds for negative variables must be negative", 1)
     end
     return n
   end
 end
 
-function rima.integer(lower, upper)
-  _integer = _integer or number_t:new(0, math.huge, true)
-
+function integer(lower, upper)
 --  lower, upper = rima.eval(lower), rima.eval(upper)
   if not lower and not upper then
     return _integer
@@ -195,8 +181,7 @@ function rima.integer(lower, upper)
   end
 end
 
-function rima.binary()
-  _binary = _binary or number_t:new(0, 1, true)
+function binary()
   return _binary
 end
 

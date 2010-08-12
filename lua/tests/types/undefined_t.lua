@@ -6,6 +6,7 @@ local type = type
 local series = require("test.series")
 local undefined_t = require("rima.types.undefined_t")
 local object = require("rima.lib.object")
+local rima = require("rima")
 
 module(...)
 
@@ -25,6 +26,13 @@ function test(options)
   T:test(undefined_t:new():includes({}), "undefined:includes()'")
   T:test(undefined_t:new():includes(nil), "undefined:includes()'")
   
+  do
+    local x = rima.R"x"
+    local S = { x = undefined_t:new() }
+    T:check_equal(rima.E(x), "x")
+    T:check_equal(rima.E(x + 1), "1 + x")
+  end
+
   return T:close()
 end
 

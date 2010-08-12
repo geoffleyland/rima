@@ -15,6 +15,7 @@ local case_op = require("rima.operators.case")
 local minmax = require("rima.operators.minmax")
 local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
+local number_t = require("rima.types.number_t")
 local constraint = require("rima.constraint")
 
 module(...)
@@ -155,6 +156,15 @@ end
 function ipairs(exp)
   return set_ref:new(exp, "i", "pairs")
 end
+
+
+-- Types -----------------------------------------------------------------------
+
+free = number_t.free
+positive = number_t.positive
+negative = number_t.negative
+integer = number_t.integer
+binary = number_t.binary
 
 
 -- EOF -------------------------------------------------------------------------

@@ -6,6 +6,7 @@ local lib = require("rima.lib")
 
 module(...)
 
+
 -- Undefined (base) Type -------------------------------------------------------
 
 local undefined_t = object:new(_M, "undefined_t")
