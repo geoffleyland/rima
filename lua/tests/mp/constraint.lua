@@ -2,7 +2,7 @@
 -- see LICENSE for license information
 
 local series = require("test.series")
-local constraint = require("rima.constraint")
+local constraint = require("rima.mp.constraint")
 local lib = require("rima.lib")
 local scope = require("rima.scope")
 local rima = require("rima")

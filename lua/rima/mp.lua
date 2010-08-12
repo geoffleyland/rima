@@ -9,9 +9,9 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local constraint = require("rima.constraint")
+local constraint = require("rima.mp.constraint")
 local tabulate = require("rima.values.tabulate")
-local linearise = require("rima.linearise")
+local linearise = require("rima.mp.linearise")
 local rima = require("rima")
 
 local print = print

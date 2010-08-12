@@ -2,9 +2,9 @@
 -- see LICENSE for license information
 
 local series = require("test.series")
-local constraint2 = require("rima.constraint")
+local constraint2 = require("rima.mp.constraint")
 local scope = require("rima.scope")
-local lp = require("rima.lp")
+local mp = require("rima.mp")
 local rima = require("rima")
 
 module(...)
@@ -21,7 +21,7 @@ function test(options)
   S.objective = x + y
   S.sense = "maximise"
   scope.set(S, { ["x, y"] = rima.positive() })
-  local objective, r = lp.solve("lpsolve", S)
+  local objective, r = mp.solve("lpsolve", S)
   T:check_equal(objective, 2)
   T:check_equal(r.x.p, 1)
   T:check_equal(r.y.p, 1)

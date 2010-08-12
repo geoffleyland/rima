@@ -53,7 +53,7 @@ blending_problem.sufficient_nutrients[{n=nutrients}] = rima.C(rima.sum{i=ingredi
 
 -- The formulation can describe itself
 io.write("\nBlending Problem\n")
-rima.lp.write(blending_problem)
+rima.mp.write(blending_problem)
 --[[
 Minimise:
   sum{i in ingredients}(i.cost*i.quantity)
@@ -86,7 +86,7 @@ local whiskas_data =
 whiskas = rima.instance(blending_problem, whiskas_data)
 
 local function s(problem, solver, S)
-  local objective, r = rima.lp.solve(solver, problem, S)
+  local objective, r = rima.mp.solve(solver, problem, S)
   io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, objective))
   for k, v in pairs(r.ingredients) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, v.quantity.p, v.quantity.d)) end
 end

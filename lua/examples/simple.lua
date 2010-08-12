@@ -21,13 +21,13 @@ S.sense = "maximise"
 rima.set(S, { ["x, y"] = rima.positive() })
 
 io.write("Algebraic Form:\n")
-rima.lp.write(S)
+rima.mp.write(S)
 io.write("\nSparse Form:\n")
-rima.lp.write_sparse(S)
+rima.mp.write_sparse(S)
 
 io.write("Solutions:\n")
 local function s(solver)
-  local objective, r = rima.lp.solve(solver, S)
+  local objective, r = rima.mp.solve(solver, S)
   io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables and constraints:\n"):format(solver, objective))
   for k, v in pairs(r) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, v.p, v.d)) end
 end

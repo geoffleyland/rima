@@ -63,7 +63,7 @@ You can derive from it, compose a new model with it, make a Lua module out
 of it and we can even write it out in a readable format:
 
     --! continue
-    rima.lp.write(knapsack)
+    rima.mp.write(knapsack)
     --> Maximise:
     -->   sum{item in items}(item.picked*item.value)
     --> Subject to:
@@ -100,7 +100,7 @@ Just like `knapsack`, it can write itself (but we'll save you the output for now
 To solve the problem, just choose a solver, and use the `solve` method:
 
     --! continue
-    objective, r = rima.lp.solve("cbc", burglar_bill)
+    objective, r = rima.mp.solve("cbc", burglar_bill)
 
 We can check the objective:
 

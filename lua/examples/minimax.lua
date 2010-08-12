@@ -33,7 +33,7 @@ curve_fit.sense = "minimise"
 
 -- Write the formulation
 io.write("\nCurve Fitting\n")
-rima.lp.write(curve_fit)
+rima.mp.write(curve_fit)
 --[[ output:
 No objective defined
 Subject to:
@@ -74,7 +74,7 @@ local samples_from_function = { s = { [p] = f(x[p]) } }
 -- Put it all together
 local Z = rima.instance(minimax, polynomial_fits, consecutive_polynomials, samples_from_function, equispaced_points)
 
-local objective, r = rima.lp.solve("clp", Z,
+local objective, r = rima.mp.solve("clp", Z,
 {
   xmin = 0,
   xmax = 10,

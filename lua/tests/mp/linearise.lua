@@ -8,7 +8,7 @@ local series = require("test.series")
 local scope = require("rima.scope")
 local core = require("rima.core")
 local lib = require("rima.lib")
-local linearise = require("rima.linearise")
+local linearise = require("rima.mp.linearise")
 local rima = require("rima")
 
 module(...)

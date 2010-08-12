@@ -24,7 +24,7 @@ knapsack.weight_limit = rima.C(weight, "<=", capacity)
 knapsack.items[item].picked = rima.binary()
 
 io.write("\nKnapsack Problem\n")
-rima.lp.write(knapsack)
+rima.mp.write(knapsack)
 --[[
 Maximise:
   sum{item in items}(item.picked*item.value)
@@ -50,12 +50,12 @@ burglar_bill = rima.instance(knapsack,
 })
 
 io.write("\nBurglar Bill Instance of Knapsack Problem\n")
-rima.lp.write(burglar_bill)
+rima.mp.write(burglar_bill)
 
 
 -- Solve using cbc and lpsolve and write out the results
 function solve(problem, solver, S)
-  local objective, r = rima.lp.solve(solver, problem, S)
+  local objective, r = rima.mp.solve(solver, problem, S)
   io.write(("\nSolution from %s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, objective))
   for k, v in pairs(r.items) do
     io.write(("    %-10s\t%-3s\n"):format(k, v.picked.p == 1 and "yes" or "no"))

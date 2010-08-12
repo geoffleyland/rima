@@ -39,7 +39,7 @@ sudoku.sense = "minimise"
 
 
 -- Write out our model
-rima.lp.write(sudoku)
+rima.mp.write(sudoku)
 --[[
 Minimise:
   1
@@ -78,7 +78,7 @@ zibopt_problem =
 sudoku_zibopt = rima.instance(sudoku_9_by_9, { initial = zibopt_problem })
 
 -- Solve the problem
-local objective, result = rima.lp.solve("cbc", sudoku_zibopt)
+local objective, result = rima.mp.solve("cbc", sudoku_zibopt)
 
 -- Print the answer nicely.  There's probably an easier way to do this.
 io.write("\nSudoku answer\n")

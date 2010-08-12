@@ -16,11 +16,11 @@ local minmax = require("rima.operators.minmax")
 local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
-local constraint = require("rima.constraint")
+local constraint = require("rima.mp.constraint")
 
 module(...)
 
-require("rima.lp")
+require("rima.mp")
 
 
 -- String representation -------------------------------------------------------

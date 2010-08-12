@@ -25,7 +25,7 @@ assignment.total_transport_cost = rima.sum{p=plants, s=store_order}(flow[p][s] *
 --assignment.objective = total_transport_cost
 assignment.sense = "minimise"
 
-rima.lp.write(assignment)
+rima.mp.write(assignment)
 --[[
 Minimise:
   sum{p in plants, s in store_order}(flow[p, s]*transport_cost[p, s])
@@ -64,7 +64,7 @@ shopping_data =
 }
 
 shopping = rima.instance(assignment, { objective=total_transport_cost}, shopping_data)
-rima.lp.write(shopping)
+rima.mp.write(shopping)
 --[[
 Minimise:
   8*flow.Denver.Barstow + 5*flow.Denver.Dallas + ...
@@ -79,7 +79,7 @@ Subject to:
   respect_capacity.Denver:            flow.Denver.Barstow + flow.Denver.Dallas + flow.Denver.Tucson + flow.Denver['San Diego'] <= 2000
 --]]
 
-objective, r = rima.lp.solve("lpsolve", shopping)
+objective, r = rima.mp.solve("lpsolve", shopping)
 for pn, p in pairs(r.flow) do
   for sn, s in pairs(p) do
     io.write(("%s -> %s : %g\n"):format(pn, sn, s.p))
@@ -98,7 +98,7 @@ facility_location.build_cost = rima.sum{p=plants}(p.build_cost * p.built)
 facility_location.plants[{p=plants}].built = rima.binary()
 facility_location.objective = total_transport_cost + build_cost
 
-rima.lp.write(facility_location)
+rima.mp.write(facility_location)
 --[[
 Minimise:
   sum{p in plants, s in store_order}(flow[p, s]*transport_cost[p, s]) + sum{p in plants}(p.build_cost*p.built)
@@ -119,7 +119,7 @@ build_shops = rima.instance(facility_location, shopping_data,
   },
 })
 
-objective, r = rima.lp.solve("cbc", build_shops)
+objective, r = rima.mp.solve("cbc", build_shops)
 io.write(("Cost: $%.2f\n"):format(objective))
 for pn, p in pairs(r.plants) do
   io.write(("%s : %g\n"):format(pn, p.built.p))

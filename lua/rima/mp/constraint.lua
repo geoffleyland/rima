@@ -6,9 +6,10 @@ local assert, ipairs = assert, ipairs
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local linearise = require("rima.linearise")
+local linearise = require("rima.mp.linearise")
 
 module(...)
+
 
 --------------------------------------------------------------------------------
 

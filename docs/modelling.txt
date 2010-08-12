@@ -46,11 +46,11 @@ You can set several variable in a scope at once with `rima.set`:
     --! continue
     rima.set(f, { ["x, y"] = rima.positive() })
 
-`rima.lp` is the module that handles linear programs.
+`rima.mp` is the module that handles math programming.
 It has functions to write a model readably:
 
     --! continue
-    rima.lp.write(f)
+    rima.mp.write(f)
     --> Maximise:
     -->   x + y
     --> Subject to:
@@ -63,7 +63,7 @@ It has functions to write a model readably:
 And you can solve a formulation using a solver:
 
     --! continue
-    objective, r = rima.lp.solve("lpsolve", f)
+    objective, r = rima.mp.solve("lpsolve", f)
 
 The are two results, `objective` is, as expected is the objective,
 and `r` is a table with variable and constraint values,
