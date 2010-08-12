@@ -116,7 +116,12 @@ function address:__repr(format)
 
   for _, a in ipairs(self) do
     if element:isa(a) then
-      a = element.value(a)
+      local v = element.value(a)
+      if type(v) == "table" then
+        a = element.key(a)
+      else
+        a = v
+      end
     end
     if is_identifier_string(a) then
       -- for strings that can be identifiers, format as a.b
