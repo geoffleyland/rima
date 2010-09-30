@@ -239,7 +239,7 @@ function address:resolve(S, current, i, base, eval, collected, used)
     if element:isa(c) then
       c = element.expression(c)
     end
-    local new_base = core.bind(c, S)
+    local new_base = c
     local new_address = self:sub(j)
 
     -- if the base is an index, use its base and glue the two addresses together
