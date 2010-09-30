@@ -6,6 +6,8 @@ local type = type
 local series = require("test.series")
 local undefined_t = require("rima.types.undefined_t")
 local object = require("rima.lib.object")
+local lib = require("rima.lib")
+local core = require("rima.core")
 local rima = require("rima")
 
 module(...)
@@ -14,6 +16,8 @@ module(...)
 
 function test(options)
   local T = series:new(_M, options)
+
+  local E = core.eval
 
   T:test(undefined_t:isa(undefined_t:new()), "isa(undefined_t:new(), undefined_t)")
   T:check_equal(object.type(undefined_t:new()), 'undefined_t', "type(undefined_t:new()) == 'undefined_t'")
@@ -28,9 +32,17 @@ function test(options)
   
   do
     local x = rima.R"x"
-    local S = { x = undefined_t:new() }
-    T:check_equal(rima.E(x), "x")
-    T:check_equal(rima.E(x + 1), "1 + x")
+    local S = rima.scope.new{ x = undefined_t:new() }
+    T:check_equal(E(x, S), "x")
+    T:check_equal(E(x + 1, S), "1 + x")
+  end
+
+  do
+    local x, y, z = rima.R"x, y, z"
+    local S = rima.scope.new{ x = { undefined_t:new() }}
+    local e = rima.sum{y=x}(x[y])
+    T:check_equal(E(e, S), "x[1]")
+    T:check_equal(lib.dump(E(e, S)), "index(ref(x), address{1})")
   end
 
   return T:close()
