@@ -1,8 +1,8 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local ipairs, getmetatable, select, tostring, type, unpack =
-      ipairs, getmetatable, select, tostring, type, unpack
+local ipairs, getmetatable, pairs, select, tostring, type, unpack =
+      ipairs, getmetatable, pairs, select, tostring, type, unpack
 local table = require("table")
 
 local object = require("rima.lib.object")
@@ -74,8 +74,19 @@ function simple_repr(o, format)
     local t = object.type(o)
     if t == "string" then
       return ("%q"):format(o)
-    elseif t == "table" or t == "boolean" then
+    elseif t == "boolean" then
       return tostring(o)
+    elseif t == "table" then
+      local s = tostring(o)..": { "
+      local count = 0
+      for k, v in pairs(o) do
+        if count == 3 then s = s..",..." break end
+        if count > 0 then s = s..", " end
+        s = s..tostring(k).."="..tostring(v)
+        count = count + 1
+      end
+      s = s.." }"
+      return s
     elseif t == "nil" then
       return "nil"
     else
