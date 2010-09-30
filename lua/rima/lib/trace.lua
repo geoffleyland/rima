@@ -20,7 +20,7 @@ end
 
 
 function troff()
-  trace = false
+  on = false
 end
 
 
