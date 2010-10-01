@@ -82,6 +82,7 @@ end
 -- Element access --------------------------------------------------------------
 
 function address:value(i)
+  if i < 0 then i = #self + i + 1 end
   return self[i]
 end
 
