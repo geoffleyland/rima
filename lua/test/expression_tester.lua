@@ -3,7 +3,6 @@
 
 local ipairs, loadstring, pcall, setfenv = ipairs, loadstring, pcall, setfenv
 
-require("rima.ref")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local rima = require("rima")
