@@ -22,12 +22,6 @@ module(...)
 require("rima.mp")
 
 
--- String representation -------------------------------------------------------
-
-set_number_format = lib.set_number_format
-repr = lib.repr
-
-
 -- Creating references ---------------------------------------------------------
 
 function R(names, type)
