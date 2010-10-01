@@ -27,7 +27,7 @@ function test(options)
   
   do
     local it
-    T:expect_ok(function() it = N(nil, nil, "key", 13) end)
+    T:expect_ok(function() it = N(nil, "key", 13) end)
     T:check_equal(it + 17, 30)
     T:check_equal(7 * it, 91)
     T:check_equal(core.defined(it), true)
@@ -35,7 +35,7 @@ function test(options)
 
   do
     local a = rima.R"a"
-    local S = scope.new{ a = N(nil, nil, "key", 13) }
+    local S = scope.new{ a = N(nil, "key", 13) }
     T:check_equal(E(a + 19, S), 32)
     T:check_equal(D(E(a + 19, S)), 32)
   end

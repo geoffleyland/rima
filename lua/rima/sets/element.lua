@@ -16,8 +16,8 @@ module(...)
 element = object:new(_M, "element")
 proxy_mt = setmetatable({}, element)
 
-function element:new(base, exp, key, value, set)
-  return proxy:new(object.new(self, { base=base, exp=exp, key=key, value=value, set=set }), proxy_mt)
+function element:new(exp, key, value, set)
+  return proxy:new(object.new(self, { exp=exp, key=key, value=value, set=set }), proxy_mt)
 end
 
 
@@ -29,7 +29,7 @@ function element:expression() return proxy.O(self).exp end
 function element:__eval(S, eval)
   self = proxy.O(self)
   local exp = eval(self.exp, S)
-  return element:new(self.base, exp, self.key, self.value, self.set)
+  return element:new(exp, self.key, self.value, self.set)
 end
 
 

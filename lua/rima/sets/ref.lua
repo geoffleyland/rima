@@ -200,7 +200,7 @@ local function set_ref_ielements(state, i)
   v = v.value
   local s = state.set
   local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
-  S[state.names[1]] = element:new(s, expression:new(index_op, s, i), i, v, rs)
+  S[state.names[1]] = element:new(expression:new(index_op, s, i), i, v, rs)
   return i, S
 end
 
@@ -213,7 +213,7 @@ local function set_ref_elements(state, k)
   v = v.value
   local s = state.set
   local S = scope.spawn(state.scope, nil, {overwrite=true, no_undefined=true})
-  S[state.names[1]] = element:new(s, expression:new(index_op, s, k), k, v, rs)
+  S[state.names[1]] = element:new(expression:new(index_op, s, k), k, v, rs)
   return k, S
 end
 
