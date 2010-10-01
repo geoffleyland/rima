@@ -9,14 +9,13 @@ local args = require("rima.lib.args")
 local trace = require("rima.lib.trace")
 local ref = require("rima.ref")
 local expression = require("rima.expression")
-local function_v = require("rima.values.function_v")
+local func = require("rima.func")
 local sum_op = require("rima.operators.sum")
 local case_op = require("rima.operators.case")
 local minmax = require("rima.operators.minmax")
 local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
-local constraint = require("rima.mp.constraint")
 
 module(...)
 
@@ -79,13 +78,13 @@ function E(e, S) -- evaluate an expression
 end
 
 
--- Creating functions and constraints ------------------------------------------
+-- Creating functions ----------------------------------------------------------
 
 function F(inputs, e, S) -- create a function
   if e then
-    return function_v:new(inputs, e, S)
+    return func:new(inputs, e, S)
   else
-    return function(e, S) return function_v:new(inputs, e, S) end
+    return function(e, S) return func:new(inputs, e, S) end
   end
 end
 

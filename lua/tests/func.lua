@@ -6,7 +6,7 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local function_v = require("rima.values.function_v")
+local func = require("rima.func")
 local rima = require("rima")
 
 module(...)
@@ -20,19 +20,19 @@ function test(options)
   local B = core.bind
   local E = core.eval
 
-  T:test(object.isa(function_v, function_v:new({"a"}, 3)),
-    "isa(function_v:new(), function_v)")
-  T:check_equal(object.type(function_v:new({"a"}, 3)),
-    "function_v", "type(function_v:new()) == 'function_v'")
+  T:test(object.isa(func, func:new({"a"}, 3)),
+    "isa(func:new(), func)")
+  T:check_equal(object.type(func:new({"a"}, 3)),
+    "func", "type(func:new()) == 'func'")
 
-  T:expect_error(function() function_v:new({1}, 1) end,
+  T:expect_error(function() func:new({1}, 1) end,
     "expected string or simple reference, got '1' %(number%)")
   do
     local a = rima.R"a"
-    T:expect_error(function() function_v:new({a[1]}, 1) end,
+    T:expect_error(function() func:new({a[1]}, 1) end,
       "expected string or simple reference, got 'a%[1%]' %(index%)")
     local S = scope.new{ b=rima.free() }
-    T:expect_error(function() function_v:new({S.b}, 1) end,
+    T:expect_error(function() func:new({S.b}, 1) end,
       "expected string or simple reference, got 'b' %(ref%)")
   end
 
@@ -40,7 +40,7 @@ function test(options)
 
   do
     local f = rima.R"f"
-    local S = scope.new{ f = function_v:new({a}, 3) }
+    local S = scope.new{ f = func:new({a}, 3) }
     T:expect_error(function() rima.E(f(), S) end,
       "the function needs to be called with at least 1 arguments, got 0")
     T:expect_error(function() rima.E(f(1, 2), S) end,
@@ -50,14 +50,14 @@ function test(options)
   end
 
   do
-    local f = function_v:new({a}, 3)
+    local f = func:new({a}, 3)
     local S = scope.new()
     T:check_equal(f, "function(a) return 3", "function description")
     T:check_equal(f:call({5}, S, E), 3)
   end
   
   do
-    local f = function_v:new({"a"}, 3 + a)
+    local f = func:new({"a"}, 3 + a)
     local S = scope.new{ x = rima.free() }
     T:check_equal(f, "function(a) return 3 + a", "function description")
     T:check_equal(f:call({x}, S, B), "3 + x")
@@ -69,7 +69,7 @@ function test(options)
   end
 
   do
-    local f = function_v:new({a}, b + a)
+    local f = func:new({a}, b + a)
     local S = scope.new{ ["a, b"] = rima.free() }
     T:check_equal(f, "function(a) return b + a", "function description")
     T:check_equal(f:call({x}, S, E), "b + x")
@@ -86,7 +86,7 @@ function test(options)
   end
 --[[
   do
-    local f = function_v:new({a, "b"}, 1 + a, nil, b^2)
+    local f = func:new({a, "b"}, 1 + a, nil, b^2)
     local S = scope.new{ ["a, b"] = rima.free() }
     T:check_equal(f, "function(a, b) return 1 + a", "function description")
     T:check_equal(f:call({2 + x, 5, {x}}, S, B), "3 + b^2")
@@ -96,7 +96,7 @@ function test(options)
 
   do
     local f = rima.R"f"
-    local S = scope.new{ f = function_v:new({"a", b}, 1 + a, nil, b^2) }
+    local S = scope.new{ f = func:new({"a", b}, 1 + a, nil, b^2) }
     local e = 1 + f(1 + x, 3, {x})
     T:check_equal(rima.E(e, S), 12)
   end

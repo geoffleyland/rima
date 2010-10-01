@@ -16,12 +16,12 @@ local ref = require("rima.ref")
 
 -- Function type ---------------------------------------------------------------
 
-local function_v = object:new(_M, "function_v")
+local func = object:new(_M, "func")
 
 
-function function_v:new(inputs, exp, S)
+function func:new(inputs, exp, S)
   local fname, usage =
-    "function_v:now",
+    "func:now",
     "new(inputs, expression, table or scope)"
 
   args.check_types(S, "S", {"nil", "table", {scope, "scope"}}, usage, fname)
@@ -60,7 +60,7 @@ end
 
 -- String representation -------------------------------------------------------
 
-function function_v:__repr(format)
+function func:__repr(format)
   return ("function(%s) return %s"):
     format(lib.concat_repr(self.inputs, format), lib.repr(self.pretty_exp, format))
 end
@@ -69,7 +69,7 @@ __tostring = lib.__tostring
 
 -- Evaluation ------------------------------------------------------------------
 
-function function_v:check_args(args)
+function func:check_args(args)
   local outputs = {}
   if #args < #self.inputs then
     error(("the function needs to be called with at least %d arguments, got %d"):format(#self.inputs, #args), 0)
@@ -79,7 +79,7 @@ function function_v:check_args(args)
 end
 
 
-function function_v:call(args, S, eval)
+function func:call(args, S, eval)
   if not args then return self end
 
   self:check_args(args)
@@ -99,7 +99,7 @@ function function_v:call(args, S, eval)
 end
 
 
-function function_v:__call(...)
+function func:__call(...)
   local S = scope.new()
   return self:call({...}, S, core.eval)
 end

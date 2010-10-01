@@ -7,7 +7,6 @@ module(...)
 
 --------------------------------------------------------------------------------
 
-require("rima.values.function_v")
 require("rima.values.tabulate")
 
 
