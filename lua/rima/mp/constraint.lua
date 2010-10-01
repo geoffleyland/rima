@@ -24,6 +24,11 @@ function constraint:new(lhs, rel, rhs)
 end
 
 
+function constraint:__eval(S)
+  return constraint:new(core.eval(self.lhs, S), self.type, core.eval(self.rhs, S))
+end
+
+
 function constraint:linearise(S)
   local constant, lhs = linearise.linearise(0 + self.lhs - self.rhs, S)
   return lhs, self.type, -constant
@@ -37,11 +42,12 @@ function constraint:tostring(S)
   return s
 end
 
-function constraint:__tostring()
-  local lhs, rhs = lib.repr(self.lhs), lib.repr(self.rhs)
+function constraint:__repr(format)
+  local lhs, rhs = lib.repr(self.lhs, format), lib.repr(self.rhs, format)
   local s = lhs.." "..self.type.." "..rhs
   return s
 end
+constraint.__tostring = lib.__tostring
 
 
 -- EOF -------------------------------------------------------------------------
