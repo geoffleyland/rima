@@ -20,7 +20,7 @@ weight = rima.sum{item=items}(item.picked * item.weight)
 knapsack = rima.new()
 knapsack.objective = value
 knapsack.sense = "maximise"
-knapsack.weight_limit = rima.C(weight, "<=", capacity)
+knapsack.weight_limit = rima.mp.C(weight, "<=", capacity)
 knapsack.items[item].picked = rima.binary()
 
 io.write("\nKnapsack Problem\n")

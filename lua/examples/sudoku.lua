@@ -20,10 +20,10 @@ initial = rima.R"initial"                -- the starting solution
 
 -- Create the model and set up the constraints
 sudoku = rima.new()
-sudoku.one_value_per_cell[{r=rows}][{c=columns}] = rima.C(rima.sum{v=values}(answer[r][c][v]), "==", 1)
-sudoku.each_value_once_per_row[{r=rows}][{v=values}] = rima.C(rima.sum{c=columns}(answer[r][c][v]), "==", 1)
-sudoku.each_value_once_per_column[{c=columns}][{v=values}] = rima.C(rima.sum{r=rows}(answer[r][c][v]), "==", 1)
-sudoku.each_value_once_per_square[{g1=groups}][{g2=groups}][{v=values}] = rima.C(rima.sum{r=rima.range(g1, g1+2),c=rima.range(g2, g2+2)}(answer[r][c][v]), "==", 1)
+sudoku.one_value_per_cell[{r=rows}][{c=columns}] = rima.mp.C(rima.sum{v=values}(answer[r][c][v]), "==", 1)
+sudoku.each_value_once_per_row[{r=rows}][{v=values}] = rima.mp.C(rima.sum{c=columns}(answer[r][c][v]), "==", 1)
+sudoku.each_value_once_per_column[{c=columns}][{v=values}] = rima.mp.C(rima.sum{r=rows}(answer[r][c][v]), "==", 1)
+sudoku.each_value_once_per_square[{g1=groups}][{g2=groups}][{v=values}] = rima.mp.C(rima.sum{r=rima.range(g1, g1+2),c=rima.range(g2, g2+2)}(answer[r][c][v]), "==", 1)
 
 -- We use the initial solution to decide whether each of the elements of answer
 -- is a variable or a constant.

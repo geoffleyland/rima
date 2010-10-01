@@ -48,8 +48,8 @@ blending_problem.ingredients[i].quantity = rima.positive()
 blending_problem.objective = total_cost
 blending_problem.sense = "minimise"
 
-blending_problem.make_quantity = rima.C(total_quantity, "==", quantity)
-blending_problem.sufficient_nutrients[{n=nutrients}] = rima.C(rima.sum{i=ingredients}(i.composition[n] * i.quantity), ">=", quantity * limits[n])
+blending_problem.make_quantity = rima.mp.C(total_quantity, "==", quantity)
+blending_problem.sufficient_nutrients[{n=nutrients}] = rima.mp.C(rima.sum{i=ingredients}(i.composition[n] * i.quantity), ">=", quantity * limits[n])
 
 -- The formulation can describe itself
 io.write("\nBlending Problem\n")

@@ -47,11 +47,11 @@ A formulation is just a scope,
 and the objective and optimisation sense are just variables in the scope.
 Rima accepts both `"maximise"` and `"maximize"`.
 
-We use `rima.C` to construct a constraint,
+We use `rima.mp.C` to construct a constraint,
 and add it to the scope like any other value::
 
     --! continue
-    knapsack.weight_limit = rima.C(weight, "<=", capacity)
+    knapsack.weight_limit = rima.mp.C(weight, "<=", capacity)
 
 Finally, we define `item.picked` as a binary variable:
 

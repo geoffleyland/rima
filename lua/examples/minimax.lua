@@ -20,12 +20,12 @@ local e = rima.R"e"                     -- positive and negative Errors at each 
 
 -- Curve fit formulation
 local curve_fit = rima.new()
-curve_fit.fit_data[{p=P}] = rima.C(
+curve_fit.fit_data[{p=P}] = rima.mp.C(
   rima.sum{t=T}(w[t] * y[t][p]) +
   rima.sum{q=Q}(q * e[q][p]), "==",
   s[p])
-curve_fit.find_max_error[{q=Q}][{p=P}] = rima.C(max_error, ">=", e[q][p])
-curve_fit.find_error_sum = rima.C(sum_error, "==", rima.sum{q=Q, p=P}(e[q][p]))
+curve_fit.find_max_error[{q=Q}][{p=P}] = rima.mp.C(max_error, ">=", e[q][p])
+curve_fit.find_error_sum = rima.mp.C(sum_error, "==", rima.sum{q=Q, p=P}(e[q][p]))
 rima.set(curve_fit, { ["max_error, sum_error"]=rima.positive(), Q = {-1, 1} })
 curve_fit.e[{q=Q}][{p=P}] = rima.positive()
 curve_fit.w[{t=T}] = rima.free()

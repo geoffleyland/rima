@@ -12,6 +12,8 @@ local element = require("rima.sets.element")
 local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 
+local print = print
+
 module(...)
 
 local scope = require("rima.scope")

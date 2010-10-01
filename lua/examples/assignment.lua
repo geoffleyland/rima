@@ -18,8 +18,8 @@ flow, transport_cost, total_transport_cost = rima.R"flow, transport_cost, total_
 
 assignment = rima.new()
 
-assignment.meet_demand[{s=stores}] = rima.C(rima.sum{p=plants}(flow[p][s]), "==", s.demand)
-assignment.respect_capacity[{p=plants}] = rima.C(rima.sum{s=stores}(flow[p][s]), "<=", p.capacity)
+assignment.meet_demand[{s=stores}] = rima.mp.C(rima.sum{p=plants}(flow[p][s]), "==", s.demand)
+assignment.respect_capacity[{p=plants}] = rima.mp.C(rima.sum{s=stores}(flow[p][s]), "<=", p.capacity)
 assignment.flow[{p=plants}][{s=stores}] = rima.positive()
 assignment.total_transport_cost = rima.sum{p=plants, s=store_order}(flow[p][s] * transport_cost[p][s])
 --assignment.objective = total_transport_cost
@@ -93,7 +93,7 @@ build_cost = rima.R"build_cost"
 
 facility_location = rima.instance(assignment)
 
-facility_location.build_plants[{p=plants}] = rima.C(rima.sum{s=store_order}(flow[p][s]), "<=", p.capacity * p.built)
+facility_location.build_plants[{p=plants}] = rima.mp.C(rima.sum{s=store_order}(flow[p][s]), "<=", p.capacity * p.built)
 facility_location.build_cost = rima.sum{p=plants}(p.build_cost * p.built)
 facility_location.plants[{p=plants}].built = rima.binary()
 facility_location.objective = total_transport_cost + build_cost

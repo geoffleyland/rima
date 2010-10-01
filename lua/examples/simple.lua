@@ -14,8 +14,8 @@ io.write("\nSimple Test:\n")
 
 local x, y = rima.R"x, y"
 local S = rima.new()
-S.c1 = rima.C(x + 2*y, "<=", 3)
-S.c2 = rima.C(2*x + y, "<=", 3)
+S.c1 = rima.mp.C(x + 2*y, "<=", 3)
+S.c2 = rima.mp.C(2*x + y, "<=", 3)
 S.objective = x + y
 S.sense = "maximise"
 rima.set(S, { ["x, y"] = rima.positive() })

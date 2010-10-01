@@ -85,13 +85,8 @@ function F(inputs, e, S) -- create a function
   if e then
     return function_v:new(inputs, e, S)
   else
-    return function(e2, S2) return function_v:new(inputs, e2, S2) end
+    return function(e, S) return function_v:new(inputs, e, S) end
   end
-end
-
-
-function C(lhs, rel, rhs) -- create a constraint
-  return constraint:new(lhs, rel, rhs)
 end
 
 

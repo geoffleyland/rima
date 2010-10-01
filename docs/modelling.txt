@@ -24,13 +24,13 @@ A model formulation is just a scope we're going to structure in a special way.
 
     f = rima.new()
 
-`rima.C` creates a new constraint, which we add to the formulation just like
+`rima.mp.C` creates a new constraint, which we add to the formulation just like
 any other value we add to the scope:
 
     --! continue
     x, y = rima.R"x, y"
-    f.c1 = rima.C(x + 2*y, "<=", 3)
-    f.c2 = rima.C(2*x + y, "<=", 3)
+    f.c1 = rima.mp.C(x + 2*y, "<=", 3)
+    f.c2 = rima.mp.C(2*x + y, "<=", 3)
 
 The objective and optimisation sense are also just values we set in the scope:
 

@@ -254,7 +254,7 @@ function solve(solver, S, values)
   local solve_mod = require("rima.solvers."..solver)
   local variables, constraints = sparse_form(S, S.objective)
   io.stderr:write(("Problem generated: %d variables, %d constraints.  Solving...\n"):format(#variables, #constraints))
-  
+
   local r = solve_mod.solve(sense(S), variables, constraints)
 
   local r2 = {}
@@ -268,4 +268,12 @@ function solve(solver, S, values)
 end
 
 
+-- creating constraints --------------------------------------------------------
+
+function C(lhs, rel, rhs) -- create a constraint
+  return constraint:new(lhs, rel, rhs)
+end
+
+
 -- EOF -------------------------------------------------------------------------
+
