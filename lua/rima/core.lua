@@ -1,6 +1,8 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
+local error, getmetatable, rawtype = error, getmetatable, type
+
 local lib = require("rima.lib")
 local trace = require("rima.lib.trace")
 
@@ -21,6 +23,40 @@ function defined(e)
   end
   if trace.on then trace.leave("defd", 1, e, d) end
   return d
+end
+
+
+-- Is an expression arithmetic? (Can you add it?) ------------------------------
+
+function arithmetic(e)
+  if trace.on then trace.enter("arth", 1, nil, e) end
+  local result
+
+  if rawtype(e) == "number" then
+    result = true
+  else
+    local mt = getmetatable(e)
+    if not mt then
+      result = false
+    else
+      local f
+      f = mt.__arithmetic
+      if f then
+        result = f(e)
+      else
+        f = mt.__defined
+        if f then
+          result = f(e)
+        elseif mt.__eval then 
+          result = false
+        else
+          result = mt.__add and true
+        end
+      end
+    end
+  end
+  if trace.on then trace.leave("arth", 1, e, result) end
+  return result
 end
 
 

@@ -50,6 +50,11 @@ function element:__defined()
 end
 
 
+function element:__arithmetic()
+  return core.arithmetic(proxy.O(self).value)
+end
+
+
 function element:__repr(format)
   self = proxy.O(self)
   if format.dump then
