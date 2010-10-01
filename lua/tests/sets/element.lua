@@ -12,19 +12,20 @@ local rima = require("rima")
 
 module(...)
 
+
 -- Tests -----------------------------------------------------------------------
 
 function test(options)
   local T = series:new(_M, options)
-  
+
   local function N(...) return element:new(...) end
-  local E = rima.E
+  local E = core.eval
   local D = lib.dump
-  
+
   -- Constructors
   T:test(element:isa(N()), "element:isa(element:new())")
   T:check_equal(object.type(N()), "element", "type(element:new()) == 'element'")
-  
+
   do
     local it
     T:expect_ok(function() it = N(nil, "key", 13) end)
@@ -39,8 +40,10 @@ function test(options)
     T:check_equal(E(a + 19, S), 32)
     T:check_equal(D(E(a + 19, S)), 32)
   end
+
   return T:close()
 end
+
 
 -- EOF -------------------------------------------------------------------------
 

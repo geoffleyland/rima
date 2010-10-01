@@ -7,6 +7,7 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
+local undefined_t = require("rima.types.undefined_t")
 
 module(...)
 
@@ -24,6 +25,16 @@ end
 function element:key() return proxy.O(self).key end
 function element:value() return proxy.O(self).value end
 function element:expression() return proxy.O(self).exp end
+
+function element:display()
+  self = proxy.O(self)
+  local v = self.value
+  if v and not undefined_t:isa(v) and object.type(v) ~= "table" then
+    return v
+  else
+    return self.key
+  end
+end
 
 
 function element:__eval(S, eval)
