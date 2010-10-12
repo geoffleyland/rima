@@ -63,28 +63,28 @@ It has functions to write a model readably:
 And you can solve a formulation using a solver:
 
     --! continue
-    objective, r = rima.mp.solve("lpsolve", f)
+    primal, dual = rima.mp.solve("lpsolve", f)
 
 The are two results, `objective` is, as expected is the objective,
 and `r` is a table with variable and constraint values,
 organised the same way as you put them in.
 
     --! continue
-    print(objective)                                    --> 2
+    print(primal.objective)                             --> 2
 
 `r` mimics the structure of the undefined variables and constraints in the model formulation.
 Each entry in variables is a table with two values: `p` (primal) the optimal value of the variable
 and `d` the optimal dual (or reduced cost):
 
     --! continue
-    print(r.x.p, r.y.p)                                 --> 1 1
-    print(r.x.d, r.y.d)                                 --> 0 0
+    print(primal.x, primal.y)                           --> 1 1
+    print(dual.x, dual.y)                               --> 0 0
 
 Likewise for the constraints:
 
     --! continue
-    print(r.c1.p, r.c2.p)                               --> 3 3
-    print(r.c2.d, r.c2.d)                               --> /0%.3+ 0%.3+/ 0.3333 0.3333
+    print(primal.c1, primal.c2)                         --> 3 3
+    print(dual.c2, dual.c2)                             --> /0%.3+ 0%.3+/ 0.3333 0.3333
 
 
 ## Model Instances

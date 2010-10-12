@@ -11,54 +11,54 @@ http://dashoptimization.com/home/cgi-bin/example.pl?id=mosel_model_2_2
 --]]
 
 -- Formulation of a knapsack
-items, item = rima.R"items, item"       -- items to put in the knapsack
+i, items = rima.R"i, items"             -- items to put in the knapsack
 capacity = rima.R"capacity"             -- capacity of the knapsack
 
-value = rima.sum{item=items}(item.picked * item.value)
-weight = rima.sum{item=items}(item.picked * item.weight)
+value = rima.sum{i=items}(i.take * i.value)
+size = rima.sum{i=items}(i.take * i.size)
 
-knapsack = rima.new()
-knapsack.objective = value
-knapsack.sense = "maximise"
-knapsack.weight_limit = rima.mp.C(weight, "<=", capacity)
-knapsack.items[item].picked = rima.binary()
+knapsack = rima.new{
+  sense = "maximise",
+  objective = value,
+  capacity_limit = rima.mp.C(size, "<=", capacity),
+}
+knapsack.items[{i=items}].take = rima.binary()
 
 io.write("\nKnapsack Problem\n")
 rima.mp.write(knapsack)
+io.write("\n")
 --[[
 Maximise:
-  sum{item in items}(item.picked*item.value)
+  sum{i in items}(i.take*i.value)
 Subject to:
-  weight_limit: sum{item in items}(item.picked*item.weight) <= capacity
+  capacity_limit: sum{i in items}(i.size*i.take) <= capacity
 --]]
 
 -- Burglar Bill instance
-burglar_bill = rima.instance(knapsack,
-{ 
-  capacity = 102,
-  items =
-  {
-    camera   = { value =  15, weight =  2 },
-    necklace = { value = 100, weight = 20 },
-    vase     = { value =  15, weight = 20 },
-    picture  = { value =  15, weight = 30 },
-    tv       = { value =  15, weight = 40 },
-    video    = { value =  15, weight = 30 },
-    chest    = { value =  15, weight = 60 },
-    brick    = { value =   1, weight = 10 },
-  }
-})
+ITEMS =
+{
+  camera   = { value =  15, size =  2 },
+  necklace = { value = 100, size = 20 },
+  vase     = { value =  15, size = 20 },
+  picture  = { value =  15, size = 30 },
+  tv       = { value =  15, size = 40 },
+  video    = { value =  15, size = 30 },
+  chest    = { value =  15, size = 60 },
+  brick    = { value =   1, size = 10 },
+}
 
-io.write("\nBurglar Bill Instance of Knapsack Problem\n")
+burglar_bill = rima.instance(knapsack, { capacity = 102, items = ITEMS })
+
+io.write("Burglar Bill Instance of Knapsack Problem\n")
 rima.mp.write(burglar_bill)
 
 
 -- Solve using cbc and lpsolve and write out the results
 function solve(problem, solver, S)
-  local objective, r = rima.mp.solve(solver, problem, S)
-  io.write(("\nSolution from %s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, objective))
-  for k, v in pairs(r.items) do
-    io.write(("    %-10s\t%-3s\n"):format(k, v.picked.p == 1 and "yes" or "no"))
+  local primal, dual = rima.mp.solve(solver, problem, S)
+  io.write(("\nSolution from %s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, primal.objective))
+  for k, v in pairs(primal.items) do
+    io.write(("    %-10s\t%-3s\n"):format(k, v.take == 1 and "yes" or "no"))
   end
 end
 

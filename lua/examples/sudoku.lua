@@ -78,15 +78,15 @@ zibopt_problem =
 sudoku_zibopt = rima.instance(sudoku_9_by_9, { initial = zibopt_problem })
 
 -- Solve the problem
-local objective, result = rima.mp.solve("cbc", sudoku_zibopt)
+local primal, dual = rima.mp.solve("cbc", sudoku_zibopt)
 
 -- Print the answer nicely.  There's probably an easier way to do this.
 io.write("\nSudoku answer\n")
 
-for i, v in pairs(result.answer) do
+for i, v in pairs(primal.answer) do
   for j, w in pairs(v) do
     for k, x in pairs(w) do
-      if x.p == 1 then zibopt_problem[i][j] = k end
+      if x == 1 then zibopt_problem[i][j] = k end
     end
   end
 end

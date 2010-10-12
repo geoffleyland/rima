@@ -100,18 +100,18 @@ Just like `knapsack`, it can write itself (but we'll save you the output for now
 To solve the problem, just choose a solver, and use the `solve` method:
 
     --! continue
-    objective, r = rima.mp.solve("cbc", burglar_bill)
+    primal, dual = rima.mp.solve("cbc", burglar_bill)
 
 We can check the objective:
 
     --! continue
-    print(objective)                                    --> 160
+    print(primal.objective)                             --> 160
 
 And see if it was worth taking the brick or necklace in the knapsack:
 
     --! continue
-    print(r.items.brick.picked.p)                       --> 0
-    print(r.items.necklace.picked.p)                    --> 1
+    print(primal.items.brick.picked)                    --> 0
+    print(primal.items.necklace.picked)                 --> 1
 
 Notice that our results follow the same structure as the input data,
 and that we access the primal value of the solution with `p`

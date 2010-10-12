@@ -18,7 +18,8 @@ S.c1 = rima.mp.C(x + 2*y, "<=", 3)
 S.c2 = rima.mp.C(2*x + y, "<=", 3)
 S.objective = x + y
 S.sense = "maximise"
-rima.set(S, { ["x, y"] = rima.positive() })
+S.x = rima.positive()
+S.y = rima.positive()
 
 io.write("Algebraic Form:\n")
 rima.mp.write(S)
@@ -27,9 +28,9 @@ rima.mp.write_sparse(S)
 
 io.write("Solutions:\n")
 local function s(solver)
-  local objective, r = rima.mp.solve(solver, S)
-  io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables and constraints:\n"):format(solver, objective))
-  for k, v in pairs(r) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, v.p, v.d)) end
+  local primal, dual = rima.mp.solve(solver, S)
+  io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables and constraints:\n"):format(solver, primal.objective))
+  for k, v in pairs(dual) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, primal[k], v)) end
 end
 
 s("lpsolve")

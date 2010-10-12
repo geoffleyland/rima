@@ -74,7 +74,7 @@ local samples_from_function = { s = { [p] = f(x[p]) } }
 -- Put it all together
 local Z = rima.instance(minimax, polynomial_fits, consecutive_polynomials, samples_from_function, equispaced_points)
 
-local objective, r = rima.mp.solve("clp", Z,
+local primal, dual = rima.mp.solve("clp", Z,
 {
   xmin = 0,
   xmax = 10,
@@ -82,8 +82,8 @@ local objective, r = rima.mp.solve("clp", Z,
   terms = 4,
   f = rima.F{x}(rima.exp(x) * rima.sin(x)),
 })
-io.write(("\nMinimax Polynomial with CLP\n  max error:\t% 10.2f\n"):format(objective))
-for k, v in pairs(r.w) do io.write(("  w[%d]:\t% 10.2f\t(% 10.2f)\n"):format(k, v.p, v.d)) end
+io.write(("\nMinimax Polynomial with CLP\n  max error:\t% 10.2f\n"):format(primal.objective))
+for k, v in pairs(primal.w) do io.write(("  w[%d]:\t% 10.2f\t(% 10.2f)\n"):format(k, v, dual.w[k])) end
 
 
 -- EOF -------------------------------------------------------------------------

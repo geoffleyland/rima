@@ -251,20 +251,24 @@ end
 
 function solve(solver, S, values)
   S = new_scope(S, values)
+
   local solve_mod = require("rima.solvers."..solver)
   local variables, constraints = sparse_form(S, S.objective)
   io.stderr:write(("Problem generated: %d variables, %d constraints.  Solving...\n"):format(#variables, #constraints))
 
   local r = solve_mod.solve(sense(S), variables, constraints)
 
-  local r2 = {}
+  local primal, dual = {}, {}
+  primal.objective = r.objective
   for i, v in ipairs(r.variables) do
-    core.set(variables[i].ref, r2, v)
+    core.set(variables[i].ref, primal, v.p)
+    core.set(variables[i].ref, dual, v.d)
   end
   for i, v in ipairs(r.constraints) do
-    core.set(constraints[i].ref, r2, v)
+    core.set(constraints[i].ref, primal, v.p)
+    core.set(constraints[i].ref, dual, v.d)
   end
-  return r.objective, r2
+  return primal, dual
 end
 
 

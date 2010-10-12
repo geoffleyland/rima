@@ -79,10 +79,10 @@ Subject to:
   respect_capacity.Denver:            flow.Denver.Barstow + flow.Denver.Dallas + flow.Denver.Tucson + flow.Denver['San Diego'] <= 2000
 --]]
 
-objective, r = rima.mp.solve("lpsolve", shopping)
-for pn, p in pairs(r.flow) do
+primal, dual = rima.mp.solve("lpsolve", shopping)
+for pn, p in pairs(primal.flow) do
   for sn, s in pairs(p) do
-    io.write(("%s -> %s : %g\n"):format(pn, sn, s.p))
+    io.write(("%s -> %s : %g\n"):format(pn, sn, s))
   end
 end
 
@@ -119,14 +119,14 @@ build_shops = rima.instance(facility_location, shopping_data,
   },
 })
 
-objective, r = rima.mp.solve("cbc", build_shops)
-io.write(("Cost: $%.2f\n"):format(objective))
-for pn, p in pairs(r.plants) do
-  io.write(("%s : %g\n"):format(pn, p.built.p))
+primal, dual = rima.mp.solve("cbc", build_shops)
+io.write(("Cost: $%.2f\n"):format(primal.objective))
+for pn, p in pairs(primal.plants) do
+  io.write(("%s : %g\n"):format(pn, p.built))
 end
-for pn, p in pairs(r.flow) do
+for pn, p in pairs(primal.flow) do
   for sn, s in pairs(p) do
-    io.write(("%s -> %s : %g\n"):format(pn, sn, s.p))
+    io.write(("%s -> %s : %g\n"):format(pn, sn, s))
   end
 end
 
