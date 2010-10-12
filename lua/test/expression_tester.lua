@@ -55,10 +55,10 @@ local function expression_tester(T, variables, scope)
         T:check_equal(lib.dump(core.eval(e, S)), t.ED, "evaluated dump", 1)
       end
       
-      local s2 = lib.repr(e, { readable=true })
+      local s2 = lib.repr(e, { format="lua" })
       local e2 = load_expression(T, s2, V)
       if e2 then
-        local s3 = lib.repr(e2, { readable=true })
+        local s3 = lib.repr(e2, { format="lua" })
         T:check_equal(s3, s2, "rereading unevaluated", 1)
         T:check_equal(core.eval(e2, S), core.eval(e, S), "rereading evaluated", 1)
       end

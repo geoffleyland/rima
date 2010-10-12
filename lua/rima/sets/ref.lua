@@ -80,14 +80,15 @@ end
 function ref:__repr(format)
   local s = lib.repr(self.set, format)
   local n = table.concat(self.names, ", ")
+  local lua_readable = format.format == "lua"
   if self.order ~= "a" or self.values ~= "elements" then
-    local f = (format.readable and "%s=rima.%s%s(%s)") or "%s in %s%s(%s)"
+    local f = (lua_readable and "%s=rima.%s%s(%s)") or "%s in %s%s(%s)"
     return f:format(n, self.order, self.values, s)
   else
     if n == s then
       return n
     else
-      local f = (format and format.readable and "%s=%s") or "%s in %s"
+      local f = (lua_readable and "%s=%s") or "%s in %s"
       return f:format(n, s)
     end
   end

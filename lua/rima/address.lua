@@ -111,7 +111,7 @@ function address:__repr(format)
 
   if not self[1] then return "" end
   local append, repr = lib.append, lib.repr
-  local readable = format.readable
+  local lua_readable = format.format == "lua"
   local mode = "s"
   local r = {}
 
@@ -134,7 +134,7 @@ function address:__repr(format)
         append(r, "[")
       else
         -- lua-readable format is [x][y], otherwise it's [x, y] for mathematicans
-        append(r, (readable and "][") or ", ")
+        append(r, (lua_readable and "][") or ", ")
       end
       if type(a) == "string" then
         -- non-identifier strings are ['1 str.ing']
