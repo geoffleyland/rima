@@ -218,7 +218,7 @@ local function process(line)
       --   get rid of any match output: "--[!>] /blah/
       --   get rid of the ">" or "!" after the --
       --   remove any trailing --
-      outline = outline:gsub("%-%-([#>])%s*/.-/", "--%1"):gsub("%-%-[#>]", "--"):gsub("%s*\\%s*$", ""):gsub("%s*%-%-%s*$", "")
+      outline = outline:gsub("%-%-([#>])%s*/.-/", "--%1"):gsub("%s*\\%s*$", ""):gsub("%s*%-%-[#>]?%s*$", "")
 
       local multiline = code:find("\\%s*$")
       code = code:gsub("\\?%s*$", "")
