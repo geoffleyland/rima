@@ -19,7 +19,7 @@ Then Rima might be for you.  With Rima you can:
 - define your model *before* any data, and define your data for as many instances of your model as you like after the model is defined;
 - compose models from parts in the manner that suits you;
 - work with your data in the structures that you wish to use;
-- access all the features of Lua, a fast, small, widely deployed scripting language that's easy to both embed and extend
+- access all the features of [Lua](http://www.lua.org/), a fast, small, widely deployed scripting language that's easy to both embed and extend
 
 Rima binds to well-known optimisation packages to solve problems.
 Currently bindings are available for:

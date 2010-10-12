@@ -23,8 +23,9 @@ Function arguments are enclosed in parentheses, and strings can be delimited wit
 paired single `'` or double `"` quotes.
 
 `--&nbsp;`introduces a comment,
-and, as a convention in this manual,
-the output of a line is shown as a comment on the right hand side of the page.
+and as a convention in this manual,
+the output of a line is shown as a comment starting with `-->` on the right hand side of the page.
+
 In fact, the script that generates the html for the manual runs all the embedded
 code and checks the output against the comments,
 so the code examples in the manual, *should* always be right.
@@ -155,7 +156,8 @@ The following is exactly equivalent to the above:
     t:f(20)                                             --> 22
 
 If your function has only one argument, and you're going to pass it a string or
-a table, you can omit the parentheses, for example, to print a string,
+a table, you can omit the parentheses.
+For example, to print a string,
 the two following lines are equivalent:
 
     print("hello")                                      --> hello

@@ -4,7 +4,7 @@
 
 [ [Contents](contents.html) | Previous: [Introduction to Lua](trouble.html) | Next: [Expressions](expressions.html) ]
 
-The values Rima works with, called *references* are quite different from Lua variables,
+The values Rima works with, called *references*, are quite different from Lua variables,
 and probably quite different from variables and parameters you've seen in other modelling languages.
 
 For a start, Rima doesn't distinguish between variables
@@ -75,12 +75,7 @@ It's quite ok for the table of values you pass in to contain other references:
     x, y, z = rima.R"x, y, z"
     print(rima.E(x, { x=y, y=z, z="you got to z!" }))   --> you got to z!
 
-The combination of references and the tables of values you pass in,
-which are actually *scopes* - tables that allow composition through layering
-are what give Rima it's flexibility in data composition.
-
-Scopes are covered in more detail in [Scopes](scopes.html),
-next, we cover `rima.E` in more detail when building expressions.
+Next, we cover `rima.E` in more detail when building expressions.
 
 
 [ [Contents](contents.html) | Previous: [Introduction to Lua](trouble.html) | Next: [Expressions](expressions.html) ]
