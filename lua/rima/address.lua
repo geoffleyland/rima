@@ -105,7 +105,7 @@ end
 -- string representation -------------------------------------------------------
 
 function address:__repr(format)
-  if format.dump then
+  if format.format == "dump" then
     return ("address{%s}"):format(lib.concat_repr(self, format))
   end
 

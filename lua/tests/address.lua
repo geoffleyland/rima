@@ -26,7 +26,7 @@ function test(options)
   local a = address:new("a", 1, 2)
   T:check_equal(a, ".a[1, 2]")
   T:check_equal(a+a, ".a[1, 2].a[1, 2]")
-  T:check_equal(lib.repr(a, { dump=true }), "address{\"a\", 1, 2}")
+  T:check_equal(lib.repr(a, { format="dump" }), "address{\"a\", 1, 2}")
 
   T:check_equal(a:sub(1), ".a[1, 2]")
   T:check_equal(a:sub(2), "[1, 2]")

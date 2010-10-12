@@ -33,7 +33,7 @@ function sum.__repr(args, format)
   args = proxy.O(args)
   local sets, e = args[1], args[2]
   local name = (format.readable and "rima.sum") or "sum"
-  if format.dump then
+  if format.format == "dump" then
     return name.."({"..lib.concat_repr(sets, format).."}, "..lib.repr(e, format)..")"
   else
     return name.."{"..lib.concat_repr(sets, format).."}("..lib.repr(e, format)..")"

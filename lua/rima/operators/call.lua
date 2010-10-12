@@ -24,7 +24,7 @@ call.precedence = 0
 
 function call.__repr(args, format)
   args = proxy.O(args)
-  if format and format.dump then
+  if format.format == "dump" then
     return "call("..lib.concat_repr(args, format)..")"
   else
     return core.parenthise(args[1], format, 0).."("..lib.concat_repr({unpack(args, 2)}, format)..")"
@@ -53,7 +53,7 @@ function call.__eval(args, S, eval)
 
     if not status then
       error(("call: error evaluating '%s' as '%s' with arguments (%s):\n  %s"):
-        format(__repr(args), lib.repr(f), lib.concat_repr({unpack(args, 2)}), r:gsub("\n", "\n  ")), 0)
+        format(__repr(args, {}), lib.repr(f), lib.concat_repr({unpack(args, 2)}), r:gsub("\n", "\n  ")), 0)
     end
     return r
   end

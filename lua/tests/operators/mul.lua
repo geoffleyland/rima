@@ -21,8 +21,8 @@ function test(options)
   local B = core.bind
   local E = core.eval
 
-  local OD = function(e) return mul.__repr(e, { dump=true }) end
-  local OS = function(e) return mul.__repr(e) end
+  local OD = function(e) return mul.__repr(e, { format="dump" }) end
+  local OS = function(e) return mul.__repr(e, {}) end
   local OB = function(e, S) return mul.__eval(e, S, B) end
   local OE = function(e, S) return mul.__eval(e, S, E) end
 

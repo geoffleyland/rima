@@ -185,7 +185,7 @@ end
 
 
 function svalue:__repr(format)
-  if format and format.dump then
+  if format.format == "dump" then
     return "svalue{ value = "..lib.repr(self.value, format).." }"
   else
     return lib.repr(self.value, format)

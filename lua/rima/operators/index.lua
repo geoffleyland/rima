@@ -45,7 +45,7 @@ end
 
 function index.__repr(args, format)
   args = proxy.O(args)
-  if format and format.dump then
+  if format.format == "dump" then
     return ("index(%s, %s)"):format(lib.repr(args[1], format), lib.repr(args[2], format))
   else
     return core.parenthise(args[1], format, 0)..lib.repr(args[2], format)
@@ -79,7 +79,7 @@ function index.resolve(args, S, eval)
     local status, r = lib.packs(xpcall(function() return address:resolve(S, scope.pack(b), 1, b, eval) end, debug.traceback))
     if not status then
       error(("index: error evaluating '%s' as '%s%s':\n  %s"):
-        format(__repr(args), lib.repr(b), lib.repr(address), r[1]:gsub("\n", "\n  ")), 0)
+        format(__repr(args, {}), lib.repr(b), lib.repr(address), r[1]:gsub("\n", "\n  ")), 0)
     else
       return lib.unpackn(r)
     end
@@ -126,7 +126,7 @@ function index.__type(args, S)
   local status, value, base, address = resolve(args, S, core.eval)
   value = scope.unpack(value)
   if not status or not undefined_t:isa(value) then
-    error(("No type information available for '%s'"):format(__repr(args)))
+    error(("No type information available for '%s'"):format(__repr(args, {})))
   else
     return value
   end
@@ -144,13 +144,13 @@ function index.__set(args, t, v)
     if #address == i then
       if cv then
         error(("error setting '%s' to %s: field already exists (%s)"):
-          format(__repr(args), lib.repr(v), lib.repr(cv)), 0)
+          format(__repr(args, {}), lib.repr(v), lib.repr(cv)), 0)
       end
       t[name] = v
     else
       if cv and type(cv) ~= "table" then
         error(("error setting '%s' to %s: field is not a table (%s)"):
-          format(__repr(args), lib.repr(v), lib.repr(cv)), 0)
+          format(__repr(args, {}), lib.repr(v), lib.repr(cv)), 0)
       end
       if not cv then t[name] = {} end
       s(t[name], address:value(i+1), i+1)

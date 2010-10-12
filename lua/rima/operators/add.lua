@@ -26,7 +26,7 @@ add.precedence = 5
 
 function add.__repr(args, format)
   args = proxy.O(args)
-  if format and format.dump then
+  if format.format == "dump" then
     return "+("..
       lib.concat(args, ", ",
         function(a) return lib.simple_repr(a[1], format).."*"..lib.repr(a[2], format) end)..

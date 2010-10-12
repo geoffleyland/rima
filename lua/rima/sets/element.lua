@@ -57,7 +57,7 @@ end
 
 function element:__repr(format)
   self = proxy.O(self)
-  if format.dump then
+  if format.format == "dump" then
     return ("element(%s, key=%s, value=%s)"):
       format(lib.repr(self.exp, format), lib.repr(self.key, format), lib.repr(self.value, format))
   else

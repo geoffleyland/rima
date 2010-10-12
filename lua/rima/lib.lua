@@ -70,7 +70,7 @@ function simple_repr(o, format)
   if type(o) == "number" then
     local nf = format.numbers or number_format
     return nf:format(o)
-  elseif format.dump then
+  elseif format.format == "dump" then
     local t = object.type(o)
     if t == "string" then
       return ("%q"):format(o)
@@ -122,7 +122,7 @@ function concat_repr(t, format)
 end
 
 
-local dump_format = { dump=true }
+local dump_format = { format="dump" }
 function dump(e)
   return repr(e, dump_format)
 end

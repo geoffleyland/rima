@@ -22,8 +22,8 @@ function test(options)
   local B = core.bind
   local E = core.eval
 
-  local OD = function(e) return add.__repr(e, { dump=true }) end
-  local OS = function(e) return add.__repr(e) end
+  local OD = function(e) return add.__repr(e, { format="dump" }) end
+  local OS = function(e) return add.__repr(e, {}) end
   local OB = function(e, S) return add.__eval(e, S, B) end
   local OE = function(e, S) return add.__eval(e, S, E) end
 

@@ -27,7 +27,7 @@ mul.precedence = 3
 
 function mul.__repr(args, format)
   args = proxy.O(args)
-  if format and format.dump then
+  if format.format == "dump" then
     return "*("..
       lib.concat(args, ", ",
         function(a) return lib.repr(a[2], format).."^"..lib.simple_repr(a[1], format) end)..

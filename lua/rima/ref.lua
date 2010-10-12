@@ -64,7 +64,7 @@ function ref.proxy_mt.__repr(r, format)
     name = R.name
   end
   
-  if format and format.dump then
+  if format.format == "dump" then
     return "ref("..name..")"
   else
     return name

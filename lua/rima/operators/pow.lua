@@ -26,7 +26,7 @@ function pow.__repr(args, format)
   local paren = core.parenthise
   local prec = pow.precedence
 
-  if format and format.dump then
+  if format.format == "dump" then
     return "^("..repr(base, format)..", "..repr(exponent, format)..")"
   else
     return paren(base, format, prec).."^"..paren(exponent, format, prec)
