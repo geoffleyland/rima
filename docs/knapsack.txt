@@ -21,42 +21,40 @@ We define references to our list of items, a reference to use for a single item
 and the total capacity of the knapsack:
 
     --! continue
-    items, item = rima.R"items, item"
+    i, items = rima.R"i, items"
     capacity = rima.R"capacity"
 
 Next, we define our two equations, one for the value of the items we're
 putting in the knapsack, and one for the weight of the items.
-Note that we're using syntax like `item.picked`, `item.value` and `item.weight` -
+Note that we're using syntax like `item.take`, `item.value` and `item.size` -
 Rima understands data structures like a dynamic language should.
 Also, we haven't defined these fields or structures at all,
 when Rima has the data, it'll check it works as expected - duck typing for a
 modelling language!
 
     --! continue
-    value = rima.sum{item=items}(item.picked * item.value)
-    weight = rima.sum{item=items}(item.picked * item.weight)
+    value = rima.sum{i=items}(i.take * i.value)
+    size = rima.sum{i=items}(i.take * i.size)
 
 We create a new formulation, set its objective:
 
     --! continue
     knapsack = rima.new()
-    knapsack.objective = value
     knapsack.sense = "maximise"
+    knapsack.objective = value
 
-A formulation is just a scope,
-and the objective and optimisation sense are just variables in the scope.
-Rima accepts both `"maximise"` and `"maximize"`.
+Rima accepts both `"maximise"` and `"maximize"` (as well as `"MaXiMiZe"`).
 
 We use `rima.mp.C` to construct a constraint,
 and add it to the scope like any other value::
 
     --! continue
-    knapsack.weight_limit = rima.mp.C(weight, "<=", capacity)
+    knapsack.capacity_limit = rima.mp.C(size, "<=", capacity)
 
-Finally, we define `item.picked` as a binary variable:
+Finally, we define `item.take` as a binary variable:
 
     --! continue
-    knapsack.items[item].picked = rima.binary()
+    knapsack.items[{i=items}].take = rima.binary()
 
 And we're done.  `knapsack` is a complete definition of a knapsack problem.
 You can derive from it, compose a new model with it, make a Lua module out
@@ -65,54 +63,47 @@ of it and we can even write it out in a readable format:
     --! continue
     rima.mp.write(knapsack)
     --> Maximise:
-    -->   sum{item in items}(item.picked*item.value)
+    -->   sum{i in items}(i.take*i.value)
     --> Subject to:
-    -->   weight_limit: sum{item in items}(item.picked*item.weight) <= capacity
+    -->   capacity_limit: sum{i in items}(i.size*i.take) <= capacity
 
 So far, we've seen no data, other than the one bit we wanted -
 defining as `items[item].picked` as a binary variable.
 Of course, we can't solve anything without data.
 
-Data's easy to add: we create an `instance` of the problem and pass it a
-table of data:
+Data is easy to add: it's just a regular Lua table:
 
     --! continue
-    burglar_bill = rima.instance(knapsack, \
+    burglar_bill = \
     { \
       capacity = 102, \
       items = \
       { \
-        camera   = { value =  15, weight =  2 }, \
-        necklace = { value = 100, weight = 20 }, \
-        vase     = { value =  15, weight = 20 }, \
-        picture  = { value =  15, weight = 30 }, \
-        tv       = { value =  15, weight = 40 }, \
-        video    = { value =  15, weight = 30 }, \
-        chest    = { value =  15, weight = 60 }, \
-        brick    = { value =   1, weight = 10 }, \
+        camera   = { value =  15, size =  2 }, \
+        necklace = { value = 100, size = 20 }, \
+        vase     = { value =  15, size = 20 }, \
+        picture  = { value =  15, size = 30 }, \
+        tv       = { value =  15, size = 40 }, \
+        video    = { value =  15, size = 30 }, \
+        chest    = { value =  15, size = 60 }, \
+        brick    = { value =   1, size = 10 }, \
       } \
-    })
+    }
 
-`burglar_bill` is also a formulation: if we'd only given it partial data,
-we could create a new instance for further specialisation.
-Just like `knapsack`, it can write itself (but we'll save you the output for now).
-
-To solve the problem, just choose a solver, and use the `solve` method:
+To solve the problem, just choose a solver, and use the `solve` method to combine the model and data:
 
     --! continue
-    primal, dual = rima.mp.solve("cbc", burglar_bill)
+    primal, dual = rima.mp.solve("cbc", knapsack, burglar_bill)
 
 We can check the objective:
 
     --! continue
-    print(primal.objective)                             --> 160
+    print(primal.objective)                           --> 160
 
 And see if it was worth taking the brick or necklace in the knapsack:
 
     --! continue
-    print(primal.items.brick.picked)                    --> 0
-    print(primal.items.necklace.picked)                 --> 1
+    print(primal.items.brick.take)                    --> 0
+    print(primal.items.necklace.take)                 --> 1
 
-Notice that our results follow the same structure as the input data,
-and that we access the primal value of the solution with `p`
-(and the dual with `d`).
+[ [Contents](contents.html) ]
