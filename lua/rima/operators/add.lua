@@ -59,7 +59,7 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function add.__eval(args, S, eval)
+function add.__eval(args, S)
   -- Sum all the arguments, keeping track of the sum of any constants,
   -- and of all remaining unresolved terms.
   -- If any subexpressions are sums, we dive into them, and if any are
@@ -68,7 +68,7 @@ function add.__eval(args, S, eval)
   args = proxy.O(args)
 
   -- evaluate or bind all arguments
-  args = lib.imap(function(a) return { a[1], eval(a[2], S) } end, args)
+  args = lib.imap(function(a) return { a[1], core.eval(a[2], S) } end, args)
 
   local constant, terms = 0, {}
   
@@ -157,6 +157,15 @@ function extract_constant(e, mt)
     end
   else                                          -- there's no constant to extract
     return nil
+  end
+end
+
+
+-- Introspection? --------------------------------------------------------------
+
+function add.__list_variables(args, S, list)
+  for _, a in ipairs(proxy.O(args)) do
+    core.list_variables(a[2], S, list)
   end
 end
 

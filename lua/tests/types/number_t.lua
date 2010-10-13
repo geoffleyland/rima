@@ -4,6 +4,7 @@
 local series = require("test.series")
 local number_t = require("rima.types.number_t")
 local object = require("rima.lib.object")
+local core = require("rima.core")
 local rima = require("rima")
 
 module(...)
@@ -12,6 +13,8 @@ module(...)
 
 function test(options)
   local T = series:new(_M, options)
+
+  local E = core.eval
 
   T:test(number_t:isa(number_t:new()), "isa(number_t:new(), number_t)")
   T:test(rima.types.undefined_t:isa(number_t:new()), "isa(number_t:new(), undefined_t)")
@@ -68,6 +71,24 @@ function test(options)
   T:expect_error(function() rima.integer(0.5, 5) end, "lower bound is not integer")
 
   T:expect_ok(function() rima.binary() end)
+
+  do
+    local x = rima.R"x"
+    local S1 = { x = 1 }
+    local S2 = { x = number_t:new() }  
+    T:expect_error(function() E(x.a, S1) end, "error indexing 'x' as 'x.a': can't index a number")
+    T:expect_error(function() E(x.a, S2) end, "error indexing 'x' as 'x.a': can't index a number")
+  end
+
+  do
+    local x = rima.R"x"
+    local S1 = { x = {1} }
+    local S2 = { x = {number_t:new()} }  
+    local e = rima.sum{x}(x.a)
+    T:expect_error(function() E(e, S1) end, "error indexing 'x%[1%]' as 'x%[1%]%.a': can't index a number")
+    T:expect_error(function() E(e, S2) end, "error indexing 'x%[1%]' as 'x%[1%]%.a': can't index a number")
+  end
+
 
   return T:close()
 end

@@ -9,6 +9,7 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local types = require("rima.types")
+local index = require("rima.index")
 local element = require("rima.sets.element")
 
 module(...)
@@ -28,17 +29,19 @@ function _linearise(l, S)
     if terms[s] then
       error(("the reference '%s' appears more than once"):format(s), 0)
     end
-    local t = core.type(v, S)
+    local t = index.variable_type(v, S)
     if not types.number_t:isa(t) then
-      error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
+      if types.undefined_t:isa(t) then
+        error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
+      else
+        error(("expecting a number type for '%s', got '%s'"):format(s, lib.repr(t)), 0)
+      end
     end
     terms[s] = { variable=v, coeff=coeff, lower=t.lower, upper=t.upper, integer=t.integer }
   end
 
   if object.type(l) == "number" then
     constant = l
-  elseif object.type(l) == "ref" then
-    add_variable(l, l, 1)
   elseif object.type(l) == "index" then
     add_variable(l, l, 1)
   elseif element:isa(l) then
@@ -58,8 +61,6 @@ function _linearise(l, S)
             format(i, lib.repr(x)), 0)
         end
         constant = c * x
-      elseif object.type(x) == "ref" then
-        add_variable(x, x, c)
       elseif object.type(x) == "index" then
         add_variable(x, x, c)
       elseif element:isa(x) then

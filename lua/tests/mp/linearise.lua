@@ -13,6 +13,7 @@ local rima = require("rima")
 
 module(...)
 
+
 -- Tests -----------------------------------------------------------------------
 
 function test(options)
@@ -20,7 +21,7 @@ function test(options)
 
 
   local a, b, c, d = rima.R"a, b, c, d"
-  local S = rima.scope.new{ ["a,b"] = rima.free(), c=rima.types.undefined_t:new() }
+  local S = rima.scope.new{ a = rima.free(), b = rima.free(), c=rima.types.undefined_t:new() }
   S.d = { rima.free(), rima.free() }
   
   local L = function(e, _S) return linearise.linearise(e, _S or S) end
@@ -34,7 +35,7 @@ function test(options)
     "linear form: '1 %+ c'.-expecting a number type for 'c', got 'c undefined'")
   T:expect_error(LF(a * b),
     "linear form: 'a%*b'.-the expression does not evaluate to a sum of terms")
-  T:expect_error(LF(1 + a[2]*5), "'a' is not indexable")
+  T:expect_error(LF(1 + a[2]*5), "error indexing 'a' as 'a%[2%]': can't index a number")
   T:expect_error(LF(1 + c[2]*5), "No type information available for 'c%[2%]'")
   T:expect_ok(LF(1 + d[2]*5), "d[2] is a number")
   T:expect_ok(LF(1 + d[2]), "d[2] is an index")
@@ -95,7 +96,7 @@ function test(options)
   check_linear(1, 1, {}, S)
   check_linear(1 + a*5, 1, {a=5}, S)
   check_nonlinear(1 + a*b, S)
-  check_linear(1 + a*b, 1, {a=5}, scope.spawn(S, {b=5}))
+  check_linear(1 + a*b, 1, {a=5}, scope.new(S, {b=5}))
   check_linear(1 + d[2]*5, 1, {["d[2]"]=5}, S)
   check_linear(1 + rima.sum({c=d}, c*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
   check_linear(1 + rima.sum({c=d}, d[c]*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
@@ -112,10 +113,11 @@ function test(options)
 
   -- element times variable
   do
-    local i, x, q, Q = rima.R"i, x, q, Q"
+    local i, x, q, Q, r = rima.R"i, x, q, Q, r"
     local S = scope.new{ Q = { 3, 7, 11, 13 } }
     S.x[i] = rima.free()
-    check_linear(rima.sum{q=Q}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
+    check_linear(rima.sum{["r,q"]=rima.ipairs(Q)}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
+    check_linear(rima.sum{["r,q"]=rima.ipairs(Q)}(q * x[r]), 0, {["x[1]"]=3,["x[2]"]=7,["x[3]"]=11,["x[4]"]=13}, S)
   end
 
   return T:close()

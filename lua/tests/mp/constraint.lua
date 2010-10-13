@@ -4,15 +4,19 @@
 local series = require("test.series")
 local constraint = require("rima.mp.constraint")
 local lib = require("rima.lib")
+local core = require("rima.core")
 local scope = require("rima.scope")
 local rima = require("rima")
 
 module(...)
 
+
 -- Tests -----------------------------------------------------------------------
 
 function test(options)
   local T = series:new(_M, options)
+
+  local E = core.eval
 
   local a, b, c, d, i, I, j, J = rima.R"a, b, c, d, i, I, j, J"
   local S = scope.new()
@@ -20,8 +24,18 @@ function test(options)
   S.b = 3
   S.c = rima.free()
   S.d = 5
-  T:expect_ok(function() S.e = constraint:new(a * b + c * d, "<=", 3) end)
-  T:check_equal(lib.repr(S.e), "a*b + c*d <= 3")
+  local C
+  T:expect_ok(function() C = constraint:new(a * b + c * d, "<=", 3) end)
+  T:check_equal(lib.repr(C), "a*b + c*d <= 3")
+  T:expect_ok(function() S.e = C end)
+  T:check_equal(lib.repr(core.eval(S.e)), "3*a + 5*c <= 3")
+
+  local lhs, type, constant
+  T:expect_ok(function() lhs, type, constant = C:linearise(S) end)
+  T:check_equal(constant, 3)
+  T:check_equal(type, "<=")
+  T:check_equal(lhs.a.coeff, 3)
+  T:check_equal(lhs.c.coeff, 5)
 
   return T:close()
 end

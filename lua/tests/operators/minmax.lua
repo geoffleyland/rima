@@ -18,7 +18,7 @@ function test(options)
   local T = series:new(_M, options)
 
   local D = lib.dump
-  local E = rima.E
+  local E = core.eval
 
   -- min
   T:test(object.isa(minmax.min, rima.min(1, {1, 1})), "isa(min, min)")

@@ -42,7 +42,7 @@ local quantity       = rima.R"quantity"     -- quantity of pet food to make
 total_cost = rima.sum{i=ingredients}(i.cost * i.quantity)
 total_quantity = rima.sum{i=ingredients}(i.quantity)
 
-blending_problem = rima.new()
+blending_problem = rima.mp.new()
 blending_problem.ingredients[i].quantity = rima.positive()
 
 blending_problem.objective = total_cost
@@ -52,8 +52,7 @@ blending_problem.make_quantity = rima.mp.C(total_quantity, "==", quantity)
 blending_problem.sufficient_nutrients[{n=nutrients}] = rima.mp.C(rima.sum{i=ingredients}(i.composition[n] * i.quantity), ">=", quantity * limits[n])
 
 -- The formulation can describe itself
-io.write("\nBlending Problem\n")
-rima.mp.write(blending_problem)
+io.write("\nBlending Problem\n", tostring(blending_problem), "\n")
 --[[
 Minimise:
   sum{i in ingredients}(i.cost*i.quantity)
@@ -83,7 +82,7 @@ local whiskas_data =
 
 -- An instance is a formulation plus some data.
 -- An instance is actually just another formulation
-whiskas = rima.instance(blending_problem, whiskas_data)
+whiskas = rima.mp.new(blending_problem, whiskas_data)
 
 local function s(problem, solver, S)
   local primal, dual = rima.mp.solve(solver, problem, S)
@@ -92,14 +91,14 @@ local function s(problem, solver, S)
 end
 
 -- We can choose our solver and set any extra variables when we solve.
-s(whiskas, "clp", { quantity=1 })
+s(whiskas, "clp", { quantity=100 })
 
 -- cbc and lpsolve can solve integer problems
 -- Note that we're redefining f as an integer.  What there is of a type
 -- system lets this happen because integers are subsets of positive variables.
 -- You couldn't set f to a free variable (because a free variable is not a
 -- subset of a positive variable).
-whiskas_integer = rima.instance(whiskas, { quantity = 99 })
+whiskas_integer = rima.mp.new(whiskas, { quantity = 99 })
 whiskas_integer.ingredients[i].quantity = rima.integer()
 
 s(whiskas_integer, "cbc")

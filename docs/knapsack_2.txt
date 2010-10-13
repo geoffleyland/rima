@@ -1,0 +1,187 @@
+    --! env rima = require("rima")
+
+# Rima Manual: A Structured Knapsack
+
+[ [Contents](contents.html) | Previous: [Structures](structures.html) | Next: [Functions](functions.html) ]
+
+Here we revisit the knapsack problem we saw [earlier](knapsack.html).
+
+This time, though, we'll extend and reuse the knapsack model in a number of ways.
+
+First, we repeat the original model:
+
+    rima = require("rima")
+    
+    i, items = rima.R"i, items"
+    capacity = rima.R"capacity"
+    
+    knapsack = rima.mp.new{ \
+      sense = "maximise", \
+      objective = rima.sum{i=items}(i.take * i.value), \
+      capacity_limit = rima.mp.C(rima.sum{i=items}(i.take * i.size), "<=", capacity), \
+      [items[{i=items}].take] = rima.binary() \
+    }
+
+As before, we can print the model,
+but this time, we'll ask Rima to write the model in LaTeX:
+
+    --! continue
+    print(rima.repr(knapsack, { format="latex" }))
+    --> \text{\bf maximise} & \sum_{i \in \text{items}} i_{\text{take}} i_{\text{value}} \\\
+    --> \text{\bf subject to} \\\
+    --> \text{capacity\_limit}: & \sum_{i \in \text{items}} i_{\text{size}} i_{\text{take}} \leq \text{capacity} \\\
+    --> & \text{items}_{i,\text{take}} \in \{0, 1\} \forall i \in \text{items} \\\
+
+(I'll leave it up to you to compile the LaTex).
+`rima.repr` is Rima's method for converting Rima objects (expressions, references, models...)
+to strings.
+It's much like Lua's `tostring`, except that it takes a second argument that defines a format.
+Some other options are `{ format="lua" }` which outputs the model in a format that Lua can read back in,
+and `{ format="dump" }` which provides a detailed dump of the structure of the model.
+
+We'll define the set of items to steal separately from the rest of the data:
+
+    --! continue
+    ITEMS = \
+    { \
+      camera   = { value =  15, size =  2 }, \
+      necklace = { value = 100, size = 20 }, \
+      vase     = { value =  15, size = 20 }, \
+      picture  = { value =  15, size = 30 }, \
+      tv       = { value =  15, size = 40 }, \
+      video    = { value =  15, size = 30 }, \
+      chest    = { value =  15, size = 60 }, \
+      brick    = { value =   1, size = 10 }, \
+    }
+
+And we can solve:
+
+    --! continue
+    primal, dual = rima.mp.solve("cbc", knapsack, { items=ITEMS, capacity=102 })
+    print(primal.objective)                           --> 160
+    print(primal.items.brick.take)                    --> 0
+    print(primal.items.camera.take)                   --> 1
+    print(primal.items.vase.take)                     --> 1
+
+
+## A Calculated Knapsack
+
+Suppose (in a somewhat contrived manner),
+that we're trying to fill a pallet,
+so our capacity constraint is on area,
+and the base area of each item is a function of its volume (they're all cubes).
+
+Remember that Rima usually doesn't mind if the data we give it is an immediate value or an expression,
+so, we can redefine our set of items:
+
+    --! continue
+    VOLUME_ITEMS = \
+    { \
+      camera   = { value =  15, volume =  2 }, \
+      necklace = { value = 100, volume = 20 }, \
+      vase     = { value =  15, volume = 20 }, \
+      picture  = { value =  15, volume = 30 }, \
+      tv       = { value =  15, volume = 40 }, \
+      video    = { value =  15, volume = 30 }, \
+      chest    = { value =  15, volume = 60 }, \
+      brick    = { value =   1, volume = 10 }, \
+    }
+
+And define the `size` of every item to be `volume^(2/3)`
+(the capacity limit of 22 is roughly `102^(2/3)`):
+
+    --! continue
+    primal, dual = rima.mp.solve("cbc", knapsack, \
+      { items=VOLUME_ITEMS, capacity=22, \
+        [items[{i=items}].size] = items[i].volume^(2/3) })
+    print(primal.objective)                           --> 131
+    print(primal.items.brick.take)                    --> 1
+    print(primal.items.necklace.take)                 --> 1
+
+So, we've just re-used our original knapsack in a different context without
+changing the original model at all.
+
+
+## A Side-Constrained Knapsack
+
+Suppose (again) that for some reason the thief can't carry the camera and the
+vase at the same time.
+We'd like to add a constraint to that effect.
+
+Just as the data you pass to `rima.solve` can be an expression,
+it can also be a constraint,
+so adding a constraint is easy:
+
+    --! continue
+    primal, dual = rima.mp.solve("cbc", knapsack, \
+      { items=ITEMS, capacity=102, \
+        camera_xor_vase = rima.mp.C(items.camera.take + items.vase.take, "<=", 1) })
+    print(primal.objective)                           --> 146
+    print(primal.items.camera.take)                   --> 1
+    print(primal.items.vase.take)                     --> 0
+
+We might want to use this constrained knapsack again in a different context.
+`rima.mp.new` actually takes several arguments -
+the first can be an existing model we'd like to extend,
+while all the subsequent arguments are date we'd like to extend the model with:
+
+    --! continue
+    side_constrained_knapsack = rima.mp.new(knapsack, { \
+      camera_xor_vase = rima.mp.C(items.camera.take + items.vase.take, "<=", 1) })
+    
+    primal, dual = rima.mp.solve("cbc", side_constrained_knapsack, {capacity=102, items=ITEMS})
+    print(primal.objective)                           --> 146
+
+
+## More than one Sack
+
+Now our hypothetical burglar has a friend.
+They have one sack each (but the sacks are smaller),
+and they'd still like to steal items of as much value as they can.
+
+Leaving the issue of what a sack is for later, we can formulate a multiple-sack problem:
+
+    --! continue
+    s, sacks, once = rima.R"s, sacks, once"
+    multiple_sack = rima.mp.new{ \
+      sense = "maximise", \
+      objective = rima.sum{s=sacks}(s.objective), \
+      [once[{i=items}]] = rima.mp.C(rima.sum{s=sacks}(s.items[i].take), "<=", 1) \
+    }
+
+Defining which model we'd like to use for the sack submodel is as easy as adding any other data:
+
+    --! continue
+    primal, dual = rima.mp.solve("cbc", multiple_sack, { \
+      items = ITEMS, \
+      sacks = { {capacity = 51}, {capacity = 51} }, \
+      [sacks[{s=sacks}].items] = ITEMS, \
+      [sacks[{s=sacks}]] = knapsack })
+    
+    print(primal.objective)                           --> 146
+
+The items taken in sack 1 are the camera, vase and brick.
+In the necklace and video are in sack 2.
+
+
+## More than one Side-Constrained Knapsack
+
+Finally, the burglars find that they can't (as above)
+carry the camera and the vase in the same sack
+(but now they can steal both).
+
+It's easy to change the submodel:
+
+    --! continue
+    primal, dual = rima.mp.solve("cbc", multiple_sack, { \
+      items = ITEMS, \
+      sacks = { {capacity = 51}, {capacity = 51} }, \
+      [sacks[{s=sacks}].items] = ITEMS, \
+      [sacks[{s=sacks}]] = side_constrained_knapsack })
+    
+    print(primal.objective)                           --> 146
+
+Sack 1 takes the camera, and takes the picture instead of the vase.
+The vase goes into sack 2 with the necklace, and the video gets left behind.
+
+[ [Contents](contents.html) | Previous: [Structures](structures.html) | Next: [Functions](functions.html) ]

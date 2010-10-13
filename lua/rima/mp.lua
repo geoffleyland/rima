@@ -1,80 +1,101 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local io, math = require("io"), require("math")
-local assert, error, ipairs, getmetatable, pairs, pcall, require, table, type =
-      assert, error, ipairs, getmetatable, pairs, pcall, require, table, type
+local io, math, os, table = require("io"), require("math"), require("os"), require("table")
+local assert, error, ipairs, getmetatable, pairs, pcall, require, setmetatable, type =
+      assert, error, ipairs, getmetatable, pairs, pcall, require, setmetatable, type
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
+local index = require("rima.index")
+local set_list = require("rima.sets.list")
+local closure = require("rima.closure")
 local constraint = require("rima.mp.constraint")
-local tabulate = require("rima.values.tabulate")
 local linearise = require("rima.mp.linearise")
 local rima = require("rima")
 
-local print = print
-local os = os
-
 module(...)
+
+
+-- Utilities -------------------------------------------------------------------
+
+local function sense(S)
+  local sense = core.eval(index:new(nil, "sense"), S)
+  if not core.defined(sense) then return end
+  if type(sense) ~= "string" then
+    error(("Optimisation sense must be a string.  Got '%s'"):format(lib.repr(sense)),2)
+  end
+  sense = sense:lower():gsub("z", "s")
+  assert(sense == "minimise" or sense == "maximise", "Optimisation sense must be 'minimise' or 'maximise'")
+  return sense
+end
+
 
 -- Constraint Handling ---------------------------------------------------------
 
-local build_ref_time, tabulate_time, inner_time = 0, 0, 0
+local tabulate_time, inner_time = 0, 0, 0
 
 local function find_constraints(S, f)
   local constraints = {}
   local current_address = {}
+  local current_sets = set_list:new()
 
   local function build_ref(S, sets, undefined)
-    local brt = os.clock()
-    local r = rima.R(current_address[1])
+    local r = index:new()
     local set_index, undefined_index = 1, 1
-    for i = 2, #current_address do
+    for i = 1, #current_address do
       local index = current_address[i]
-      if index == scope.free_index_marker then
-        index = scope.lookup(S, sets[set_index].names[1])
-        if not index or not index.value then
+      if scope.set_default_thinggy:isa(index) then
+        index = core.eval(rima.R(current_sets[set_index].names[1]), S)
+        if not index then
           index = undefined[undefined_index]
           undefined_index = undefined_index + 1
         else
-          index = index.value
           set_index = set_index + 1
         end
       end
       r = r[index]
     end
-    build_ref_time = build_ref_time + os.clock() - brt
     return r
   end
 
-  local function add_constraint(e, S, sets, undefined)
-    local r1, r2, r3, r4, r5 = f(e, S, undefined)
-    if r1 then
-      constraints[#constraints+1] = { ref=build_ref(S, sets, undefined), r1, r2, r3, r4, r5 }
-    end
+  local function add_constraint(c, ref, undefined)
+    constraints[#constraints+1] = { constraint=c, ref=ref, undefined=undefined }
   end
-
 
   local function search(t)
     for k, v in pairs(t) do
       current_address[#current_address+1] = k
+      if scope.set_default_thinggy:isa(k) then
+        current_sets:append(k.set_ref)
+      end
       if type(v) == "table" and not getmetatable(v) then
         search(v)
       elseif constraint:isa(v) then
-        add_constraint(v, S)
-      elseif tabulate:isa(v) and constraint:isa(v.expression) then
+        if not current_sets[1] then
+          add_constraint(core.eval(v, S), build_ref(S))
+        else
+          for S2, undefined in current_sets:iterate(scope.new(S), "$mp") do
+            local ref = build_ref(S2["$mp"], current_sets, undefined)
+            add_constraint(core.eval(ref, S2), ref, undefined) 
+          end
+        end
+      elseif closure:isa(v) and constraint:isa(v.exp) then
         local tt = os.clock()
-        for S2, undefined in v.indexes:iterate(S) do
+        for S2, undefined in current_sets:iterate(scope.new(S), v.name) do
           local itt = os.clock()
           inner_time = inner_time + os.clock() - itt
-          add_constraint(v.expression, S2, v.indexes, undefined)
+            add_constraint(core.eval(v.exp, S2), build_ref(S2[v.name], current_sets, undefined), undefined)
           inner_time = inner_time + os.clock() - itt
         end
         tabulate_time = tabulate_time + os.clock() - tt
       end
       current_address[#current_address] = nil
+      if scope.set_default_thinggy:isa(k) then
+        current_sets:pop()
+      end
     end
   end
 
@@ -82,62 +103,109 @@ local function find_constraints(S, f)
   return constraints
 end
 
+
 local function linearise_constraints(S)
-  local count = 0
-  local search_time, linearise_time = os.clock(), 0
-  build_ref_time, tabulate_time, inner_time = 0, 0, 0
-  local result = find_constraints(S,
-    function(c, S, undefined)
-      if undefined and undefined[1] then
-        error(("error while linearising the constraint '%s': Some of the constraint's indices are undefined"):
-          format(lib.repr(c)), 0)
-      end
-      local st = os.clock()
-      local status, lhs, type, constant = pcall(c.linearise, c, S)
-      if not status then
-        error(("error while linearising the constraint '%s':\n   %s"):
-          format(lib.repr(c), lhs:gsub("\n", "\n    ")), 0)
-      end
-      linearise_time = linearise_time + os.clock() - st
-      count = count + 1
-      io.stderr:write(("\rGenerated %d constraints..."):format(count))
-      return lhs, type, constant
-    end)
-  io.stderr:write("\n")
-  search_time = os.clock() - search_time
-  io.write(("Search time: %f, linearise time: %f, build_ref time: %f, tabulate time %f, inner_time %f\n"):
-    format(search_time, linearise_time, build_ref_time, tabulate_time, inner_time))
-  return result
-end
+  local t0 = os.clock()
+  io.stderr:write("Searching for constraints...")
+  local constraints = find_constraints(S)
+  io.stderr:write(("\rFound %d constraints in %.1f secs\n"):format(#constraints, os.clock() - t0))
 
+  local linearised = {}
+  t0 = os.clock()
+  for i, c in ipairs(constraints) do
+    if c.undefined and c.undefined[1] then
+      error(("error while linearising the constraint '%s': Some of the constraint's indices are undefined"):
+        format(lib.repr(c.constraint)), 0)
+    end
 
-local function tostring_constraints(S)
-  return find_constraints(S,
-    function(c, S, undefined)
-      local s = c:tostring(S)
-      return s
-    end)
-end
-
-
--- Utilities -------------------------------------------------------------------
-
-local function new_scope(S, values)
-  if values then
-    local S2 = scope.spawn(S)
-    scope.set(S2, values)
-    S = S2
+    local status, lhs, type, constant = pcall(c.constraint.linearise, c.constraint, S)
+    if not status then
+      error(("error while linearising the constraint '%s':\n   %s"):
+        format(lib.repr(c.constraint), lhs:gsub("\n", "\n    ")), 0)
+    end
+    io.stderr:write(("\rGenerated %d constraints in %.1f secs..."):format(i, os.clock() - t0))
+    linearised[i] = { ref=c.ref, constraint=c.constraint, lhs=lhs, type=type, constant=constant }
   end
-  return S
+  io.stderr:write("\n")
+  return linearised
 end
 
-local function sense(S)
-  local sense = S.sense
-  if not core.defined(sense) then return end
-  assert(type(sense) == "string", "Optimisation sense must be a string")
-  sense = sense:lower():gsub("z", "s")
-  assert(sense == "minimise" or sense == "maximise", "Optimisation sense must be 'minimise' or 'maximise'")
-  return sense
+
+-- Model -----------------------------------------------------------------------
+
+local proxy_mt = {}
+
+function proxy_mt.__repr(M, format)
+  if format.format == "dump" then return scope.proxy_mt.__repr(M, format) end
+  local append, repr = lib.append, lib.repr
+  local r = {}
+
+  local latex = format.format == "latex"
+
+  -- Write the objective
+  local sense = sense(M)
+  local objective = core.eval(index:new(nil, "objective"), M)
+  if objective and sense then
+    local f = latex and "\\text{\\bf %s} & %s \\\\\n" or "%s:\n  %s\n"
+    if not latex then sense = sense:sub(1,1):upper()..sense:sub(2) end
+    append(r, f:format(sense, repr(objective, format)))
+  elseif latex then
+    append(r, "\\text{no objective}\\\\\n")
+  else
+    append(r, "No objective defined\n")
+  end
+
+  -- Write constraints
+  append(r, latex and "\\text{\\bf subject to} \\\\\n" or "Subject to:\n")  
+  local constraints = find_constraints(M)
+  local maxlen = 0
+  for _, c in ipairs(constraints) do
+    c.name = repr(c.ref, format)
+    maxlen = math.max(maxlen, c.name:len())
+  end
+  for i, c in ipairs(constraints) do
+    local cr = lib.repr(c.constraint, format)
+    if latex then
+      append(r, ("%s: & %s \\\\\n"):format(c.name, cr))
+    else
+      append(r, ("  %s:%s %s\n"):format(c.name, (" "):rep(maxlen - c.name:len()), cr))
+    end
+  end
+  
+  -- Write variables
+  local variables = {}
+  for i, c in ipairs(constraints) do
+    c = core.eval(c.constraint.lhs - c.constraint.rhs, M)
+    core.list_variables(c, M, variables)
+  end
+  local sorted_variables = {}
+  for n, v in pairs(variables) do
+    sorted_variables[#sorted_variables+1] = { name=n, index=v.index, sets=v.sets }
+  end
+  table.sort(sorted_variables, function(a, b) return a.name < b.name end)
+
+  for _, v in ipairs(sorted_variables) do
+    local status, vt = pcall(index.variable_type, v.index, M)
+    if status then
+      append(r, latex and "& " or "  ", vt:describe(v.index, format))
+      if v.sets and v.sets[1] then
+        append(r, latex and " \\forall " or " for all ")
+        for i, s in ipairs(v.sets) do
+          if i > 1 then append(r, ", ") end
+          append(r, lib.repr(s, format))
+        end
+      end
+      append(r, latex and " \\\\\n" or "\n")
+    end
+  end
+
+  return lib.concat(r)
+end
+proxy_mt.__tostring = lib.__tostring
+
+
+function new(parent, ...)
+  return scope.new_with_metatable(proxy_mt, parent, ...)
 end
 
 
@@ -145,13 +213,13 @@ end
 
 function sparse_form(S)
 
-  local constant, objective = linearise.linearise(S.objective, S)
+  local constant, objective = linearise.linearise(index:new(nil, "objective"), S)
   local constraints = linearise_constraints(S)
   
   -- Find all the variables in the constraints
   local variables = {}
   for _, c in pairs(constraints) do
-    for name, info in pairs(c[1]) do
+    for name, info in pairs(c.lhs) do
       variables[name] = info
     end
   end
@@ -181,12 +249,13 @@ function sparse_form(S)
   local sparse_constraints = {}
   for _, c in pairs(constraints) do
     local cc = {}
-    for v, k in pairs(c[1]) do
+    for v, k in pairs(c.lhs) do
       cc[#cc+1] = { variables[v].index, k.coeff }
     end
     table.sort(cc, function(a, b) return a[1] < b[1] end)
-    local low = ((c[2] == "==" or c[2] == ">=") and c[3]) or -math.huge
-    local high = ((c[2] == "==" or c[2] == "<=") and c[3]) or math.huge
+    local type, constant = c.type, c.constant
+    local low = ((type == "==" or type == ">=") and constant) or -math.huge
+    local high = ((type == "==" or type == "<=") and constant) or math.huge
     sparse_constraints[#sparse_constraints+1] = { ref=c.ref, l=low, h=high, m=cc }
   end
 
@@ -196,36 +265,9 @@ end
 
 -- Writing ---------------------------------------------------------------------
 
-function write(S, values, f)
-  S = new_scope(S, values)
-  f = f or io.stdout
-
-  -- Write the objective
-  local sense = sense(S)
-  local objective = scope.lookup(S, "objective")
-  if objective and sense then
-    local o = rima.E(objective.value, S)
-    f:write(("%s:\n  %s\n"):format((sense == "minimise" and "Minimise") or "Maximise", lib.repr(o)))
-  else
-    f:write("No objective defined\n")
-  end
-
-  -- Write constraints
-  f:write("Subject to:\n")  
-  local constraints = tostring_constraints(S)
-  local maxlen = 0
-  for _, c in ipairs(constraints) do
-    c.name = lib.repr(c.ref)
-    maxlen = math.max(maxlen, c.name:len())
-  end
-  for i, c in ipairs(constraints) do
-    f:write(("  %s:%s %s\n"):format(c.name, (" "):rep(maxlen - c.name:len()), c[1]))
-  end
-end
-
-
 function write_sparse(S, values, f)
-  S = new_scope(S, values)
+  S = new(S, values)
+
   f = f or io.stdout
 
   local variables, constraints = sparse_form(S)
@@ -249,8 +291,8 @@ end
 
 -- Solving ---------------------------------------------------------------------
 
-function solve(solver, S, values)
-  S = new_scope(S, values)
+function solve(solver, S, ...)
+  S = new(S, ...)
 
   local solve_mod = require("rima.solvers."..solver)
   local variables, constraints = sparse_form(S, S.objective)
@@ -261,12 +303,12 @@ function solve(solver, S, values)
   local primal, dual = {}, {}
   primal.objective = r.objective
   for i, v in ipairs(r.variables) do
-    core.set(variables[i].ref, primal, v.p)
-    core.set(variables[i].ref, dual, v.d)
+    index.set(variables[i].ref, primal, v.p)
+    index.set(variables[i].ref, dual, v.d)
   end
   for i, v in ipairs(r.constraints) do
-    core.set(constraints[i].ref, primal, v.p)
-    core.set(constraints[i].ref, dual, v.d)
+    index.set(constraints[i].ref, primal, v.p)
+    index.set(constraints[i].ref, dual, v.d)
   end
   return primal, dual
 end

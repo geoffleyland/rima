@@ -42,9 +42,21 @@ function constraint:tostring(S)
   return s
 end
 
+local latex_compare_translation =
+{
+  ["<="] = "\\eq",
+  ["<="] = "\\leq",
+  [">="] = "\\geq",
+}
 function constraint:__repr(format)
   local lhs, rhs = lib.repr(self.lhs, format), lib.repr(self.rhs, format)
-  local s = lhs.." "..self.type.." "..rhs
+  local type
+  if format.format == "latex" then
+    type = latex_compare_translation[self.type]
+  else
+    type = self.type
+  end
+  local s = lhs.." "..type.." "..rhs
   return s
 end
 constraint.__tostring = lib.__tostring

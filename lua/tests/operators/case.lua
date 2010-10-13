@@ -17,7 +17,7 @@ function test(options)
   local T = series:new(_M, options)
 
   local D = lib.dump
-  local E = rima.E
+  local E = core.eval
 
   T:test(object.isa(case, rima.case(1, {1, 1})), "isa(case, case)")
   T:check_equal(object.type(rima.case(1, {1, 1})), "case", "type(case) == 'case'")

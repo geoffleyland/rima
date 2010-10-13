@@ -39,7 +39,7 @@ modelling language!
 We create a new formulation, set its objective:
 
     --! continue
-    knapsack = rima.new()
+    knapsack = rima.mp.new()
     knapsack.sense = "maximise"
     knapsack.objective = value
 
@@ -61,11 +61,12 @@ You can derive from it, compose a new model with it, make a Lua module out
 of it and we can even write it out in a readable format:
 
     --! continue
-    rima.mp.write(knapsack)
+    print(knapsack)
     --> Maximise:
     -->   sum{i in items}(i.take*i.value)
     --> Subject to:
     -->   capacity_limit: sum{i in items}(i.size*i.take) <= capacity
+    -->   items[i].take binary for all i in items
 
 So far, we've seen no data, other than the one bit we wanted -
 defining as `items[item].picked` as a binary variable.

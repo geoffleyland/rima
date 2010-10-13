@@ -7,8 +7,7 @@ local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local scope = require("rima.scope")
-local rima = require("rima")
+local index = require("rima.index")
 
 module(...)
 
@@ -35,8 +34,8 @@ function test(options)
   end
 
   do
-    local a = rima.R"a"
-    local S = scope.new{ a = N(nil, "key", 13) }
+    local a = index:new().a
+    local S = { a = N(nil, "key", 13) }
     T:check_equal(E(a + 19, S), 32)
     T:check_equal(D(E(a + 19, S)), 32)
   end

@@ -27,7 +27,9 @@ mul.precedence = 3
 
 function mul.__repr(args, format)
   args = proxy.O(args)
-  if format.format == "dump" then
+  local ff = format.format
+
+  if ff == "dump" then
     return "*("..
       lib.concat(args, ", ",
         function(a) return lib.repr(a[2], format).."^"..lib.simple_repr(a[1], format) end)..
@@ -44,7 +46,7 @@ function mul.__repr(args, format)
         s = "1/"
       end
     else
-      s = s..((c < 0 and "/") or "*")
+      s = s..((c < 0 and "/") or (ff == "latex" and " " or "*"))
     end
     
     -- If the constant's not 1 then we need to parenthise (almost) like an exponentiation
@@ -53,7 +55,12 @@ function mul.__repr(args, format)
     -- If the constant's not 1, write the constant
     local ac = math.abs(c)
     if ac ~= 1 then
-      s = s.."^"..lib.repr(ac, format)
+      local acr = lib.repr(ac, format)
+      if ff == "latex" then
+        s = "{"..s.."}^{"..acr.."}"
+      else
+        s = s.."^"..acr
+      end
     end
   end
   return s
@@ -62,7 +69,7 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function mul.__eval(args, S, eval)
+function mul.__eval(args, S)
   -- Multiply all the arguments, keeping track of the product of any exponents,
   -- and of all remaining unresolved terms
   -- If any subexpressions are products, we dive into them, if any are
@@ -71,7 +78,7 @@ function mul.__eval(args, S, eval)
   args = proxy.O(args)
 
   -- evaluate or bind all arguments
-  return simplify(lib.imap(function(a) return { a[1], eval(a[2], S) } end, args))
+  return simplify(lib.imap(function(a) return { a[1], core.eval(a[2], S) } end, args))
 end
 
 function mul.simplify(args)
@@ -144,6 +151,15 @@ function mul.simplify(args)
       new_args[#new_args+1] = { t.exponent, t.expression }
     end
     return expression:new(mul, unpack(new_args))
+  end
+end
+
+
+-- Introspection? --------------------------------------------------------------
+
+function mul.__list_variables(args, S, list)
+  for _, a in ipairs(proxy.O(args)) do
+    core.list_variables(a[2], S, list)
   end
 end
 

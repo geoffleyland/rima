@@ -8,6 +8,7 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
+local undefined_t = require("rima.types.undefined_t")
 
 module(...)
 
@@ -36,15 +37,22 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function case.__eval(args, S, eval)
+function case.__eval(args, S)
   args = proxy.O(args)
-  local value = eval(args[1], S)
+  local value = core.eval(args[1], S)
   local cases = {}
   for i, v in ipairs(args[2]) do
-    cases[i] = { eval(v[1], S), eval(v[2], S) }
+    local match_value = core.eval(v[1], S)
+    local result
+    if undefined_t:isa(v[2]) then
+      result = v[2]
+    else
+      result = core.eval(v[2], S)
+    end
+    cases[i] = { match_value, result }
   end
   local default
-  if args[3] then default = eval(args[3], S) end
+  if args[3] then default = core.eval(args[3], S) end
   
   local remaining_cases = {}
   local matched = false

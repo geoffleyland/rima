@@ -1,8 +1,8 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, getmetatable, ipairs, pairs, rawget, rawset, require, setmetatable =
-      error, getmetatable, ipairs, pairs, rawget, rawset, require, setmetatable
+local ipairs, pairs, rawget, rawset, require, setmetatable =
+      ipairs, pairs, rawget, rawset, require, setmetatable
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -15,7 +15,8 @@ local add_op = require("rima.operators.add")
 local mul_op = require("rima.operators.mul")
 local pow_op = require("rima.operators.pow")
 local call_op = require("rima.operators.call")
-local index_op = require("rima.operators.index")
+local index = require("rima.index")
+
 
 -- Constructor -----------------------------------------------------------------
 
@@ -47,45 +48,58 @@ end
 
 -- String representation -------------------------------------------------------
 
-function expression.proxy_mt.__repr(e, format)
+function proxy_mt.__repr(e, format)
   return object.type(e).."("..lib.concat_repr(proxy.O(e), format)..")"
 end
-expression.proxy_mt.__tostring = lib.__tostring
+proxy_mt.__tostring = lib.__tostring
+
+
+-- Introspection? --------------------------------------------------------------
+
+function proxy_mt.__list_variables(args, S, list)
+  for _, a in ipairs(proxy.O(args)) do
+    core.list_variables(a, S, list)
+  end
+end
 
 
 -- Overloaded operators --------------------------------------------------------
 
-function expression.proxy_mt.__add(a, b)
+function proxy_mt.__add(a, b)
   return expression:new(add_op, {1, a}, {1, b})
 end
 
-function expression.proxy_mt.__sub(a, b)
+function proxy_mt.__sub(a, b)
   return expression:new(add_op, {1, a}, {-1, b})
 end
 
-function expression.proxy_mt.__unm(a)
+function proxy_mt.__unm(a)
   return expression:new(add_op, {-1, a})
 end
 
-function expression.proxy_mt.__mul(a, b, c)
+function proxy_mt.__mul(a, b, c)
   return expression:new(mul_op, {1, a}, {1, b})
 end
 
-function expression.proxy_mt.__div(a, b)
+function proxy_mt.__div(a, b)
   return expression:new(mul_op, {1, a}, {-1, b})
 end
 
-function expression.proxy_mt.__pow(a, b)
+function proxy_mt.__pow(a, b)
   return expression:new(pow_op, a, b)
 end
 
-function expression.proxy_mt.__call(...)
+function proxy_mt.__call(...)
   return expression:new(call_op, ...)
 end
 
+function proxy_mt.__index(...)
+  return index:new(...)
+end
 
+--[[
 function expression.proxy_mt.__index(r, i)
-  local e = expression:new(index_op, r, i)
+  local e = expression:new(operators.index, r, i)
   local f = core.eval(e)
   if not f or (object.type(f) == "table" and not getmetatable(f)) then
     return e
@@ -124,7 +138,7 @@ function expression.proxy_mt.__newindex(e, i, v)
       format(lib.repr(e[i]), lib.repr(v), lib.repr(e), err), 0)
   end
 end
-
+--]]
 
 -- EOF -------------------------------------------------------------------------
 

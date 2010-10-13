@@ -1,16 +1,19 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local ipairs, pairs = ipairs, pairs
+local ipairs, pairs, require = ipairs, pairs, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
-local expression = require("rima.expression")
-local add = require("rima.operators.add")
-local set_list = require("rima.sets.list")
+local core = require("rima.core")
+local closure = require("rima.closure")
 
 module(...)
+
+local add = require("rima.operators.add")
+local expression = require("rima.expression")
+local set_list = require("rima.sets.list")
 
 
 -- Subscripts ------------------------------------------------------------------
@@ -19,39 +22,44 @@ local sum = object:new(_M, "sum")
 sum.precedence = 1
 
 function sum.construct(args)
-  local sets = args[1]
+  local sets, exp = args[1], args[2]
   if not set_list:isa(sets) then
     sets = set_list:read(sets)
   end
-  return { sets, args[2] }
+  return { closure:new(exp, sets) }
 end
 
 
 -- String Representation -------------------------------------------------------
 
 function sum.__repr(args, format)
-  args = proxy.O(args)
-  local sets, e = args[1], args[2]
-  local name = (format.format == "lua" and "rima.sum") or "sum"
-  if format.format == "dump" then
-    return name.."({"..lib.concat_repr(sets, format).."}, "..lib.repr(e, format)..")"
+  local ar = lib.repr(proxy.O(args)[1], format)
+  local ff = format.format
+  local f
+  if ff == "dump" then
+    f = "sum(%s)"
+  elseif ff == "lua" then
+    f = "rima.sum%s"
+  elseif ff == "latex" then
+    f = "\\sum_%s"
   else
-    return name.."{"..lib.concat_repr(sets, format).."}("..lib.repr(e, format)..")"
+    f = "sum%s"
   end
+  return f:format(ar)
 end
 
 
 -- Evaluation ------------------------------------------------------------------
 
-function sum.__eval(args, S, eval)
+function sum.__eval(args, S)
   args = proxy.O(args)
-  local sets, e = args[1], args[2]
+  local cl = args[1]
   local defined_terms, undefined_terms = {}, {}
 
   -- Iterate through all the elements of the sets, collecting defined and
   -- undefined terms
-  for S2, undefined in sets:iterate(S) do
-    local z = eval(e, S2)
+  for S2, undefined in cl:iterate(S) do
+    local z = core.eval(cl.exp+0, S2)  -- the +0 helps to "cast" e to a number (if it's a set element)
     if undefined and undefined[1] then
       -- Undefined terms are stored in groups based on the undefined sum
       -- indices (so we can group them back into sums over the same indices)
@@ -81,7 +89,7 @@ function sum.__eval(args, S, eval)
     else
       z = t.terms[1][2]
     end
-    total_terms[#total_terms+1] = {1, expression:new(sum, t.iterators, z) }
+    total_terms[#total_terms+1] = {1, expression:new(sum, t.iterators, cl:undo(z, t.iterators)) }
   end
 
   -- Add the defined terms onto the end
@@ -92,7 +100,18 @@ function sum.__eval(args, S, eval)
   if #total_terms == 1 then
     return total_terms[1][2]
   else
-    return eval(expression:new_table(add, total_terms), S)
+    return core.eval(expression:new_table(add, total_terms), S)
+  end
+end
+
+
+-- Introspection? --------------------------------------------------------------
+
+function sum.__list_variables(args, S, list)
+  local cl = proxy.O(args)[1]
+  for S2, undefined in cl:iterate(S) do
+    local S3 = cl:fake_iterate(S2, undefined)
+    core.list_variables(core.eval(cl, S3), S3, list)
   end
 end
 

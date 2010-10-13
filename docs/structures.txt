@@ -1,0 +1,81 @@
+    --! env rima = require("rima")
+
+# Rima Manual: Structures
+
+[ [Contents](contents.html) | Previous: [A Blending Problem](blending.html) | Next: [A Structured Knapsack](knapsack_2.html) ]
+
+Lua's arrays are implemented as "tables".
+Tables are efficient as both a numerically indexed array,
+and as a hash lookup or dictionary.
+
+You can index the "hash part" of the table with the same syntax as the "array part":
+`x["key"]` works as well as `x[1]`.
+For string keys you can use dot notation: `x.key` is exactly the same as `x["key"]`.
+
+Rima understands structures as well as arrays, so you can treat references like objects:
+
+    x = rima.R"x"
+    volume = x.length * x.width * x.height
+    print(rima.E(volume, {x={length=2,width=5}}))       --> 10*x.height
+
+Just like 2 and higher dimensional arrays, you can construct complex tables,
+and index them with several indices:
+
+    x = rima.R"x"
+    e = x[1].a + x[2].b
+    print(rima.E(e, {x={{a=17},{b=19}}}))               --> 36
+
+The subscripts you use in indexes don't have to be literal values,
+they can be references to other variables:
+
+    x, y = rima.R"x, y"
+    e = x[y].a
+    print(rima.E(e, {y="second"}))                      --> x.second.a
+    print(rima.E(e, {y="second", x={first={a=20},second={a=50}}}))
+    --> 50
+
+Beware of confusing `x[a]` (where `a` is a reference)
+with `x["a"]` and `x.a` (where `a` is a string key) though!
+
+
+`rima.sum` understands structures as well as arrays.
+You can sum over expressions about structures:
+
+    x, X = rima.R"x, X"
+    e = rima.sum{x=X}(x.y * x.z)
+    XX = {{y=3, z=7}, {y=5, z=5}, {y=7, z=3}}
+    print(rima.E(e, {X=XX}))                            --> 67
+
+Or just sum the elements of a structure:
+
+    x, X = rima.R"x, X"
+    e = rima.sum{x=X}(x)
+    XX = {apples=2,oranges=3,bananas=4}
+    print(rima.E(e, {X=XX}))                            --> 9
+
+So you can be more descriptive of your data:
+
+    i, items = rima.R"i, items"
+    e = rima.sum{i=items}(i.cost * i.quantity)
+    ITEMS = {apples={cost=1, quantity=2}, oranges={cost=2, quantity=5}}
+    print(rima.E(e, {items=ITEMS}))                     --> 12
+
+As usual, Rima doesn't mind if some of the data isn't defined:
+
+    i, items = rima.R"i, items"
+    e = rima.sum{i=items}(i.cost * i.quantity)
+    ITEMS = {apples={cost=1}, oranges={quantity=2}}
+    print(rima.E(e, {items=ITEMS}))                     --> items.apples.quantity + 2*items.oranges.cost
+
+In the section on arrays,
+we saw that an array can be indexed with the elements of a separate table.
+The same thing works for tables with non-integer indexes:
+
+    s, S, count, cost = rima.R"s, S, count, cost"
+    e = rima.sum{s=S}(count[s] * cost[s])
+    SS = { "north", "south", "east", "west" }
+    COUNT = { 1, 2, 4, 8 }
+    COST = { north=3, south=2, east=1, west=1 }
+    print(rima.E(e, {S=SS, count=COUNT, cost=COST}))    --> 19
+
+[ [Contents](contents.html) | Previous: [A Blending Problem](blending.html) | Next: [A Structured Knapsack](knapsack_2.html) ]

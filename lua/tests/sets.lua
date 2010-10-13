@@ -5,28 +5,31 @@ local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local ref = require("rima.ref")
 local scope = require("rima.scope")
 local rima = require("rima")
+require("rima.types.number_t")
 
 module(...)
+
 
 -- Tests -----------------------------------------------------------------------
 
 function test(options)
   local T = series:new(_M, options)
-  
-  local B = core.bind
-  local E = rima.E
-  
+
+  local E = core.eval
+
   local x, y, z, Q, R, r = rima.R"x, y, z, Q, R, r"
+
   T:check_equal(rima.sum{Q}(x[Q]), "sum{Q}(x[Q])")
   T:check_equal(E(rima.sum{Q}(x[Q])), "sum{Q}(x[Q])")
 
   do
-    local S = scope.new{ x = {10}, Q = {"a"}, y={{z=13}} }
+    local S = { x = {10}, Q = {"a"}, y={{z=13}} }
+    T:check_equal(rima.sum{r=Q}(x[r]), "sum{r in Q}(x[r])")
     T:check_equal(E(rima.sum({r=Q}, x[r]), S), 10)
-    T:check_equal(E(rima.sum({r=x}, r), S), 10)
+    T:check_equal(rima.sum{r=x}(r), "sum{r in x}(r)")
+    T:check_equal(E(rima.sum{r=x}(r), S), 10)
     T:check_equal(E(rima.sum({r=x}, r+1), S), 11)
     T:check_equal(E(rima.sum({r=y}, r.z), S), 13)
   end
@@ -49,13 +52,11 @@ function test(options)
     local S = scope.new{ Q = {"a"}, x = { rima.free() }, z = { a=rima.free() } }
     T:check_equal(E(rima.sum{y=x}(y), S), "x[1]")
     T:check_equal(E(rima.sum{y=z}(y), S), "z.a")
-    T:check_equal(E(rima.sum{y=Q}(y), S), "a")
-    T:check_equal(E(rima.sum{y=Q}(Q[y]), S), "a")
     T:check_equal(E(rima.sum{y=x}(x[y]), S), "x[1]")
     T:check_equal(E(rima.sum{y=z}(z[y]), S), "z.a")
     T:check_equal(E(rima.sum{y=Q}(x[y]), S), "x[1]")
-    T:check_equal(lib.dump(E(rima.sum{y=Q}(x[y]), S)), "index(ref(x), address{1})")
-    T:check_equal(lib.dump(E(rima.sum{y=Q}(z[y]), S)), "index(ref(z), address{\"a\"})")
+    T:check_equal(lib.dump(E(rima.sum{y=Q}(x[y]), S)), "index(address{\"x\", 1})")
+    T:check_equal(lib.dump(E(rima.sum{y=Q}(z[y]), S)), "index(address{\"z\", \"a\"})")
     T:check_equal(E(rima.sum{y=Q}(x[y] + z[y]), S), "x[1] + z.a")
   end
 
@@ -90,13 +91,20 @@ function test(options)
     T:check_equal(E(rima.sum({["k, v"]=rima.pairs(y)}, v), S), 70)
     T:check_equal(E(rima.sum({["k, v"]=rima.ipairs(y)}, v), S), 60)
   end
-  
+
+  do
+    local t, v = rima.R"t, v"
+    local S = rima.scope.new{ t={ {b=5} }}
+    T:check_equal(rima.sum({["_, v"]=rima.ipairs(t)}, v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
+    T:check_equal(E(rima.sum({["_, v"]=rima.ipairs(t)}, v.b), S), 5)
+    T:check_equal(E(rima.sum{["_, v"]=rima.ipairs(t)}(v.a), S), "t[1].a")
+    T:check_equal(E(rima.sum({["_, v"]=rima.ipairs(t)}, v.a * v.b), S), "5*t[1].a")
+  end
+
   do
     local t, v = rima.R"t, v"
     local S = rima.scope.new{ t={ {b=5}, {b=6}, {b=7} }}
     T:check_equal(rima.sum({["_, v"]=rima.ipairs(t)}, v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
-    T:check_equal(B(rima.sum({["_, v"]=rima.ipairs(t)}, v.b), S), "t[1].b + t[2].b + t[3].b")
-    T:check_equal(B(rima.sum({["_, v"]=rima.ipairs(t)}, v.a * v.b), S), "t[1].a*t[1].b + t[2].a*t[2].b + t[3].a*t[3].b")
     T:check_equal(E(rima.sum({["_, v"]=rima.ipairs(t)}, v.b), S), 18)
     T:check_equal(E(rima.sum({["_, v"]=rima.ipairs(t)}, v.a * v.b), S), "5*t[1].a + 6*t[2].a + 7*t[3].a")
   end
@@ -105,7 +113,7 @@ function test(options)
     local x, X = rima.R"x, X"
     local S = rima.scope.new{ X = {a=1, b=2} }
     T:check_equal(E(rima.sum({["_, x"]=rima.pairs(X)}, x), S), 3)
-    local S1 = rima.scope.spawn(S, { X = {c=3, d=4} })
+    local S1 = rima.scope.new(S, { X = {c=3, d=4} })
     T:check_equal(E(rima.sum({["_, x"]=rima.pairs(X)}, x), S1), 10)
   end
 
@@ -114,8 +122,6 @@ function test(options)
     local S = rima.scope.new{ r = rima.range(1, 3) }
     S.X[r] = rima.free()
     T:check_equal(E(rima.sum{r}(r), S), 6)
-    T:check_equal(B(rima.sum{r}(r * x[r]), S), "r*x[1] + r*x[2] + r*x[3]")
-    T:check_equal(E(B(rima.sum{r}(r * x[r]), S)), "x[1] + 2*x[2] + 3*x[3]")
     T:check_equal(E(rima.sum{r}(r * x[r]), S), "x[1] + 2*x[2] + 3*x[3]")
   end
 

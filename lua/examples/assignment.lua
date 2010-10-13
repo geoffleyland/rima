@@ -16,7 +16,7 @@ p, plants = rima.R"p, plants"
 s, stores, store_order = rima.R"s, stores, store_order"
 flow, transport_cost, total_transport_cost = rima.R"flow, transport_cost, total_transport_cost"
 
-assignment = rima.new()
+assignment = rima.mp.new()
 
 assignment.meet_demand[{s=stores}] = rima.mp.C(rima.sum{p=plants}(flow[p][s]), "==", s.demand)
 assignment.respect_capacity[{p=plants}] = rima.mp.C(rima.sum{s=stores}(flow[p][s]), "<=", p.capacity)
@@ -25,7 +25,7 @@ assignment.total_transport_cost = rima.sum{p=plants, s=store_order}(flow[p][s] *
 --assignment.objective = total_transport_cost
 assignment.sense = "minimise"
 
-rima.mp.write(assignment)
+io.write("Assignment:\n", tostring(assignment), "\n")
 --[[
 Minimise:
   sum{p in plants, s in store_order}(flow[p, s]*transport_cost[p, s])
@@ -63,8 +63,8 @@ shopping_data =
   },
 }
 
-shopping = rima.instance(assignment, { objective=total_transport_cost}, shopping_data)
-rima.mp.write(shopping)
+shopping = rima.mp.new(assignment, shopping_data, { objective=total_transport_cost})
+io.write("Shopping:\n", tostring(shopping), "\n")
 --[[
 Minimise:
   8*flow.Denver.Barstow + 5*flow.Denver.Dallas + ...
@@ -91,14 +91,14 @@ end
 
 build_cost = rima.R"build_cost"
 
-facility_location = rima.instance(assignment)
+facility_location = rima.mp.new(assignment)
 
 facility_location.build_plants[{p=plants}] = rima.mp.C(rima.sum{s=store_order}(flow[p][s]), "<=", p.capacity * p.built)
 facility_location.build_cost = rima.sum{p=plants}(p.build_cost * p.built)
 facility_location.plants[{p=plants}].built = rima.binary()
 facility_location.objective = total_transport_cost + build_cost
 
-rima.mp.write(facility_location)
+io.write("\nFacility Location:\n", tostring(facility_location), "\n")
 --[[
 Minimise:
   sum{p in plants, s in store_order}(flow[p, s]*transport_cost[p, s]) + sum{p in plants}(p.build_cost*p.built)
@@ -108,7 +108,7 @@ Subject to:
   meet_demand[s in stores]:      sum{p in plants}(flow[p, s]) == s.demand
 --]]
 
-build_shops = rima.instance(facility_location, shopping_data,
+build_shops = rima.mp.new(facility_location, shopping_data,
 {
   plants =
   {

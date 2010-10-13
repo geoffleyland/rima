@@ -1,0 +1,83 @@
+    --! env rima = require("rima")
+
+# Rima Manual: A Blending Problem
+
+[ [Contents](contents.html) | Previous: [Sums](Sums.html) | Next: [Structures](structures.html) ]
+
+We wish to make a dog food that meets nutritional requirements at lowest cost
+by blending a number of ingredients,
+each of which is composed of a number of nutrients.
+
+(This problem is courtesy of an example by Mike Trick)
+
+We'll construct this model using only arrays,
+but after the next sections on structures,
+you'll see there's a cleaner way to structure the model.
+
+First, we declare some references:
+
+    i, I = rima.R"i, I"               -- ingredients
+    n, N = rima.R"n, N"               -- nutrients
+    c = rima.R"c"                     -- cost of ingredients
+    pn = rima.R"pn"                   -- nutrients in each product
+    l = rima.R"l"                     -- limits on nutrients
+    Q = rima.R"Q"                     -- Quantity of product we're producing
+    f = rima.R"f"                     -- ingredient fractions (result)
+
+Then we set up our problem:
+
+    --! continue
+    blending_problem = rima.mp.new{ \
+      sense = "minimise", \
+      objective = rima.sum{i=I}(c[i] * f[i]), \
+      make_quantity = rima.mp.C(rima.sum{i=I}(f[i]), "==", Q) \
+    }
+    blending_problem.sufficient_nutrients[{n=N}] = rima.mp.C(rima.sum{i=I}(pn[i][n] * f[i]), ">=", Q * l[n])
+    blending_problem.f[{i=I}] = rima.positive()
+
+Note that the last two lines are array assignments for a constraint and
+for variable bounds.
+
+As before, we can print out the blending problem:
+
+    --! continue
+    print(blending_problem)
+    --> Minimise:
+    -->   sum{i in I}(c[i]*f[i])
+    --> Subject to:
+    -->   make_quantity:               sum{i in I}(f[i]) == Q
+    -->   sufficient_nutrients[{n=N}]: sum{i in I}(f[i]*pn[i, n]) >= Q*l[n]
+    -->   0 <= f[i] <= inf, f[i] real for all i in I
+
+Next, we define the data for the model:
+
+    --! continue
+    whiskas_data = { \
+      I = {"chicken", "beef", "mutton", "rice", "wheat bran", "gel"}, \
+      N = {"protein", "fat", "fibre", "salt"}, \
+      c = { 0.013, 0.008, 0.010, 0.002, 0.005, 0.001 }, \
+      l = { 0.08, 0.06, -0.02, -0.004 }, \
+      pn = \
+      { \
+        chicken           = { 0.100,  0.080, -0.001, -0.002 }, \
+        beef              = { 0.200,  0.100, -0.005, -0.005 }, \
+        mutton            = { 0.150,  0.110, -0.003, -0.007 }, \
+        rice              = { 0.000,  0.010, -0.100, -0.002 }, \
+        ["wheat bran"]    = { 0.040,  0.010, -0.150, -0.008 }, \
+        gel               = { 0.000,  0.000, -0.000, -0.000 }, \
+      }, \
+    }
+
+And finally, solve:
+
+    --! continue
+    primal, dual = rima.mp.solve("clp", blending_problem, whiskas_data, { Q = 100 })
+    print(primal.objective)                             --> 0.52
+    print(primal.f.chicken)                             --> 0
+    print(primal.f.beef)                                --> 60
+    print(primal.f.mutton)                              --> 0
+    print(primal.f.rice)                                --> 0
+    print(primal.f["wheat bran"])                       --> 0
+    print(primal.f.gel)                                 --> 40
+
+[ [Contents](contents.html) | Previous: [Sums](sums.html) | Next: [Structures](structures.html) ]

@@ -6,6 +6,7 @@ local ipairs, type = ipairs, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
+local core = require("rima.core")
 local expression = require("rima.expression")
 
 module(...)
@@ -16,12 +17,12 @@ module(...)
 min = object:new({}, "min")
 min.precedence = 0
 
-function min.__eval(args, S, eval)
+function min.__eval(args, S)
   args = proxy.O(args)
   local a2 = {}
   local m = math.huge
   for _, a in ipairs(args) do
-    a = eval(a, S)
+    a = core.eval(a, S)
     if type(a) == "number" then
       if a < m then
         m = a
@@ -45,12 +46,12 @@ end
 max = object:new({}, "max")
 max.precedence = 0
 
-function max.__eval(args, S, eval)
+function max.__eval(args, S)
   args = proxy.O(args)
   local a2 = {}
   local m = -math.huge
   for _, a in ipairs(args) do
-    a = eval(a, S)
+    a = core.eval(a, S)
     if type(a) == "number" then
       if a > m then
         m = a

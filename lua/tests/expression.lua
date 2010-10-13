@@ -41,32 +41,31 @@ function test(options)
   -- tests with add, mul and pow
   do
     local a, b = rima.R"a, b"
-    local S = rima.scope.new{ ["a,b"]=rima.free() }
-    equal(T, "+(1*3, 4*ref(a))", {3 + 4 * a, S, E, D})
+    local S = {}
+    equal(T, '+(1*3, 4*index(address{"a"}))', {3 + 4 * a, S, E, D})
     equal(T, "3 - 4*a", {4 * -a + 3, S, E})
-    equal(T, "+(1*3, 4**(ref(a)^1, ref(b)^1))", {3 + 4 * a * b, S, E, D})
+    equal(T, '+(1*3, 4**(index(address{"a"})^1, index(address{"b"})^1))', {3 + 4 * a * b, S, E, D})
     equal(T, "3 - 4*a*b", {3 - 4 * a * b, S, E})
 
-    equal(T, "*(6^1, ref(a)^1)", {3 * (a + a), S, E, D})
+    equal(T, '*(6^1, index(address{"a"})^1)', {3 * (a + a), S, E, D})
     equal(T, "6*a", {3 * (a + a), S, E})
-    equal(T, "+(1*1, 6*ref(a))", {1 + 3 * (a + a), S, E, D})
+    equal(T, '+(1*1, 6*index(address{"a"}))', {1 + 3 * (a + a), S, E, D})
     equal(T, "1 + 6*a", {1 + 3 * (a + a), S, E})
 
-    equal(T, "*(1.5^1, ref(a)^-1)", {3 / (a + a), S, E, D})
+    equal(T, '*(1.5^1, index(address{"a"})^-1)', {3 / (a + a), S, E, D})
     equal(T, "1.5/a", {3 / (a + a), S, E})
-    equal(T, "+(1*1, 1.5**(ref(a)^-1))", {1 + 3 / (a + a), S, E, D})
+    equal(T, '+(1*1, 1.5**(index(address{"a"})^-1))', {1 + 3 / (a + a), S, E, D})
     equal(T, "1 + 1.5/a", {1 + 3 / (a + a), S, E})
 
-
-    equal(T, "*(3^1, ^(ref(a), 2)^1)", {3 * a^2, "", D})
-    equal(T, "*(3^1, ref(a)^2)", {3 * a^2, S, E, D})
-    equal(T, "*(3^1, +(1*1, 1*ref(a))^2)", {3 * (a+1)^2, S, E, D})
+    equal(T, '*(3^1, ^(index(address{"a"}), 2)^1)', {3 * a^2, "", D})
+    equal(T, '*(3^1, index(address{"a"})^2)', {3 * a^2, S, E, D})
+    equal(T, '*(3^1, +(1*1, 1*index(address{"a"}))^2)', {3 * (a+1)^2, S, E, D})
   end
 
   -- tests with references to expressions
   do
     local a, b = rima.R"a,b"
-    local S = rima.scope.new{ a = rima.free(), b = 3 * (a + 1)^2 }
+    local S = { b = 3 * (a + 1)^2 }
     equal(T, {b, S, E, D}, {3 * (a + 1)^2, S, E, D})
     equal(T, {5 * b, S, E, D}, {5 * (3 * (a + 1)^2), S, E, D} )
     
@@ -74,13 +73,6 @@ function test(options)
     S.d = 3 + (c * 5)^2
     T:expect_ok(function() E(5 * d, S) end)
     equal(T, "5*(3 + (5*c)^2)", {5 * d, S, E})
-  end
-
-  -- references to functions
-  do
-    local f, x, y = rima.R"f, x, y"
-    local S = rima.scope.new{ x = 2, f = rima.F({y}, y + 5) }
-    T:check_equal(rima.E(f(x), S), 7)
   end
 
   return T:close()

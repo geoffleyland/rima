@@ -2,13 +2,14 @@
 -- see LICENSE for license information
 
 local debug = require("debug")
-local error, rawipairs, require, unpack, xpcall =
-      error, ipairs,    require, unpack, xpcall
+local error, require, unpack, xpcall =
+      error, require, unpack, xpcall
 
+local lib = require("rima.lib")
 local args = require("rima.lib.args")
 local trace = require("rima.lib.trace")
-local ref = require("rima.ref")
-local expression = require("rima.expression")
+local index = require("rima.index")
+local core = require("rima.core")
 local func = require("rima.func")
 local sum_op = require("rima.operators.sum")
 local case_op = require("rima.operators.case")
@@ -22,12 +23,19 @@ module(...)
 require("rima.mp")
 
 
+-- String representation -------------------------------------------------------
+
+repr = lib.repr
+
 -- Creating references ---------------------------------------------------------
 
-function R(names, type)
+function R(names)
+  local fname, usage = "rima.R", "Create references.\n  ref1, ..., refN = R(name: list of comma-separated reference names [string])"
+  args.check_type(names, "names", "string", usage, fname)
+
   local results = {}
   for n in names:gmatch("[%a_][%w_]*") do
-    results[#results+1] = ref:new{name=n, type=type}
+    results[#results+1] = index:new(nil, n)
   end
   return unpack(results)
 end
@@ -35,39 +43,16 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function D(e) -- check if an expression is defined
-  return core.defined(e)
-end
-
-
-local dgs
-local function default_global_scope()
-  if not dgs then
-    dgs = scope.new(nil, { name="_GLOBAL" })
-  end
-  return dgs
-end
-
-
 function E(e, S) -- evaluate an expression
-  local fname, usage =
-    "rima.E",
-    "E(e:expression, S:nil, table or scope)"
-
-  args.check_types(S, "S", {"nil", "table", {scope, "scope"}}, usage, fname)
-
-  if not S then
-    S = scope.spawn(default_global_scope(), nil, {no_undefined=true})
-  elseif not scope:isa(S) then
-    S = scope.spawn(default_global_scope(), S, {no_undefined=true})
-  end
+  local fname, usage = "rima.E", "Evaluate an expression.\n  result = E(e:any expression, s: scope to evaluate e in [nil|table|scope])"
+  args.check_types(S, "S", {"nil", "table", "scope"}, usage, fname)
 
   local status, r = xpcall(function() return core.eval(e, S) end, debug.traceback)
   if status then
     return r
   else
     trace.reset_depth()
-    error(("evaluate: error evaluating '%s':\n  %s"):format(lib.repr(e), r:gsub("\n", "\n  ")), 0)
+    error(("error evaluating '%s':\n  %s"):format(lib.repr(e), r:gsub("\n", "\n  ")), 2)
   end
 end
 
@@ -80,21 +65,6 @@ function F(inputs, e, S) -- create a function
   else
     return function(e, S) return func:new(inputs, e, S) end
   end
-end
-
-
--- Scopes ----------------------------------------------------------------------
-
-new = scope.new
-set = scope.set
-
-
-function instance(S, ...) -- create a new instance of a scope
-  local S2 = scope.spawn(S)
-  for _, v in rawipairs{...} do
-    scope.set(S2, v)
-  end
-  return S2
 end
 
 

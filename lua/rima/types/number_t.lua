@@ -60,12 +60,31 @@ function number_t:__repr(format)
 end
 number_t.__tostring = lib.__tostring
 
-
-function number_t:describe(vars)
+local no_format = {}
+function number_t:describe(vars, format)
 --  local lower, upper = rima.eval(self.lower, env), rima.eval(self.upper, env)
-  if self.integer and self.lower == 0 and self.upper == 1 then return vars.." binary" end
-  return ("%s <= %s <= %s, %s %s"):format(
-    lib.repr(self.lower), vars, lib.repr(self.upper), vars, self.integer and "integer" or "real")
+  format = format or no_format
+  local vr = lib.repr(vars, format)
+  local ff = format.format
+
+  if self.integer and self.lower == 0 and self.upper == 1 then
+    if ff == "latex" then
+      return vr.." \\in \\{0, 1\\}"
+    else
+      return vr.." binary"
+    end
+  end
+  
+  local f, set
+  if ff == "latex" then
+    f = "%s \\leq %s \\leq %s, %s \\in %s"
+    set = self.integer and "\\mathcal{I}" or "\\Re"
+  else
+    f = "%s <= %s <= %s, %s %s"
+    set = self.integer and "integer" or "real"
+  end
+  
+  return f:format(lib.repr(self.lower), vr, lib.repr(self.upper), vr, set)
 end
 
 --[[

@@ -1,15 +1,22 @@
     --! env rima = require("rima")
 
-# Rima Manual: Arrays and Structures
+# Rima Manual: Arrays
 
-[ [Contents](contents.html) | Previous: [Expressions](expressions.html) | Next: [Sums](sums.html) ]
+[ [Contents](contents.html) | Previous: [A Simple LP](simple_lp.html) | Next: [Sums](sums.html) ]
 
-Array indexing in Rima (and Lua) uses square brackets (`x[1]`) and
+Array indexing in Rima (and Lua) uses square brackets (`x[1]`) while
 array construction uses curly braces (`x = {13, 15, 17}`).
 
     x = rima.R"x"
     print(x[1] + x[2] + x[3])                           --> x[1] + x[2] + x[3]
     print(rima.E(x[1] + x[2] + x[3], {x={10,20,30}}))   --> 60
+
+If you try to index something that's not an array Rima will complain:
+
+    x = rima.R"x"
+    print(rima.E(x[1], {x=2}))                          --#
+    --> /error evaluating 'x%[1%]':/ error evaluating 'x[1]':
+    --> /error indexing 'x' as 'x%[1%]': can't index a number/   error indexing 'x' as 'x[1]': can't index a number
 
 If you wish to use 2D arrays, you need to use two separate sets of square brackets
 (`x[2][3]` rather than `x[2, 3]`),
@@ -19,38 +26,38 @@ and construct an array of arrays (`x = {{2, 4}, {3, 5}}`).
     e = x[1][1] + x[2][2]
     print(rima.E(e, {x={{5,7},{11,13}}}))               --> 18
 
-In fact, Lua and Rima only have one data structure, the `table` which is
-efficient as both a numerically indexed array,
-and as a hash lookup or dictionary.
+So far, we've passed data to `rima.E` in plain Lua tables,
+but in fact, rima converts these tables into rima `scopes`.
+Scopes offer a number of features beyond what plain tables offer,
+and in this case,
+they support more complex indexing.
 
-You can index the hash part of the table with the same syntax as the array part:
-`x["key"]` works as well as `x[1]`, or, for string keys,
-you can use dot notation: `x.key` is exactly the same as `x["key"]`.
+While it's often convenient (or even necessary) to use scopes rather than plain tables,
+in all cases where you're not using any of the extra features of a scope,
+you can use a plain table.
 
-The table constructor syntax for non-consecutive integer keys is
-`x = { a=1, b=2 }`.
-You can mix integer indexes and string keys in your table constructor,
-and you can mix the the dot and square bracket notation for string key indexing:
+You can assign to a whole array at once using a reference as one of your indices,
+but you have to use a scope to get the indexing ability.
+Scopes are created with `rima.scope.new`:
 
-    x = rima.R"x"
-    e = x.a + x["b"] + x.c + x["d"]
-    print(rima.E(e, {x={a=1,b=1,c=2,d=3}}))             --> 7
+    x, i = rima.R"x, i"
+    S = rima.scope.new()
+    S.x[i] = 10                                         -- This won't work with a plain table
+    print(rima.E(x[1], S), rima.E(x[7], S))             --> 10 10
 
-Just like 2 and higher dimensional arrays, you can construct complex tables,
-and index them with several indices:
+Of course, you can compute the values in the array based on the indexes:
 
-    x = rima.R"x"
-    e = x[1].a + x[2].b
-    print(rima.E(e, {x={{a=17},{b=19}}}))               --> 36
+    x, i = rima.R"x, i"
+    S = rima.scope.new()
+    S.x[i] = 2^i
+    print(rima.E(x[1], S), rima.E(x[7], S))             --> 2 128
 
-The subscripts you use in indexes don't have to be literal values,
-they can be references to other variables:
+You can use this method of indexing directly in the call to `rima.scope.new`,
+but you have to enclose the index expression in square brackets:
 
-    x, y = rima.R"x, y"
-    e = x[y].a
-    print(rima.E(e, {y=2}))                             --> x[2].a
-    print(rima.E(e, {y=2, x={{a=20},{a=50}}}))          --> 50
+    x, i = rima.R"x, i"
+    S = rima.scope.new{ [x[i]] = 2^i }
+    print(rima.E(x[1], S), rima.E(x[7], S))             --> 2 128
 
-Beware of confusing `x[a]` with `x["a"]` and `x.a` though!
 
-[ [Contents](contents.html) | Previous: [Expressions](expressions.html) | Next: [Sums](sums.html) ]
+[ [Contents](contents.html) | Previous: [A Simple LP](simple_lp.html) | Next: [Sums](sums.html) ]

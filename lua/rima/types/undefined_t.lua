@@ -20,8 +20,8 @@ end
 __tostring = lib.__tostring
 
 
-function undefined_t:describe(s)
-  return ("%s undefined"):format(s)
+function undefined_t:describe(s, format)
+  return ("%s undefined"):format(lib.repr(s, format))
 end
 
 

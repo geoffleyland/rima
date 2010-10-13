@@ -19,7 +19,7 @@ answer = rima.R"answer"
 initial = rima.R"initial"                -- the starting solution
 
 -- Create the model and set up the constraints
-sudoku = rima.new()
+sudoku = rima.mp.new()
 sudoku.one_value_per_cell[{r=rows}][{c=columns}] = rima.mp.C(rima.sum{v=values}(answer[r][c][v]), "==", 1)
 sudoku.each_value_once_per_row[{r=rows}][{v=values}] = rima.mp.C(rima.sum{c=columns}(answer[r][c][v]), "==", 1)
 sudoku.each_value_once_per_column[{c=columns}][{v=values}] = rima.mp.C(rima.sum{r=rows}(answer[r][c][v]), "==", 1)
@@ -39,7 +39,7 @@ sudoku.sense = "minimise"
 
 
 -- Write out our model
-rima.mp.write(sudoku)
+--io.write("Sudoku model:\n", tostring(sudoku), "\n")
 --[[
 Minimise:
   1
@@ -51,7 +51,7 @@ Subject to:
 --]]
 
 -- Set up a 9 by 9 sudoku problem
-sudoku_9_by_9 = rima.instance(sudoku,
+sudoku_9_by_9 = rima.mp.new(sudoku,
   {
     rows = rima.range(1, 9),
     columns = rima.range(1, 9),
@@ -61,7 +61,7 @@ sudoku_9_by_9 = rima.instance(sudoku,
 
 
 -- The example sudoku grid from zibopt
-zibopt_problem =
+zibopt_data =
 {
   {0, 0, 0,   6, 9, 2,   0, 4, 0},
   {7, 0, 0,   0, 0, 0,   8, 9, 0},
@@ -75,23 +75,32 @@ zibopt_problem =
   {0, 8, 6,   0, 0, 0,   0, 0, 1},
   {0, 3, 0,   7, 2, 8,   0, 0, 0}
 }
-sudoku_zibopt = rima.instance(sudoku_9_by_9, { initial = zibopt_problem })
+sudoku_zibopt = rima.mp.new(sudoku_9_by_9, { initial = zibopt_data })
+print(rima.E(initial[1][1], sudoku_zibopt))
+print(rima.E(rima.case(initial[1][1],
+  {
+    { 1, 1 },
+    { 0, rima.binary() },
+  }, 0), sudoku_zibopt))
+print(rima.E(answer[1][1][1], sudoku_zibopt))
+
+os.exit()
 
 -- Solve the problem
-local primal, dual = rima.mp.solve("cbc", sudoku_zibopt)
+local objective, result = rima.mp.solve("cbc", sudoku_9_by_9, { initial = zibopt_data })
 
 -- Print the answer nicely.  There's probably an easier way to do this.
 io.write("\nSudoku answer\n")
 
-for i, v in pairs(primal.answer) do
+for i, v in pairs(result.answer) do
   for j, w in pairs(v) do
     for k, x in pairs(w) do
-      if x == 1 then zibopt_problem[i][j] = k end
+      if x.p == 1 then zibopt_data[i][j] = k end
     end
   end
 end
 
-for i, r in ipairs(zibopt_problem) do
+for i, r in ipairs(zibopt_data) do
   for j, v in ipairs(r) do
     io.write(("%d "):format(v))
     if j == 3 or j == 6 then io.write(" ") end

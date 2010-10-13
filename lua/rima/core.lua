@@ -1,10 +1,11 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, getmetatable, rawtype = error, getmetatable, type
+local getmetatable, type = getmetatable, type
 
 local lib = require("rima.lib")
 local trace = require("rima.lib.trace")
+local undefined_t = require("rima.types.undefined_t")
 
 module(...)
 
@@ -32,7 +33,7 @@ function arithmetic(e)
   if trace.on then trace.enter("arth", 1, nil, e) end
   local result
 
-  if rawtype(e) == "number" then
+  if type(e) == "number" then
     result = true
   else
     local mt = getmetatable(e)
@@ -63,70 +64,40 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function eval(e, S)
+  local value, exp = eval_to_paths(e, S, 1)
+  local f = lib.getmetamethod(value, "__finish")
+  if f then
+    value = f(value)
+  end
+  if value and not undefined_t:isa(value) then
+    return value
+  else
+    return exp
+  end
+end
+
+
+function eval_to_paths(e, s, d)
   local f = lib.getmetamethod(e, "__eval")
-  if trace.on then trace.enter("eval", 1, f, e) end
-
+  if trace.on then trace.enter("eval", d and d+1, f, e) end
+  local value, exp
   if f then
-    local exp, type = f(e, S, eval)
-    if trace.on then trace.leave("eval", 1, e, exp) end
-    if type then return exp, type else return exp end
+    value, exp = f(e, s)
   else
-    if trace.on then trace.leave("eval", 1, e, e) end
-    return e
+    value = e
   end
+  if trace.on then trace.leave("eval", 1, e, value, exp) end
+  return value, exp
 end
 
 
--- Binding ---------------------------------------------------------------------
+-- Listing variables -----------------------------------------------------------
 
-function bind(e, S)
-  local b = lib.getmetamethod(e, "__bind")
-  if trace.on then trace.enter("bind", 1, b, e) end
-
-  local exp, type
-
-  if b then
-    exp, type = b(e, S)
-  else
-    local f = lib.getmetamethod(e, "__eval")
-    if f then
-      exp, type = f(e, S, bind)
-    end
-  end
-  
-  if exp then
-    if trace.on then trace.leave("bind", 1, e, exp) end
-    if type then return exp, type else return exp end
-  else
-    if trace.on then trace.leave("bind", 1, e, e) end
-    return e
-  end
-end
-
-
--- Types -----------------------------------------------------------------------
-
-function type(e, S)
-  local f = lib.getmetamethod(e, "__type")
-  if f then
-    return f(e, S)
-  else
-    error(("error getting type information for '%s': the object doesn't support type queries"):
-      format(lib.repr(e)))
-  end
-end
-
-
--- Setting ---------------------------------------------------------------------
-
-function set(e, t, v)
-  local f = lib.getmetamethod(e, "__set")
-  if f then
-    f(e, t, v)
-  else
-    error(("error setting result field '%s' to '%s': the object used as a field index doesn't support setting"):
-      format(lib.repr(e), lib.repr(v)))
-  end
+function list_variables(e, S, list)
+  list = list or {}
+  local f = lib.getmetamethod(e, "__list_variables")
+  if f then f(e, S, list) end
+  return list
 end
 
 

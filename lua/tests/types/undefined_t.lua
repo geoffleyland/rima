@@ -32,17 +32,17 @@ function test(options)
   
   do
     local x = rima.R"x"
-    local S = rima.scope.new{ x = undefined_t:new() }
+    local S = { x = undefined_t:new() }
     T:check_equal(E(x, S), "x")
     T:check_equal(E(x + 1, S), "1 + x")
   end
 
   do
     local x, y, z = rima.R"x, y, z"
-    local S = rima.scope.new{ x = { undefined_t:new() }}
+    local S = { x = { undefined_t:new() }}
     local e = rima.sum{y=x}(x[y])
     T:check_equal(E(e, S), "x[1]")
-    T:check_equal(lib.dump(E(e, S)), "index(ref(x), address{1})")
+    T:check_equal(lib.dump(E(e, S)), "index(address{\"x\", 1})")
   end
 
   return T:close()

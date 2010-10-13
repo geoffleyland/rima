@@ -3,58 +3,68 @@
 
 local error, ipairs, require = error, ipairs, require
 
-local args = require("rima.lib.args")
+local libargs = require("rima.lib.args")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local call = require("rima.operators.call")
 local scope = require("rima.scope")
+local index = require("rima.index")
 
 module(...)
 
-local ref = require("rima.ref")
 
 -- Function type ---------------------------------------------------------------
 
 local func = object:new(_M, "func")
+local counter = 1
 
 
-function func:new(inputs, exp, S)
-  local fname, usage =
-    "func:now",
-    "new(inputs, expression, table or scope)"
-
-  args.check_types(S, "S", {"nil", "table", {scope, "scope"}}, usage, fname)
-
-  if S and not scope:isa(S) then S = scope.new(S) end
-
-  local new_inputs = {}
-  for i, v in ipairs(inputs) do
+local function read(args)
+  local new_args = {}
+  for i, v in ipairs(args) do
     if type(v) == "string" then
-      new_inputs[i] = ref:new{name=v}
-    elseif ref:isa(v) then
-      if ref.is_simple(v) then
-        new_inputs[i] = v
+      new_args[i] = v
+    elseif index:isa(v) then
+      if index:is_identifier(v) then
+        new_args[i] = lib.repr(v)
       else
-        error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
+        error(("bad input #%d to function constructor: expected string or identifier, got '%s' (%s)"):
           format(i, lib.repr(v), type(v)), 0)
       end
     else
-      error(("bad input #%d to function constructor: expected string or simple reference, got '%s' (%s)"):
+      error(("bad input #%d to function constructor: expected string or identifier, got '%s' (%s)"):
         format(i, lib.repr(v), type(v)), 0)
     end
   end
+  return new_args
+end
 
-  local pretty_exp = exp
-  if new_inputs[1] then
-    S = S or scope.new()
-    for i, a in ipairs(new_inputs) do
-      S[lib.repr(a)] = ref:new{name="_"..i}
+
+local function prepare(exp, name, args)
+  if args[1] then
+    local S2 = scope.new()
+    for i, a in ipairs(args) do
+      S2[a] = index:new(nil, name, a)
     end
-    exp = core.eval(exp, S)
+    exp = core.eval(exp, S2)
   end
+  return exp
+end
 
-  return object.new(self, { inputs=new_inputs, exp=exp, S=S, pretty_exp=pretty_exp })
+
+function func:new(args, exp, S)
+  local fname, usage =
+    "func:new",
+    "new(inputs, expression, table or scope)"
+  libargs.check_types(S, "S", {"nil", "table", {scope, "scope"}}, usage, fname)
+
+  local name = "$func"..counter
+  counter = counter + 1
+  args = read(args)
+
+  if S then exp = core.eval(exp, S) end
+
+  return object.new(self, { name=name, args=args, exp=prepare(exp, name, args) })
 end
 
 
@@ -62,46 +72,37 @@ end
 
 function func:__repr(format)
   return ("function(%s) return %s"):
-    format(lib.concat_repr(self.inputs, format), lib.repr(self.pretty_exp, format))
+    format(lib.concat_repr(self.args, format), lib.repr(self.exp, format))
 end
 __tostring = lib.__tostring
 
 
 -- Evaluation ------------------------------------------------------------------
 
-function func:check_args(args)
-  local outputs = {}
-  if #args < #self.inputs then
-    error(("the function needs to be called with at least %d arguments, got %d"):format(#self.inputs, #args), 0)
-  elseif #args ~= #self.inputs then
-    error(("the function needs to be called with %d arguments, got %d"):format(#self.inputs, #args), 0)
-  end
-end
 
-
-function func:call(args, S, eval)
+function func:call(args, S)
   if not args then return self end
+  S = (S and not self.args[1]) and S or scope.new(S)
+  local Sn = S[self.name]
 
-  self:check_args(args)
-
-  local function_scope
-  if self.inputs[1] then
-    function_scope = scope.spawn(S, nil, {overwrite=true, rewrite=true, no_undefined=true})
-  else
-    function_scope = S
+  local new_args = {}
+  for i, n in ipairs(self.args) do
+    local a = args[i]
+    if a then
+      Sn[n] = a
+    else
+      Sn[n] = index:new(nil, n)
+      new_args[#new_args+1] = n
+    end
   end
 
-  for i in ipairs(self.inputs) do
-    function_scope["_"..i] = args[i]
-  end
-
-  return eval(self.exp, function_scope)
+  local exp = core.eval_to_paths(self.exp, S)
+  return new_args[1] and func:new(new_args, exp) or exp
 end
 
 
 function func:__call(...)
-  local S = scope.new()
-  return self:call({...}, S, core.eval)
+  return self:call{...}
 end
 
 

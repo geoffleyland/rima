@@ -37,16 +37,17 @@ function element:display()
 end
 
 
-function element:__eval(S, eval)
+function element:__eval(S)
   self = proxy.O(self)
-  local exp = eval(self.exp, S)
+  local exp = core.eval(self.exp, S)
+  if core.defined(exp) then exp = self.exp end
   return element:new(exp, self.key, self.value, self.set)
 end
 
 
 function element:__defined()
-  self = proxy.O(self)
-  return core.defined(self.exp)
+  local v = proxy.O(self).value
+  return v ~= nil
 end
 
 
@@ -82,10 +83,7 @@ function proxy_mt.__div(a, b) return extract(a) / extract(b) end
 function proxy_mt.__pow(a, b) return extract(a) ^ extract(b) end
 
 function proxy_mt:__unm() return -proxy.O(self).value end
-
--- Elements don't have an __index, because indexing is more complex than
--- indexing the element's value - there might be default values to deal with.
--- The rewrite might fix this.
+function proxy_mt:__index(i) return proxy.O(self).exp[i] end
 
 
 -- EOF -------------------------------------------------------------------------

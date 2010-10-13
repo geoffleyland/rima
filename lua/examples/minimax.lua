@@ -19,21 +19,22 @@ local e = rima.R"e"                     -- positive and negative Errors at each 
 
 
 -- Curve fit formulation
-local curve_fit = rima.new()
+local curve_fit = rima.mp.new()
 curve_fit.fit_data[{p=P}] = rima.mp.C(
   rima.sum{t=T}(w[t] * y[t][p]) +
   rima.sum{q=Q}(q * e[q][p]), "==",
   s[p])
 curve_fit.find_max_error[{q=Q}][{p=P}] = rima.mp.C(max_error, ">=", e[q][p])
 curve_fit.find_error_sum = rima.mp.C(sum_error, "==", rima.sum{q=Q, p=P}(e[q][p]))
-rima.set(curve_fit, { ["max_error, sum_error"]=rima.positive(), Q = {-1, 1} })
+curve_fit.max_error = rima.positive()
+curve_fit.sum_error = rima.positive()
+curve_fit.Q = {-1, 1}
 curve_fit.e[{q=Q}][{p=P}] = rima.positive()
 curve_fit.w[{t=T}] = rima.free()
 curve_fit.sense = "minimise"
 
 -- Write the formulation
-io.write("\nCurve Fitting\n")
-rima.mp.write(curve_fit)
+io.write("\nCurve Fitting\n", tostring(curve_fit), "\n")
 --[[ output:
 No objective defined
 Subject to:
@@ -44,23 +45,21 @@ Subject to:
 --]]
 
 -- minimax formulation
-local minimax = rima.instance(curve_fit)
-minimax.objective = max_error
+local minimax = rima.mp.new(curve_fit, { objective = max_error })
 
 -- minisum formulation
-local minisum = rima.instance(curve_fit)
-minisum.objective = sum_error
+local minisum = rima.mp.new(curve_fit, { objective = sum_error })
 
 -- equally spaced sampling points
 local points, x, xmin, xmax = rima.R"points, x, xmin, xmax"
 local equispaced_points =
 {
   P = rima.range(0, points),
-  x = { [p] = xmin + (xmax - xmin) * p / points }
+  [x[p]] = xmin + (xmax - xmin) * p / points
 }
 
 -- fit a polynomial with arbitrary order terms
-local polynomial_fits = { y = { [t] = { [p] = x[p]^t } } }
+local polynomial_fits = { [y[t][p]] = x[p]^t }
 
 -- fit polynomial with terms 1, x, x^2
 local terms = rima.R"terms"
@@ -68,11 +67,11 @@ local consecutive_polynomials = { T = rima.range(1, terms) }
 
 -- fit to a function
 local f = rima.R"f"
-local samples_from_function = { s = { [p] = f(x[p]) } }
-
+local samples_from_function = { [s[p]] = f(x[p]) }
+--local samples_from_function = { [s[p]] = x[p] }
 
 -- Put it all together
-local Z = rima.instance(minimax, polynomial_fits, consecutive_polynomials, samples_from_function, equispaced_points)
+local Z = rima.mp.new(minimax, polynomial_fits, consecutive_polynomials, samples_from_function, equispaced_points)
 
 local primal, dual = rima.mp.solve("clp", Z,
 {

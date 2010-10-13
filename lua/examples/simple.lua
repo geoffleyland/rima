@@ -13,7 +13,7 @@ This simple problem is copied from an OSI example:
 io.write("\nSimple Test:\n")
 
 local x, y = rima.R"x, y"
-local S = rima.new()
+local S = rima.mp.new()
 S.c1 = rima.mp.C(x + 2*y, "<=", 3)
 S.c2 = rima.mp.C(2*x + y, "<=", 3)
 S.objective = x + y
@@ -22,7 +22,7 @@ S.x = rima.positive()
 S.y = rima.positive()
 
 io.write("Algebraic Form:\n")
-rima.mp.write(S)
+io.write(tostring(S))
 io.write("\nSparse Form:\n")
 rima.mp.write_sparse(S)
 

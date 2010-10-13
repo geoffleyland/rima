@@ -1,0 +1,84 @@
+    --! env rima = require("rima")
+
+# Rima Manual: A Simple Linear Program
+
+[ [Contents](contents.html) | Previous: [Expressions](expressions.html) | Next: [Arrays](arrays.html) ]
+
+We've got just enough knowledge of expressions to build
+our first (very simple) Linear Program and solve it.
+
+
+## Constructing a Model
+
+`rima.mp` is the module that handles math programming.
+`rima.mp.new` constructs a new model environment:
+
+    M = rima.mp.new()
+
+The objective and optimisation sense are set as fields of `M`,
+which we treat like a Lua table:
+
+    --! continue
+    x, y = rima.R"x, y"
+    M.sense = "maximise"
+    M.objective = x + y
+
+The string setting the objective sense is not case-sensitive, and can be
+maximise, maximize, minimise or minimize.
+
+`rima.mp.C` creates a new constraint.
+Constraints are named, and added to `M` as well:
+
+    --! continue
+    M.c1 = rima.mp.C(x + 2*y, "<=", 3)
+    M.c2 = rima.mp.C(2*x + y, "<=", 3)
+
+Finally we set bounds on the variables:
+
+    --! continue
+    M.x = rima.positive()
+    M.y = rima.positive()
+
+As with expressions, printing a model gives a readable description:
+
+    --! continue
+    print(M)
+    --> Maximise:
+    -->   x + y
+    --> Subject to:
+    -->   c1: x + 2*y <= 3
+    -->   c2: 2*x + y <= 3
+    -->   0 <= x <= inf, x real
+    -->   0 <= y <= inf, y real
+
+
+## Solving a Model
+
+`rima.mp.solve` solves the model:
+
+    --! continue
+    primal, dual = rima.mp.solve("lpsolve", M)
+
+`rima.mp.solve`  returns two values.
+The first is the primal solution to the problem,
+the second is the set of duals.
+Both are organised using the same set of names as were used to define the problem.
+The objective is a field of the primal table:
+
+    --! continue
+    print(primal.objective)                             --> 2
+
+Primal and dual value for the variables can be obtained:
+
+    --! continue
+    print(primal.x, primal.y)                           --> 1 1
+    print(dual.x, dual.y)                               --> 0 0
+
+Likewise for the constraints:
+
+    --! continue
+    print(primal.c1, primal.c2)                         --> 3 3
+    print(dual.c2, dual.c2)                             --> /0%.3+ 0%.3+/ 0.3333 0.3333
+
+
+[ [Contents](contents.html) | Previous: [Expressions](expressions.html) | Next: [Arrays](arrays.html) ]
