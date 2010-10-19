@@ -105,7 +105,9 @@ function list:prepare(e, name)
       S[n] = index:new(nil, name, n)
     end
   end
-  return core.eval(e, S)
+  if e then
+    return core.eval(e, S)
+  end
 end
 
 
