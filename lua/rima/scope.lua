@@ -475,7 +475,7 @@ local function finish_prototypes(new_paths)
   end
 end
 
-local zzz = 1
+
 local function step_paths(r, i)
   r = proxy.O(r)
   local addr = r.address[i]
