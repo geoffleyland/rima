@@ -287,6 +287,8 @@ function index.resolve(r, s)
       j = 0
     end
 
+    if trace.on then trace.leave("indx", 1, v, current) end
+
     current, addr2 = core.eval_to_paths(current, s)
     if addr2 then
       base = addr2
@@ -294,7 +296,6 @@ function index.resolve(r, s)
       j = 0
     end
 
-    if trace.on then trace.leave("indx", 1, v, current) end
     if not current then break end
     j = j + 1
   end
