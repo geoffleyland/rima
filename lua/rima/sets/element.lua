@@ -62,7 +62,11 @@ function element:__repr(format)
     return ("element(%s, key=%s, value=%s)"):
       format(lib.repr(self.exp, format), lib.repr(self.key, format), lib.repr(self.value, format))
   else
-    return lib.repr(self.exp, format)
+    if core.arithmetic(self.value) then
+      return lib.repr(self.value, format)
+    else
+      return lib.repr(self.exp, format)
+    end
   end
 end
 proxy_mt.__tostring = lib.__tostring
