@@ -266,10 +266,14 @@ end
 
 function index.resolve(r, s)
   local I = proxy.O(r)
-  local addr, base, addr2
+  local addr, base
   addr = core.eval(I.address, s)
-  base, addr2 = core.eval_to_paths(I.base, s)
-  if addr2 then base = addr2 end
+  base = I.base
+  if base then
+    local addr2
+    base, addr2 = core.eval_to_paths(I.base, s)
+    if addr2 then base = addr2 end
+  end
 
   local current = base or s
   local f = lib.getmetamethod(current, "__read_ref")
