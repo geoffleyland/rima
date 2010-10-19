@@ -74,7 +74,7 @@ function test(options)
     if not pass then
       local s = ""
       s = s..("error linearising %s:\n"):format(lib.repr(e))
-      s = s..("  Evaluated to %s\n"): format(lib.repr(core.eval(e, S)))
+      s = s..("  Evaluated to %s\n"): format(lib.repr((core.eval(e, S))))
       s = s..("  Constant: %.4g %s %.4g\n"):format(expected_constant,
         (expected_constant==got_constant and "==") or "~=", got_constant)
       local all = {}

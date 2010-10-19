@@ -113,8 +113,8 @@ ref.__tostring = lib.__tostring
 -- Evaluation ------------------------------------------------------------------
 
 function ref:__eval(S)
-  local t = core.eval(self.set, S)
-  
+  local t, addr = core.eval(self.set, S)
+
   if not core.defined(t) then
     return ref:new(t, self.order, self.values, self.names)
   end
@@ -126,7 +126,7 @@ function ref:__eval(S)
   
   -- assume empty tables mean we're undefined - might be wrong on this
   if not next(t) then
-    return ref:new(self.set, self.order, self.values, self.names)
+    return ref:new(addr, self.order, self.values, self.names)
   end
   
   return ref:new(self.set, self.order, self.values, self.names, t)

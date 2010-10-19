@@ -70,7 +70,7 @@ function eval(e, S)
     value = f(value)
   end
   if value and not undefined_t:isa(value) then
-    return value
+    return value, exp
   else
     return exp
   end

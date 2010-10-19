@@ -36,8 +36,8 @@ end
 
 
 function constraint:tostring(S)
-  local lhs = lib.repr(core.eval(self.lhs, S))
-  local rhs = lib.repr(core.eval(self.rhs, S))
+  local lhs = lib.repr((core.eval(self.lhs, S)))
+  local rhs = lib.repr((core.eval(self.rhs, S)))
   local s = lhs.." "..self.type.." "..rhs
   return s
 end
