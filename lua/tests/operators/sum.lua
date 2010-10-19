@@ -37,24 +37,24 @@ function test(options)
   U{"rima.sum{q=Q}(x*v)", S="sum{q in Q}(v*x)" }
   U{"rima.sum{q=Q}(x[q]*y[q])", S="sum{q in Q}(x[q]*y[q])"}  
   U{"rima.sum{r=R}(x[r]*y[r])", S="sum{r in R}(x[r]*y[r])", ES="x.a + 2*x.b + 3*x.c"}
-  U{"rima.sum{q=Q, R}(x[q][R])", S="sum{R, q in Q}(x[q, R])", ES="sum{q in Q}(x[q].a + x[q].b + x[q].c)"}
+  U{"rima.sum{q=Q, R=R}(x[q][R])", S="sum{R in R, q in Q}(x[q, R])", ES="sum{q in Q}(x[q].a + x[q].b + x[q].c)"}
   U{"rima.sum{q=Q, r=R}(x[q][r])", S="sum{q in Q, r in R}(x[q, r])", ES="sum{q in Q}(x[q].a + x[q].b + x[q].c)"}
   U{"rima.sum{q=Q, r=R}(x[q][r] * y[q])", S="sum{q in Q, r in R}(x[q, r]*y[q])", ES="sum{q in Q}(x[q].a*y[q] + x[q].b*y[q] + x[q].c*y[q])"}
   U{"rima.sum{q=Q, r=R}(x[q][r] * y[r])", S="sum{q in Q, r in R}(x[q, r]*y[r])", ES="sum{q in Q}(x[q].a + 2*x[q].b + 3*x[q].c)"}
 
-  U{"rima.sum{Q, R}(x[Q][R])", S="sum{Q, R}(x[Q, R])", ES="sum{Q}(x[Q].a + x[Q].b + x[Q].c)"}
-  U{"rima.sum{Q, R}(z[Q][R])", S="sum{Q, R}(z[Q, R])", ES="sum{Q}(z[Q].a + z[Q].b + z[Q].c)"}
-  U{"rima.sum{V, Q}(x[V][Q])", S="sum{V, Q}(x[V, Q])", ES="sum{Q}(x.d[Q] + x.e[Q])"}
-  U{"rima.sum{R, V}(x[R][V])", S="sum{R, V}(x[R, V])", ES="x.a.d + x.a.e + x.b.d + x.b.e + x.c.d + x.c.e"}
-  U{"rima.sum{R, V}(z[R][V])", S="sum{R, V}(z[R, V])", ES=21}
+  U{"rima.sum{Q=Q, R=R}(x[Q][R])", S="sum{Q in Q, R in R}(x[Q, R])", ES="sum{Q in Q}(x[Q].a + x[Q].b + x[Q].c)"}
+  U{"rima.sum{Q=Q, R=R}(z[Q][R])", S="sum{Q in Q, R in R}(z[Q, R])", ES="sum{Q in Q}(z[Q].a + z[Q].b + z[Q].c)"}
+  U{"rima.sum{V=V, Q=Q}(x[V][Q])", S="sum{Q in Q, V in V}(x[V, Q])", ES="sum{Q in Q}(x.d[Q] + x.e[Q])"}
+  U{"rima.sum{R=R, V=V}(x[R][V])", S="sum{R in R, V in V}(x[R, V])", ES="x.a.d + x.a.e + x.b.d + x.b.e + x.c.d + x.c.e"}
+  U{"rima.sum{R=R, V=V}(z[R][V])", S="sum{R in R, V in V}(z[R, V])", ES=21}
 
   -- Recursive indexes
   local U = expression_tester(T, "x, y, q, Q, R, r, V", { Q={"a", "b"}, R={ a={ "x", "y" }, b={ "y", "z" } }, y={ x=1, y=2, z=3} })
   U{"rima.sum{q=Q, r=R[q]}(x[r])", S="sum{q in Q, r in R[q]}(x[r])", ES="x.x + 2*x.y + x.z"}
-  U{"rima.sum{Q, r=R[Q]}(x[r])", S="sum{Q, r in R[Q]}(x[r])", ES="x.x + 2*x.y + x.z"}
-  U{"rima.sum{V, r=R[V]}(x[r])", S="sum{V, r in R[V]}(x[r])", ES="sum{V, r in R[V]}(x[r])"}
-  U{"rima.sum{Q, r=V[Q]}(x[r])", S="sum{Q, r in V[Q]}(x[r])", ES="sum{r in V.a}(x[r]) + sum{r in V.b}(x[r])"}
-  U{"rima.sum{Q, r=R[Q]}(y[r])", S="sum{Q, r in R[Q]}(y[r])", ES=8}
+  U{"rima.sum{Q=Q, r=R[Q]}(x[r])", S="sum{Q in Q, r in R[Q]}(x[r])", ES="x.x + 2*x.y + x.z"}
+  U{"rima.sum{V=V, r=R[V]}(x[r])", S="sum{V in V, r in R[V]}(x[r])", ES="sum{V in V, r in R[V]}(x[r])"}
+  U{"rima.sum{Q=Q, r=V[Q]}(x[r])", S="sum{Q in Q, r in V[Q]}(x[r])", ES="sum{r in V.a}(x[r]) + sum{r in V.b}(x[r])"}
+  U{"rima.sum{Q=Q, r=R[Q]}(y[r])", S="sum{Q in Q, r in R[Q]}(y[r])", ES=8}
 
   -- Ranges
   local y, z = rima.R"y, z"
@@ -77,8 +77,8 @@ function test(options)
     T:check_equal(E(e1, S), "X[1].y + X[2].y + X[3].y")
     T:check_equal(E(e1, S2), 6)
 
-    local e2 = rima.sum({X}, X.y)
-    T:check_equal(e2, "sum{X}(X.y)")
+    local e2 = rima.sum({X=X}, X.y)
+    T:check_equal(e2, "sum{X in X}(X.y)")
 --    T:check_equal(D(e2), "sum({X in ref(X)}, index(ref(X), address{\"y\"}))")
     T:check_equal(E(e2, S), "X[1].y + X[2].y + X[3].y")
     T:check_equal(E(e2, S2), 6)
@@ -105,10 +105,10 @@ function test(options)
     T:check_equal(E(e1, S), "sum{_, x in ipairs(X)}(x.y)")
     T:check_equal(E(e1, S2), 6)
 
-    local e2 = rima.sum({X}, X.y)
-    T:check_equal(e2, "sum{X}(X.y)")
+    local e2 = rima.sum({X=X}, X.y)
+    T:check_equal(e2, "sum{X in X}(X.y)")
 --    T:check_equal(D(e2), "sum({X in ref(X)}, index(ref(X), address{\"y\"}))")
-    T:check_equal(E(e2, S), "sum{X}(X.y)")
+    T:check_equal(E(e2, S), "sum{X in X}(X.y)")
     T:check_equal(E(rima.sum{x=X}(x.y), S2), 6)
     T:check_equal(E(e2, S2), 6)
 
@@ -141,13 +141,13 @@ function test(options)
     T:check_equal(E(e, S2), "11*X[1].y")
     T:check_equal(E(e, S3), "11*X[1].y + 13*X[2].y + 17*X[3].y")
 
-    e = rima.sum{X}(X.y)
-    T:check_equal(e, "sum{X}(X.y)")
+    e = rima.sum{X=X}(X.y)
+    T:check_equal(e, "sum{X in X}(X.y)")
     T:check_equal(E(e, S2), "X[1].y")
     T:check_equal(E(e, S3), "X[1].y + X[2].y + X[3].y")
 
-    e = rima.sum{X}(X.y * X.z)
-    T:check_equal(e, "sum{X}(X.y*X.z)")
+    e = rima.sum{X=X}(X.y * X.z)
+    T:check_equal(e, "sum{X in X}(X.y*X.z)")
     T:check_equal(E(e, S2), "11*X[1].y")
     T:check_equal(E(e, S3), "11*X[1].y + 13*X[2].y + 17*X[3].y")
 

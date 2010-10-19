@@ -8,20 +8,12 @@ Summing the elements of a table is achieved with `rima.sum{tables}(expression)`,
 which takes a list of tables to sum over as its first argument,
 and an expression to sum as its second:
 
-    X = rima.R"X"
-    e = rima.sum{X}(X)
-    print(e)                                            --> sum{X}(X)
-    print(rima.E(e, {X={3, 5, 7}}))                     --> 15
-
-It's usually nicer to give the current element of the table a different name from
-the table you're summing over.  For this, use `{x=X}` for the table argument.
-
     x, X = rima.R"x, X"
     e = rima.sum{x=X}(x)
     print(e)                                            --> sum{x in X}(x)
     print(rima.E(e, {X={4, 5, 6}}))                     --> 15
 
-This is especially useful if you want to sum over the same table more than once:
+The `{x=X}` syntax is especially useful if you want to sum over the same table more than once:
 
     x1, x2, X = rima.R"x1, x2, X"
     e = rima.sum{x1=X, x2=X}(x1 * x2)

@@ -36,9 +36,9 @@ function test(options)
 
   local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = rima.range(2, r) }  
   T:check_equal(E(rima.sum({r=Q}, x[r]), S), 60)
-  T:check_equal(E(rima.sum({Q}, x[Q]), S), 60)
+  T:check_equal(E(rima.sum({Q=Q}, x[Q]), S), 60)
   T:check_equal(rima.sum{y=Q}(x[y]), "sum{y in Q}(x[y])")
-  T:check_equal(rima.sum{Q=Q}(x[Q]), "sum{Q}(x[Q])")
+  T:check_equal(rima.sum{Q=Q}(x[Q]), "sum{Q in Q}(x[Q])")
   T:check_equal(E(rima.sum({y=Q}, x[y]), S), 60)
   T:check_equal(rima.sum({y=Q}, rima.ord(y)), "sum{y in Q}(ord(y))")
   T:check_equal(E(rima.sum{y=Q}(rima.ord(y)), S), 6)
@@ -70,15 +70,15 @@ function test(options)
     T:check_equal(E(rima.sum{y=Q}(x[y] + z[y]), S), "x[1] + x[2] + x[3] + z.a + z.b + z.c")
   end
 
-  T:check_equal(rima.sum({R}, R), "sum{R}(R)")
+  T:check_equal(rima.sum({R=R}, R), "sum{R in R}(R)")
   T:check_equal(rima.sum({R=rima.range(2, r)}, R), "sum{R in range(2, r)}(R)")
   T:check_equal(rima.sum({R=rima.range(2, 10)}, R), "sum{R in range(2, 10)}(R)")
-  T:check_equal(E(rima.sum({R}, R), S), "sum{R in range(2, r)}(R)")
+  T:check_equal(E(rima.sum({R=R}, R), S), "sum{R in range(2, r)}(R)")
   T:check_equal(E(rima.sum({y=R}, y), S), "sum{y in range(2, r)}(y)")
   T:check_equal(E(rima.sum({y=rima.range(2, r)}, y), S), "sum{y in range(2, r)}(y)")
   T:check_equal(E(rima.sum({y=rima.range(2, 10)}, y), S), 54)
   S.r = 10
-  T:check_equal(E(rima.sum({R}, R), S), 54)
+  T:check_equal(E(rima.sum({R=R}, R), S), 54)
   T:check_equal(E(rima.sum({y=R}, y), S), 54)
   T:check_equal(E(rima.sum({y=rima.range(2, r)}, y), S), 54)
 
@@ -121,8 +121,8 @@ function test(options)
     local x, X, r = rima.R"x, X, r"
     local S = rima.scope.new{ r = rima.range(1, 3) }
     S.X[r] = rima.free()
-    T:check_equal(E(rima.sum{r}(r), S), 6)
-    T:check_equal(E(rima.sum{r}(r * x[r]), S), "x[1] + 2*x[2] + 3*x[3]")
+    T:check_equal(E(rima.sum{r=r}(r), S), 6)
+    T:check_equal(E(rima.sum{r=r}(r * x[r]), S), "x[1] + 2*x[2] + 3*x[3]")
   end
 
   do

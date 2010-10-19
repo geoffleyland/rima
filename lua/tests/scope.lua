@@ -345,9 +345,9 @@ function test(options)
     subscope.e3 = c
     subscope.e4 = c + d
     subscope.e5 = a * c
-    subscope.e6 = rima.sum{e}(e.a)
-    subscope.e7 = rima.sum{e}(e.b)
-    subscope.e8 = rima.sum{e}(e.a * e.b)
+    subscope.e6 = rima.sum{e=e}(e.a)
+    subscope.e7 = rima.sum{e=e}(e.b)
+    subscope.e8 = rima.sum{e=e}(e.a * e.b)
     
     local superscope = N()
     superscope.sub[i] = subscope

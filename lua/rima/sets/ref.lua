@@ -39,9 +39,9 @@ function ref:read(s)
   local namestring, set
   local t = object.type(s)
   if t == "index" then -- 's'
-    namestring, set = index:identifier(s), s
+    namestring, set = index:identifier(s), nil
   elseif t == "string" then -- '"s"'
-    namestring, set = s, s
+    namestring, set = s, nil
   elseif t == "table" and not getmetatable(s) then -- '{n=S}'
     namestring, set = next(s)
   else
@@ -56,7 +56,9 @@ function ref:read(s)
 
   -- what was l?
   local result
-  if type(set) == "string" then
+  if not set then
+    result = ref:new(nil, "a", "elements", names)  
+  elseif type(set) == "string" then
     result = ref:new(index:new(nil, set), "a", "elements", names)
   elseif ref:isa(set) then
     set:set_names(names)
@@ -87,25 +89,27 @@ function ref:__repr(format)
     return ("ref{names={%s}, order={%s%s}, set=%s}"):format(n, self.order, self.values, s)
   end
 
-  local f
-  if self.order ~= "a" or self.values ~= "elements" then
-    f = ("%s%s(%%s)"):format(self.order, self.values)
-    if ff == "lua" then f = "rima."..f end
-  else
-    f = "%s"
-  end
+  if self.set then
+    local f
+    if self.order ~= "a" or self.values ~= "elements" then
+      f = ("%s%s(%%s)"):format(self.order, self.values)
+      if ff == "lua" then f = "rima."..f end
+    else
+      f = "%s"
+    end
 
-  if ff == "latex" then
-    f = "%s \\in "..f
-  elseif n == s then
-    f = "%s"
-  elseif ff == "lua" then
-    f = "%s="..f
+    if ff == "latex" then
+      f = "%s \\in "..f
+    elseif ff == "lua" then
+      f = "%s="..f
+    else
+      f = "%s in "..f
+    end
+
+    return f:format(n, s)
   else
-    f = "%s in "..f
+    return n
   end
-  
-  return f:format(n, s)
 end
 ref.__tostring = lib.__tostring
 
@@ -113,6 +117,8 @@ ref.__tostring = lib.__tostring
 -- Evaluation ------------------------------------------------------------------
 
 function ref:__eval(S)
+  if not self.set then return self end
+
   local t, addr = core.eval(self.set, S)
 
   if not core.defined(t) then
