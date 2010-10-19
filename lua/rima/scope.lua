@@ -282,6 +282,9 @@ function node:__repr(format)
       for k, v in pairs(format) do f2[k] = v end
       f2.depth = (f2.depth or 0) + 1
       local result = {}
+      if self.scope then
+        lib.append(result, (" private scope: prefix=%s\n"):format(lib.repr(proxy.O(self.scope).prefix)))
+      end
       if self.set_default then
         lib.append(result, (" <set default> = %s\n"):format(newlines_or_spaces(lib.repr(self.set_default, f2))))
       end
@@ -295,18 +298,24 @@ function node:__repr(format)
       r = lib.concat(result, ", ")
 
     else
+      f = ""
+      if self.scope then
+        f = ("private scope: prefix=%s, "):format(lib.repr(proxy.O(self.scope).prefix))
+      end
       if format.depth then
-        f = "%s"
+        f = f.."%s"
       else
-        f = "node(%s)"
+        f = f.."node(%s)"
       end
     end
 
     if not r then
       if self.value then
-        r = lib.repr(self.value or self.prototype, format)
+        r = lib.repr(self.value, format)
+      elseif self.prototype then
+        r = "prototype("..lib.repr(self.prototype, format)..")"
       else
-        r = "prototype("..lib.repr(self.value or self.prototype, format)..")"
+        r = "nil"
       end
     end
     return f:format(r)
