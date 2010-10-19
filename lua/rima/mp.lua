@@ -81,8 +81,10 @@ local function find_constraints(S, f)
           end
         end
       elseif closure:isa(v) and constraint:isa(v.exp) then
-        for S2, undefined in current_sets:iterate(scope.new(S), v.name) do
-            add_constraint(core.eval(v.exp, S2), build_ref(S2[v.name], current_sets, undefined), undefined)
+        local cs2 = current_sets:copy()
+        cs2:prepare(nil, v.name)
+        for S2, undefined in cs2:iterate(scope.new(S), v.name) do
+          add_constraint(core.eval(v.exp, S2), build_ref(S2[v.name], cs2, undefined), undefined)
         end
       end
       current_address[#current_address] = nil

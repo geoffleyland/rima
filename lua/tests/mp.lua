@@ -109,6 +109,29 @@ Subject to:
     T:check_equal(primal.constraint[2], 3)
   end
 
+  do
+    local a, p, P, q, Q = rima.R"a, p, P, q, Q"
+    local S = rima.mp.new()
+    S.constraint1[{p=P}][{q=P[p].Q}] = constraint:new(a, "<=", P[p].Q[q])
+    S.constraint2[{p=P}][{q=p.Q}] = constraint:new(a, "<=", q)
+    S.P = {{Q={3,5}},{Q={7,11,13}}}
+    T:check_equal(S,
+[[
+No objective defined
+Subject to:
+  constraint1[1, 3]:  a <= 3
+  constraint1[1, 5]:  a <= 5
+  constraint1[2, 7]:  a <= 7
+  constraint1[2, 11]: a <= 11
+  constraint1[2, 13]: a <= 13
+  constraint2[1, 3]:  a <= 3
+  constraint2[1, 5]:  a <= 5
+  constraint2[2, 7]:  a <= 7
+  constraint2[2, 11]: a <= 11
+  constraint2[2, 13]: a <= 13
+]])
+  end
+
   return T:close()
 end
 
