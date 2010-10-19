@@ -36,7 +36,7 @@ end
 
 
 function closure:set_args(s, args)
-  local eval_scope = scope.new(s)
+  local eval_scope = scope.new_local(s)
   local local_scope = eval_scope[self.name]
   local setc = #self.args
   local arg_offset = #args - setc
@@ -48,12 +48,12 @@ end
 
 
 function closure:iterate(s)
-  return self.args:iterate(scope.new(s), self.name)
+  return self.args:iterate(scope.new_local(s), self.name)
 end
 
 
 function closure:fake_iterate(s, undefined)
-  local sn = scope.new(s)
+  local sn = scope.new_local(s)
   local sf = sn[self.name]
   for _, v in ipairs(undefined) do
     v:fake_iterate(sf)

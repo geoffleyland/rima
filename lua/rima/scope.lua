@@ -63,7 +63,7 @@ function scope.join(...)
 end
 
 
-function scope.new_with_metatable(mt, parent, ...)
+function scope.real_new(mt, top_node, parent, ...)
   if mt then
     setmetatable(mt, scope)
     for k, v in pairs(proxy_mt) do
@@ -79,7 +79,7 @@ function scope.new_with_metatable(mt, parent, ...)
     parent = nil
   end
 
-  local s = object.new(scope, copy(node:new(), parent))
+  local s = object.new(scope, copy(top_node or node:new(), parent))
 
   local S = proxy:new(s, mt)
 
@@ -102,8 +102,18 @@ function scope.new_with_metatable(mt, parent, ...)
 end
 
 
+function scope.new_with_metatable(mt, parent, ...)
+  return real_new(mt, nil, parent, ...)
+end
+
+
 function scope.new(parent, ...)
-  return new_with_metatable(nil, parent, ...)
+  return real_new(nil, nil, parent, ...)
+end
+
+
+function scope.new_local(parent, ...)
+  return real_new(nil, node:new{ is_local=true }, parent, ...)
 end
 
 
@@ -492,17 +502,29 @@ local function step_paths(r, i)
 end
 
 
-local function return_paths(paths)
+local function return_paths(paths, r)
   if #paths > 0 then
     return read_ref.new(paths), paths.address
   else
+    -- if we found nothing, we might have to add a prefix from the first parent scope that'll accept failure
+    if r and not proxy.O(r).prefix then
+      for _, p in ipairs(proxy.O(r)) do
+        if not p.is_local then
+          local prefix = proxy.O(p.scope).prefix
+          if prefix then
+            paths.address = index:new(prefix, proxy.O(paths.address).address)
+          end
+          break
+        end
+      end
+    end
     return nil, paths.address
   end
 end
 
 
 function read_ref.__index(r, i)
-  return return_paths(step_paths(r, i))
+  return return_paths(step_paths(r, i), r)
 end
 
 
