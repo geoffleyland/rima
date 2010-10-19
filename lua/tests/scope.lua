@@ -8,7 +8,6 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local rima = require("rima")
-
 local index = require("rima.index")
 
 module(...)
@@ -316,6 +315,7 @@ function test(options)
 
     T:check_equal(E(sub.a, superscope), "sub.b + sub.c")
   end
+
   do
     local a, b, c, d, e, sub = rima.R"a, b, c, d, e, sub"
     local subscope = N()
@@ -324,6 +324,16 @@ function test(options)
     superscope.sub = subscope
 
     T:check_equal(E(sub.a.b, superscope), "sub.c + sub.d.e")
+  end
+
+  do
+    local a, b, B, sub = rima.R"a, b, B, sub"
+    local subscope = N()
+    subscope.a = rima.sum{b=B}(b)
+    local superscope = N()
+    superscope.sub = subscope
+
+    T:check_equal(E(sub.a, superscope), "sum{b in sub.B}(b)")
   end
 
   do
@@ -505,13 +515,14 @@ function test(options)
   end
 
   do
-    local a, b, i, I, s, sub0, S = rima.R"a, b, i, I, s, sub0, S"
+    local a, b, c, i, I, s, sub0, notsub0 = rima.R"a, b, c, i, I, s, sub0, notsub0"
     local sub = scope.new()
     sub.a = rima.sum{i=I}(i.x)
 
     local super1 = scope.new()
     super1.a = rima.sum{s=sub0}(s.a)
-    super1.b = rima.sum{s=S}(sub0[s].a)
+    super1.b = rima.sum{s=notsub0}(sub0[s].a)
+    super1.c = rima.sum{s=notsub0}(s.a)
     T:check_equal(E(a, super1), "sum{s in sub0}(s.a)")
 
     local super2 = scope.new(super1)
@@ -519,10 +530,15 @@ function test(options)
 
     T:check_equal(E(sub0[1].a, super2), "sum{i in sub0[1].I}(i.x)")
     T:check_equal(E(a, super2), "sum{s in sub0}(sum{i in s.I}(i.x))")
-    T:check_equal(E(b, super2), "sum{s in S}(sum{i in sub0[s].I}(i.x))")
+    T:check_equal(E(b, super2), "sum{s in notsub0}(sum{i in sub0[s].I}(i.x))")
+    T:check_equal(E(c, super2), "sum{s in notsub0}(sum{i in s.I}(i.x))")
     
     local super3 = scope.new(super2, { sub0={{I={{x=3},{x=5}}},{I={{x=7},{x=11}}}} })
     T:check_equal(E(a, super3), 26)
+
+    local super4 = scope.new(super2, { notsub0=sub0 })
+    T:check_equal(E(b, super4), "sum{s in sub0}(sum{i in sub0[s].I}(i.x))")
+    T:check_equal(E(c, super4), "sum{s in sub0}(sum{i in s.I}(i.x))")
   end
 
   do
