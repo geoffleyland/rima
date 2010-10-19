@@ -35,8 +35,6 @@ end
 
 -- Constraint Handling ---------------------------------------------------------
 
-local tabulate_time, inner_time = 0, 0, 0
-
 local function find_constraints(S, f)
   local constraints = {}
   local current_address = {}
@@ -83,14 +81,9 @@ local function find_constraints(S, f)
           end
         end
       elseif closure:isa(v) and constraint:isa(v.exp) then
-        local tt = os.clock()
         for S2, undefined in current_sets:iterate(scope.new(S), v.name) do
-          local itt = os.clock()
-          inner_time = inner_time + os.clock() - itt
             add_constraint(core.eval(v.exp, S2), build_ref(S2[v.name], current_sets, undefined), undefined)
-          inner_time = inner_time + os.clock() - itt
         end
-        tabulate_time = tabulate_time + os.clock() - tt
       end
       current_address[#current_address] = nil
       if scope.set_default_thinggy:isa(k) then
