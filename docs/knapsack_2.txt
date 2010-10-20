@@ -93,7 +93,7 @@ And define the `size` of every item to be `volume^(2/3)`
     --! continue
     primal, dual = rima.mp.solve("cbc", knapsack, \
       { items=VOLUME_ITEMS, capacity=22, \
-        [items[{i=items}].size] = items[i].volume^(2/3) })
+        [items[{i=items}].size] = i.volume^(2/3) })
     print(primal.objective)                           --> 131
     print(primal.items.brick.take)                    --> 1
     print(primal.items.necklace.take)                 --> 1

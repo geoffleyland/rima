@@ -125,9 +125,10 @@ end
 
 -- Set a ref in a scope --------------------------------------------------------
 
-function list:set_args(S, i, ...)
-  self[i]:set_args(S, ...)
+function list:set_args(S, Sn, i, a)
+  self[i]:index(S, Sn, a)
 end
+
 
 -- Iteration -------------------------------------------------------------------
 

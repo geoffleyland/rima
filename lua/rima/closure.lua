@@ -41,7 +41,7 @@ function closure:set_args(s, args)
   local setc = #self.args
   local arg_offset = #args - setc
   for i = 1, setc do
-    self.args:set_args(local_scope, i, args[i + arg_offset])
+    self.args:set_args(eval_scope, local_scope, i, args[i + arg_offset])
   end
   return eval_scope
 end

@@ -158,6 +158,35 @@ function ref:set_args(S, ...)
 end
 
 
+function ref:index(S, Sn, i)
+  if not self.set then
+    self:set_args(Sn, i)
+    return
+  end
+
+  local literal = self.literal or core.eval(self.set, S)
+  if not core.defined(literal) or not next(literal) then
+    literal = nil
+  end
+  local iterate_function = lib.getmetamethod(literal, "__iterate")
+
+  if iterate_function then
+    error("indexing subiterations is not implemented yet")
+  end
+
+  if self.values == "pairs" then
+    self:set_args(Sn, i, self.set[i])
+  else
+    local v = literal and literal[i]
+    if l and not v then
+      error(("Index out of bounds when indexing %s as %s[%s]"):format(lib.repr(self), lib.repr(self.set), lib.repr(i)))
+    end
+    local value = v and v.value
+    self:set_args(Sn, element:new(self.set[i], i, v, literal))
+  end
+end
+
+
 -- Iteration -------------------------------------------------------------------
 
 local function set_ref_ipairs(state, i)
