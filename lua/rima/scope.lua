@@ -559,7 +559,7 @@ function read_ref.__eval(r, s)
   else
     a = r.address
   end
-  local new_paths = { address = a, prefix = r.prefix }
+  local results = {}
 
   for _, path in ipairs(r) do
     local result = path.value
@@ -574,12 +574,30 @@ function read_ref.__eval(r, s)
       result = core.eval_to_paths(result, eval_scope)
     end
 
-    if read_ref:isa(result) then
-      for _, p2 in ipairs(proxy.O(result)) do
-        new_paths[#new_paths+1] = node:new({ scope=path.scope or s}, p2)
+    if result then
+      results[#results+1] = { result, path, path.scope or s }
+    end
+  end
+
+  local new_paths
+  if #results == 1 and read_ref:isa(results[1][1]) then
+    local r1 = results[1]
+    local result, path, scope = proxy.O(r1[1]), r1[2], r1[3]
+    new_paths = { address=result.address or a, prefix=result.prefix or r.prefix }
+    for _, p2 in ipairs(result) do
+      new_paths[#new_paths+1] = node:new({ scope=scope }, p2)
+    end
+  else
+    new_paths = { address = a, prefix = r.prefix }
+    for _, rp in ipairs(results) do
+      local result, path, scope = rp[1], rp[2], rp[3]
+      if read_ref:isa(result) then
+        for _, p2 in ipairs(proxy.O(result)) do
+          new_paths[#new_paths+1] = node:new({ scope=scope }, p2)
+        end
+      else
+        new_paths[#new_paths+1] = node:new(path, { value=result })
       end
-    elseif result then
-      new_paths[#new_paths+1] = node:new(path, { value=result })
     end
   end
 
