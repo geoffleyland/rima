@@ -89,7 +89,7 @@ Subject to:
 Maximise:
   sum{n in N}(c[n]*x[n])
 Subject to:
-  constraint[m]: sum{n in N}(A[m, n]*x[n]) <= b[m]
+  constraint[m in M]: sum{n in N}(A[m, n]*x[n]) <= b[m]
   0 <= x[n] <= inf, x[n] real for all n
 ]])
 
@@ -114,6 +114,13 @@ Subject to:
     local S = rima.mp.new()
     S.constraint1[{p=P}][{q=P[p].Q}] = constraint:new(a, "<=", P[p].Q[q])
     S.constraint2[{p=P}][{q=p.Q}] = constraint:new(a, "<=", q)
+    T:check_equal(S,
+[[
+No objective defined
+Subject to:
+  constraint1[p in P, q in P[p].Q]: a <= P[p].Q[q]
+  constraint2[p in P, q in p.Q]:    a <= q
+]])
     S.P = {{Q={3,5}},{Q={7,11,13}}}
     T:check_equal(S,
 [[

@@ -46,13 +46,11 @@ local function find_constraints(S, f)
     for i = 1, #current_address do
       local index = current_address[i]
       if scope.set_default_thinggy:isa(index) then
-        index = core.eval(rima.R(current_sets[set_index].names[1]), S)
-        if not index then
-          index = undefined[undefined_index]
-          undefined_index = undefined_index + 1
-        else
-          set_index = set_index + 1
+        index = core.eval(rima.R(sets[set_index].names[1]), S)
+        if not core.defined(index) then
+          index = sets[set_index]
         end
+        set_index = set_index + 1
       end
       r = r[index]
     end

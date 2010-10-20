@@ -46,7 +46,7 @@ As before, we can print out the blending problem:
     -->   sum{i in I}(c[i]*f[i])
     --> Subject to:
     -->   make_quantity:               sum{i in I}(f[i]) == Q
-    -->   sufficient_nutrients[{n=N}]: sum{i in I}(f[i]*pn[i, n]) >= Q*l[n]
+    -->   sufficient_nutrients[n in N]: sum{i in I}(f[i]*pn[i, n]) >= Q*l[n]
     -->   0 <= f[i] <= inf, f[i] real for all i in I
 
 Next, we define the data for the model:
