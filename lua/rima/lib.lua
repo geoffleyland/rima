@@ -77,7 +77,7 @@ function simple_repr(o, format)
     elseif t == "boolean" then
       return tostring(o)
     elseif t == "table" then
-      local s = tostring(o)..": { "
+      local s = "table"..": { "
       local count = 0
       for k, v in pairs(o) do
         if count == 3 then s = s..",..." break end
@@ -93,7 +93,11 @@ function simple_repr(o, format)
       return t.."("..tostring(o)..")"
     end
   else
-    return tostring(o)
+    if type(o) == "table" then
+      return "table"
+    else
+      return tostring(o)
+    end
   end
 end
 
