@@ -39,50 +39,43 @@ end
 
 function case.__eval(args, S)
   args = proxy.O(args)
+
+  -- Evaluate the test value
   local value = core.eval(args[1], S)
+  local value_defined = core.defined(value)
+
+  -- Run through evaluating all the case values, seeing if we get a match
   local cases = {}
+  local found_match
   for i, v in ipairs(args[2]) do
     local match_value = core.eval(v[1], S)
-    local result
-    if undefined_t:isa(v[2]) then
-      result = v[2]
-    else
-      result = core.eval(v[2], S)
-    end
-    cases[i] = { match_value, result }
-  end
-  local default
-  if args[3] then default = core.eval(args[3], S) end
-  
-  local remaining_cases = {}
-  local matched = false
-
-  if core.defined(value) then
-    for i, v in ipairs(cases) do
-      if core.defined(v[1]) then
-        if value == v[1] then
-          if remaining_cases[1] then
-            remaining_cases[#remaining_cases+1] = v
-            matched = true
-            default = nil
-          else
-            return v[2]  -- first definite match
-          end
+    if core.defined(match_value) then
+      if value_defined and (value == match_value) then
+        if #cases == 0 then  -- if it's the first match, and none of the
+                             -- preceeding ones were undefined, we're done
+          return core.eval(v[2], S)
         end
-      else
-        if not matched then
-          remaining_cases[#remaining_cases+1] = v
-        end
+        -- otherwise, collect it and stop
+        cases[#cases+1] = { match_value, (core.eval(v[2], S)) }
+        found_match = true
+        break
       end
+    else -- if we can't compare it, collect it
+      cases[#cases+1] = { match_value, (core.eval(v[2], S)) }
     end
-    if remaining_cases[1] then
-      return expression:new(case, value, remaining_cases, default)
-    else
-      return default
-    end
-  else
-    return expression:new(case, value, cases, default)
   end
+  -- if not cases matched, return the default (if there is one
+  if #cases == 0 and args[3] then
+    return core.eval(args[3], S)
+  end
+
+  -- only keep the default if we didn't find a match (we might be here if we
+  -- did find a match, but earlier match values weren't defined)
+  local default
+  if not found_match then default = core.eval(args[3], S) end
+
+  -- If we got this far, return a new case
+  return expression:new(case, value, cases, default)
 end
 
 
