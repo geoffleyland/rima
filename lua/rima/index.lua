@@ -174,8 +174,7 @@ local function safe_index(t, i, base, address, length, depth, allow_undefined)
       if tt ~= "nil" then
         article = tt:sub(1,1):match("[aeiouAEIOU]") and " an" or " a"
       end
---      print(message)
-      error(("error indexing '%s' as '%s': can't index%s %s"):format(lib.repr(a2), lib.repr(a2+i), article, tt), depth+1)
+      error(("error indexing '%s' as '%s': can't index%s %s: (%s)"):format(lib.repr(a2), lib.repr(a2+i), article, tt, message), depth+1)
     end
   end
   return r1, r2
