@@ -119,23 +119,23 @@ ref.__tostring = lib.__tostring
 function ref:__eval(S)
   if not self.set then return self end
 
-  local t, addr = core.eval(self.set, S)
+  local value, _, addr = core.eval(self.set, S)
 
-  if not core.defined(t) then
-    return ref:new(t, self.order, self.values, self.names)
+  if not core.defined(value) then
+    return ref:new(value, self.order, self.values, self.names)
   end
 
-  if type(t) ~= "table" and not lib.getmetamethod(t, "__iterate") then
+  if type(value) ~= "table" and not lib.getmetamethod(value, "__iterate") then
     error(("expecting a table or iterable object when evaluating %s, but got '%s' (%s)"):
-      format(lib.repr(self.set), lib.repr(t), type(t)))
+      format(lib.repr(self.set), lib.repr(value), type(value)))
   end
   
   -- assume empty tables mean we're undefined - might be wrong on this
-  if not next(t) then
+  if not next(value) then
     return ref:new(addr, self.order, self.values, self.names)
   end
   
-  return ref:new(self.set, self.order, self.values, self.names, t)
+  return ref:new(self.set, self.order, self.values, self.names, value)
 end
 
 

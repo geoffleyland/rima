@@ -64,30 +64,34 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function eval(e, S)
-  local value, exp = eval_to_paths(e, S, 1)
+  if trace.on then trace.enter("eval", 1, nil, e) end
+  local value, type, addr = eval_to_paths(e, S, 1)
   local f = lib.getmetamethod(value, "__finish")
   if f then
-    value = f(value)
+    value, type, addr = f(value)
   end
-  if value and not undefined_t:isa(value) then
-    return value, exp
-  else
-    return exp
+  if undefined_t:isa(value) then
+    type = value
+    value = nil
   end
+  value = value or addr
+  if trace.on then trace.leave("eval", 1, e, value, type, addr) end
+  return value, type, addr
 end
 
 
 function eval_to_paths(e, s, d)
   local f = lib.getmetamethod(e, "__eval")
-  if trace.on then trace.enter("eval", d and d+1, f, e) end
-  local value, exp
+  if trace.on then trace.enter("evtp", d and d+1, f, e) end
+  local value, type, addr
   if f then
-    value, exp = f(e, s)
+    value, type, addr = f(e, s)
   else
     value = e
   end
-  if trace.on then trace.leave("eval", 1, e, value, exp) end
-  return value, exp
+  value = value or addr
+  if trace.on then trace.leave("evtp", 1, e, value, type, addr) end
+  return value, type, addr
 end
 
 

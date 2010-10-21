@@ -37,6 +37,13 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
+local function eval_preserve(S, value, type, addr)
+  local t, a
+  value, t, a = core.eval(value, S)
+  return value, t or type, a or addr
+end
+
+
 function case.__eval(args, S)
   args = proxy.O(args)
 
@@ -49,33 +56,34 @@ function case.__eval(args, S)
   local found_match
   for i, v in ipairs(args[2]) do
     local match_value = core.eval(v[1], S)
-    if core.defined(match_value) then
-      if value_defined and (value == match_value) then
+    if value_defined and core.defined(match_value) then
+      if value == match_value then
+        local value, type, addr = eval_preserve(S, v[2], v[3], v[4])
         if #cases == 0 then  -- if it's the first match, and none of the
                              -- preceeding ones were undefined, we're done
-          return core.eval(v[2], S)
+          return value, type, addr
         end
         -- otherwise, collect it and stop
-        cases[#cases+1] = { match_value, (core.eval(v[2], S)) }
+        cases[#cases+1] = { match_value, value, type, addr }
         found_match = true
         break
       end
     else -- if we can't compare it, collect it
-      cases[#cases+1] = { match_value, (core.eval(v[2], S)) }
+      cases[#cases+1] = { match_value, eval_preserve(S, v[2], v[3], v[4]) }
     end
   end
-  -- if not cases matched, return the default (if there is one
+  -- if no cases matched, return the default (if there is one)
   if #cases == 0 and args[3] then
-    return core.eval(args[3], S)
+    return eval_preserve(S, args[3], args[4], args[5])
   end
 
   -- only keep the default if we didn't find a match (we might be here if we
   -- did find a match, but earlier match values weren't defined)
-  local default
-  if not found_match then default = core.eval(args[3], S) end
-
-  -- If we got this far, return a new case
-  return expression:new(case, value, cases, default)
+  if found_match or not args[3] then
+    return expression:new(case, value, cases)
+  else
+    return expression:new(case, value, cases, eval_preserve(S, args[3], args[4], args[5]))
+  end
 end
 
 

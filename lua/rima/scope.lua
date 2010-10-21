@@ -504,7 +504,7 @@ end
 
 local function return_paths(paths, r)
   if #paths > 0 then
-    return read_ref.new(paths), paths.address
+    return read_ref.new(paths), nil, paths.address
   else
     -- if we found nothing, we might have to add a prefix from the first parent scope that'll accept failure
     if r and not proxy.O(r).prefix then
@@ -518,7 +518,7 @@ local function return_paths(paths, r)
         end
       end
     end
-    return nil, paths.address
+    return nil, nil, paths.address
   end
 end
 
@@ -571,7 +571,9 @@ function read_ref.__eval(r, s)
         eval_scope = result:set_args(eval_scope, path.collected_indexes)
         proxy.O(eval_scope).prefix = prefix
       end
-      result = core.eval_to_paths(result, eval_scope)
+      local rtype
+      result, rtype = core.eval_to_paths(result, eval_scope)
+      result = result or rtype
     end
 
     if result then
@@ -607,36 +609,37 @@ end
 
 function read_ref:__finish()
   self = proxy.O(self)
+
+  -- We want to collect value and type information, and, if the result is a
+  -- table, we have to assemble it over all layers of scope.
+
+  local value, vtype, is_table
+
+  -- Search for values and types, note if we're a table
   for _, v in ipairs(self) do
     v = v.value
-    if v and not undefined_t:isa(v) then
-      if type(v) ~= "table" then
-        return v
+    if v then
+      if undefined_t:isa(v) then
+        vtype = vtype or v
+      elseif type(v) == "table" then
+        if not (value or vtype) then is_table = true end
+      else
+        value = value or v
       end
-      break
     end
   end
 
-  if type(self[1].value) == "table" then
-    local result = {}
+  -- if it's a table, build it
+  if is_table then
+    value = {}
     for i, t in ipairs(self) do
       for k, v in pairs(t.value) do
-        result[k] = result[k] or v
+        value[k] = value[k] or v
       end
     end
-    return result
   end
-end
 
-
-function read_ref:__type()
-  self = proxy.O(self)
-  for _, v in ipairs(self) do
-    v = v.value
-    if undefined_t:isa(v) then
-      return v
-    end
-  end
+  return value, vtype, self.address
 end
 
 

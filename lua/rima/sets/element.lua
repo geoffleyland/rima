@@ -39,9 +39,9 @@ end
 
 function element:__eval(S)
   self = proxy.O(self)
-  local exp = core.eval(self.exp, S)
-  if core.defined(exp) then exp = self.exp end
-  return element:new(exp, self.key, self.value, self.set)
+  local value, type, addr = core.eval(self.exp, S)
+  if core.defined(value) then value = addr or self.exp end
+  return element:new(value, self.key, self.value, self.set)
 end
 
 

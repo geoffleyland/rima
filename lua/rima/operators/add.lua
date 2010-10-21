@@ -68,7 +68,7 @@ function add.__eval(args, S)
   args = proxy.O(args)
 
   -- evaluate or bind all arguments
-  args = lib.imap(function(a) return { a[1], core.eval(a[2], S) } end, args)
+  args = lib.imap(function(a) return { a[1], (core.eval(a[2], S)) } end, args)
 
   local constant, terms = 0, {}
   

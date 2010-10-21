@@ -178,8 +178,8 @@ function proxy_mt.__repr(M, format)
   table.sort(sorted_variables, function(a, b) return a.name < b.name end)
 
   for _, v in ipairs(sorted_variables) do
-    local status, vt = pcall(index.variable_type, v.index, M)
-    if status then
+    local _, vt = core.eval(v.index, M)
+    if vt then
       append(r, latex and "& " or "  ", vt:describe(v.index, format))
       if v.sets and v.sets[1] then
         append(r, latex and " \\forall " or " for all ")

@@ -29,7 +29,7 @@ function _linearise(l, S)
     if terms[s] then
       error(("the reference '%s' appears more than once"):format(s), 0)
     end
-    local t = index.variable_type(v, S)
+    local _, t = core.eval(v, S)
     if not types.number_t:isa(t) then
       if types.undefined_t:isa(t) then
         error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
@@ -82,7 +82,7 @@ function linearise(e, S)
   local l = core.eval(e, S)
   local status, constant, terms = pcall(_linearise, l, S)
   if not status then
-    error(("linear form: '%s':\n  %s"):format(lib.repr(l), constant:gsub("\n", "\n    ")), 0)
+    error(("Error linearising '%s' (linear form: '%s'):\n  %s"):format(lib.repr(e), lib.repr(l), constant:gsub("\n", "\n    ")), 0)
   end
   return constant, terms
 end

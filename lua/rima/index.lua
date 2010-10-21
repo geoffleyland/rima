@@ -123,25 +123,25 @@ local function do_index(t, i, j, address)
   if element:isa(i) then
 
     local k = element.key(i)
-    local kr1, kr2 = z(k)
+    local kvalue, ktype, kaddr = z(k)
 
     local v = element.value(i)
-    local vr1, vr2
+    local vvalue, vtype, vaddr
     if lib.repr(v):sub(1,5) ~= "table" then
-      vr1, vr2 = z(v)
+      vvalue, vtype, vaddr = z(v)
     end
 
-    if vr1 then
+    if vvalue then
       address:set(j+1, v)
-      return vr1, vr2
+      return vvalue, vtype, vaddr
     end
 
-    if kr1 then
+    if kvalue then
       address:set(j+1, k)
-      return kr1, kr2
+      return kvalue, ktype, kaddr
     end
 
-    return nil, vr2 or kr2
+    return nil, vtype or ktype, vaddr or kaddr
   else
     return z(i)
   end
@@ -155,8 +155,8 @@ local function safe_index(t, i, base, address, length, depth, allow_undefined)
   end
   if not t then return end
   local r1, r2
---  local status, message = xpcall(function() r1, r2 = do_index(t, i, length, address) end, debug.traceback)
-  local status, message = pcall(function() r1, r2 = do_index(t, i, length, address) end)
+--  local status, message = xpcall(function() value, vtype, vaddr = do_index(t, i, length, address) end, debug.traceback)
+  local status, message = pcall(function() value, vtype, vaddr = do_index(t, i, length, address) end)
   if not status then
     local a2 = address:sub(1, length)
     if base then
@@ -177,7 +177,7 @@ local function safe_index(t, i, base, address, length, depth, allow_undefined)
       error(("error indexing '%s' as '%s': can't index%s %s: (%s)"):format(lib.repr(a2), lib.repr(a2+i), article, tt, message), depth+1)
     end
   end
-  return r1, r2
+  return value, vtype, vaddr
 end
 
 
@@ -274,7 +274,8 @@ function index.resolve(r, s)
     if addr2 then base = addr2 end
   end
 
-  local current = base or s
+  local current, ctype = base or s
+
   local f = lib.getmetamethod(current, "__read_ref")
   if f then current = f(current) end
   local j = 1
@@ -282,7 +283,7 @@ function index.resolve(r, s)
     local addr2
     if trace.on then trace.enter("indx", 1, nil, v, current) end
 
-    current, addr2 = safe_index(current, v, base, addr, j-1, 3, true)
+    current, ctype, addr2 = safe_index(current, v, base, addr, j-1, 3, true)
     local new_base = current or addr2
     if index:isa(new_base) then
       base = new_base
@@ -290,9 +291,10 @@ function index.resolve(r, s)
       j = 0
     end
 
-    if trace.on then trace.leave("indx", 1, v, current) end
+    if trace.on then trace.leave("indx", 1, v, current, ctype, addr2) end
+    if not current then break end
 
-    current, addr2 = core.eval_to_paths(current, s)
+    current, ctype, addr2 = core.eval_to_paths(current, s)
     if addr2 then
       base = addr2
       addr = addr:sub(j+1)
@@ -303,40 +305,13 @@ function index.resolve(r, s)
     j = j + 1
   end
 
-  return current, base, addr
+  addr = index:new(base, addr)
+  return current or addr, ctype, addr
 end
 
 
 function proxy_mt.__eval(e, s)
-  local current, base, addr = index.resolve(e, s)
-  addr = index:new(base, addr)
-  if not current then
-    return addr
-  else
-    return current, addr
-  end
-end
-
-
-function index.variable_type(e, s)
-  if trace.on then trace.enter("type", 1, nil, e) end
-
-  local current, base, addr = index.resolve(e, s)
-
-  local f = lib.getmetamethod(current, "__type")
-  local value
-  if f then
-    value = f(current)
-  else
-    value = current
-  end
-
-  if trace.on then trace.leave("type", 1, e, value) end
-  if undefined_t:isa(value) then
-    return value
-  else
-    error(("No type information available for '%s', got '%s'"):format(lib.repr(e), lib.repr(current)))
-  end
+  return index.resolve(e, s)
 end
 
 

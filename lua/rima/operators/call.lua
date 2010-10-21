@@ -47,18 +47,18 @@ function call.__eval(args, S)
     return expression:new(call, f, unpack(fargs))
   else
 
-    local status, r
+    local status, value, vtype, addr
     if type(f) == "function" then
-      status, r = xpcall(function() return f(unpack(fargs)) end, debug.traceback)
+      status, value, vtype, addr = xpcall(function() return f(unpack(fargs)) end, debug.traceback)
     else
-      status, r = xpcall(function() return f:call({unpack(fargs)}, S) end, debug.traceback)
+      status, value, vtype, addr = xpcall(function() return f:call({unpack(fargs)}, S) end, debug.traceback)
     end
 
     if not status then
       error(("call: error evaluating '%s' as '%s' with arguments (%s):\n  %s"):
-        format(__repr(args), lib.repr(f), lib.concat_repr({unpack(args, 2)}), r:gsub("\n", "\n  ")), 0)
+        format(__repr(args), lib.repr(f), lib.concat_repr({unpack(args, 2)}), value:gsub("\n", "\n  ")), 0)
     end
-    return r
+    return value, vtype, addr
   end
 end
 

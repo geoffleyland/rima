@@ -36,7 +36,7 @@ function test(options)
   T:expect_error(LF(a * b),
     "linear form: 'a%*b'.-the expression does not evaluate to a sum of terms")
   T:expect_error(LF(1 + a[2]*5), "error indexing 'a' as 'a%[2%]': can't index a number")
-  T:expect_error(LF(1 + c[2]*5), "No type information available for 'c%[2%]'")
+  T:expect_error(LF(1 + c[2]*5), "expecting a number type for 'c%[2%]', got 'nil'")
   T:expect_ok(LF(1 + d[2]*5), "d[2] is a number")
   T:expect_ok(LF(1 + d[2]), "d[2] is an index")
   T:expect_ok(LF(d[2]), "d[2] is an index")
