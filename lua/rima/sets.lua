@@ -58,6 +58,14 @@ function range_type:__iterate()
 end
 
 
+function range_type:__iterindex(i)
+  if i < 1 or 1 > self.high - self.low then
+    error(("index out of range trying to index '%s' with '%s'"):format(lib.repr(self), lib.repr(i)))
+  end
+  return self.low + i - 1
+end
+
+
 range_op = object:new({}, "range")
 function range_op.__eval(args, S)
   args = proxy.O(args)

@@ -171,7 +171,13 @@ function ref:index(S, Sn, i)
   local iterate_function = lib.getmetamethod(literal, "__iterate")
 
   if iterate_function then
-    error("indexing subiterations is not implemented yet")
+    local iterindex = lib.getmetamethod(literal, "__iterindex")
+    if not iterindex then
+      error(("Can't directly index the iterable set '%s'"):format(lib.repr(self)))
+    else
+      self:set_args(Sn, iterindex(literal, i))
+    end
+    return
   end
 
   if self.values == "pairs" then
