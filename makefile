@@ -1,5 +1,5 @@
 PACKAGE=rima
-VERSION=0.03
+VERSION=0.04
 
 LUA= $(shell echo `which lua`)
 LUA_BINDIR= $(shell echo `dirname $(LUA)`)
