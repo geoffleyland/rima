@@ -67,7 +67,7 @@ function closure:__repr(format)
   local ff = format.format
   local f
   if ff == "dump" then
-    f = "closure(%s, %s)" return "closure("..ar..", "..er..")"
+    f = "closure("..self.name..", %s, %s)"
   elseif ff == "latex" then
     f = "%s %s"
   else
