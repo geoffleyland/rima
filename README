@@ -3,5 +3,5 @@ It is available as open source under the MIT license.
 
 For more information, visit http://www.incremental.co.nz/projects/lua.html
 
-Documentation is in the docs and docshtml directories of this distribution.
-For installation instuctions see docshtml/install.html.
+Documentation is in the docs and htmldocs directories of this distribution.
+For installation instructions see htmldocs/install.html.
