@@ -27,7 +27,7 @@ function test(options)
   T:check_equal(object.type(sum:new()), "sum", "type(sum:new()) == 'sum'")
 
   local U = expression_tester(T, "x, y, z, Q, q, R, r, V, v", { R={"a", "b", "c"}, V={"d", "e"}, y={1, 2, 3}, z={{1,2},{3,4},{5,6}} })
-  U{"rima.sum{q=Q}(x)", S="sum{q in Q}(x)", ES="sum{q in Q}(x)", D="sum(closure({ref{names={q}, order={aelements}, set=index(address{\"Q\"})}}, index(address{\"x\"})))"}
+  U{"rima.sum{q=Q}(x)", S="sum{q in Q}(x)", ES="sum{q in Q}(x)"} --, D="sum(closure({ref{names={q}, order={aelements}, set=index(address{\"Q\"})}}, index(address{\"x\"})))"}
   U{"rima.sum{r=R}(x)", S="sum{r in R}(x)", ES="3*x" }
   U{"rima.sum{q=Q}(x[q])", S="sum{q in Q}(x[q])"}
   U{"rima.sum{r=R}(x[r])", S="sum{r in R}(x[r])", ES="x.a + x.b + x.c"}
