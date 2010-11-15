@@ -15,7 +15,7 @@ arithmetic operators and functions and by combining other expressions.
 
 Defining an expression in Rima is straightforward:
 
-    x, y = rima.R"x, y"
+    rima.define"x, y"
     e = x + y
     print(e)                                            --> x + y
 
@@ -36,7 +36,7 @@ Expressions can be treated just like variables, and used to build more complex e
 
 `rima.E` evaluates expressions as it does references:
 
-    x, y = rima.R"x, y"
+    rima.define"x, y"
     print(rima.E(x + y, { x=1, y=2 }))                  --> 3
 
 Partial lists of values are fine - `rima.E` doesn't mind if some variables aren't defined:
@@ -76,7 +76,7 @@ they can also be expressions,
 allowing you to build complex expressions from parts
 and meaning you can leave some parts of an expression to be defined later:
 
-    x, y, z = rima.R"x, y, z"
+    rima.define"x, y, z"
     e = x / y
     print(rima.E(e, { y=z^2 }))                         --> x/z^2
     print(rima.E(e, { y=z^2, z=x^0.5 }))                --> 1

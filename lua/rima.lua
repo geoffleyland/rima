@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local debug = require("debug")
-local error, require, unpack, xpcall =
-      error, require, unpack, xpcall
+local error, getfenv, require, unpack, xpcall =
+      error, getfenv, require, unpack, xpcall
 
 local lib = require("rima.lib")
 local args = require("rima.lib.args")
@@ -38,6 +38,18 @@ function R(names)
     results[#results+1] = index:new(nil, n)
   end
   return unpack(results)
+end
+
+
+function define(names)
+  local fname, usage = "rima.define", "Create references in the caller's environment.\n  define(name: list of comma-separated reference names [string])"
+  args.check_type(names, "names", "string", usage, fname)
+
+  local results = {}
+  local env = getfenv(2)
+  for n in names:gmatch("[%a_][%w_]*") do
+    env[n] = index:new(nil, n)
+  end
 end
 
 

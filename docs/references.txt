@@ -39,6 +39,21 @@ If you wish to define more than one variable at a time, you can:
 
     x, y = rima.R"x, y"
 
+If you're using variables in the global scope
+(we were above, and do for most of the manual),
+then `rima.define` offers an even easier way to define references.
+It automatically inserts the new references into the global scope:
+
+    rima.define("x, y")
+    print(x + y)                                        --> x + y
+
+If, on they other hand, your references are going into a local scope,
+you must use `rima.R` - there's no way of inserting variables into a local scope.
+
+In the rest of the manual, we'll use `rima.R` and `rima.define` from time to time,
+the effect is the same,
+and you can choose which suits you.
+
 
 ## Evaluating References
 
@@ -52,7 +67,7 @@ and a table of values to look the reference up in:
 You can use the same reference in more than one evaluation,
 with different tables:
 
-    x = rima.R"x"
+    rima.define"x"
     print(rima.E(x, { x=5 }))                           --> 5
     print(rima.E(x, { x="hello" }))                     --> hello
 
@@ -72,7 +87,7 @@ and the tables you pass in as objects.
 
 It's quite ok for the table of values you pass in to contain other references:
 
-    x, y, z = rima.R"x, y, z"
+    rima.define"x, y, z"
     print(rima.E(x, { x=y, y=z, z="you got to z!" }))   --> you got to z!
 
 Next, we cover `rima.E` in more detail when building expressions.
