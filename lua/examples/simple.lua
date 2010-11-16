@@ -29,8 +29,10 @@ rima.mp.write_sparse(S)
 io.write("Solutions:\n")
 local function s(solver)
   local primal, dual = rima.mp.solve(solver, S)
-  io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables and constraints:\n"):format(solver, primal.objective))
-  for k, v in pairs(dual) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, primal[k], v)) end
+  if primal then
+    io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables and constraints:\n"):format(solver, primal.objective))
+    for k, v in pairs(dual) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, primal[k], v)) end
+  end
 end
 
 s("lpsolve")

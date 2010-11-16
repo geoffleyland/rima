@@ -82,23 +82,25 @@ zibopt_data =
 local primal, dual = rima.mp.solve("cbc", sudoku_9_by_9, { initial = zibopt_data })
 
 -- Print the answer nicely.  There's probably an easier way to do this.
-io.write("\nSudoku answer\n")
+if primal then
+  io.write("\nSudoku answer\n")
 
-for i, v in pairs(primal.answer) do
-  for j, w in pairs(v) do
-    for k, x in pairs(w) do
-      if x == 1 then zibopt_data[i][j] = k end
+  for i, v in pairs(primal.answer) do
+    for j, w in pairs(v) do
+      for k, x in pairs(w) do
+        if x == 1 then zibopt_data[i][j] = k end
+      end
     end
   end
-end
 
-for i, r in ipairs(zibopt_data) do
-  for j, v in ipairs(r) do
-    io.write(("%d "):format(v))
-    if j == 3 or j == 6 then io.write(" ") end
+  for i, r in ipairs(zibopt_data) do
+    for j, v in ipairs(r) do
+      io.write(("%d "):format(v))
+      if j == 3 or j == 6 then io.write(" ") end
+    end
+    io.write("\n")
+    if i == 3 or i == 6 then io.write("\n") end
   end
-  io.write("\n")
-  if i == 3 or i == 6 then io.write("\n") end
 end
 
 

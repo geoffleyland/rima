@@ -1,15 +1,16 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local assert, ipairs = assert, ipairs
+local assert, ipairs, pcall = assert, ipairs, pcall
 
-local core = require("rima_clp_core")
+local status, core = pcall(require, "rima_clp_core")
 
 module(...)
 
 --------------------------------------------------------------------------------
 
 function solve(sense, variables, constraints)
+  if not status then return nil, "clp not available" end
   local m = core.new()
   assert(m:resize(0, #variables))
   assert(m:build_rows(constraints))
@@ -19,3 +20,4 @@ function solve(sense, variables, constraints)
 end
 
 -- EOF -------------------------------------------------------------------------
+

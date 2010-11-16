@@ -291,7 +291,11 @@ function solve(solver, S, ...)
   local variables, constraints = sparse_form(S, S.objective)
   io.stderr:write(("Problem generated: %d variables, %d constraints.  Solving...\n"):format(#variables, #constraints))
 
-  local r = solve_mod.solve(sense(S), variables, constraints)
+  local r, message = solve_mod.solve(sense(S), variables, constraints)
+  if not r then
+    io.stderr:write(message, "\n")
+    return nil, message
+  end
 
   local primal, dual = {}, {}
   primal.objective = r.objective

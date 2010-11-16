@@ -1,15 +1,16 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
-local assert, ipairs = assert, ipairs
+local assert, ipairs, pcall = assert, ipairs, pcall
 
-local core = require("rima_lpsolve_core")
+local status, core = pcall(require, "rima_lpsolve_core")
 
 module(...)
 
 --------------------------------------------------------------------------------
 
 function solve(sense, variables, constraints)
+  if not status then return nil, "lpsolve not available" end
   local m = core.new(0, #variables)
   assert(m:resize(#constraints, #variables))
   assert(m:build_rows(constraints))
@@ -19,3 +20,4 @@ function solve(sense, variables, constraints)
 end
 
 -- EOF -------------------------------------------------------------------------
+

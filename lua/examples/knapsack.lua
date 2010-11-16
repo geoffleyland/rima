@@ -62,9 +62,11 @@ io.write("Burglar Bill Instance of Knapsack Problem:\n", tostring(burglar_bill),
 -- Solve using cbc and lpsolve and write out the results
 function solve(problem, solver, S)
   local primal, dual = rima.mp.solve(solver, problem, S)
-  io.write(("\nSolution from %s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, primal.objective))
-  for k, v in pairs(primal.items) do
-    io.write(("    %-10s\t%-3s\n"):format(k, v.take == 1 and "yes" or "no"))
+  if primal then
+    io.write(("\nSolution from %s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, primal.objective))
+    for k, v in pairs(primal.items) do
+      io.write(("    %-10s\t%-3s\n"):format(k, v.take == 1 and "yes" or "no"))
+    end
   end
 end
 
@@ -135,13 +137,15 @@ multiple_sack_data = rima.mp.new(multiple_sack, {
 
 local function solve_multiple(problem, ...)
   primal, dual = rima.mp.solve("cbc", problem, ...)
-  io.write(("\nSolution from %s:\n  objective:  \t% 10.2f\n  variables:\n               "):format("cbc", primal.objective))
-  for s in pairs(primal.sacks) do io.write(("subsack %-5s "):format(tostring(s))) end
-  io.write("\n")
-  for i in pairs(ITEMS) do
-    io.write(("    %-10s  "):format(i))
-    for _, s in pairs(primal.sacks) do io.write(("% 7s       "):format(s.items[i].take == 1 and "yes" or "no")) end
-    io.write("\n") 
+  if primal then
+    io.write(("\nSolution from %s:\n  objective:  \t% 10.2f\n  variables:\n               "):format("cbc", primal.objective))
+    for s in pairs(primal.sacks) do io.write(("subsack %-5s "):format(tostring(s))) end
+    io.write("\n")
+    for i in pairs(ITEMS) do
+      io.write(("    %-10s  "):format(i))
+      for _, s in pairs(primal.sacks) do io.write(("% 7s       "):format(s.items[i].take == 1 and "yes" or "no")) end
+      io.write("\n") 
+    end
   end
 end
 

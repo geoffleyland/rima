@@ -81,9 +81,10 @@ local primal, dual = rima.mp.solve("clp", Z,
   terms = 4,
   f = rima.F{x}(rima.exp(x) * rima.sin(x)),
 })
-io.write(("\nMinimax Polynomial with CLP\n  max error:\t% 10.2f\n"):format(primal.objective))
-for k, v in pairs(primal.w) do io.write(("  w[%d]:\t% 10.2f\t(% 10.2f)\n"):format(k, v, dual.w[k])) end
-
+if primal then
+  io.write(("\nMinimax Polynomial with CLP\n  max error:\t% 10.2f\n"):format(primal.objective))
+  for k, v in pairs(primal.w) do io.write(("  w[%d]:\t% 10.2f\t(% 10.2f)\n"):format(k, v, dual.w[k])) end
+end
 
 -- EOF -------------------------------------------------------------------------
 

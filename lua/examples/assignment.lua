@@ -80,9 +80,11 @@ Subject to:
 --]]
 
 primal, dual = rima.mp.solve("lpsolve", shopping)
-for pn, p in pairs(primal.flow) do
-  for sn, s in pairs(p) do
-    io.write(("%s -> %s : %g\n"):format(pn, sn, s))
+if primal then
+  for pn, p in pairs(primal.flow) do
+    for sn, s in pairs(p) do
+      io.write(("%s -> %s : %g\n"):format(pn, sn, s))
+    end
   end
 end
 
@@ -120,13 +122,15 @@ build_shops = rima.mp.new(facility_location, shopping_data,
 })
 
 primal, dual = rima.mp.solve("cbc", build_shops)
-io.write(("Cost: $%.2f\n"):format(primal.objective))
-for pn, p in pairs(primal.plants) do
-  io.write(("%s : %g\n"):format(pn, p.built))
-end
-for pn, p in pairs(primal.flow) do
-  for sn, s in pairs(p) do
-    io.write(("%s -> %s : %g\n"):format(pn, sn, s))
+if primal then
+  io.write(("Cost: $%.2f\n"):format(primal.objective))
+  for pn, p in pairs(primal.plants) do
+    io.write(("%s : %g\n"):format(pn, p.built))
+  end
+  for pn, p in pairs(primal.flow) do
+    for sn, s in pairs(p) do
+      io.write(("%s -> %s : %g\n"):format(pn, sn, s))
+    end
   end
 end
 

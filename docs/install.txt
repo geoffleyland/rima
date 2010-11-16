@@ -44,13 +44,38 @@ I took a bit of a more tortuous route, and use the COIN trunk.
 There's a makefile in the distribution which, at this stage, I'm afraid you'll almost certainly have to modify yourself.
 It works for me on OS X, and I'd appreciate it if you let me know what works on your setup.
 
-Ideally you'll just
+If you have CLP, CBC and lpsolve installed, ideally, you'll just have to:
 
     --! ignore
     make
     make test
     sudo make install
 
+### Building
+
+Unfortunately your solvers might not be where the makefile expects them,
+and you'll have to edit the makefile, modifying the lines
+
+    --! ignore
+    COIN_PREFIX=/usr/local
+
+and
+
+    --! ignore
+    LPSOLVE_PREFIX=/usr/local
+
+or alternatively, `make COIN_PREFIX=/path/to/coin`.
+
+If you don't have all the solvers (or any), just make the ones you want: `make clp cbc COIN_PREFIX=/path/to/coin`
+
+### Testing
+
+To test Rima, you'll need the Lua Filesystem library from [here](http://keplerproject.github.com/luafilesystem/).
+Then run `make test`.
+
+### Installing
+
+The install target 
 The default target for the makefile, the test target and the install target all try to build and test all three solvers:
 you'll probably want to modify the makefile to only use one.
 
