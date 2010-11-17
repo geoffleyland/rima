@@ -77,7 +77,11 @@ Then run `make test`.
 
 ### Installing
 
-The install target 
-The default target for the makefile, the test target and the install target all try to build and test all three solvers:
-you'll probably want to modify the makefile to only use one.
+`sudo make install` should install Rima and any solver bindings you've built to the appropriate locations
+(where Lua can find them).
+
+### Making Documentation
+
+To build the documentation (`make doc`),
+you'll need to install [markdown.lua](http://www.frykholm.se/files/markdown.lua) first.
 
