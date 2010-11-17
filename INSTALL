@@ -1,1 +1,3 @@
 See htmldocs/install.html for instructions to install Rima.
+If you got this copy of Rima from version control and you haven't built the
+documentation, see docs/install.txt.

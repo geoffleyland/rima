@@ -13,9 +13,11 @@ and a linear program solver.
 
 You'll need to have Lua 5.1 installed and working (which should be easy).
 Instructions and binaries are [here](http://www.lua.org/download.html).
-There may be an even easier way to get it for your platform:
+Building Lua from source is very easy (possibly easier than using a package manager),
+but there probably is a package for your platform:
 
-+ Linux: you can almost certainly `apt-get install lua`
++ Linux: There's probably a package for your distribution that you can install with apt-get or yum.
+  Make sure you get Lua 5.1 (not 5.0) and that you get the headers - you'll probably need to install a development package
 + OS X: if have [MacPorts](http://www.macports.org/) installed you can `port install lua` (there must be a similar command for [Fink](http://www.finkproject.org/))
 + Windows: there's [Lua for Windows](http://luaforwindows.luaforge.net/) which is a binary installer for Lua and a range of modules
 

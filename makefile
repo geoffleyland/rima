@@ -45,13 +45,13 @@ cbc: rima_cbc_core.$(SO_SUFFIX)
 lpsolve: rima_lpsolve_core.$(SO_SUFFIX)
 
 rima_clp_core.$(SO_SUFFIX): c/rima_clp_core.cpp 
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils $(LIBS) -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
 
 rima_cbc_core.$(SO_SUFFIX): c/rima_cbc_core.cpp
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lcbc -losiclp $(LIBS) -I$(COIN_INCDIR)/cbc -I$(COIN_INCDIR)/osi -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lcbc -losiclp $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)/cbc -I$(COIN_INCDIR)/osi -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
 
 rima_lpsolve_core.$(SO_SUFFIX): c/rima_lpsolve_core.cpp
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(LPSOLVE_LIBDIR) -llpsolve55 $(LIBS) -I$(LPSOLVE_INCDIR)
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(LPSOLVE_LIBDIR) -llpsolve55 $(LIBS) -I$(LUA_INCDIR) -I$(LPSOLVE_INCDIR)
 
 test: lua/rima.lua
 	-cp rima_*_core.so lua/

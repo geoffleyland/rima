@@ -5,3 +5,7 @@ For more information, visit http://www.incremental.co.nz/projects/lua.html
 
 Documentation is in the docs and htmldocs directories of this distribution.
 For installation instructions see htmldocs/install.html.
+
+If you got this copy of Rima from version control and you haven't built the
+documentation, the text source for the documentation is in the docs directory
+and installation instructions are in docs/install.txt.
