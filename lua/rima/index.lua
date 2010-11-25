@@ -108,7 +108,7 @@ end
 
 local function do_index(t, i, j, address)
   local function z(ii)
-    -- we have to call __index ourselves, because scope's __index returns two values.
+    -- we have to call __index ourselves, because scope's __index returns several values.
     local f = lib.getmetamethod(t, "__index")
     if f then
       return f(t, ii)
