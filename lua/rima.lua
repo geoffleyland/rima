@@ -12,6 +12,7 @@ local index = require("rima.index")
 local core = require("rima.core")
 local func = require("rima.func")
 local sum_op = require("rima.operators.sum")
+local prod_op = require("rima.operators.product")
 local case_op = require("rima.operators.case")
 local minmax = require("rima.operators.minmax")
 local sets = require("rima.sets")
@@ -87,6 +88,15 @@ function sum(sets, e)
     return expression:new(sum_op, sets, e)
   else
     return function(e2) return expression:new(sum_op, sets, e2) end
+  end
+end
+
+
+function product(sets, e)
+  if e then
+    return expression:new(prod_op, sets, e)
+  else
+    return function(e2) return expression:new(prod_op, sets, e2) end
   end
 end
 

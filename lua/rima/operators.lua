@@ -13,6 +13,7 @@ require("rima.operators.pow")
 require("rima.operators.math")
 require("rima.operators.call")
 require("rima.operators.sum")
+require("rima.operators.product")
 require("rima.operators.case")
 require("rima.operators.minmax")
 
