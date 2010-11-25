@@ -11,6 +11,7 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
+local element = require("rima.sets.element")
 
 module(...)
 
@@ -117,7 +118,7 @@ function mul.simplify(args)
           type(E[2]) == "number" then
           simplify(exp * E[2], E[1])
         else                                    -- if there's nothing else to do, add the term
-          add_term(exp, e)
+          add_term(exp, element.extract(e))
         end
       end
       simplify(exp, e)

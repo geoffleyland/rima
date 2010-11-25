@@ -140,6 +140,10 @@ function test(options)
     local a, d, D = rima.R"a, d, D"
     T:check_equal(E(rima.sum{d=D}(d^2), rima.scope.new{}), "sum{d in D}(d^2)")
     T:check_equal(E(rima.sum{d=D}(d^2), rima.scope.new{D={7}}), 49)
+    T:check_equal(E(rima.sum{d=D}(2+d), rima.scope.new{D={a}}), "2 + a")
+    T:check_equal(E(rima.sum{d=D}(d+d), rima.scope.new{D={a}}), "2*a")
+    T:check_equal(E(rima.sum{d=D}(2*d), rima.scope.new{D={a}}), "2*a")
+    T:check_equal(E(rima.sum{d=D}(d*d), rima.scope.new{D={a}}), "a^2")
     T:check_equal(E(rima.sum{d=D}(d^2), rima.scope.new{D={a}}), "a^2")
   end
 

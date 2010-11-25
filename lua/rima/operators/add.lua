@@ -10,6 +10,7 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
+local element = require("rima.sets.element")
 
 module(...)
 
@@ -102,10 +103,10 @@ function add.__eval(args, S)
           if new_c then                         -- if we did hoist a constant, re-simplify the resulting expression
             simplify(c * new_c, new_e)
           else                                  -- otherwise just add it
-            add_term(c, e)
+            add_term(c, element.extract(e))
           end
         else                                    -- if there's nothing else to do, add the term
-          add_term(c, e)
+          add_term(c, element.extract(e))
         end
       end
       simplify(c, e)

@@ -7,6 +7,8 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
+local expression = require("rima.expression")
+local mul = require("rima.operators.mul")
 
 module(...)
 
@@ -43,21 +45,25 @@ function pow.__eval(args, S)
   args = proxy.O(args)
   local base, exponent = core.eval(args[1], S), core.eval(args[2], S)
   
-  if type(exponent) == "number" then
-    if exponent == 0 then
-      return 1
-    elseif exponent == 1 then
-      return base
-    end
-  end
+  local base_is_number = type(base) == "number"
   
-  if type(base) == "number" then
+  if base_is_number then
     if base == 0 then
       return 0
     elseif base == 1 then
       return 1
     end
   end
+
+  if type(exponent) == "number" then
+    if exponent == 0 then
+      return 1
+    elseif exponent == 1 then
+      return base
+    elseif not_base_is_number then
+     return expression:new(mul, {exponent, base})
+    end
+ end
 
   return base ^ exponent
 end

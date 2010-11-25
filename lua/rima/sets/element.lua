@@ -75,10 +75,14 @@ element.__tostring = lib.__tostring
 
 -- Operators -------------------------------------------------------------------
 
-local function extract(a)
-  if element:isa(a) then return proxy.O(a).value end
-  return a
+function element.extract(a)
+  if not element:isa(a) then return a end
+  local e = proxy.O(a)
+  local v = e.value
+  if undefined_t:isa(v) then return e.exp end
+  return v
 end
+
 
 function proxy_mt.__add(a, b) return extract(a) + extract(b) end
 function proxy_mt.__sub(a, b) return extract(a) - extract(b) end
