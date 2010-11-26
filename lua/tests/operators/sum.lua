@@ -21,7 +21,6 @@ function test(options)
 
   local D = lib.dump
   local E = core.eval
---  local TYPE = core.type
 
   T:test(sum:isa(sum:new()), "isa(sum, sum:new())")
   T:check_equal(object.type(sum:new()), "sum", "type(sum:new()) == 'sum'")

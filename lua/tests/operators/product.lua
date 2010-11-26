@@ -21,7 +21,6 @@ function test(options)
 
   local D = lib.dump
   local E = core.eval
---  local TYPE = core.type
 
   T:test(product:isa(product:new()), "isa(product, product:new())")
   T:check_equal(object.type(product:new()), "product", "type(product:new()) == 'product'")
