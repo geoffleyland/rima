@@ -35,7 +35,7 @@ end
 
 -- Constraint Handling ---------------------------------------------------------
 
-local function find_constraints(S, f)
+function find_constraints(S)
   local constraints = {}
   local current_address = {}
   local current_sets = set_list:new()
