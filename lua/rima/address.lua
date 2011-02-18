@@ -201,6 +201,16 @@ end
 __tostring = lib.__tostring
 
 
+-- equality --------------------------------------------------------------------
+
+function address:__eq(b)
+  for i, a in ipairs(self) do
+    if b[i] ~= a then return end
+  end
+  return true
+end
+
+
 -- evaluation ------------------------------------------------------------------
 
 function address:__eval(S)
