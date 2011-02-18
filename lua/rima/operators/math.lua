@@ -24,6 +24,32 @@ local math_functions =
 }
 
 
+local function math_repr(args, format)
+  local o = object.type(args)
+  args = proxy.O(args)
+  local ff = format.format
+  if ff == "latex" then
+    if o == "sqrt" then
+      return "\\sqrt{"..lib.repr(args[1], format).."}"
+    elseif o == "exp" then
+      return "e^{"..lib.repr(args[1], format).."}"
+    elseif o == "log" then
+      return "\\ln "..core.parenthise(args[1], format, 1)
+    elseif o == "log10" then
+      return "\\log_{10} "..core.parenthise(args[1], format, 1)
+    else
+      if #args > 1 then
+        return "\\"..object.type(args).."("..lib.concat_repr(args, format)..")"
+      else
+        return "\\"..object.type(args).." "..core.parenthise(args[1], format, 1)
+      end
+    end
+  else
+    return o.."("..lib.concat_repr(args, format)..")"
+  end
+end
+
+
 local function make_math_function(name)
   local f = assert(math[name], "The math function does not exist")
   local op = object:new({ precedence=0 }, name) 
@@ -38,30 +64,7 @@ local function make_math_function(name)
     end
   end
 
-  op.__repr = function(args, format)
-    local ff = format.format
-    if ff == "latex" then
-      local o = object.type(args)
-      args = proxy.O(args)
-      if o == "sqrt" then
-        return "\\sqrt{"..lib.repr(args[1], format).."}"
-      elseif o == "exp" then
-        return "e^{"..lib.repr(args[1], format).."}"
-      elseif o == "log" then
-        return "\\ln "..core.parenthise(args[1], format, 1)
-      elseif o == "log10" then
-        return "\\log_{10} "..core.parenthise(args[1], format, 1)
-      else
-        if #args > 1 then
-          return "\\"..object.type(args).."("..lib.concat_repr(args, format)..")"
-        else
-          return "\\"..object.type(args).." "..core.parenthise(args[1], format, 1)
-        end
-      end
-    else
-      return object.type(args).."("..lib.concat_repr(proxy.O(args), format)..")"
-    end
-  end
+  op.__repr = math_repr
 
   rima[name] = function(e)
     if type(e) == "number" then
