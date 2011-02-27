@@ -144,6 +144,8 @@ end
 
 -- Extract the constant from an add or mul (if there is one)
 function extract_constant(e, mt)
+  e = proxy.O(e)
+  mt = mt or add
   if type(e[1][2]) == "number" then
     local constant = e[1][2]
     local new_args = {}
