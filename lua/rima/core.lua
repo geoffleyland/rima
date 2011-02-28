@@ -95,6 +95,25 @@ function eval_to_paths(e, s, d)
 end
 
 
+-- Automatic differentiation ---------------------------------------------------
+
+-- differentiate e with respect to v
+function diff(e, v)
+  local f = lib.getmetamethod(e, "__diff")
+  if trace.on then trace.enter("diff", d and d+1, f, e, v) end
+  local dedv
+  if f then
+    dedv = f(e, v)
+  elseif type(e) == "number" then
+    dedv = 0
+  else
+    error(("Can't differentiate %s with respect to %s"):format(lib.repr(e), lib.repr(v)))
+  end
+  if trace.on then trace.leave("diff", 1, e, v, dedv) end
+  return dedv
+end
+
+
 -- Listing variables -----------------------------------------------------------
 
 function list_variables(e, S, list)

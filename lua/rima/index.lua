@@ -383,6 +383,19 @@ function proxy_mt.__list_variables(i, s, list)
 end
 
 
+-- Automatic differentiation ---------------------------------------------------
+
+function index.__diff(i, v)
+  local I = proxy.O(i)
+  local V = proxy.O(v)
+  if I.base == V.base and I.address == V.address then
+    return 1
+  else
+    return 0
+  end
+end
+
+
 -- Operators -------------------------------------------------------------------
 
 function proxy_mt.__add(a, b)

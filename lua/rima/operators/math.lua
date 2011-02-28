@@ -50,6 +50,32 @@ local function math_repr(args, format)
 end
 
 
+local function math_diff(args, v)
+  local o = object.type(args)
+  args = proxy.O(args)
+  local a = args[1]
+
+  local dadv = core.diff(a, v)
+  if dadv == 0 then return 0 end
+  
+  if o == "exp" then
+    return dadv * rima.exp(a)
+  elseif o == "log" then
+    return dadv / a 
+  elseif o == "log10" then
+    return dadv / (math.log(10) * a)
+  elseif o == "sin" then
+    return dadv * rima.cos(a)
+  elseif o == "cos" then
+    return -dadv * rima.sin(a)
+  elseif o == "sqrt" then
+    return dadv * 0.5 * a ^ (-0.5)
+  else
+    error("Can't differentiate "..o, 0)
+  end
+end
+
+
 local function make_math_function(name)
   local f = assert(math[name], "The math function does not exist")
   local op = object:new({ precedence=0 }, name) 
@@ -65,6 +91,7 @@ local function make_math_function(name)
   end
 
   op.__repr = math_repr
+  op.__diff = math_diff
 
   rima[name] = function(e)
     if type(e) == "number" then

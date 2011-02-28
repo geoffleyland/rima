@@ -164,6 +164,22 @@ function extract_constant(e, mt)
 end
 
 
+-- Automatic differentiation ---------------------------------------------------
+
+function add.__diff(args, v)
+  local dargs = {}
+  for _, a in ipairs(proxy.O(args)) do
+    local c, e = a[1], a[2]
+    local dedv = core.diff(e, v)
+    if dedv ~= 0 then
+      dargs[#dargs+1] = {c, dedv}
+    end
+  end
+  
+  return expression:new_table(add, dargs)
+end
+
+
 -- Introspection? --------------------------------------------------------------
 
 function add.__list_variables(args, S, list)

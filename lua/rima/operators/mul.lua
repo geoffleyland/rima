@@ -156,6 +156,42 @@ function mul.simplify(args)
 end
 
 
+-- Automatic differentiation ---------------------------------------------------
+
+function mul.__diff(args, v)
+  args = proxy.O(args)
+  local dargs = {}
+  for i in ipairs(args) do
+    local t = {}
+    for j, a in ipairs(args) do
+      local exponent, expression = a[1], a[2]
+      if i == j then
+        local d = core.diff(expression, v)
+        if d == 0 then
+          t = nil
+          break
+        else
+          if d ~= 1 then
+            t[#t+1] = {1, d}
+          end
+          if exponent ~= 1 then
+            t[#t+1] = {exponent-1, expression}
+            t[#t+1] = {1, exponent}
+          end
+        end
+      else
+        t[#t+1] = {exponent, expression}
+      end
+    end
+    if t then
+      dargs[#dargs+1] = {1, expression:new_table(mul, t)}
+    end
+  end
+  
+  return expression:new_table(add, dargs)
+end
+
+
 -- Introspection? --------------------------------------------------------------
 
 function mul.__list_variables(args, S, list)

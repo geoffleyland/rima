@@ -2,6 +2,7 @@
 -- see LICENSE for license information
 
 local error = error
+local math = require("math")
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -9,6 +10,7 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
 local mul = require("rima.operators.mul")
+local rima = rima
 
 module(...)
 
@@ -61,11 +63,32 @@ function pow.__eval(args, S)
     elseif exponent == 1 then
       return base
     elseif not_base_is_number then
-     return expression:new(mul, {exponent, base})
+      return expression:new(mul, {exponent, base})
     end
  end
 
   return base ^ exponent
+end
+
+
+-- Automatic differentiation ---------------------------------------------------
+
+function pow.__diff(args, v)
+  args = proxy.O(args)
+  local base, exponent = args[1], args[2]
+
+  local base_is_number = type(base) == "number"
+
+  if type(exponent) == "number" then
+    if base_is_number then return 0 end
+    return core.diff(base, v) * exponent * base ^ (exponent - 1)
+  end
+
+  if base_is_number then
+    return core.diff(exponent, v) * math.log(base) * base ^ exponent
+  end
+  
+  return core.diff(exponent * rima.log(base), v) * base ^ exponent
 end
 
 
