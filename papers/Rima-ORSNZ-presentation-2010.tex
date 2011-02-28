@@ -1,0 +1,779 @@
+%\documentclass[smaller,handout]{beamer}
+\documentclass[smaller]{beamer}
+
+\usepackage{listings}
+\usepackage{textcomp}
+\usepackage[normalem]{ulem}
+\usepackage{verbatim}
+
+\lstdefinelanguage{lua}
+  {morekeywords={and,break,do,else,elseif,end,false,for,function,if,in,local,
+     nil,not,or,repeat,return,then,true,until,while},
+   morekeywords={[2]arg,assert,collectgarbage,dofile,error,_G,getfenv,
+     getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,
+     rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,
+     type,unpack,_VERSION,xpcall},
+   morekeywords={[2]coroutine.create,coroutine.resume,coroutine.running,
+     coroutine.status,coroutine.wrap,coroutine.yield},
+   morekeywords={[2]module,require,package.cpath,package.load,package.loaded,
+     package.loaders,package.loadlib,package.path,package.preload,
+     package.seeall},
+   morekeywords={[2]string.byte,string.char,string.dump,string.find,
+     string.format,string.gmatch,string.gsub,string.len,string.lower,
+     string.match,string.rep,string.reverse,string.sub,string.upper},
+   morekeywords={[2]table.concat,table.insert,table.maxn,table.remove,
+   table.sort},
+   morekeywords={[2]math.abs,math.acos,math.asin,math.atan,math.atan2,
+     math.ceil,math.cos,math.cosh,math.deg,math.exp,math.floor,math.fmod,
+     math.frexp,math.huge,math.ldexp,math.log,math.log10,math.max,math.min,
+     math.modf,math.pi,math.pow,math.rad,math.random,math.randomseed,math.sin,
+     math.sinh,math.sqrt,math.tan,math.tanh},
+   morekeywords={[2]io.close,io.flush,io.input,io.lines,io.open,io.output,
+     io.popen,io.read,io.tmpfile,io.type,io.write,file:close,file:flush,
+     file:lines,file:read,file:seek,file:setvbuf,file:write},
+   morekeywords={[2]os.clock,os.date,os.difftime,os.execute,os.exit,os.getenv,
+     os.remove,os.rename,os.setlocale,os.time,os.tmpname},
+   alsodigit = {.},
+   sensitive=true,
+   morecomment=[l]{--},
+   morecomment=[s]{--[[}{]]--},
+   morestring=[b]",
+   morestring=[d]'
+  }
+
+\lstset{
+  language=lua,
+  basewidth=0.5em,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  keywordstyle=[2]\color{blue},
+  keywordstyle=[3]\color{orange},
+  commentstyle=\color[rgb]{0,.6,0},
+%  stringstyle=\color{green},
+  showstringspaces=false,
+  morekeywords={[3]
+    rima.R, rima.E, rima.repr, rima.sum, rima.sqrt, rima.nonnegative, rima.binary,
+    rima.mp.new, rima.mp.C, rima.mp.solve},
+  upquote=true,
+  backgroundcolor=\color[rgb]{.9,.9,.9},
+  escapeinside={(*}{*)},
+  escapebegin=\bfseries\color{red},
+}
+
+\lstdefinelanguage{mosel}{
+  morekeywords={[2] sum,in,forall,maximize,is_binary},
+}
+
+\lstdefinestyle{mosel}{
+  language=mosel,
+  basicstyle=\ttfamily\small,
+}
+
+\newcommand*\oldmacro{}%
+\let\oldmacro\insertshorttitle%
+\renewcommand*\insertshorttitle{%
+  \oldmacro\hfill%
+  \insertframenumber\,/\,\inserttotalframenumber}
+
+\mode<presentation>
+{
+  \usetheme{Warsaw}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title[Rima]{Rima: Building Math Models for Reuse}
+%\subtitle{Include Only If Paper Has a Subtitle}
+\author[Geoff~Leyland]{Geoff~Leyland \\ \texttt{geoff.leyland@incremental.co.nz}}
+\institute[Incremental Limited] {Incremental Limited}
+\date[ORSNZ 2010]{ORSNZ 2010}
+
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Model Reuse}
+
+%%%%%%%%%%
+\subsection{Model Reuse}
+\begin{frame}{Composing Models from \emph{Reusable} Parts}
+
+
+  {\bf Reuse:} Someone has written a model or model part,
+  and someone would like to use the model or part in a different context
+  \vspace{\stretch{1}}
+
+  {\bf In this talk:}You have a model for a \emph{single} knapsack
+  and you would like to extend it to a \emph{multiple} knapsack model (generalised assignment)
+\end{frame}
+
+
+%%%%%%%%%%
+\subsection{Reusing a Knapsack}
+\begin{frame}[fragile]{One to Many Knapsacks}
+  We would like to fill a single sack with items of the highest value:
+  \vspace{-2ex}
+  \begin{overprint}
+  \onslide<1| handout:0>
+  \begin{lstlisting}[style=mosel]
+(*maximize(sum(i in ITEMS) take(i) *\ value(i))*)
+sum(i in ITEMS) take(i) * size(i) <= CAPACITY
+forall(i in ITEMS) take(i) is_binary
+  \end{lstlisting}
+
+  \onslide<2| handout:0>
+  \begin{lstlisting}[style=mosel]
+maximize(sum(i in ITEMS) take(i) * value(i))
+(*sum(i in ITEMS) take(i) *\ size(i) <= CAPACITY*)
+forall(i in ITEMS) take(i) is_binary
+  \end{lstlisting}
+
+  \onslide<3| handout:0>
+  \begin{lstlisting}[style=mosel]
+maximize(sum(i in ITEMS) take(i) * value(i))
+sum(i in ITEMS) take(i) * size(i) <= CAPACITY
+(*forall(i in ITEMS) take(i) is\_binary*)
+\end{lstlisting}
+
+  \onslide<4-| handout:1>
+  \begin{lstlisting}[style=mosel]
+maximize(sum(i in ITEMS) take(i) * value(i))
+sum(i in ITEMS) take(i) * size(i) <= CAPACITY
+forall(i in ITEMS) take(i) is_binary
+  \end{lstlisting}
+  \vspace{2ex}
+
+  Now we'd like to extend the model to cover several sacks:
+  \begin{lstlisting}[style=mosel]
+maximize(
+  sum((*s in SACKS,*) i in ITEMS) take((*s,*) i) * value(i))
+(*forall(s in SACKS)*)
+  sum(i in ITEMS) take((*s,*) i) * size(i) <= CAPACITY(*(s)*)
+forall((*s in SACKS,*) i in ITEMS) take((*s,*) i) is_binary
+(*\color{orange}forall(i in ITEMS) sum(s in SACKS) take(s, i) <= 1*)
+\end{lstlisting}
+  \end{overprint}
+\end{frame}
+
+
+%%%%%%%%%%
+\subsection{Why do we care?}
+\begin{frame}{Why do we care?}
+  It's only a few extra characters, right?
+  \vspace{\stretch{1}}\pause
+  \begin{itemize}
+    \item We might have a more complex model than a knapsack
+    \vspace{1ex}
+    \item Altering the text of the model makes it hard to re-use
+      \begin{itemize}
+        \item to re-use it, we have to understand it enough to modify it
+        \item it is hard to share improvements between the two models
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%
+\begin{frame}
+  Why program by hand in five days what you can spend five years of your life automating?\\
+  ~\\
+  - Terence Parr
+\end{frame}
+
+
+%%%%%%%%%%
+\subsection{What is Rima?}
+\begin{frame}{What is Rima?}
+  Rima:
+  \begin{itemize}
+    \item is \emph{Yet-Another} Math Programming Modelling Language
+    \item focuses on making it easy to construct and re-use models
+  \end{itemize}
+  \vspace{\stretch{1}}
+  \begin{itemize}
+    \item is MIT licensed and available at {\tt http://rima.googlecode.com/}
+    \item is implemented in Lua: {\tt http://www.lua.org/}
+    \begin{itemize}\item a small, fast ``scripting'' language\end{itemize}
+    \item currently binds to CLP, CBC and lpsolve
+    \item has been submitted to COIN for review
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%
+\begin{frame}{Contents}
+  \textbf{Algorithms + Data Structures = Programs}\\
+  ~\\
+  - Niklaus Wirth\\
+  \vspace{\stretch{1}}
+  \small\textbf{Symbolic Expressions + Structured Data = Reusable Model Components}\\ 
+\end{frame}
+  
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\begin{frame}
+%  \frametitle{Outline}
+%  \tableofcontents
+%\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Symbolic Expressions}
+\begin{comment}
+%%%%%%%%%%
+\subsection{Expressions}
+\begin{frame}{Symbolic Expressions}
+  In Rima, the objective and constraints are stored as symbolic expressions\\
+  ~\\
+  Expressions and data are combined and into matrix rows at solve time
+  \\
+  ~\\
+  \begin{itemize}
+    \item dedicated modelling languages tend to do the same
+    \item some ``mainstream language'' bindings directly construct matrix rows
+ \end{itemize}
+\end{frame}
+\end{comment}
+
+%%%%%%%%%%
+\begin{frame}[fragile]{Constructing Expressions}
+
+  Rima expressions involve \emph{references} constructed with \lstinline!rima.R!:
+  \begin{lstlisting}
+e = rima.R("a") * rima.R("x") + rima.R("b") * rima.R("y")
+  \end{lstlisting}
+  \vspace{\stretch{1}}\pause
+
+  Expressions are stored symbolically and print nicely:
+  \begin{lstlisting}
+print(e)                           --> a*x + b*y
+  \end{lstlisting}
+%  {``\footnotesize\lstinline!--!'' introduces a comment in Lua.
+%   I will use ``\lstinline!-->!'' to show output}
+  \vspace{\stretch{1}}\pause
+  
+
+  All the \lstinline!rima.R!'s are cumbersome, so there is a shortcut:
+  \begin{lstlisting}
+(*rima.define("a, x, b, y")*)
+e = a * x + b * y
+print(e)                           --> a*x + b*y
+  \end{lstlisting}
+  \vspace{\stretch{1}}\pause
+
+  You can manipulate expressions like references:
+  \begin{lstlisting}
+print(3 * e)                       --> 3*(a*x + b*y)
+print(e^2)                         --> (a*x + b*y)^2
+  \end{lstlisting}
+\end{frame}
+
+
+%%%%%%%%%%
+\begin{frame}[fragile]{Evaluating Expressions}
+
+  \lstinline!rima.E! evaluates expressions by matching references to a \emph{table} of values:
+  \begin{lstlisting}
+rima.define("a, x, b, y")
+e = a * x + b * y
+print((*rima.E(e, \verb|{|a=2,x=3,b=4,y=5\verb|}|)*))--> 26
+  \end{lstlisting}
+  \vspace{\stretch{1}}\pause
+
+  If some references are undefined, \lstinline!rima.E! returns a new expression:
+  \begin{lstlisting}
+print(rima.E(e, {a=2,b=4}))        --> 2*x + 4*y
+  \end{lstlisting}
+  \vspace{\stretch{1}}\pause
+
+ The values you provide as data to \lstinline!rima.E! can be other expressions:
+  \begin{lstlisting}
+rima.define("xpos, xneg")
+print(rima.E(e, {(*\verb!x=xpos - xneg!*)})   --> a*(xpos - xneg) + b*y
+  \end{lstlisting}
+\end{frame}
+
+
+%%%%%%%%%%
+\subsection{A Simple LP}
+\begin{frame}[fragile]{A Simple LP (1)}
+
+  \lstinline!rima.mp.new! creates a model, and \lstinline!rima.mp.C! builds a constraint:
+  \vspace{-2ex}
+  \begin{overprint}
+  \onslide<1| handout:0>
+  \begin{lstlisting}
+rima.define("a, b, x, y")
+
+M = rima.mp.new({
+  sense = "maximise",
+  objective = a*x + b*y,
+  \end{lstlisting}
+
+  \onslide<2| handout:0>
+  \begin{lstlisting}
+rima.define("a, b, x, y")
+
+M = rima.mp.new({
+  sense = "maximise",
+  objective = a*x + b*y,
+
+  C1 = rima.mp.C(x + 2*y, "<=", 3),
+  C2 = rima.mp.C(2*x + y, "<=", 3),
+  \end{lstlisting}
+
+  \onslide<3| handout:1>
+  \begin{lstlisting}
+rima.define("a, b, x, y")
+
+M = rima.mp.new({
+  sense = "maximise",
+  objective = a*x + b*y,
+
+  C1 = rima.mp.C(x + 2*y, "<=", 3),
+  C2 = rima.mp.C(2*x + y, "<=", 3),
+
+  x = rima.positive(),
+  y = rima.positive()
+})
+  \end{lstlisting}
+
+  \end{overprint}
+\end{frame}
+
+
+%%%%%%%%%%
+\begin{frame}[fragile]{A Simple LP (2)}
+  As with expressions, you can print the model:
+  \begin{lstlisting}
+print(M)
+--> Maximise:
+-->   a*x + b*y
+--> Subject to:
+-->   C1: x + 2*y <= 3
+-->   C2: 2*x + y <= 3
+-->   0 <= x <= inf, x real
+-->   0 <= y <= inf, x real
+  \end{lstlisting}
+\end{frame}
+
+
+%%%%%%%%%%
+\begin{frame}[fragile]{A Simple LP (3)}
+
+  \lstinline{rima.mp.solve} takes the model and a table of data and solves:
+  \begin{lstlisting}
+primal, dual = rima.mp.solve("clp", M, {a=2, b=2})
+print(primal.objective)             --> 4
+print(primal.x)                     --> 1
+print(primal.y)                     --> 1
+print(primal.C1)                    --> 3
+
+print(dual.x)                       --> 0
+print(dual.C1)                      --> 0.333
+  \end{lstlisting}
+  \vspace{\stretch{1.0}}
+  \bf{\lstinline{M} encapsulates a complete, symbolic representation of the model}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Structured Data}
+
+\begin{comment}
+%%%%%%%%%%
+\begin{frame}{Structured Data}
+  Rima data can be richly structured
+  \begin{itemize}
+    \item like all other languages, Rima supports arrays
+    \item Rima also supports structures
+    \begin{itemize}
+      \item most general-purpose programming languages have structures
+      \item some dedicated modelling languages \emph{do not} have structures
+      \item most language bindings support structures in their host language, but the modelling systems themselves have weaker support
+    \end{itemize}
+ \end{itemize}
+\end{frame}
+\end{comment}
+
+%%%%%%%%%%
+\subsection{Arrays, Sums and Array Assignment}
+\begin{frame}[fragile]{Arrays, Sums and Array Assignment}
+
+  You can index references as if they were arrays:%
+  \vspace{-2ex}
+  \begin{overprint}%
+%
+  \onslide<1| handout:0>%
+  \begin{lstlisting}
+rima.define("X")
+e = X[1] + X[2] + X[3]
+print(e)                           --> X[1] + X[2] + X[3]
+  \end{lstlisting}%
+%
+  \onslide<2-| handout:1>%
+  \begin{lstlisting}
+rima.define("X")
+e = X[1] + X[2] + X[3]
+print(e)                           --> X[1] + X[2] + X[3]
+print(rima.E(e, {(*\verb!X={1,2,3}!*)}))      --> 6
+  \end{lstlisting}
+%  
+  \end{overprint} 
+  \vspace{\stretch{1}}\pause\pause
+  \vspace{-1ex}
+
+  \lstinline!rima.sum! sums an expression over a set:
+  \begin{lstlisting}
+rima.define("x, X")
+e = (*\verb!rima.sum{x=X}(x^2)!*)
+print(rima.E(e, {X={1,2,3}}))      --> 14
+  \end{lstlisting}
+  \vspace{\stretch{1}}\pause
+
+  You can assign to a whole array at once:
+  \begin{lstlisting}
+rima.define("i, X")
+(*\verb!t = { [X[i]] = 2^i }!*)
+print(rima.E(X[5], t))             --> 32
+  \end{lstlisting}
+
+\end{frame}
+
+
+%%%%%%%%%%
+\subsection{Structures}
+\begin{frame}[fragile]{Structures}
+
+  As well as using arrays, you can also index references as if they were structures:
+  \begin{lstlisting}
+rima.define("item")
+mass = item.(*volume*) * item.(*density*)
+print(mass)
+  --> item.volume * item.density
+print(rima.E(mass, {(*\verb!item={volume=10, density=1.032}!*)}))
+  --> 10.32
+  \end{lstlisting}
+  \vspace{\stretch{1}}
+\end{frame}
+
+
+%%%%%%%%%%
+\subsection{A Structured Knapsack}
+\begin{frame}[fragile]{A Structured Knapsack (1)}
+  \vspace{-2ex}
+  \begin{overprint}%
+%
+  \onslide<1| handout:0>%
+  \begin{lstlisting}
+rima.define("i, items")      -- items in knapsack
+rima.define("capacity")
+
+knapsack = rima.mp.new()
+ 
+(*\verb!knapsack.sense = "maximise"!*)
+(*\verb!knapsack.objective = rima.sum{i=items}(i.take * i.value)!*)
+
+knapsack.capacity_limit = rima.mp.C(
+  rima.sum{i=items}(i.take * i.size), "<=", capacity)
+
+knapsack.items[{i=items}].take = rima.binary()
+  \end{lstlisting}
+
+  \bf{Remember this model, because we won't change it from here on}
+
+  \onslide<2| handout:0>%
+  \begin{lstlisting}
+rima.define("i, items")      -- items in knapsack
+rima.define("capacity")
+
+knapsack = rima.mp.new()
+ 
+knapsack.sense = "maximise"
+knapsack.objective = rima.sum{i=items}(i.take * i.value)!
+
+(*\verb!knapsack.capacity_limit = rima.mp.C(!*)
+(*\verb!  rima.sum{i=items}(i.take * i.size), "<=", capacity)!*)
+
+knapsack.items[{i=items}].take = rima.binary()
+  \end{lstlisting}
+
+  \bf{Remember this model, because we won't change it from here on}
+
+  \onslide<3| handout:0>%
+  \begin{lstlisting}
+rima.define("i, items")      -- items in knapsack
+rima.define("capacity")
+
+knapsack = rima.mp.new()
+ 
+knapsack.sense = "maximise"
+knapsack.objective = rima.sum{i=items}(i.take * i.value)
+
+knapsack.capacity_limit = rima.mp.C(
+  rima.sum{i=items}(i.take * i.size), "<=", capacity)
+
+(*\verb!knapsack.items[{i=items}].take = rima.binary()!*)
+  \end{lstlisting}
+
+  \bf{Remember this model, because we won't change it from here on}
+
+  \onslide<4| handout:1>%
+  \begin{lstlisting}
+rima.define("i, items")      -- items in knapsack
+rima.define("capacity")
+
+knapsack = rima.mp.new()
+ 
+knapsack.sense = "maximise"
+knapsack.objective = rima.sum{i=items}(i.take * i.value)
+
+knapsack.capacity_limit = rima.mp.C(
+  rima.sum{i=items}(i.take * i.size), "<=", capacity)
+
+knapsack.items[{i=items}].take = rima.binary()
+  \end{lstlisting}
+
+  \bf{Remember this model, because we won't change it from here on}
+  \end{overprint}
+\end{frame}
+
+
+%%%%%%%%%%
+\begin{frame}[fragile]{A Structured Knapsack (2)}
+  As usual, rima can write the model out for us:
+  \begin{lstlisting}
+print(rima.repr(knapsack, {format="latex"}))
+  \end{lstlisting}
+  \vspace{\stretch{1}}
+
+  In \LaTeX:
+\begin{align*}
+\text{\bf maximise} & \sum_{i \in \text{items}} i_{\text{take}} i_{\text{value}} \\
+\text{\bf subject to} \\
+\text{capacity\_limit}: & \sum_{i \in \text{items}} i_{\text{size}} i_{\text{take}} \leq \text{capacity} \\
+& \text{items}_{i,\text{take}} \in \{0, 1\} \forall i \in \text{items}\\
+\end{align*}
+
+\end{frame}
+
+
+
+%%%%%%%%%%
+\begin{frame}[fragile]{A Structured Knapsack (3)}
+  \begin{lstlisting}
+ITEMS = {
+  camera   = { value =  15, size =  2 },
+  necklace = { value = 100, size = 20 },
+  vase     = { value =  15, size = 20 },
+  picture  = { value =  15, size = 30 },
+  tv       = { value =  15, size = 40 },
+  video    = { value =  15, size = 30 },
+  chest    = { value =  15, size = 60 },
+  brick    = { value =   1, size = 10 }}
+
+primal = rima.mp.solve("cbc", knapsack,
+  {items=ITEMS, capacity=102})
+
+print(primal.objective)             --> 160
+print(primal.items.camera.take)     --> 1
+print(primal.items.vase.take)       --> 1
+print(primal.items.brick.take)      --> 0
+  \end{lstlisting}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Reusable Model Components}
+\begin{comment}
+%%%%%%%%%%
+\begin{frame}{Reusable Model Components}
+  With Rima we can build a model from parts by:
+  \begin{itemize}
+    \item Configuring an existing model
+    \item Extending an existing model
+    \item Including an existing model, perhaps more than once
+ \end{itemize}
+\end{frame}
+\end{comment}
+
+%%%%%%%%%%
+\subsection{Extensible Models}
+\begin{frame}[fragile]{Constraints are Data Too}
+  Suppose, for example, you can only pick one of the camera or the vase.\\
+  \vspace{\stretch{1}}
+
+  Constraints, like expressions, are just data, so modelling this is easy:
+  \begin{lstlisting}
+primal = rima.mp.solve("cbc", knapsack,
+  {items=ITEMS, capacity=102,
+  (*\verb!camera_xor_vase =!*)
+    (*rima.mp.C(items.camera.take + items.vase.take, "<=", 1)*)})
+  
+print(primal.objective)             --> 146
+print(primal.items.camera.take)     --> 1
+print(primal.items.vase.take)       --> 0
+  \end{lstlisting}
+  \vspace{\stretch{1}}
+  \bf{What if we want to reuse this constrained model?}
+\end{frame}
+
+
+%%%%%%%%%%
+\begin{frame}[fragile]{Extensible Models}
+  \lstinline!rima.mp.new! can take two arguments,
+  the model you want to extend
+  and any extensions to the model:
+  \begin{lstlisting}
+side_constrained_knapsack = rima.mp.new(knapsack, {
+  (*\verb!camera_xor_vase =!*)
+    (*\verb!rima.mp.C(items.camera.take + items.vase.take, "<=", 1)!*)})
+
+primal = rima.mp.solve("cbc", side_constrained_knapsack,
+  {items=ITEMS, capacity=102})
+
+print(primal.objective)             --> 146
+  \end{lstlisting}
+  \vspace{\stretch{1}}
+\end{frame}
+
+
+%%%%%%%%%%
+\subsection{Multiple Sacks}
+\begin{frame}[fragile]{Multiple Sacks}
+  Now we are ready to try a multiple sack model:
+  \vspace{-2ex}
+  \begin{overprint}%
+%
+  \onslide<1| handout:0>%
+  \begin{lstlisting}
+rima.define("s, sacks")
+
+multiple_sack = rima.mp.new({
+(*\verb!  sense = "maximise",!*)
+(*\verb!  objective = rima.sum{s=sacks}(s.objective),!*)
+  only_take_once[{i=items}] =
+    rima.mp.C(rima.sum{s=sacks}(s.items[i].take), "<=", 1)
+})
+  \end{lstlisting}
+  \vspace{\stretch{1}}
+  Note that:
+  \begin{itemize}
+    \item we are treating \lstinline!sacks! like a ``substructure''
+    \item we have not said anything about what \lstinline!sacks! is
+   \end{itemize}
+
+  \onslide<2| handout:0>%
+  \begin{lstlisting}
+rima.define("s, sacks")
+
+multiple_sack = rima.mp.new({
+  sense = "maximise",
+  objective = rima.sum{s=sacks}(s.objective),
+(*\verb!  only_take_once[{i=items}] =!*)
+(*\verb!    rima.mp.C(rima.sum{s=sacks}(s.items[i].take), "<=", 1)!*)
+})
+  \end{lstlisting}
+  \vspace{\stretch{1}}
+  Note that:
+  \begin{itemize}
+    \item we are treating \lstinline!sacks! like a ``substructure''
+    \item we have not said anything about what \lstinline!sacks! is
+   \end{itemize}
+
+  \onslide<3| handout:1>%
+  \begin{lstlisting}
+rima.define("s, sacks")
+
+multiple_sack = rima.mp.new({
+  sense = "maximise",
+  objective = rima.sum{s=sacks}(s.objective),
+  only_take_once[{i=items}] =
+    rima.mp.C(rima.sum{s=sacks}(s.items[i].take), "<=", 1)
+})
+  \end{lstlisting}
+  \vspace{\stretch{1}}
+  Note that:
+  \begin{itemize}
+    \item we are treating \lstinline!sacks! like a ``substructure''
+    \item we have not said anything about what \lstinline!sacks! is
+   \end{itemize}
+
+  \end{overprint}
+\end{frame}
+
+
+%%%%%%%%%%
+\begin{frame}[fragile]{Multiple Knapsacks}
+  We can specify what the knapsack submodel is when we solve:
+
+  \begin{lstlisting}
+primal = rima.mp.solve("cbc", multiple_sack, {
+  items = ITEMS,
+  [sacks[s].items] = items,
+  sacks = {{capacity=51}, {capacity=51}},
+  (*[sacks[s]] = knapsack*)})
+
+print(primal.objective)             --> 146
+  \end{lstlisting}
+  Sack 1: \lstinline!camera, vase, brick!\\
+  Sack 2: \lstinline!necklace, video!
+\end{frame}
+
+
+%%%%%%%%%%
+\begin{frame}[fragile]{Multiple \emph{Constrained} Knapsacks}
+  What if we can't carry the camera and vase in the same sack?
+
+  \begin{lstlisting}
+primal = rima.mp.solve("cbc", multiple_sack, {
+  items = ITEMS,
+  [sacks[s].items] = items,
+  sacks = {{capacity=51}, {capacity=51}},
+  [sacks[s]] = (*\verb!side_constrained_knapsack!*)})
+
+print(primal.objective)             --> 146
+  \end{lstlisting}
+  Sack 1: \lstinline!camera, picture, brick!\\
+  Sack 2: \lstinline!vase, necklace!
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+
+%%%%%%%%%%
+\begin{frame}{Conclusion}
+  We wrote a knapsack model and reused it without any modification:
+  \begin{itemize}
+    \item in a side-constrained knapsack
+    \item as a part of a multiple knapsack problem
+    \item as a part of a multiple side-constrained knapsack problem
+  \end{itemize}
+  \vspace{\stretch{1}}
+
+  Structured symbolic models enable reuse \emph{without} alteration:
+  \begin{itemize}
+    \item we only need to understand the model interface to reuse it
+    \item it is easy to share improvements
+  \end{itemize}
+
+  \vspace{\stretch{1}}
+  {\bf Can we ``compose'' complex models, and is it worthwhile?}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
