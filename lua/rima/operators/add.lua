@@ -118,9 +118,11 @@ function add.__eval(args, S)
   -- sort the terms alphabetically, so that when we group by a string representation,
   -- like terms look alike
   local ordered_terms = {}
+  local i = 1
   for name, t in pairs(terms) do
     if t.coeff ~= 0 then
-      ordered_terms[#ordered_terms+1] = { name=t.name, coeff=t.coeff, expression=t.expression }
+      ordered_terms[i] = t
+      i = i + 1
     end
   end
   table.sort(ordered_terms, function(a, b) return a.name < b.name end)
