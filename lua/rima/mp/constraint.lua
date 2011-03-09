@@ -17,10 +17,7 @@ local constraint = object:new(_M, "constraint")
 
 function constraint:new(lhs, rel, rhs)
   assert(rel == "==" or rel == ">=" or rel == "<=")
-
-  o = { type=rel, lhs=lhs, rhs=rhs }
-
-  return object.new(self, o)
+  return object.new(self, { type=rel, lhs=lhs, rhs=rhs })
 end
 
 
