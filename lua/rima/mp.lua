@@ -14,6 +14,7 @@ local set_list = require("rima.sets.list")
 local closure = require("rima.closure")
 local constraint = require("rima.mp.constraint")
 local linearise = require("rima.mp.linearise")
+local types = require("rima.types")
 local rima = require("rima")
 
 module(...)
@@ -224,16 +225,26 @@ function sparse_form(S)
     end
   end
 
-  -- Order the variables (for now, alphabetically)
+  -- Get the variable bounds and order them (for now, alphabetically)
   local ordered_variables = {}
   for name, c in pairs(variables) do
     local cost = 0
     local o = objective[name]
     if o then cost = o.coeff end
-    ordered_variables[#ordered_variables+1] = { name=name, cost=cost, ref=c.variable, l=c.lower, h=c.upper, i=c.integer }
+
+    local _, t = core.eval(c.variable, S)
+    if not types.number_t:isa(t) then
+      if types.undefined_t:isa(t) then
+        error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
+      else
+        error(("expecting a number type for '%s', got '%s'"):format(s, lib.repr(t)), 0)
+      end
+    end
+
+    ordered_variables[#ordered_variables+1] = { name=name, cost=cost, ref=c.variable, l=t.lower, h=t.upper, i=t.integer }
   end
   table.sort(ordered_variables, function(a, b) return a.name < b.name end)
-  
+
   for i, v in ipairs(ordered_variables) do
     variables[v.name].index = i
   end

@@ -8,7 +8,6 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local types = require("rima.types")
 local index = require("rima.index")
 local element = require("rima.sets.element")
 
@@ -29,15 +28,7 @@ function _linearise(l, S)
     if terms[s] then
       error(("the reference '%s' appears more than once"):format(s), 0)
     end
-    local _, t = core.eval(v, S)
-    if not types.number_t:isa(t) then
-      if types.undefined_t:isa(t) then
-        error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
-      else
-        error(("expecting a number type for '%s', got '%s'"):format(s, lib.repr(t)), 0)
-      end
-    end
-    terms[s] = { variable=v, coeff=coeff, lower=t.lower, upper=t.upper, integer=t.integer }
+    terms[s] = { variable=v, coeff=coeff }
   end
 
   if object.type(l) == "number" then

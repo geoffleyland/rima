@@ -31,12 +31,9 @@ function test(options)
   T:expect_ok(LF(1 + a))
   T:expect_error(LF(1 + (3 + a^2)),
     "linear form: '4 %+ a^2'.-term 2 is not linear %(got 'a^2', pow%)")
-  T:expect_error(LF(1 + c),
-    "linear form: '1 %+ c'.-expecting a number type for 'c', got 'c undefined'")
   T:expect_error(LF(a * b),
     "linear form: 'a%*b'.-the expression does not evaluate to a sum of terms")
   T:expect_error(LF(1 + a[2]*5), "error indexing 'a' as 'a%[2%]': can't index a number")
-  T:expect_error(LF(1 + c[2]*5), "expecting a number type for 'c%[2%]', got 'nil'")
   T:expect_ok(LF(1 + d[2]*5), "d[2] is a number")
   T:expect_ok(LF(1 + d[2]), "d[2] is an index")
   T:expect_ok(LF(d[2]), "d[2] is an index")
