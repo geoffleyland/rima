@@ -136,6 +136,57 @@ function prepare_constraints(S)
 end
 
 
+function prepare_variables(S, objective, constraints)
+  local has_integer_variables = false
+
+  -- List all the variables in the constraints
+  local variable_map = {}
+  for _, e in ipairs(constraints) do
+    core.list_variables(e, nil, variable_map)
+  end
+
+  -- and in the objective
+  local objective_variables = {}
+  core.list_variables(objective, nil, objective_variables)
+
+  -- and check that everything in the objective appears in a constraint
+  for name in pairs(objective_variables) do
+    if not variable_map[name] then
+      error(("The variable '%s' is not involved in any constraint, but is in the objective\n"):format(lib.repr(name)))
+    end
+  end
+
+  -- work out the types of the variables...
+  local sorted_variables = {}
+  local i = 1
+  for n, v in pairs(variable_map) do
+    local _, t = core.eval(v.ref, S)
+    if not types.number_t:isa(t) then
+      if types.undefined_t:isa(t) then
+        error(("expecting a number type for '%s', got '%s'"):format(v.name, t:describe(v.name)), 0)
+      else
+        error(("expecting a number type for '%s', got '%s'"):format(v.name, lib.repr(t)), 0)
+      end
+    end
+    if t.integer then has_integer_variables = true end
+    v.type = t
+
+    sorted_variables[i] = v
+    i = i + 1
+  end
+
+  -- and sort them
+  table.sort(sorted_variables, function(a, b) return a.name < b.name end)
+  
+  -- assign indices to the variables
+  for i, v in ipairs(sorted_variables) do
+    v.index = i
+  end
+
+  return has_integer_variables, variable_map, sorted_variables
+end
+
+
 -- Model -----------------------------------------------------------------------
 
 local proxy_mt = {}
@@ -226,47 +277,12 @@ function sparse_form(S)
       format(lib.repr(S):gsub("\n", "\n    ")), 0)
   end
 
-  -- Find all the variables in the constraints
-  local variables = {}
-  for _, c in pairs(constraints) do
-    for name, info in pairs(c.linear_exp) do
-      variables[name] = info
-    end
-  end
+  local is_integer, variables, ordered_variables = prepare_variables(S, objective, constraint_expressions)
 
-  -- Check all the variables in the objective appear in the constraints
-  for name in pairs(objective) do
-    if not variables[name] then
-      error(("The variable '%s' is not involved in any constraint, but is in the objective\n"):format(lib.repr(name)))
-    end
-  end
-
-  -- Get the variable bounds and order them (for now, alphabetically)
-  local ordered_variables = {}
-  local i = 1
-  for name, c in pairs(variables) do
-    local cost = 0
+  -- add costs to variables
+  for name, v in pairs(variables) do
     local o = objective[name]
-    if o then cost = o.coeff end
-
-    local _, t = core.eval(c.ref, S)
-    if not types.number_t:isa(t) then
-      if types.undefined_t:isa(t) then
-        error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
-      else
-        error(("expecting a number type for '%s', got '%s'"):format(s, lib.repr(t)), 0)
-      end
-    end
-
-    c.cost = cost
-    c.type = t
-    ordered_variables[i] = c
-    i = i + 1
-  end
-  table.sort(ordered_variables, function(a, b) return a.name < b.name end)
-
-  for i, v in ipairs(ordered_variables) do
-    variables[v.name].index = i
+    v.cost = (o and o.coeff) or 0
   end
 
   -- Build a set of sparse constraints
