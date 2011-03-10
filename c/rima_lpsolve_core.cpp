@@ -7,30 +7,29 @@ see LICENSE for license information
 
 *******************************************************************************/
 
+#include "rima_solver_tools.h"
 extern "C"
 {
-#include "lualib.h"
 #include "lauxlib.h"
 #include "lp_lib.h"
 LUALIB_API int luaopen_rima_lpsolve_core(lua_State *L);
 }
 
 #include <limits>
-#include <vector>
+#include <exception>
+#include <new>
+#include <cstring>
 
 static const char metatable_name[] = "rima.lpsolve";
 
+
 /*============================================================================*/
 
-static int error(lua_State *L, const char *s)
+static lprec *get_model(lua_State *L)
 {
-  lua_settop(L, 0);
-  lua_pushnil(L);
-  lua_pushstring(L, s);
-  return 2;
+  return *(lprec**)luaL_checkudata(L, 1, metatable_name);
 }
 
-/*============================================================================*/
 
 static int rima_new(lua_State *L)
 {
@@ -56,9 +55,10 @@ static int rima_new(lua_State *L)
   return 1;
 }
 
+
 static int rima_resize(lua_State *L)
 {
-  lprec *model = *(lprec**)luaL_checkudata(L, 1, metatable_name);
+  lprec *model = get_model(L);
   luaL_checkinteger(L, 2);
   luaL_checkinteger(L, 3);
   int rows = lua_tointeger(L, 2), columns = lua_tointeger(L, 3);
@@ -71,122 +71,69 @@ static int rima_resize(lua_State *L)
   return 1;
 }
 
+
+static const char *build_constraint(void *M, unsigned non_zeroes, int *columns, double *coefficients, double lower, double upper)
+{
+  int constraint_type;
+  double rhs;
+  if (lower == -std::numeric_limits<double>::infinity())
+  {
+    rhs = upper;
+    constraint_type = 1;
+  }
+  else if (upper == std::numeric_limits<double>::infinity())
+  {
+    rhs = lower;
+    constraint_type = 2;
+  }
+  else if (lower == upper)
+  {
+    rhs = lower;
+    constraint_type = 3;
+  }
+  else
+    return "lpsolve can't handle constraints with upper and lower bounds";
+
+    if (add_constraintex((lprec *)M, non_zeroes, &coefficients[0], &columns[0], constraint_type, rhs) == 0)
+      return "couldn't add constraint";
+  return 0;
+}
+
+
 static int rima_build_rows(lua_State *L)
 {
-  lprec *model = *(lprec**)luaL_checkudata(L, 1, metatable_name);
+  lprec *model = get_model(L);
   luaL_checktype(L, 2, LUA_TTABLE);
   unsigned constraint_count = lua_objlen(L, 2);
-  unsigned max_non_zeroes = 0;
   unsigned column_count = get_Ncolumns(model);
 
-  for (unsigned i = 0; i != constraint_count; ++i)
-  {
-    lua_rawgeti(L, 2, i+1);
-    if (lua_type(L, -1) != LUA_TTABLE)
-      return error(L, "The elements of the constraints table must be tables of constraints");
+  unsigned max_non_zeroes = 0;
+  const char *err = check_constraints(L, constraint_count, column_count, max_non_zeroes);
+  if (err) return error(L, err);
 
-    lua_pushstring(L, "l");
-    lua_rawget(L, -2);
-    if (lua_type(L, -1) != LUA_TNUMBER)
-      return error(L, "The lower bound on a constraint (l) must be a number");
-    lua_pop(L, 1);
+  err = build_constraints(L, max_non_zeroes, constraint_count, 0, build_constraint, model);
+  if (err) return error(L, err);
 
-    lua_pushstring(L, "h");
-    lua_rawget(L, -2);
-    if (lua_type(L, -1) != LUA_TNUMBER)
-      return error(L, "The upper bound on a constraint (h) must be a number");
-    lua_pop(L, 1);
-
-    lua_pushstring(L, "m");
-    lua_rawget(L, -2);
-    if (lua_type(L, -1) != LUA_TTABLE)
-      return error(L, "The constraint members array must be a table");
-
-    unsigned nz = lua_objlen(L, -1);
-    for (unsigned j = 0; j != nz; ++j)
-    {
-      lua_rawgeti(L, -1, j+1);
-      if (lua_type(L, -1) != LUA_TTABLE && lua_objlen(L, -1) != 2)
-        return error(L, "The elements of a table of non-zeroes must be a table of two numbers");
-      lua_rawgeti(L, -1, 1);
-      lua_rawgeti(L, -2, 2);
-      if (lua_type(L, -1) != LUA_TNUMBER || lua_type(L, -2) != LUA_TNUMBER)
-        return error(L, "The elements of a table of non-zeroes must be a table of two numbers");
-      unsigned column = lua_tointeger(L, -2) - 1;
-      if (column > column_count)
-        return error(L, "An index in the column vector exceeded the number of columns");
-      lua_pop(L, 3);
-    }
-    if (nz > max_non_zeroes)
-      max_non_zeroes = nz;
-    lua_pop(L, 2);
-  }
-
-  std::vector<int> columns(max_non_zeroes);
-  std::vector<double> coefficients(max_non_zeroes);
-
-  for (unsigned i = 0; i != constraint_count; ++i)
-  {
-    lua_rawgeti(L, 2, i+1);
-
-    lua_pushstring(L, "l");
-    lua_rawget(L, -2);
-    double lower = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_pushstring(L, "h");
-    lua_rawget(L, -2);
-    double upper = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_pushstring(L, "m");
-    lua_rawget(L, -2);
-
-    unsigned nz = lua_objlen(L, -1);
-    for (unsigned j = 0; j != nz; ++j)
-    {
-      lua_rawgeti(L, -1, j+1);
-      lua_rawgeti(L, -1, 1);
-      lua_rawgeti(L, -2, 2);
-      unsigned column = lua_tointeger(L, -2); // - 1;
-      double coefficient = lua_tonumber(L, -1);
-      columns[j] = column;
-      coefficients[j] = coefficient;
-      lua_pop(L, 3);
-    }
-    
-    int constraint_type;
-    double rhs;
-    if (lower == -std::numeric_limits<double>::infinity())
-    {
-      rhs = upper;
-      constraint_type = 1;
-    }
-    else if (upper == std::numeric_limits<double>::infinity())
-    {
-      rhs = lower;
-      constraint_type = 2;
-    }
-    else if (lower == upper)
-    {
-      rhs = lower;
-      constraint_type = 3;
-    }
-    else
-      return error(L, "lpsolve can't handle constraints with upper and lower bounds");
-
-    if (add_constraintex(model, nz, &coefficients[0], &columns[0], constraint_type, rhs) == 0)
-      return error(L, "couldn't add constraint");
-    lua_pop(L, 2);
-  }
-  
   lua_pushboolean(L, 1);
   return 1;
 }
 
+
+static const char *build_variable(void *M, unsigned index, double cost, double lower, double upper, bool integer)
+{
+  index += 1;
+  if (set_obj((lprec *)M, index, cost) == 0)
+    return "couldn't set variable cost";
+  set_bounds((lprec *)M, index, lower, upper);
+  if (integer)
+    set_int((lprec *)M, index, 1);
+  return 0;
+}
+
+
 static int rima_set_objective(lua_State *L)
 {
-  lprec *model = *(lprec**)luaL_checkudata(L, 1, metatable_name);
+  lprec *model = get_model(L);
   luaL_checktype(L, 2, LUA_TTABLE);
   luaL_checktype(L, 3, LUA_TSTRING);
   unsigned variable_count = lua_objlen(L, 2);
@@ -204,104 +151,48 @@ static int rima_set_objective(lua_State *L)
   else
     return error(L, "The the optimisation direction must be 'minimise' or 'maximise'");
 
-  for (unsigned i = 0; i != variable_count; ++i)
-  {
-    lua_rawgeti(L, 2, i+1);
-    if (lua_type(L, -1) != LUA_TTABLE)
-      return error(L, "The elements of the constraints table must be tables of constraints");
-      
-    lua_pushstring(L, "l");
-    lua_rawget(L, -2);
-    if (lua_type(L, -1) != LUA_TNUMBER)
-      return error(L, "The lower bound on a variable (l) must be a number");
-    lua_pop(L, 1);
+  const char *err = check_variables(L, variable_count);
+  if (err) return error(L, err);
 
-    lua_pushstring(L, "h");
-    lua_rawget(L, -2);
-    if (lua_type(L, -1) != LUA_TNUMBER)
-      return error(L, "The upper bound on a variable (h) must be a number");
-    lua_pop(L, 1);
+  err = build_variables(L, variable_count, build_variable, model);
+  if (err) return error(L, err);
 
-    lua_pushstring(L, "i");
-    lua_rawget(L, -2);
-    if (!lua_isboolean(L, -1) && !lua_isnil(L, -1))
-      return error(L, "The integer flag for a variable (i) must be true, false or nil");
-    lua_pop(L, 1);
-
-    lua_pushstring(L, "cost");
-    lua_rawget(L, -2);
-    if (lua_type(L, -1) != LUA_TNUMBER)
-      return error(L, "The cost of a variable (cost) must be a number");
-    lua_pop(L, 1);
-
-    lua_pop(L, 1);
-  }
-
-  for (unsigned i = 0; i != variable_count; ++i)
-  {
-    lua_rawgeti(L, 2, i+1);
-
-    lua_pushstring(L, "l");
-    lua_rawget(L, -2);
-    double lower = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_pushstring(L, "h");
-    lua_rawget(L, -2);
-    double upper = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_pushstring(L, "i");
-    lua_rawget(L, -2);
-    bool integer = lua_toboolean(L, -1);
-    lua_pop(L, 1);
-
-    lua_pushstring(L, "cost");
-    lua_rawget(L, -2);
-    double cost = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    if (set_obj(model, i+1, cost) == 0)
-      return error(L, "couldn't set variable cost");
-    set_bounds(model, i+1, lower, upper);
-    if (integer)
-      set_int(model, i+1, 1);
-
-    lua_pop(L, 1);
-  }
   set_sense(model, optimization_direction);
 
   lua_pushboolean(L, 1);
   return 1;  
 }
 
+
 static int rima_solve(lua_State *L)
 {
-  lprec *model = *(lprec**)luaL_checkudata(L, 1, metatable_name);
+  lprec *model = get_model(L);
+
   int result = solve(model);
 
   if (result != 0)
     return error(L, "Model not solved to optimality");
 
   lua_pushboolean(L, 1);
-  return 1;  
+  return 1;
 }
+
 
 static int rima_get_solution(lua_State *L)
 {
-  lprec *model = *(lprec**)luaL_checkudata(L, 1, metatable_name);
+  lprec *model = get_model(L);
 
   unsigned row_count = get_Nrows(model);
   unsigned column_count = get_Ncolumns(model);
   double *primal, *dual;
   get_ptr_primal_solution(model, &primal);
   get_ptr_dual_solution(model, &dual);
-  
+
   lua_newtable(L);
   lua_pushnumber(L, *primal);
   lua_setfield(L, -2, "objective");
   ++primal; ++dual;
-  
+
   lua_createtable(L, row_count, 0);
   for (unsigned i = 0; i != row_count; ++i)
   {
@@ -327,16 +218,17 @@ static int rima_get_solution(lua_State *L)
     ++primal; ++dual;    
   }
   lua_setfield(L, -2, "variables");
-  
-  return 1;  
+
+  return 1;
 }
+
 
 static int rima_delete(lua_State *L)
 {
-  lprec *model = *(lprec**)luaL_checkudata(L, 1, metatable_name);
-  delete_lp(model); 
+  delete_lp(get_model(L));
   return 0;
 }
+
 
 /*============================================================================*/
 
@@ -345,6 +237,7 @@ static luaL_Reg rima_functions[] =
   {"new",  rima_new},
   {NULL, NULL}
 };
+
 
 static luaL_Reg rima_methods[] =
 {
@@ -356,6 +249,7 @@ static luaL_Reg rima_methods[] =
   {"get_solution", rima_get_solution},
   {NULL, NULL}
 };
+
 
 LUALIB_API int luaopen_rima_lpsolve_core(lua_State *L)
 {
@@ -373,6 +267,7 @@ LUALIB_API int luaopen_rima_lpsolve_core(lua_State *L)
   luaL_register(L, "rima_lpsolve_core", rima_functions);
   return 1;
 }
+
 
 /*============================================================================*/
 
