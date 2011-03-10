@@ -457,17 +457,17 @@ function test(options)
     local list = {}
     index.proxy_mt.__list_variables(a[1].b, S, list)
     index.proxy_mt.__list_variables(a[2].b, S, list)
-    T:check_equal(list["a[i].b"].index, "a[i].b")
+    T:check_equal(list["a[i].b"].ref, "a[i].b")
     T:check_equal(list["a[i].b"].sets[1], "i in I")
     
     list = {}
     index.proxy_mt.__list_variables(a[i.j].b, S, list)
-    T:check_equal(list["a[i].b"].index, "a[i].b")
+    T:check_equal(list["a[i].b"].ref, "a[i].b")
 
     list = core.list_variables(a[1].b + a[2].b + a[3].c, S)
-    T:check_equal(list["a[i].b"].index, "a[i].b")
+    T:check_equal(list["a[i].b"].ref, "a[i].b")
     T:check_equal(list["a[i].b"].sets[1], "i in I")
-    T:check_equal(list["a[i].c"].index, "a[i].c")
+    T:check_equal(list["a[i].c"].ref, "a[i].c")
     T:check_equal(list["a[i].c"].sets[1], "i in I")
   end
   

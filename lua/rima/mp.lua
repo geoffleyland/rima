@@ -180,14 +180,14 @@ function proxy_mt.__repr(M, format)
   end
   local sorted_variables = {}
   for n, v in pairs(variables) do
-    sorted_variables[#sorted_variables+1] = { name=n, index=v.index, sets=v.sets }
+    sorted_variables[#sorted_variables+1] = v
   end
   table.sort(sorted_variables, function(a, b) return a.name < b.name end)
 
   for _, v in ipairs(sorted_variables) do
-    local _, vt = core.eval(v.index, M)
+    local _, vt = core.eval(v.ref, M)
     if vt then
-      append(r, latex and "& " or "  ", vt:describe(v.index, format))
+      append(r, latex and "& " or "  ", vt:describe(v.ref, format))
       if v.sets and v.sets[1] then
         append(r, latex and " \\forall " or " for all ")
         for i, s in ipairs(v.sets) do

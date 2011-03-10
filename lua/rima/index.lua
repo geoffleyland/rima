@@ -379,7 +379,9 @@ function proxy_mt.__list_variables(i, s, list)
       result_index = result_index[addr:value(i)]
     end
   end
-  list[lib.repr(result_index)] = { index=result_index, sets=result_sets }
+
+  local name = lib.repr(result_index)
+  list[name] = { name=name, ref=result_index, sets=result_sets }
 end
 
 
