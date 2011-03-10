@@ -36,7 +36,9 @@ end
 
 -- Constraint Handling ---------------------------------------------------------
 
-function find_constraints(S)
+function find_constraints(S, callback)
+  local t0 = os.clock()
+
   local constraints = {}
   local current_address = {}
   local current_sets = set_list:new()
@@ -60,6 +62,7 @@ function find_constraints(S)
 
   local function add_constraint(c, ref, undefined)
     constraints[#constraints+1] = { constraint=c, ref=ref, undefined=undefined }
+    if callback then callback(#constraints, t0) end
   end
 
   local function search(t)
@@ -98,11 +101,14 @@ function find_constraints(S)
 end
 
 
+local function report_search_time(cc, t0)
+  io.stderr:write(("\rFound %d constraints in %.1f secs..."):format(cc, os.clock() - t0))
+end
+
+
 local function linearise_constraints(S)
-  local t0 = os.clock()
-  io.stderr:write("Searching for constraints...")
-  local constraints = find_constraints(S)
-  io.stderr:write(("\rFound %d constraints in %.1f secs\n"):format(#constraints, os.clock() - t0))
+  local constraints = find_constraints(S, report_search_time)
+  io.stderr:write("\n")
 
   local linearised = {}
   t0 = os.clock()
