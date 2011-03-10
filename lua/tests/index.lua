@@ -98,7 +98,7 @@ function test(options)
   local list = {}
   local i = N(nil, "a", 1, "b")
   index.proxy_mt.__list_variables(i, {}, list)
-  T:check_equal(list["a[1].b"].index, "a[1].b")
+  T:check_equal(list["a[1].b"].ref, "a[1].b")
   
   return T:close()
 end

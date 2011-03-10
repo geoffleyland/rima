@@ -326,7 +326,7 @@ function proxy_mt.__list_variables(i, s, list)
 
   if not query_f then
     local name = lib.repr(i)
-    list[name] = { index=i }
+    list[name] = { name=name, ref=i }
     return
   end
 
