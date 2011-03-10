@@ -32,8 +32,8 @@ function test(options)
   T:expect_ok(function() S.e = C end)
   T:check_equal(lib.repr((core.eval(S.e))), "3*a + 5*c <= 3")
 
-  local lhs, type, constant
-  T:expect_ok(function() lhs, lower, upper = C:linearise(S) end)
+  local lower, upper, lhs
+  T:expect_ok(function() lower, upper, _, lhs = C:characterise(S) end)
   T:check_equal(upper, 3)
   T:check_equal(lower, -math.huge)
   T:check_equal(lhs.a.coeff, 3)

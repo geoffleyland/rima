@@ -106,28 +106,33 @@ local function report_search_time(cc, t0)
 end
 
 
-local function linearise_constraints(S)
+function prepare_constraints(S)
   local constraints = find_constraints(S, report_search_time)
   io.stderr:write("\n")
 
-  local linearised = {}
+  local constraint_expressions, constraint_info = {}, {}
+  local linear = true
+
   t0 = os.clock()
   for i, c in ipairs(constraints) do
     if c.undefined and c.undefined[1] then
-      error(("error while linearising the constraint '%s': Some of the constraint's indices are undefined"):
+      error(("error while preparing the constraint '%s': Some of the constraint's indices are undefined"):
         format(lib.repr(c.constraint)), 0)
     end
 
-    local status, lhs, lower, upper = pcall(c.constraint.linearise, c.constraint, S)
-    if not status then
-      error(("error while linearising the constraint '%s':\n   %s"):
-        format(lib.repr(c.constraint), lhs:gsub("\n", "\n    ")), 0)
-    end
+    local lower, upper, exp, linear_exp = c.constraint:characterise(S)
+    if not linear_exp then linear = false end
+
+    c.lower = lower
+    c.upper = upper
+    c.linear_exp = linear_exp
+    constraint_info[i] = c
+    constraint_expressions[i] = exp
+
     io.stderr:write(("\rGenerated %d constraints in %.1f secs..."):format(i, os.clock() - t0))
-    linearised[i] = { ref=c.ref, constraint=c.constraint, lhs=lhs, lower=lower, upper=upper }
   end
   io.stderr:write("\n")
-  return linearised
+  return linear, constraint_expressions, constraint_info
 end
 
 
@@ -214,12 +219,17 @@ end
 function sparse_form(S)
 
   local constant, objective = linearise.linearise(index:new(nil, "objective"), S)
-  local constraints = linearise_constraints(S)
-  
+  local linear, constraint_expressions, constraints = prepare_constraints(S)
+
+  if not linear then
+    error(("error while linearising: some constraints in the problem are not linear:\n   %s"):
+      format(lib.repr(S):gsub("\n", "\n    ")), 0)
+  end
+
   -- Find all the variables in the constraints
   local variables = {}
   for _, c in pairs(constraints) do
-    for name, info in pairs(c.lhs) do
+    for name, info in pairs(c.linear_exp) do
       variables[name] = info
     end
   end
@@ -265,7 +275,7 @@ function sparse_form(S)
   for _, c in pairs(constraints) do
     local elements = {}
     local j = 1
-    for name, element in pairs(c.lhs) do
+    for name, element in pairs(c.linear_exp) do
       element.index = variables[name].index
       elements[j] = element    
       j = j + 1
