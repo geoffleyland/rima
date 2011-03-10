@@ -265,8 +265,9 @@ function sparse_form(S)
   for _, c in pairs(constraints) do
     local elements = {}
     local j = 1
-    for v, k in pairs(c.lhs) do
-      elements[j] = { index=variables[v].index, coeff=k.coeff }
+    for name, element in pairs(c.lhs) do
+      element.index = variables[name].index
+      elements[j] = element    
       j = j + 1
     end
     table.sort(elements, function(a, b) return a.index < b.index end)
