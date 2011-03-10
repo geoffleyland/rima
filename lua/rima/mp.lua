@@ -233,12 +233,13 @@ function sparse_form(S)
 
   -- Get the variable bounds and order them (for now, alphabetically)
   local ordered_variables = {}
+  local i = 1
   for name, c in pairs(variables) do
     local cost = 0
     local o = objective[name]
     if o then cost = o.coeff end
 
-    local _, t = core.eval(c.variable, S)
+    local _, t = core.eval(c.ref, S)
     if not types.number_t:isa(t) then
       if types.undefined_t:isa(t) then
         error(("expecting a number type for '%s', got '%s'"):format(s, t:describe(s)), 0)
@@ -247,7 +248,10 @@ function sparse_form(S)
       end
     end
 
-    ordered_variables[#ordered_variables+1] = { name=name, cost=cost, ref=c.variable, l=t.lower, h=t.upper, i=t.integer }
+    c.cost = cost
+    c.type = t
+    ordered_variables[i] = c
+    i = i + 1
   end
   table.sort(ordered_variables, function(a, b) return a.name < b.name end)
 
@@ -286,7 +290,7 @@ function write_sparse(S, values, f)
   
   f:write("Minimise:\n")
   for i, v in ipairs(variables) do
-    f:write(("  %0.4g*%s (index=%d, lower=%0.4g, upper=%0.4g)\n"):format(v.cost, v.name, i, v.l, v.h))
+    f:write(("  %0.4g*%s (index=%d, lower=%0.4g, upper=%0.4g)\n"):format(v.cost, v.name, i, v.type.lower, v.type.upper))
   end
 
   f:write("Subject to:\n")

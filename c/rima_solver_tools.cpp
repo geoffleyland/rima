@@ -134,22 +134,27 @@ const char *check_variables(lua_State *L, unsigned variable_count)
     if (lua_type(L, -1) != LUA_TTABLE)
       return "The elements of the constraints table must be tables of constraints";
 
-    lua_pushstring(L, "l");
+    lua_pushstring(L, "type");
     lua_rawget(L, -2);
-    if (lua_type(L, -1) != LUA_TNUMBER)
-      return "The lower bound on a variable (l) must be a number";
-    lua_pop(L, 1);
+    {
+      lua_pushstring(L, "lower");
+      lua_rawget(L, -2);
+      if (lua_type(L, -1) != LUA_TNUMBER)
+        return "The lower bound on a variable (type.lower) must be a number";
+      lua_pop(L, 1);
 
-    lua_pushstring(L, "h");
-    lua_rawget(L, -2);
-    if (lua_type(L, -1) != LUA_TNUMBER)
-      return "The upper bound on a variable (h) must be a number";
-    lua_pop(L, 1);
+      lua_pushstring(L, "upper");
+      lua_rawget(L, -2);
+      if (lua_type(L, -1) != LUA_TNUMBER)
+        return "The upper bound on a variable (type.upper) must be a number";
+      lua_pop(L, 1);
 
-    lua_pushstring(L, "i");
-    lua_rawget(L, -2);
-    if (!lua_isboolean(L, -1) && !lua_isnil(L, -1))
-      return "The integer flag for a variable (i) must be true, false or nil";
+      lua_pushstring(L, "integer");
+      lua_rawget(L, -2);
+      if (!lua_isboolean(L, -1) && !lua_isnil(L, -1))
+        return "The integer flag for a variable (type.integer) must be true, false or nil";
+      lua_pop(L, 1);
+    }
     lua_pop(L, 1);
 
     lua_pushstring(L, "cost");
@@ -173,19 +178,24 @@ const char *build_variables(lua_State *L, unsigned variable_count, variable_buil
     double lower, upper;
     bool integer;
 
-    lua_pushstring(L, "l");
+    lua_pushstring(L, "type");
     lua_rawget(L, -2);
-    lower = lua_tonumber(L, -1);
-    lua_pop(L, 1);
+    {
+      lua_pushstring(L, "lower");
+      lua_rawget(L, -2);
+      lower = lua_tonumber(L, -1);
+      lua_pop(L, 1);
 
-    lua_pushstring(L, "h");
-    lua_rawget(L, -2);
-    upper = lua_tonumber(L, -1);
-    lua_pop(L, 1);
+      lua_pushstring(L, "upper");
+      lua_rawget(L, -2);
+      upper = lua_tonumber(L, -1);
+      lua_pop(L, 1);
 
-    lua_pushstring(L, "i");
-    lua_rawget(L, -2);
-    integer = lua_toboolean(L, -1);
+      lua_pushstring(L, "integer");
+      lua_rawget(L, -2);
+      integer = lua_toboolean(L, -1);
+      lua_pop(L, 1);
+    }
     lua_pop(L, 1);
 
     lua_pushstring(L, "cost");

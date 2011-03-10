@@ -23,7 +23,7 @@ local function add_variable(terms, ref, coeff)
   if terms[name] then
     error(("the reference '%s' appears more than once"):format(name), 0)
   end
-  terms[name] = { variable=ref, coeff=coeff }
+  terms[name] = { name=name, ref=ref, coeff=coeff }
 end
 
 
