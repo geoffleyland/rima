@@ -8,6 +8,8 @@ local core = require("rima.core")
 local scope = require("rima.scope")
 local rima = require("rima")
 
+local math = require("math")
+
 module(...)
 
 
@@ -31,9 +33,9 @@ function test(options)
   T:check_equal(lib.repr((core.eval(S.e))), "3*a + 5*c <= 3")
 
   local lhs, type, constant
-  T:expect_ok(function() lhs, type, constant = C:linearise(S) end)
-  T:check_equal(constant, 3)
-  T:check_equal(type, "<=")
+  T:expect_ok(function() lhs, lower, upper = C:linearise(S) end)
+  T:check_equal(upper, 3)
+  T:check_equal(lower, -math.huge)
   T:check_equal(lhs.a.coeff, 3)
   T:check_equal(lhs.c.coeff, 5)
 

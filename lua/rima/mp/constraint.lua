@@ -1,6 +1,7 @@
 -- Copyright (c) 2009-2010 Incremental IP Limited
 -- see LICENSE for license information
 
+local math = require("math")
 local assert, ipairs = assert, ipairs
 
 local object = require("rima.lib.object")
@@ -28,7 +29,13 @@ end
 
 function constraint:linearise(S)
   local constant, lhs = linearise.linearise(0 + self.lhs - self.rhs, S)
-  return lhs, self.type, -constant
+
+  local comp = self.type
+  local lower = ((comp == "==" or comp == ">=") and -constant) or -math.huge
+  local upper = ((comp == "==" or comp == "<=") and -constant) or math.huge
+
+  return lhs, lower, upper
+
 end
 
 

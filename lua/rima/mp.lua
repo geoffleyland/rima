@@ -112,13 +112,13 @@ local function linearise_constraints(S)
         format(lib.repr(c.constraint)), 0)
     end
 
-    local status, lhs, type, constant = pcall(c.constraint.linearise, c.constraint, S)
+    local status, lhs, lower, upper = pcall(c.constraint.linearise, c.constraint, S)
     if not status then
       error(("error while linearising the constraint '%s':\n   %s"):
         format(lib.repr(c.constraint), lhs:gsub("\n", "\n    ")), 0)
     end
     io.stderr:write(("\rGenerated %d constraints in %.1f secs..."):format(i, os.clock() - t0))
-    linearised[i] = { ref=c.ref, constraint=c.constraint, lhs=lhs, type=type, constant=constant }
+    linearised[i] = { ref=c.ref, constraint=c.constraint, lhs=lhs, lower=lower, upper=upper }
   end
   io.stderr:write("\n")
   return linearised
@@ -251,16 +251,18 @@ function sparse_form(S)
 
   -- Build a set of sparse constraints
   local sparse_constraints = {}
+  local i = 1
   for _, c in pairs(constraints) do
-    local cc = {}
+    local elements = {}
+    local j = 1
     for v, k in pairs(c.lhs) do
-      cc[#cc+1] = { variables[v].index, k.coeff }
+      elements[j] = { index=variables[v].index, coeff=k.coeff }
+      j = j + 1
     end
-    table.sort(cc, function(a, b) return a[1] < b[1] end)
-    local type, constant = c.type, c.constant
-    local low = ((type == "==" or type == ">=") and constant) or -math.huge
-    local high = ((type == "==" or type == "<=") and constant) or math.huge
-    sparse_constraints[#sparse_constraints+1] = { ref=c.ref, l=low, h=high, m=cc }
+    table.sort(elements, function(a, b) return a.index < b.index end)
+    c.elements = elements
+    sparse_constraints[i] = c
+    i = i + 1
   end
 
   return ordered_variables, sparse_constraints
@@ -284,11 +286,11 @@ function write_sparse(S, values, f)
   f:write("Subject to:\n")
   
   for _, c in ipairs(constraints) do
-    f:write(("  %0.4g <= "):format(c.l))
-    for _, cc in ipairs(c.m) do
-      f:write(("%+0.4g*%s "):format(cc[2], variables[cc[1]].name))
+    f:write(("  %0.4g <= "):format(c.lower))
+    for _, cc in ipairs(c.elements) do
+      f:write(("%+0.4g*%s "):format(cc.coeff, variables[cc.index].name))
     end
-    f:write(("<= %0.4g\n"):format(c.h))
+    f:write(("<= %0.4g\n"):format(c.upper))
   end
 end
 

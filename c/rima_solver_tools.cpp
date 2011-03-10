@@ -36,33 +36,35 @@ const char *check_constraints(lua_State *L, unsigned constraint_count, unsigned 
     if (lua_type(L, -1) != LUA_TTABLE)
       return "The elements of the constraints table must be tables of constraints";
 
-    lua_pushstring(L, "l");
+    lua_pushstring(L, "lower");
     lua_rawget(L, -2);
     if (lua_type(L, -1) != LUA_TNUMBER)
-      return "The lower bound on a constraint (l) must be a number";
+      return "The lower bound on a constraint (lower) must be a number";
     lua_pop(L, 1);
 
-    lua_pushstring(L, "h");
+    lua_pushstring(L, "upper");
     lua_rawget(L, -2);
     if (lua_type(L, -1) != LUA_TNUMBER)
-      return "The upper bound on a constraint (h) must be a number";
+      return "The upper bound on a constraint (upper) must be a number";
     lua_pop(L, 1);
 
-    lua_pushstring(L, "m");
+    lua_pushstring(L, "elements");
     lua_rawget(L, -2);
     if (lua_type(L, -1) != LUA_TTABLE)
-      return "The constraint members array must be a table";
+      return "The constraint elements array must be a table";
 
     unsigned nz = lua_objlen(L, -1);
     for (unsigned j = 0; j != nz; ++j)
     {
       lua_rawgeti(L, -1, j+1);
-      if (lua_type(L, -1) != LUA_TTABLE && lua_objlen(L, -1) != 2)
-        return "The elements of a table of non-zeroes must be a table of two numbers";
-      lua_rawgeti(L, -1, 1);
-      lua_rawgeti(L, -2, 2);
+      if (lua_type(L, -1) != LUA_TTABLE)
+        return "The elements of a table of non-zeroes must be a table";
+      lua_pushstring(L, "index");
+      lua_rawget(L, -2);
+      lua_pushstring(L, "coeff");
+      lua_rawget(L, -3);
       if (lua_type(L, -1) != LUA_TNUMBER || lua_type(L, -2) != LUA_TNUMBER)
-        return "The elements of a table of non-zeroes must be a table of two numbers";
+        return "The elements of a table of non-zeroes must be a table with index and coeff fields";
       unsigned column = lua_tointeger(L, -2) - 1;
       if (column > column_count)
         return "An index in the column vector exceeded the number of columns";
@@ -85,25 +87,27 @@ const char *build_constraints(lua_State *L, unsigned max_non_zeroes, unsigned co
   {
     lua_rawgeti(L, 2, i+1);
 
-    lua_pushstring(L, "l");
+    lua_pushstring(L, "lower");
     lua_rawget(L, -2);
     double lower = lua_tonumber(L, -1);
     lua_pop(L, 1);
 
-    lua_pushstring(L, "h");
+    lua_pushstring(L, "upper");
     lua_rawget(L, -2);
     double upper = lua_tonumber(L, -1);
     lua_pop(L, 1);
 
-    lua_pushstring(L, "m");
+    lua_pushstring(L, "elements");
     lua_rawget(L, -2);
 
     unsigned nz = lua_objlen(L, -1);
     for (unsigned j = 0; j != nz; ++j)
     {
       lua_rawgeti(L, -1, j+1);
-      lua_rawgeti(L, -1, 1);
-      lua_rawgeti(L, -2, 2);
+      lua_pushstring(L, "index");
+      lua_rawget(L, -2);
+      lua_pushstring(L, "coeff");
+      lua_rawget(L, -3);
       unsigned column = lua_tointeger(L, -2) + column_offset;
       double coefficient = lua_tonumber(L, -1);
       columns[j] = column;
