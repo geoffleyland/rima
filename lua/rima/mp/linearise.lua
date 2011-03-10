@@ -18,26 +18,27 @@ local operators = require("rima.operators")
 
 -- Getting a linear form -------------------------------------------------------
 
+local function add_variable(terms, ref, coeff)
+  local name = lib.repr(ref)
+  if terms[name] then
+    error(("the reference '%s' appears more than once"):format(name), 0)
+  end
+  terms[name] = { variable=ref, coeff=coeff }
+end
+
+
 function _linearise(l, S)
 
   local constant, terms = 0, {}
   local fail = false
 
-  local function add_variable(n, v, coeff)
-    local s = lib.repr(n)
-    if terms[s] then
-      error(("the reference '%s' appears more than once"):format(s), 0)
-    end
-    terms[s] = { variable=v, coeff=coeff }
-  end
-
   if object.type(l) == "number" then
     constant = l
   elseif object.type(l) == "index" then
-    add_variable(l, l, 1)
+    add_variable(terms, l, 1)
   elseif element:isa(l) then
     local exp = element.expression(l)
-    add_variable(exp, exp, 1)
+    add_variable(terms, exp, 1)
   elseif getmetatable(l) == operators.add then
     for i, a in ipairs(proxy.O(l)) do
       a = proxy.O(a)
@@ -53,10 +54,10 @@ function _linearise(l, S)
         end
         constant = c * x
       elseif object.type(x) == "index" then
-        add_variable(x, x, c)
+        add_variable(terms, x, c)
       elseif element:isa(x) then
         local exp = element.expression(x)
-        add_variable(exp, exp, c)
+        add_variable(terms, exp, c)
       else
         error(("term %d is not linear (got '%s', %s)"):format(i, lib.repr(x), object.type(x)), 0)
       end
