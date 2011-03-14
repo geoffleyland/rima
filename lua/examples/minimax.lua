@@ -73,7 +73,7 @@ local samples_from_function = { [s[p]] = f(x[p]) }
 -- Put it all together
 local Z = rima.mp.new(minimax, polynomial_fits, consecutive_polynomials, samples_from_function, equispaced_points)
 
-local primal, dual = rima.mp.solve("clp", Z,
+local primal, dual = rima.mp.solve(Z,
 {
   xmin = 0,
   xmax = 10,
@@ -82,7 +82,7 @@ local primal, dual = rima.mp.solve("clp", Z,
   f = rima.F{x}(rima.exp(x) * rima.sin(x)),
 })
 if primal then
-  io.write(("\nMinimax Polynomial with CLP\n  max error:\t% 10.2f\n"):format(primal.objective))
+  io.write(("\nMinimax Polynomial\n  max error:\t% 10.2f\n"):format(primal.objective))
   for k, v in pairs(primal.w) do io.write(("  w[%d]:\t% 10.2f\t(% 10.2f)\n"):format(k, v, dual.w[k])) end
 end
 

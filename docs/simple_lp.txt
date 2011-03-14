@@ -57,9 +57,14 @@ As with expressions, printing a model gives a readable description:
 `rima.mp.solve` solves the model:
 
     --! continue
-    primal, dual = rima.mp.solve("lpsolve", M)
+    primal, dual = rima.mp.solve(M)
 
-`rima.mp.solve`  returns two values.
+It examines the problem and based on its properties (linearity, integer variables)
+chooses the best solver to solve the problem.
+(You can influence its choices by setting the preferences of solvers or using
+`rima.mp.solve_with')
+
+`rima.mp.solve` returns two values.
 The first is the primal solution to the problem,
 the second is the set of duals.
 Both are organised using the same set of names as were used to define the problem.
@@ -68,11 +73,11 @@ The objective is a field of the primal table:
     --! continue
     print(primal.objective)                             --> 2
 
-Primal and dual value for the variables can be obtained:
+Primal and dual values for the variables can be obtained:
 
     --! continue
     print(primal.x, primal.y)                           --> 1 1
-    print(dual.x, dual.y)                               --> 0 0
+    print(dual.x, dual.y)                               --> /%-*0 %-*0/ 0 0
 
 Likewise for the constraints:
 

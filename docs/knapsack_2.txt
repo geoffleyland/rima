@@ -57,7 +57,7 @@ We'll define the set of items to steal separately from the rest of the data:
 And we can solve:
 
     --! continue
-    primal, dual = rima.mp.solve("cbc", knapsack, { items=ITEMS, capacity=102 })
+    primal, dual = rima.mp.solve(knapsack, { items=ITEMS, capacity=102 })
     print(primal.objective)                           --> 160
     print(primal.items.brick.take)                    --> 0
     print(primal.items.camera.take)                   --> 1
@@ -91,7 +91,7 @@ And define the `size` of every item to be `volume^(2/3)`
 (the capacity limit of 22 is roughly `102^(2/3)`):
 
     --! continue
-    primal, dual = rima.mp.solve("cbc", knapsack, \
+    primal, dual = rima.mp.solve(knapsack, \
       { items=VOLUME_ITEMS, capacity=22, \
         [items[{i=items}].size] = i.volume^(2/3) })
     print(primal.objective)                           --> 131
@@ -113,7 +113,7 @@ it can also be a constraint,
 so adding a constraint is easy:
 
     --! continue
-    primal, dual = rima.mp.solve("cbc", knapsack, \
+    primal, dual = rima.mp.solve(knapsack, \
       { items=ITEMS, capacity=102, \
         camera_xor_vase = rima.mp.C(items.camera.take + items.vase.take, "<=", 1) })
     print(primal.objective)                           --> 146
@@ -129,7 +129,7 @@ while all the subsequent arguments are date we'd like to extend the model with:
     side_constrained_knapsack = rima.mp.new(knapsack, { \
       camera_xor_vase = rima.mp.C(items.camera.take + items.vase.take, "<=", 1) })
     
-    primal, dual = rima.mp.solve("cbc", side_constrained_knapsack, {capacity=102, items=ITEMS})
+    primal, dual = rima.mp.solve(side_constrained_knapsack, {capacity=102, items=ITEMS})
     print(primal.objective)                           --> 146
 
 
@@ -152,7 +152,7 @@ Leaving the issue of what a sack is for later, we can formulate a multiple-sack 
 Defining which model we'd like to use for the sack submodel is as easy as adding any other data:
 
     --! continue
-    primal, dual = rima.mp.solve("cbc", multiple_sack, { \
+    primal, dual = rima.mp.solve(multiple_sack, { \
       items = ITEMS, \
       sacks = { {capacity = 51}, {capacity = 51} }, \
       [sacks[{s=sacks}].items] = ITEMS, \
@@ -173,7 +173,7 @@ carry the camera and the vase in the same sack
 It's easy to change the submodel:
 
     --! continue
-    primal, dual = rima.mp.solve("cbc", multiple_sack, { \
+    primal, dual = rima.mp.solve(multiple_sack, { \
       items = ITEMS, \
       sacks = { {capacity = 51}, {capacity = 51} }, \
       [sacks[{s=sacks}].items] = ITEMS, \

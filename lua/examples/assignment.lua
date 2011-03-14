@@ -79,7 +79,7 @@ Subject to:
   respect_capacity.Denver:            flow.Denver.Barstow + flow.Denver.Dallas + flow.Denver.Tucson + flow.Denver['San Diego'] <= 2000
 --]]
 
-primal, dual = rima.mp.solve("lpsolve", shopping)
+primal, dual = rima.mp.solve(shopping)
 if primal then
   for pn, p in pairs(primal.flow) do
     for sn, s in pairs(p) do
@@ -121,7 +121,7 @@ build_shops = rima.mp.new(facility_location, shopping_data,
   },
 })
 
-primal, dual = rima.mp.solve("cbc", build_shops)
+primal, dual = rima.mp.solve(build_shops)
 if primal then
   io.write(("Cost: $%.2f\n"):format(primal.objective))
   for pn, p in pairs(primal.plants) do

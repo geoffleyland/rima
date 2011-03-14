@@ -85,7 +85,7 @@ local whiskas_data =
 whiskas = rima.mp.new(blending_problem, whiskas_data)
 
 local function s(problem, solver, S)
-  local primal, dual = rima.mp.solve(solver, problem, S)
+  local primal, dual = rima.mp.solve_with(solver, problem, S)
   if primal then
     io.write(("\n%s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, primal.objective))
     for k, v in pairs(primal.ingredients) do io.write(("    %-10s\t% 10.2f\t(% 10.2f)\n"):format(k, v.quantity, dual.ingredients[k].quantity)) end

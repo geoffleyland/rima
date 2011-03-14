@@ -91,10 +91,10 @@ Data is easy to add: it's just a regular Lua table:
       } \
     }
 
-To solve the problem, just choose a solver, and use the `solve` method to combine the model and data:
+To solve the problem use the `solve` method to combine the model and data:
 
     --! continue
-    primal, dual = rima.mp.solve("cbc", knapsack, burglar_bill)
+    primal, dual = rima.mp.solve(knapsack, burglar_bill)
 
 We can check the objective:
 

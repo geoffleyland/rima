@@ -79,7 +79,7 @@ zibopt_data =
 }
 
 -- Solve the problem
-local primal, dual = rima.mp.solve("cbc", sudoku_9_by_9, { initial = zibopt_data })
+local primal, dual = rima.mp.solve(sudoku_9_by_9, { initial = zibopt_data })
 
 -- Print the answer nicely.  There's probably an easier way to do this.
 if primal then

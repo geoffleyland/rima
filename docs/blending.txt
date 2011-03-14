@@ -71,7 +71,7 @@ Next, we define the data for the model:
 And finally, solve:
 
     --! continue
-    primal, dual = rima.mp.solve("clp", blending_problem, whiskas_data, { Q = 100 })
+    primal, dual = rima.mp.solve(blending_problem, whiskas_data, { Q = 100 })
     print(primal.objective)                             --> 0.52
     print(primal.f.chicken)                             --> 0
     print(primal.f.beef)                                --> 60

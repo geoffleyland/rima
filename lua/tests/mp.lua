@@ -36,7 +36,7 @@ Subject to:
   0 <= y <= inf, y real
 ]])
 
-    local primal, dual = mp.solve("clp", S)
+    local primal, dual = mp.solve(S)
     if primal then
       T:check_equal(primal.objective, 2)
       T:check_equal(primal.x, 1)
@@ -68,7 +68,7 @@ Subject to:
   0 <= x[i, j].a <= inf, x[i, j].a real for all i, j
 ]])
 
-    local primal, dual = mp.solve("cbc", S)
+    local primal, dual = mp.solve_with("cbc", S)
 
     if primal then
       T:check_equal(primal.objective, 2)
@@ -96,7 +96,7 @@ Subject to:
   0 <= x[n] <= inf, x[n] real for all n
 ]])
 
-    local primal, dual = mp.solve("lpsolve", S,
+    local primal, dual = mp.solve_with("lpsolve", S,
       {
         M = rima.range(1, 2),
         N = rima.range(1, 2),

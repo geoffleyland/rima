@@ -15,6 +15,7 @@ local closure = require("rima.closure")
 local constraint = require("rima.mp.constraint")
 local linearise = require("rima.mp.linearise")
 local types = require("rima.types")
+local solvers = require("rima.solvers")
 local rima = require("rima")
 
 module(...)
@@ -100,6 +101,8 @@ function find_constraints(S, callback)
   return constraints
 end
 
+
+-- Preparing problems ----------------------------------------------------------
 
 local function report_search_time(cc, t0)
   io.stderr:write(("\rFound %d constraints in %.1f secs..."):format(cc, os.clock() - t0))
@@ -191,6 +194,14 @@ end
 
 local proxy_mt = {}
 
+
+function new(parent, ...)
+  return scope.new_with_metatable(proxy_mt, parent, ...)
+end
+
+
+-- String Representation -------------------------------------------------------
+
 function proxy_mt.__repr(M, format)
   if format.format == "dump" then return scope.proxy_mt.__repr(M, format) end
   local append, repr = lib.append, lib.repr
@@ -260,104 +271,86 @@ end
 proxy_mt.__tostring = lib.__tostring
 
 
-function new(parent, ...)
-  return scope.new_with_metatable(proxy_mt, parent, ...)
-end
-
-
--- Sparse Form -----------------------------------------------------------------
-
-function sparse_form(S)
-
-  local constant, objective = linearise.linearise(index:new(nil, "objective"), S)
-  local linear, constraint_expressions, constraints = prepare_constraints(S)
-
-  if not linear then
-    error(("error while linearising: some constraints in the problem are not linear:\n   %s"):
-      format(lib.repr(S):gsub("\n", "\n    ")), 0)
-  end
-
-  local is_integer, variables, ordered_variables = prepare_variables(S, objective, constraint_expressions)
-
-  -- add costs to variables
-  for name, v in pairs(variables) do
-    local o = objective[name]
-    v.cost = (o and o.coeff) or 0
-  end
-
-  -- Build a set of sparse constraints
-  local sparse_constraints = {}
-  local i = 1
-  for _, c in pairs(constraints) do
-    local elements = {}
-    local j = 1
-    for name, element in pairs(c.linear_exp) do
-      element.index = variables[name].index
-      elements[j] = element    
-      j = j + 1
-    end
-    table.sort(elements, function(a, b) return a.index < b.index end)
-    c.elements = elements
-    sparse_constraints[i] = c
-    i = i + 1
-  end
-
-  return ordered_variables, sparse_constraints
-end
-
-
--- Writing ---------------------------------------------------------------------
-
-function write_sparse(S, values, f)
-  S = new(S, values)
-
-  f = f or io.stdout
-
-  local variables, constraints = sparse_form(S)
-  
-  f:write("Minimise:\n")
-  for i, v in ipairs(variables) do
-    f:write(("  %0.4g*%s (index=%d, lower=%0.4g, upper=%0.4g)\n"):format(v.cost, v.name, i, v.type.lower, v.type.upper))
-  end
-
-  f:write("Subject to:\n")
-  
-  for _, c in ipairs(constraints) do
-    f:write(("  %0.4g <= "):format(c.lower))
-    for _, cc in ipairs(c.elements) do
-      f:write(("%+0.4g*%s "):format(cc.coeff, variables[cc.index].name))
-    end
-    f:write(("<= %0.4g\n"):format(c.upper))
-  end
-end
-
-
 -- Solving ---------------------------------------------------------------------
 
-function solve(solver, S, ...)
+function solve(S, ...)
   S = new(S, ...)
 
-  local solve_mod = require("rima.solvers."..solver)
-  local variables, constraints = sparse_form(S, S.objective)
-  io.stderr:write(("Problem generated: %d variables, %d constraints.  Solving...\n"):format(#variables, #constraints))
+  local objective = core.eval(index:new(nil, "objective"), S)
+  local objective_is_linear, objective_constant, linear_objective = pcall(linearise.linearise, objective, S)
 
-  local r, message = solve_mod.solve(sense(S), variables, constraints)
+  local constraints_are_linear, constraint_expressions, constraint_info = prepare_constraints(S)
+
+  local has_integer_variables, variable_map, ordered_variables = prepare_variables(S, objective, constraint_expressions)
+
+  local objective_type = objective_is_linear and "linear" or "nonlinear"
+  local constraint_type = constraints_are_linear and "linear" or "nonlinear"
+  local variable_type = has_integer_variables and "integer" or "continuous"
+
+  local best_preference, best_solver, best_name = math.huge
+  for n, s in pairs(solvers) do
+    if s.available and
+       s.objective[objective_type] and
+       s.constraints[constraint_type] and
+       s.variables[variable_type] and
+       s.preference < best_preference then
+      best_preference = s.preference
+      best_solver = s
+      best_name = n
+    end
+  end
+  
+  if not best_solver then
+    return nil, "No available solver can handle this type of problem"
+  end
+
+  io.stderr:write(("Solving with %s...\n"):format(best_name))
+
+  local r, message = best_solver.solve{
+    sense = sense(S),
+    objective = objective,
+    linear_objective = linear_objective,
+    constraint_expressions = constraint_expressions,
+    constraint_info = constraint_info,
+    variable_map = variable_map,
+    ordered_variables = ordered_variables
+  }
+
   if not r then
-    io.stderr:write(message, "\n")
     return nil, message
   end
 
   local primal, dual = {}, {}
+  local has_dual = true
   primal.objective = r.objective
   for i, v in ipairs(r.variables) do
-    index.set(variables[i].ref, primal, v.p)
-    index.set(variables[i].ref, dual, v.d)
+    if type(v) == "table" then
+      index.set(ordered_variables[i].ref, primal, v.p)
+      index.set(ordered_variables[i].ref, dual, v.d)
+    else
+      index.set(ordered_variables[i].ref, primal, v)
+      has_dual = false
+    end
   end
   for i, v in ipairs(r.constraints) do
-    index.set(constraints[i].ref, primal, v.p)
-    index.set(constraints[i].ref, dual, v.d)
+    if type(v) == "table" then
+      index.set(constraint_info[i].ref, primal, v.p)
+      index.set(constraint_info[i].ref, dual, v.d)
+    else
+      index.set(constraint_info[i].ref, primal, v)
+      has_dual = false
+    end
   end
-  return primal, dual
+  return primal, has_dual and dual or nil
+end
+
+
+function solve_with(solver, S, ...)
+  local p0 = solvers[solver].preference
+  solvers[solver].preference = -1
+  local r1, r2, r3 = solve(S, ...)
+  solvers[solver].preference = p0
+  return r1, r2, r3
 end
 
 

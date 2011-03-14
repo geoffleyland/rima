@@ -61,7 +61,7 @@ io.write("Burglar Bill Instance of Knapsack Problem:\n", tostring(burglar_bill),
 
 -- Solve using cbc and lpsolve and write out the results
 function solve(problem, solver, S)
-  local primal, dual = rima.mp.solve(solver, problem, S)
+  local primal, dual = rima.mp.solve_with(solver, problem, S)
   if primal then
     io.write(("\nSolution from %s:\n  objective:  \t% 10.2f\n  variables:\n"):format(solver, primal.objective))
     for k, v in pairs(primal.items) do
@@ -136,7 +136,7 @@ multiple_sack_data = rima.mp.new(multiple_sack, {
   })
 
 local function solve_multiple(problem, ...)
-  primal, dual = rima.mp.solve("cbc", problem, ...)
+  primal, dual = rima.mp.solve(problem, ...)
   if primal then
     io.write(("\nSolution from %s:\n  objective:  \t% 10.2f\n  variables:\n               "):format("cbc", primal.objective))
     for s in pairs(primal.sacks) do io.write(("subsack %-5s "):format(tostring(s))) end
