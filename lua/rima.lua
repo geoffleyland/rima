@@ -18,6 +18,7 @@ local minmax = require("rima.operators.minmax")
 local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
+local compiler = require("rima.compiler")
 
 module(...)
 
@@ -79,6 +80,11 @@ function F(inputs, e, S) -- create a function
     return function(e, S) return func:new(inputs, e, S) end
   end
 end
+
+
+-- Compiling expressions -------------------------------------------------------
+
+compile = compiler.compile
 
 
 -- Operators -------------------------------------------------------------------
