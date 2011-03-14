@@ -1,4 +1,4 @@
--- Copyright (c) 2009-2010 Incremental IP Limited
+-- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
 local call = require("rima.operators.call")

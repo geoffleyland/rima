@@ -1,5 +1,5 @@
 -- doctest.lua
--- (c) Copyright 2009-2010 Incremental IP Ltd.
+-- (c) Copyright 2009-2011 Incremental IP Ltd.
 -- See http://www.incremental.co.nz/projects/lua.html
 
 --[[

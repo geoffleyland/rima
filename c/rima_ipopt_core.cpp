@@ -2,7 +2,7 @@
 
 rima_ipopt_core.cpp
 
-Copyright (c) 2010 Incremental IP Limited
+Copyright (c) 2010-2011 Incremental IP Limited
 see LICENSE for license information
 
 *******************************************************************************/
