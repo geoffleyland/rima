@@ -40,6 +40,7 @@ I think the right way to install them is to check out the latest stable version 
 from COIN's [Subversion server](https://projects.coin-or.org/svn/Cbc/stable/) and proceed from there.
 I took a bit of a more tortuous route, and use the COIN trunk.
 
+Rima also solves nonlinear problems if you have [ipopt](https://projects.coin-or.org/Ipopt) installed.
 
 ## Building and installing Rima
 
@@ -52,6 +53,11 @@ If you have CLP, CBC and lpsolve installed, ideally, you'll just have to:
     make
     make test
     sudo make install
+
+If you have ipopt installed then you'll need to build it separately:
+    --! ignore
+    make ipopt
+
 
 ### Building
 

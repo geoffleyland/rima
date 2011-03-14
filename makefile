@@ -16,17 +16,21 @@ LPSOLVE_PREFIX=/usr/local
 LPSOLVE_LIBDIR=$(LPSOLVE_PREFIX)/lib
 LPSOLVE_INCDIR=$(LPSOLVE_PREFIX)/include/lpsolve
 
+IPOPT_PREFIX=/usr/local/
+IPOPT_LIBDIR=$(IPOPT_PREFIX)/lib
+IPOPT_INCDIR=$(IPOPT_PREFIX)/include/coin
+
 CPP=g++
 #-DNOMINMAX is needed for some compilers on windows.  I'm not sure which, so I guess I'll just blanket-add it for now.  Can't hurt, right?
 CFLAGS=-O3 -DNOMINMAX
 SO_SUFFIX=so
-#SHARED=-bundle -bundle_loader $(LUA)
 
 # Guess a platform
 UNAME=$(shell uname -s)
 ifneq (,$(findstring Darwin,$(UNAME)))
   # OS X
   CFLAGS:=$(CFLAGS) -arch i686 -arch x86_64
+  IPOPT_CFLAGS:=
   SHARED=-bundle -bundle_loader $(LUA)
   LIBS=
 else
@@ -44,6 +48,8 @@ cbc: rima_cbc_core.$(SO_SUFFIX)
 
 lpsolve: rima_lpsolve_core.$(SO_SUFFIX)
 
+ipopt: rima_ipopt_core.$(SO_SUFFIX)
+
 rima_clp_core.$(SO_SUFFIX): c/rima_clp_core.cpp c/rima_solver_tools.cpp
 	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
 
@@ -53,7 +59,10 @@ rima_cbc_core.$(SO_SUFFIX): c/rima_cbc_core.cpp c/rima_solver_tools.cpp
 rima_lpsolve_core.$(SO_SUFFIX): c/rima_lpsolve_core.cpp c/rima_solver_tools.cpp
 	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(LPSOLVE_LIBDIR) -llpsolve55 $(LIBS) -I$(LUA_INCDIR) -I$(LPSOLVE_INCDIR)
 
-test: lua/rima.lua
+rima_ipopt_core.$(SO_SUFFIX): c/rima_ipopt_core.cpp
+	$(CPP) $(IPOPT_CFLAGS) $(SHARED) $^ -o $@ -g -L$(IPOPT_LIBDIR) -lipopt -lgfortran -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(IPOPT_INCDIR)
+
+test: all lua/rima.lua
 	-cp rima_*_core.so lua/
 	cd lua; $(LUA) rima-test.lua; $(LUA) rima-test-solvers.lua
 	cd lua; for f in `find ../docs -name "*.txt"`; do $(LUA) test/doctest.lua -i $$f > /dev/null; done

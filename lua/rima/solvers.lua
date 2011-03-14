@@ -11,6 +11,7 @@ module(...)
 require("rima.solvers.clp")
 require("rima.solvers.cbc")
 require("rima.solvers.lpsolve")
+require("rima.solvers.ipopt")
 
 
 -- EOF -------------------------------------------------------------------------
