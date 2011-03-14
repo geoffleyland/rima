@@ -60,7 +60,7 @@ rima_lpsolve_core.$(SO_SUFFIX): c/rima_lpsolve_core.cpp c/rima_solver_tools.cpp
 	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(LPSOLVE_LIBDIR) -llpsolve55 $(LIBS) -I$(LUA_INCDIR) -I$(LPSOLVE_INCDIR)
 
 rima_ipopt_core.$(SO_SUFFIX): c/rima_ipopt_core.cpp
-	$(CPP) $(IPOPT_CFLAGS) $(SHARED) $^ -o $@ -g -L$(IPOPT_LIBDIR) -lipopt -lgfortran -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(IPOPT_INCDIR)
+	$(CPP) $(IPOPT_CFLAGS) $(SHARED) $^ -o $@ -L$(IPOPT_LIBDIR) -lipopt -lgfortran -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(IPOPT_INCDIR)
 
 test: all lua/rima.lua
 	-cp rima_*_core.so lua/
