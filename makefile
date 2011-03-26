@@ -22,16 +22,16 @@ IPOPT_INCDIR=$(IPOPT_PREFIX)/include/coin
 
 CPP=g++
 #-DNOMINMAX is needed for some compilers on windows.  I'm not sure which, so I guess I'll just blanket-add it for now.  Can't hurt, right?
-CFLAGS=-O3 -DNOMINMAX
+CFLAGS=-O3 -DNOMINMAX -fPIC
 SO_SUFFIX=so
 
 # Guess a platform
 UNAME=$(shell uname -s)
 ifneq (,$(findstring Darwin,$(UNAME)))
   # OS X
+  IPOPT_CFLAGS:=$(CFLAGS) # can't seem to build a fat ipopt
   CFLAGS:=$(CFLAGS) -arch i686 -arch x86_64
-  IPOPT_CFLAGS:=
-  SHARED=-bundle -bundle_loader $(LUA)
+  SHARED=-bundle -undefined dynamic_lookup
   LIBS=
 else
   # Linux
