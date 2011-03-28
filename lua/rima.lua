@@ -82,6 +82,13 @@ function F(inputs, e, S) -- create a function
 end
 
 
+-- Automatic differentiation ---------------------------------------------------
+
+function diff(exp, var)
+  return (core.eval(core.diff(exp, var)))
+end
+
+
 -- Compiling expressions -------------------------------------------------------
 
 compile = compiler.compile
