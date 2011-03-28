@@ -40,9 +40,10 @@ Currently bindings are available for:
 ## Find out More
 
 If Rima has got your attention,
-you can [have a look at a Rima model](http://rima.incremental.co.nz/knapsack.html),
-read the [Rima user guide](http://rima.incremental.co.nz/contents.html)(including example models),
+you could [have a look at a Rima model](http://rima.incremental.co.nz/knapsack.html),
+read the [Rima user guide](http://rima.incremental.co.nz/contents.html) (including example models),
 starting with how to [build expressions](http://rima.incremental.co.nz/expressions.html).
+You could also [read the installation instructions](http://rima.incremental.co.nz/install.html).
 
 Rima is developed by [Incremental](http://www.incremental.co.nz/).
 You can contact us at <rima@incremental.co.nz>.
