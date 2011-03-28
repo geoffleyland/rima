@@ -87,7 +87,7 @@ dist: doc
 	rm -f dist.files
 	rm -rf $(PACKAGE)-$(VERSION)
 	rm -f $(PACKAGE)-$(VERSION).tar.gz
-	find * | grep -v "\.svn" | grep -v "^\.DS_Store$$" | grep -v "^build$$" | grep -v "\.so$$" | grep -v "\.o$$" > dist.files
+	find * | grep -v "\.svn" | grep -v "^\.DS_Store$$" | grep -v "^build$$" | grep -v "\.so$$" | grep -v "\.o$$" | grep -v "\.git" | grep -v "\.rockspec" | grep -v "update-copyright.sh" > dist.files
 	mkdir -p $(PACKAGE)-$(VERSION)
 	cpio -p $(PACKAGE)-$(VERSION) < dist.files
 	tar czvf $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
