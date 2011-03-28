@@ -1,0 +1,19 @@
+Rima 0.05 (2011-03-28)
+  Support for nonlinear problems with ipopt
+  Automatic differentiation
+  Compiling expressions to Lua code
+
+Rima 0.04 (2010-10-29)
+  Submodel support!
+
+Rima 0.03 (2010-02-22)
+  Better syntax for array assignments
+  Constraints are named and part of the model structure
+
+Rima 0.02 (2009-10-22)
+  More comprehensive table handling
+  Syntax improvements
+  Improved documentation
+
+Rima 0.01 (2009-05-20)
+  First public release.  Just enough to formulate a small LP
