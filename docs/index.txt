@@ -39,7 +39,7 @@ or you can [get Rima](install.html),
 
 Like Lua, Rima is available under the [MIT Licence](http://www.opensource.org/licenses/mit-license.php),
 and source code is freely available.
-Rima's [development site](http://code.google.com/p/rima/) is hosted at [Google Code](http://code.google.com)
+Rima's [development site](https://github.com/geoffleyland/rima) is hosted at [GitHub](https://github.com/)
 
 Rima is developed by [Incremental](http://www.incremental.co.nz/).
 You can contact us at <rima@incremental.co.nz>.
