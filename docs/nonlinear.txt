@@ -1,0 +1,39 @@
+    --! env rima = require("rima")
+
+# Rima Manual: Nonlinear Problems
+
+[ [Contents](contents.html) | Previous: [Cases](cases.html) | Next: [Differentiation](differentiation.html) ]
+
+Rima can be used to formulate nonlinear problems just like nonlinear problems,
+and will use [ipopt](https://projects.coin-or.org/Ipopt) to solve them if it's
+available.
+
+    rima.define"x, X"
+    nonlinear = rima.mp.new{ \
+      sense = "minimise", \
+      objective = X[1]*X[4]*(X[1] + X[2] + X[3]) + X[3], \
+      c1 = rima.mp.C(rima.product{x=X}(x), ">=", 25), \
+      c2 = rima.mp.C(rima.sum{x=X}(x^2), "==", 40), \
+      X = { rima.free(1, 5), rima.free(1, 5), rima.free(1, 5), rima.free(1, 5) } \
+    }
+
+(This example is taken from the [ipopt documentation](http://www.coin-or.org/Ipopt/documentation/node28.html).
+As usual, you can print the model:
+
+    --! continue
+    print(nonlinear)
+    --> Minimise:
+    -->   X[1]*(X[1] + X[2] + X[3])*X[4] + X[3]
+    --> Subject to:
+    -->   c1: X[1]*X[2]*X[3]*X[4] >= 25
+    -->   c2: X[1]^2 + X[2]^2 + X[3]^2 + X[4]^2 == 40
+
+`rima.mp.solve` will inspect the problem, work out that it's nonlinear and use 
+ipopt.
+Keep in mind that when you solve, you don't get duals:
+
+    --! continue
+    primal = rima.mp.solve(nonlinear)
+    print(primal.objective)                           --> /17.0141*/ 17.014
+
+[ [Contents](contents.html) | Previous: [Cases](cases.html) | Next: [Differentiation](differentiation.html) ]

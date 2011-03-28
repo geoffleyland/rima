@@ -1,5 +1,7 @@
 # Rima Documentation
 
+## Table of Contents
+
 - [Home Page](index.html)
 - [Quick Look at a Model](knapsack.html)
 - [Obtaining and Installing Rima](install.html)
@@ -16,6 +18,8 @@
     - [A Structured Knapsack](knapsack_2.html)
     - [Functions](functions.html)
     - [Cases](cases.html)
+    - [Nonlinear Problems](nonlinear.html)
+    - [Differentiation](differentiation.html)
 - Examples (Lua code, not html)
     --! ignore
     - [Simple Example](examples/simple.lua)
@@ -24,4 +28,5 @@
     - [Curve Fitting](examples/minimax.lua)
     - [Assignment and Facility Location](examples/assignment.lua)
     - [Sudoku](examples/sudoku.lua)
-  
+    - [Nonlinear](examples/nonlinear.lua)
+

@@ -1,0 +1,25 @@
+    --! env rima = require("rima")
+
+# Rima Manual: Differentiation
+
+[ [Contents](contents.html) | Previous: [Nonlinear Problems](nonlinear.html) ]
+
+Rima can symbolically differentiate an expression with respect to a variable:
+
+    rima.define("x, y")
+    print(rima.diff(1, x))                            --> 0
+    print(rima.diff(x, x))                            --> 1
+    print(rima.diff(y, x))                            --> 0
+    print(rima.diff(x * y, x))                        --> y
+    print(rima.diff(x^2, x))                          --> 2*x
+
+or even:
+
+    --! continue
+    print(rima.diff((rima.sin(x))^(x^2), x))          --> (cos(x)/sin(x)*x^2 + 2*log(sin(x))*x)*sin(x)^x^2
+
+Rima uses automatic differentiation to generate gradients and hessians for
+nonlinear problems.
+
+[ [Contents](contents.html) | Previous: [Nonlinear Problems](nonlinear.html) ]
+

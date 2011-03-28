@@ -2,7 +2,7 @@
 
 # Rima Manual: Cases
 
-[ [Contents](contents.html) | Previous: [Functions](functions.html) ]
+[ [Contents](contents.html) | Previous: [Functions](functions.html) ] | Next: [Nonlinear Problems](nonlinear.html) ]
 
 A `case` is Rima's generalisation of an if statement.
 The syntax isn't pretty, so you can make any suggestions you like:
@@ -29,4 +29,5 @@ If there's a non-match, but no actual match, the non-match is discarded:
     print(rima.E(c, {value=1, m1=2}))                   --> case 1 (m2: r2; default: default; )
 
 
-[ [Contents](contents.html) | Previous: [Functions](functions.html) ]
+[ [Contents](contents.html) | Previous: [Functions](functions.html) ] | Next: [Nonlinear Problems](nonlinear.html) ]
+
