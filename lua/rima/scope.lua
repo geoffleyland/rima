@@ -248,18 +248,10 @@ function node:new(...)
     local arg = select(i, ...)
     if arg then
       for k, v in pairs(arg) do
-        if k == "value_or_prototype" then
-          if scope:isa(v) then
-            k = "prototype"
-          else
-            k = "value"
-          end
-        end
         n[k] = v
       end
     end
   end
-
   return object.new(node, n)
 end
 
@@ -380,14 +372,15 @@ function write_ref:__newindex(i, value)
     index_names = self.free_indexes + i
   end
 
+  local value_or_prototype = scope:isa(value) and "prototype" or "value"
   if not core.defined(value) then
     if index_names[1] then
       new_node.value = closure:new(value, index_names)
     else
-      new_node.value_or_prototype = value
+      new_node[value_or_prototype] = value
     end
   else
-    new_node.value_or_prototype = value
+    new_node[value_or_prototype] = value
   end
 
   if is_literal(i) then
