@@ -60,6 +60,8 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
+local SCOPE_FORMAT = { scopes = true }
+
 function add.__eval(args, S)
   -- Sum all the arguments, keeping track of the sum of any constants,
   -- and of all remaining unresolved terms.
@@ -74,13 +76,12 @@ function add.__eval(args, S)
   local constant, terms = 0, {}
   
   local function add_term(c, e)
-    local n = lib.repr(e)
-    local s = lib.repr(e, { scopes = true })
+    local s = lib.repr(e, SCOPE_FORMAT)
     local t = terms[s]
     if t then
       t.coeff = t.coeff + c
     else
-      terms[s] = { name=n, coeff=c, expression=e }
+      terms[s] = { name=lib.repr(e), coeff=c, expression=e }
     end
   end
 
