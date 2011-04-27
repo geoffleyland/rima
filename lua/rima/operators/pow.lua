@@ -43,8 +43,8 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function pow.__eval(args, S)
-  args = proxy.O(args)
+function pow.__eval(args_in, S)
+  local args = proxy.O(args_in)
   local base, exponent = core.eval(args[1], S), core.eval(args[2], S)
   
   local base_is_number = type(base) == "number"
@@ -64,10 +64,16 @@ function pow.__eval(args, S)
       return base
     elseif not_base_is_number then
       return expression:new(mul, {exponent, base})
+    else -- base is a number
+      return base ^ exponent
     end
  end
 
-  return base ^ exponent
+  if base == args[1] and exponent == args[2] then
+    return args_in
+  else
+    return base ^ exponent
+  end
 end
 
 
