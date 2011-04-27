@@ -214,11 +214,26 @@ end
 -- evaluation ------------------------------------------------------------------
 
 function address:__eval(S)
-  local new_address = {}
+  local new_address
   for i, a in ipairs(self) do
-    new_address[i] = core.eval(a, S)
+    local a2 = core.eval(a, S)
+    if not new_address and a2 ~= a then
+      new_address = {}
+      for j = 1, i-1 do new_address[j] = self[j] end
+    end
+    if new_address then
+      if a2 == a then
+        new_address[i] = a
+      else
+        new_address[i] = a2
+      end
+    end
   end
-  return object.new(address, new_address)
+  if new_address then
+    return object.new(address, new_address)
+  else
+    return self
+  end
 end
 
 
