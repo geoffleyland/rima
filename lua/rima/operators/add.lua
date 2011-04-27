@@ -62,16 +62,35 @@ end
 
 local SCOPE_FORMAT = { scopes = true }
 
-function add.__eval(args, S)
+function add.__eval(args_in, S)
   -- Sum all the arguments, keeping track of the sum of any constants,
   -- and of all remaining unresolved terms.
   -- If any subexpressions are sums, we dive into them, and if any are
   -- products, we try to hoist out the constant and see if what's left is a
   -- sum.
-  args = proxy.O(args)
+  local args = proxy.O(args_in)
 
   -- evaluate or bind all arguments
-  args = lib.imap(function(a) return { a[1], (core.eval(a[2], S)) } end, args)
+  local new_args
+  for i, a in ipairs(args) do
+    local a2 = core.eval(a[2], S)
+    if not new_args and a2 ~= a[2] then
+      new_args = {}
+      for j = 1, i-1 do
+        new_args[j] = { args[j][1], args[j][2] }
+      end
+    end
+    if new_args then
+      if a2 == a[2] then
+        new_args[i] = { a[1], a[2] }
+      else
+        new_args[i] = { a[1], a2 }
+      end
+    end
+  end
+  if new_args then
+    args = new_args
+  end
 
   local constant, terms = 0, {}
   
