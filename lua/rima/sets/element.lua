@@ -38,10 +38,13 @@ end
 
 
 function element:__eval(S)
-  self = proxy.O(self)
-  local value, type, addr = core.eval(self.exp, S)
-  if core.defined(value) then value = addr or self.exp end
-  return element:new(value, self.key, self.value, self.set)
+  local s = proxy.O(self)
+  local value, type, addr = core.eval(s.exp, S)
+  if value == s.exp then
+    return self
+  end
+  if core.defined(value) then value = addr or s.exp end
+  return element:new(value, s.key, s.value, s.set)
 end
 
 
