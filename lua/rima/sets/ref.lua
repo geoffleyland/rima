@@ -121,6 +121,10 @@ function ref:__eval(S)
 
   local value, _, addr = core.eval(self.set, S)
 
+  if value == self.set then
+    return self
+  end
+
   if not core.defined(value) then
     return ref:new(value, self.order, self.values, self.names)
   end
