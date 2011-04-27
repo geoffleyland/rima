@@ -18,16 +18,21 @@ module(...)
 ord_op = object:new({}, "ord")
 
 
-function ord_op.__eval(args, S)
-  args = proxy.O(args)
+function ord_op.__eval(args_in, S)
+  local args = proxy.O(args_in)
   local e = core.eval(args[1], S)
+
   if element:isa(e) then
     return element.key(e)
   else
     if core.defined(e) then
       error("ord can only be applied to elements")
     else
-      return expression:new(ord_op, e)
+      if e == args[1] then
+        return args_in
+      else
+        return expression:new(ord_op, e)
+      end
     end
   end
 end
@@ -67,13 +72,19 @@ end
 
 
 range_op = object:new({}, "range")
-function range_op.__eval(args, S)
-  args = proxy.O(args)
+function range_op.__eval(args_in, S)
+  local args = proxy.O(args_in)
+
   local l, h = core.eval(args[1], S), core.eval(args[2], S)
+  
   if core.defined(l) and core.defined(h) then
     return range_type:new(l, h)
   else
-    return expression:new(range_op, l, h)
+    if l == args[1] and h == args[2] then
+      return args_in
+    else
+      return expression:new(range_op, l, h)
+    end
   end
 end
 
