@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local coroutine, table = require("coroutine"), require("table")
-local error, ipairs, pairs, pcall, require =
-      error, ipairs, pairs, pcall, require
+local error, ipairs, pairs, pcall, require, type =
+      error, ipairs, pairs, pcall, require, type
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")

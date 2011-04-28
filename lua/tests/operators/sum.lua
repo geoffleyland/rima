@@ -23,7 +23,7 @@ function test(options)
   local E = core.eval
 
   T:test(sum:isa(sum:new()), "isa(sum, sum:new())")
-  T:check_equal(object.type(sum:new()), "sum", "type(sum:new()) == 'sum'")
+  T:check_equal(object.typename(sum:new()), "sum", "typename(sum:new()) == 'sum'")
 
   local U = expression_tester(T, "x, y, z, Q, q, R, r, V, v", { R={"a", "b", "c"}, V={"d", "e"}, y={1, 2, 3}, z={{1,2},{3,4},{5,6}} })
   U{"rima.sum{q=Q}(x)", S="sum{q in Q}(x)", ES="sum{q in Q}(x)"} --, D="sum(closure({ref{names={q}, order={aelements}, set=index(address{\"Q\"})}}, index(address{\"x\"})))"}

@@ -22,7 +22,7 @@ function test(options)
   local E = core.eval
 
   T:test(object.isa(call, expression:new(call)), "call:isa(call)")
-  T:check_equal(object.type(expression:new(call)), "call")
+  T:check_equal(object.typename(expression:new(call)), "call")
 
   do
     local a, b = rima.R"a, b"

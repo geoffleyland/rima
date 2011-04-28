@@ -49,7 +49,7 @@ end
 -- String representation -------------------------------------------------------
 
 function proxy_mt.__repr(e, format)
-  return object.type(e).."("..lib.concat_repr(proxy.O(e), format)..")"
+  return object.typename(e).."("..lib.concat_repr(proxy.O(e), format)..")"
 end
 proxy_mt.__tostring = lib.__tostring
 

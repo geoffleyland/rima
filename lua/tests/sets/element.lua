@@ -23,7 +23,7 @@ function test(options)
 
   -- Constructors
   T:test(element:isa(N()), "element:isa(element:new())")
-  T:check_equal(object.type(N()), "element", "type(element:new()) == 'element'")
+  T:check_equal(object.typename(N()), "element", "typename(element:new()) == 'element'")
 
   do
     local it

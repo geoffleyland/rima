@@ -35,17 +35,17 @@ function check_type(arg, name, expected, caller_usage, caller_name)
     "check_type(arg, name, expected: typename | {metatable | checkfunction, name}, caller_usage, caller_name)"
 
   if type(expected) == "string" then
-    if object.type(arg) ~= expected then
-      fail(object.type(arg), name, expected, caller_usage, caller_name, 3)
+    if object.typename(arg) ~= expected then
+      fail(object.typename(arg), name, expected, caller_usage, caller_name, 3)
     end
   elseif type(expected) == "table" then
     if type(expected[1]) == "table" then
       if not object.isa(expected[1], arg) then
-        fail(object.type(arg), name, expected[2], caller_usage, caller_name, 3)
+        fail(object.typename(arg), name, expected[2], caller_usage, caller_name, 3)
       end
     elseif type(expected[1]) == "function" then
       if not expected[1](arg) then
-        fail(object.type(arg), name, expected[2], caller_usage, caller_name, 3)
+        fail(object.typename(arg), name, expected[2], caller_usage, caller_name, 3)
       end
     else
       fail(type(expected), "expected", "type description", usage, fname)
@@ -67,7 +67,7 @@ function check_types(arg, name, expected, caller_usage, caller_name)
 
   for _, e in ipairs(expected) do
     if type(e) == "string" then
-      if object.type(arg) == e then return end
+      if object.typename(arg) == e then return end
     elseif type(e) == "table" then
       if type(e[1]) == "table" then
         if object.isa(e[1], arg) then return end
@@ -94,7 +94,7 @@ function check_types(arg, name, expected, caller_usage, caller_name)
     end
   end
 
-  fail(object.type(arg), name, names, caller_usage, caller_name, 3)
+  fail(object.typename(arg), name, names, caller_usage, caller_name, 3)
 end
 
 

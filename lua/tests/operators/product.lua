@@ -23,7 +23,7 @@ function test(options)
   local E = core.eval
 
   T:test(product:isa(product:new()), "isa(product, product:new())")
-  T:check_equal(object.type(product:new()), "product", "type(product:new()) == 'product'")
+  T:check_equal(object.typename(product:new()), "product", "typename(product:new()) == 'product'")
 
   local x, X = rima.R"x, X"
 

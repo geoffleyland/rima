@@ -24,7 +24,7 @@ function test(options)
 
   -- Constructors
   T:test(scope:isa(N()), "scope:isa(scope.new())")
-  T:check_equal(object.type(N()), "scope", "type(scope.new()) == 'scope'")
+  T:check_equal(object.typename(N()), "scope", "typename(scope.new()) == 'scope'")
 
   -- Indexing
   do

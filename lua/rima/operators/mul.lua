@@ -2,9 +2,8 @@
 -- see LICENSE for license information
 
 local math, table = require("math"), require("table")
-local error, require, unpack = error, require, unpack
-local ipairs, pairs = ipairs, pairs
-local getmetatable = getmetatable
+local error, getmetatable, ipairs, pairs, require, type, unpack =
+      error, getmetatable, ipairs, pairs, require, type, unpack
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")

@@ -21,7 +21,7 @@ function test(options)
   local E = core.eval
 
   T:test(undefined_t:isa(undefined_t:new()), "isa(undefined_t:new(), undefined_t)")
-  T:check_equal(object.type(undefined_t:new()), 'undefined_t', "type(undefined_t:new()) == 'undefined_t'")
+  T:check_equal(object.typename(undefined_t:new()), 'undefined_t', "typename(undefined_t:new()) == 'undefined_t'")
   T:check_equal(undefined_t:new(), 'undefined', "repr(undefined_t:new()) == 'undefined'")
 
   T:check_equal(undefined_t:new():describe("a"), 'a undefined', "undefined:describe()'")

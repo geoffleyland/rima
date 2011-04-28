@@ -1,8 +1,8 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, getmetatable, ipairs, pairs, pcall, require, setmetatable, xpcall =
-      error, getmetatable, ipairs, pairs, pcall, require, setmetatable, xpcall
+local error, getmetatable, ipairs, pairs, pcall, require, setmetatable, type, xpcall =
+      error, getmetatable, ipairs, pairs, pcall, require, setmetatable, type, xpcall
 
 local debug = require("debug")
 
@@ -79,7 +79,7 @@ proxy_mt.__tostring = lib.__tostring
 function proxy_mt.__repr(i, format)
   local I = proxy.O(i)
   local base, addr = I.base, I.address
-  local bt = type(base)
+  local bt = typename(base)
   if format.format == "dump" then
     if base then
       return ("index(%s, %s)"):format(lib.repr(base, format), lib.repr(addr, format))
@@ -169,7 +169,7 @@ local function safe_index(t, i, base, address, length, depth, allow_undefined)
       if f then
         t = f(t)
       end
-      local tt = type(t)
+      local tt = typename(t)
       local article = ""
       if tt ~= "nil" then
         article = tt:sub(1,1):match("[aeiouAEIOU]") and " an" or " a"
@@ -191,7 +191,7 @@ local function newindex_check(t, i, value, base, a, depth)
   else
     t = safe_index(t, i, base, a, -1, depth+1)
   end
-  if type(value) == "table" then
+  if typename(value) == "table" then
     for k, v in pairs(value) do
       newindex_check(t, k, v, base, a+i, depth+1)
     end
@@ -219,7 +219,7 @@ local function newindex_set(current, i, value)
     end
   end
 
-  if type(value) == "table" then
+  if typename(value) == "table" then
     current = create_table_element(current, i)
     for k, v in pairs(value) do
       newindex_set(current, k, v)
@@ -364,7 +364,7 @@ function proxy_mt.__list_variables(i, s, list)
 
     -- now run forwards through that creating an index
     for _, i in ipairs(addr2) do
-      if type(i) == "sets.ref" then
+      if typename(i) == "sets.ref" then
         result_index = result_index[index:new(nil, i.names[1])]
         result_sets[#result_sets+1] = i
       else

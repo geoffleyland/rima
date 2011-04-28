@@ -29,7 +29,7 @@ function element:expression() return proxy.O(self).exp end
 function element:display()
   self = proxy.O(self)
   local v = self.value
-  if v and not undefined_t:isa(v) and object.type(v) ~= "table" then
+  if v and not undefined_t:isa(v) and object.typename(v) ~= "table" then
     return v
   else
     return self.key

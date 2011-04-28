@@ -20,7 +20,7 @@ function test(options)
   local E = core.eval
 
   T:test(object.isa(case, rima.case(1, {1, 1})), "isa(case, case)")
-  T:check_equal(object.type(rima.case(1, {1, 1})), "case", "type(case) == 'case'")
+  T:check_equal(object.typename(rima.case(1, {1, 1})), "case", "typename(case) == 'case'")
   
   do
     local a, b, c, d, e, f, g, h = rima.R"a, b, c, d, e, f, g, h"

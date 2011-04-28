@@ -16,7 +16,7 @@ function test(options)
 
   local p = proxy:new({}, my_type)
   T:test(my_type:isa(p), "my_type:isa(p)")
-  T:check_equal(object.type(p), "my_type", "type(proxy) == 'my_type'")
+  T:check_equal(object.typename(p), "my_type", "typename(proxy) == 'my_type'")
   
   local o = {}
   local p = proxy:new(o, my_type)

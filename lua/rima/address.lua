@@ -1,7 +1,8 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, ipairs, select = error, ipairs, select
+local error, ipairs, select, type =
+      error, ipairs, select, type
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
@@ -36,7 +37,7 @@ end
 function address:append(...)
   for i = 1, select("#", ...) do
     local e = select(i, ...)
-    local t = type(e)
+    local t = typename(e)
 
     if t == "address" then
       for i, v in ipairs(e) do

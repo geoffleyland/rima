@@ -25,7 +25,7 @@ local math_functions =
 
 
 local function math_repr(args, format)
-  local o = object.type(args)
+  local o = object.typename(args)
   args = proxy.O(args)
   local ff = format.format
   if ff == "latex" then
@@ -51,7 +51,7 @@ end
 
 
 local function math_diff(args, v)
-  local o = object.type(args)
+  local o = object.typename(args)
   args = proxy.O(args)
   local a = args[1]
 

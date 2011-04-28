@@ -22,7 +22,7 @@ function test(options)
 
   -- min
   T:test(object.isa(minmax.min, rima.min(1, {1, 1})), "isa(min, min)")
-  T:check_equal(object.type(rima.min(1, {1, 1})), "min", "type(min) == 'min'")
+  T:check_equal(object.typename(rima.min(1, {1, 1})), "min", "typename(min) == 'min'")
   
   do
     local a, b, c, d = rima.R"a, b, c, d"
@@ -36,7 +36,7 @@ function test(options)
 
   -- max
   T:test(object.isa(minmax.max, rima.max(1, {1, 1})), "isa(max, max)")
-  T:check_equal(object.type(rima.max(1, {1, 1})), "max", "type(max) == 'max'")
+  T:check_equal(object.typename(rima.max(1, {1, 1})), "max", "typename(max) == 'max'")
   
   do
     local a, b, c, d = rima.R"a, b, c, d"

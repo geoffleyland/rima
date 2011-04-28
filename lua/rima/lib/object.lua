@@ -1,9 +1,8 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local rawget, rawtype = rawget, type
-local getmetatable, setmetatable = getmetatable, setmetatable
-local error, pairs = error, pairs
+local error, getmetatable, pairs, setmetatable, rawget, type =
+      error, getmetatable, pairs, setmetatable, rawget, type
 
 module(...)
 
@@ -16,9 +15,9 @@ object.__typename = "object"
 object.__typeinfo = { object = true, [object] = true }
 
 
-function object:new_class(o, typename)
+function object:new_class(o, new_type_name)
   o = o or {}
-  if typename then o.__typename = typename end
+  if new_type_name then o.__typename = new_type_name end
   local parent_typeinfo = self.__typeinfo
   o.__typeinfo = { [o.__typename] = true, [o] = true }
   if self.__typeinfo then
@@ -51,19 +50,19 @@ local core_type_info =
 
 function object.typeinfo(o)
   local mt = getmetatable(o)
-  return mt and mt.__typeinfo or core_type_info[rawtype(o)]
+  return mt and mt.__typeinfo or core_type_info[type(o)]
 end
 
 
 function object.isa(t, o)
   local mt = getmetatable(o)
-  return (mt and mt.__typeinfo or core_type_info[rawtype(o)])[t]
+  return (mt and mt.__typeinfo or core_type_info[type(o)])[t]
 end
 
 
-function object.type(o)
+function object.typename(o)
   local mt = getmetatable(o)
-  return mt and mt.__typename or rawtype(o)
+  return mt and mt.__typename or type(o)
 end
 
 

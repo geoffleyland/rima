@@ -1,8 +1,8 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error = error
 local math = require("math")
+local error, type = error, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")

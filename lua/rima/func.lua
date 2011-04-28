@@ -1,7 +1,7 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, ipairs, require = error, ipairs, require
+local error, ipairs, require, type = error, ipairs, require, type
 
 local libargs = require("rima.lib.args")
 local object = require("rima.lib.object")
@@ -29,11 +29,11 @@ local function read(args)
         new_args[i] = lib.repr(v)
       else
         error(("bad input #%d to function constructor: expected string or identifier, got '%s' (%s)"):
-          format(i, lib.repr(v), type(v)), 0)
+          format(i, lib.repr(v), typename(v)), 0)
       end
     else
       error(("bad input #%d to function constructor: expected string or identifier, got '%s' (%s)"):
-        format(i, lib.repr(v), type(v)), 0)
+        format(i, lib.repr(v), typename(v)), 0)
     end
   end
   return new_args

@@ -1,8 +1,8 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, getmetatable, ipairs, pairs, select, rawget, require, setmetatable =
-      error, getmetatable, ipairs, pairs, select, rawget, require, setmetatable
+local error, getmetatable, ipairs, pairs, select, rawget, require, setmetatable, type =
+      error, getmetatable, ipairs, pairs, select, rawget, require, setmetatable, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -30,7 +30,7 @@ function scope.append(nodes, ...)
   for i = 1, select("#", ...) do
     local arg = select(i, ...)
     if arg then
-      if type(arg) == "scope.node" then
+      if typename(arg) == "scope.node" then
         nodes[#nodes+1] = arg
       else
         for _, n in ipairs(proxy.O(arg)) do
@@ -74,7 +74,7 @@ function scope.real_new(mt, top_node, parent, ...)
   end
 
   local v1
-  if type(parent) ~= "scope" then
+  if typename(parent) ~= "scope" then
     v1 = parent
     parent = nil
   end
@@ -271,7 +271,7 @@ node.__tostring = lib.__tostring
 function node:__repr(format)
   if format.format == "dump" then
     local f, r 
-    if type(self.value) == "table" then
+    if typename(self.value) == "table" then
       if format.depth then
         f = "{%s}"
         if format.depth > (format.depth_limit or 2) then
@@ -338,7 +338,7 @@ end
 
 
 local function is_literal(i)
-  local t = type(i)
+  local t = typename(i)
   return t == "number" or t == "string" or t == "sets.ref"
 end
 
@@ -614,7 +614,7 @@ function read_ref:__finish()
     if v then
       if undefined_t:isa(v) then
         vtype = vtype or v
-      elseif type(v) == "table" then
+      elseif typename(v) == "table" then
         if not (value or vtype) then is_table = true end
       else
         value = value or v

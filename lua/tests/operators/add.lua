@@ -25,7 +25,7 @@ function test(options)
   local OE = function(e, S) return add.__eval(e, S) end
 
   T:test(add:isa(add:new()), "isa(add, add:new())")
-  T:check_equal(object.type(add:new()), "add", "type(add:new()) == 'add'")
+  T:check_equal(object.typename(add:new()), "add", "typename(add:new()) == 'add'")
 
   T:check_equal(OD({{1, 1}}), "+(1*1)")
   T:check_equal(OS({{1, 1}}), "1")

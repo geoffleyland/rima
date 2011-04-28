@@ -18,7 +18,7 @@ function test(options)
 
   T:test(number_t:isa(number_t:new()), "isa(number_t:new(), number_t)")
   T:test(rima.types.undefined_t:isa(number_t:new()), "isa(number_t:new(), undefined_t)")
-  T:check_equal(object.type(number_t:new()), "number_t", "type(number_t:new()) == 'number_t'")
+  T:check_equal(object.typename(number_t:new()), "number_t", "typename(number_t:new()) == 'number_t'")
 
   T:expect_error(function() number_t:new("lower") end, "expecting a number for 'lower_bound', got 'string'")
   T:expect_error(function() number_t:new(1, {}) end, "expecting a number for 'upper_bound', got 'table'")
@@ -54,19 +54,19 @@ function test(options)
   T:test(number_t:new(0, 1):includes(number_t:new(0, 1, true)), "(0, 1) includes (0, 1, int)")
   T:test(not number_t:new(0, 1, true):includes(number_t:new(0, 1)), "(0, 1, int) does not include (0, 1)")
 
-  T:check_equal(object.type(rima.free()), "number_t", "type(rima.free()) == 'number_t'")
+  T:check_equal(object.typename(rima.free()), "number_t", "typename(rima.free()) == 'number_t'")
   T:test(rima.free():includes(rima.free()), "free includes free")
   T:test(not rima.free(1):includes(rima.free()), "free(1) does not include free")
 
-  T:check_equal(object.type(rima.positive()), "number_t", "type(rima.positive()) == 'number_t'")
+  T:check_equal(object.typename(rima.positive()), "number_t", "typename(rima.positive()) == 'number_t'")
   T:expect_ok(function() rima.positive(3, 5) end)
   T:expect_error(function() rima.positive(-3, 5) end, "bounds for positive variables must be positive")
 
-  T:check_equal(object.type(rima.negative()), "number_t", "type(rima.negative()) == 'number_t'")
+  T:check_equal(object.typename(rima.negative()), "number_t", "typename(rima.negative()) == 'number_t'")
   T:expect_ok(function() rima.negative(-3, -1) end)
   T:expect_error(function() rima.negative(-3, 5) end, "bounds for negative variables must be negative")
 
-  T:check_equal(object.type(rima.integer()), "number_t", "type(rima.integer()) == 'number_t'")
+  T:check_equal(object.typename(rima.integer()), "number_t", "typename(rima.integer()) == 'number_t'")
   T:expect_ok(function() rima.integer(-5, 5) end)
   T:expect_error(function() rima.integer(0.5, 5) end, "lower bound is not integer")
 

@@ -21,7 +21,7 @@ function test(options)
 
   -- constructors
   T:test(index:isa(N()), "index:isa(index:new())")
-  T:test(object.type(N(), "index"), "type(index:new())=='index'")
+  T:test(object.typename(N(), "index"), "typename(index:new())=='index'")
 --  T:expect_error(function() N(B, 1) end, "the first element of this index must be an identifier string")
   T:expect_ok(function() N({}, 1) end)
 

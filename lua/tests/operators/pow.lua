@@ -21,7 +21,7 @@ function test(options)
   local D = lib.dump
 
   T:test(pow:isa(pow:new()), "isa(pow, pow:new())")
-  T:check_equal(object.type(pow:new()), "pow", "type(pow:new()) == 'pow'")
+  T:check_equal(object.typename(pow:new()), "pow", "typename(pow:new()) == 'pow'")
 
   local a, b = rima.R"a, b"
   local S = { a = 5 }

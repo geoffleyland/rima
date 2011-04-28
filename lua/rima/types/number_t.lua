@@ -2,7 +2,7 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local error = error
+local error, type = error, type
 
 local args = require("rima.lib.args")
 local lib = require("rima.lib")

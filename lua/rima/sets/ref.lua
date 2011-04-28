@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local math, table = require("math"), require("table")
-local error, getmetatable, next, select, require =
-      error, getmetatable, next, select, require
+local error, getmetatable, next, require, select, type =
+      error, getmetatable, next, require, select, type
 
 local object = require("rima.lib.object")
 local index = require("rima.index")
@@ -37,7 +37,7 @@ function ref:read(s)
 
   -- did we get 'S', '"S"' or '{n=S}'?
   local namestring, set
-  local t = object.type(s)
+  local t = object.typename(s)
   if t == "index" then -- 's'
     namestring, set = index:identifier(s), nil
   elseif t == "string" then -- '"s"'
@@ -45,7 +45,7 @@ function ref:read(s)
   elseif t == "table" and not getmetatable(s) then -- '{n=S}'
     namestring, set = next(s)
   else
-    error(("Got '%s', (%s)"):format(lib.repr(s), type(s)))
+    error(("Got '%s', (%s)"):format(lib.repr(s), t))
   end
 
   -- did we get "['a, b']=l"?
@@ -129,9 +129,9 @@ function ref:__eval(S)
     return ref:new(value, self.order, self.values, self.names)
   end
 
-  if type(value) ~= "table" and not lib.getmetamethod(value, "__iterate") then
+  if typename(value) ~= "table" and not lib.getmetamethod(value, "__iterate") then
     error(("expecting a table or iterable object when evaluating %s, but got '%s' (%s)"):
-      format(lib.repr(self.set), lib.repr(value), type(value)))
+      format(lib.repr(self.set), lib.repr(value), typename(value)))
   end
   
   -- assume empty tables mean we're undefined - might be wrong on this

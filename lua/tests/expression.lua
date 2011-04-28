@@ -15,7 +15,7 @@ module(...)
 
 local function equal(T, expected, got)
   local function prep(z)
-    if object.type(z) == "table" then
+    if object.typename(z) == "table" then
       local e = z[1]
       for i = 3, #z do
         local arg = z[2]

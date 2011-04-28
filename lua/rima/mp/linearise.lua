@@ -1,8 +1,8 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, getmetatable, ipairs, pcall, require =
-      error, getmetatable, ipairs, pcall, require
+local error, getmetatable, ipairs, pcall, require, type =
+      error, getmetatable, ipairs, pcall, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -32,9 +32,9 @@ function _linearise(l, S)
   local constant, terms = 0, {}
   local fail = false
 
-  if object.type(l) == "number" then
+  if type(l) == "number" then
     constant = l
-  elseif object.type(l) == "index" then
+  elseif object.typename(l) == "index" then
     add_variable(terms, l, 1)
   elseif element:isa(l) then
     local exp = element.expression(l)
@@ -43,7 +43,7 @@ function _linearise(l, S)
     for i, a in ipairs(proxy.O(l)) do
       a = proxy.O(a)
       local c, x = a[1], a[2]
-      if object.type(x) == "number" then
+      if type(x) == "number" then
         if i ~= 1 then
           error(("term %d is constant (%s).  Only the first term should be constant"):
             format(i, lib.repr(x)), 0)
@@ -53,13 +53,13 @@ function _linearise(l, S)
             format(i, lib.repr(x)), 0)
         end
         constant = c * x
-      elseif object.type(x) == "index" then
+      elseif object.typename(x) == "index" then
         add_variable(terms, x, c)
       elseif element:isa(x) then
         local exp = element.expression(x)
         add_variable(terms, exp, c)
       else
-        error(("term %d is not linear (got '%s', %s)"):format(i, lib.repr(x), object.type(x)), 0)
+        error(("term %d is not linear (got '%s', %s)"):format(i, lib.repr(x), object.typename(x)), 0)
       end
     end
   else

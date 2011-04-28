@@ -13,12 +13,12 @@ function test(options)
 
   local o = object:new()
   T:test(object:isa(o), "object:isa(o)")
-  T:check_equal(object.type(o), "object", "type(object) == 'object'")
+  T:check_equal(object.typename(o), "object", "typename(object) == 'object'")
 
   local subobj = object:new_class(nil, "subobj")
-  T:check_equal(object.type(subobj), "object", "type(subobj) == 'object'")
+  T:check_equal(object.typename(subobj), "object", "typename(subobj) == 'object'")
   local s = subobj:new()
-  T:check_equal(object.type(s), "subobj", "type(s) == 'subobj'")
+  T:check_equal(object.typename(s), "subobj", "typename(s) == 'subobj'")
   T:test(object:isa(s), "object:isa(s)")
   T:test(subobj:isa(s), "subobj:isa(s)")
   T:test(not object.isa({}, s), "isa({}, s)")
@@ -26,8 +26,8 @@ function test(options)
   T:test(not object:isa({}), "object:isa({})")
   T:test(not subobj:isa(object:new()), "subobj:isa(object:new())")
 
-  T:check_equal(object.type(s), "subobj", "type(s) == 'subobj'")
-  T:check_equal(object.type(1), "number", "type(1) == 'number'")
+  T:check_equal(object.typename(s), "subobj", "typename(s) == 'subobj'")
+  T:check_equal(object.typename(1), "number", "typename(1) == 'number'")
 
   return T:close()
 end
