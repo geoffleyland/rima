@@ -16,7 +16,7 @@ function test(options)
   T:check_equal(object.type(o), "object", "type(object) == 'object'")
 
   local subobj = object:new_class(nil, "subobj")
-  T:check_equal(object.type(subobj), "subobj", "type(subobj) == 'subobj'")
+  T:check_equal(object.type(subobj), "object", "type(subobj) == 'object'")
   local s = subobj:new()
   T:check_equal(object.type(s), "subobj", "type(s) == 'subobj'")
   T:test(object:isa(s), "object:isa(s)")
@@ -25,10 +25,7 @@ function test(options)
   T:test(not subobj:isa({}), "subobj:isa({})")
   T:test(not object:isa({}), "object:isa({})")
   T:test(not subobj:isa(object:new()), "subobj:isa(object:new())")
-  
-  T:expect_error(function() object.isa("thing", {}) end,
-    "bad argument #1 to 'rima%.lib%.object%.isa' %(table expected, got string%)")
-  
+
   T:check_equal(object.type(s), "subobj", "type(s) == 'subobj'")
   T:check_equal(object.type(1), "number", "type(1) == 'number'")
 

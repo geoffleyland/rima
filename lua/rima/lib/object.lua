@@ -3,7 +3,7 @@
 
 local rawget, rawtype = rawget, type
 local getmetatable, setmetatable = getmetatable, setmetatable
-local error = error
+local error, pairs = error, pairs
 
 module(...)
 
@@ -11,13 +11,21 @@ module(...)
 -- Types -----------------------------------------------------------------------
 
 local object = _M
-object.__typename = "object"
 object.__index = object
+object.__typename = "object"
+object.__typeinfo = { object = true, [object] = true }
 
 
 function object:new_class(o, typename)
   o = o or {}
   if typename then o.__typename = typename end
+  local parent_typeinfo = self.__typeinfo
+  o.__typeinfo = { [o.__typename] = true, [o] = true }
+  if self.__typeinfo then
+    for k, v in pairs(self.__typeinfo) do
+      o.__typeinfo[k] = v
+    end
+  end
   o.__index = o
   return setmetatable(o, self)
 end
@@ -28,32 +36,34 @@ function object:new(o)
 end
 
 
-function object.isa(mt, o)
-  if rawtype(mt) ~= "table" then
-    error(("bad argument #1 to 'rima.lib.object.isa' (table expected, got %s)"):format(rawtype(mt)), 0)
-  end
+local core_type_info =
+{
+  boolean = { boolean = true },
+  ["function"] = { ["function"] = true },
+  ["nil"] = { ["nil"] = true },
+  number = { number = true },
+  string = { string = true },
+  table = { table = true },
+  thread = { thread = true },
+  userdata = { userdata = true },
+}
 
-  repeat
-     local o2 = getmetatable(o)
-     if o2 == mt then return true end
-     if o2 == o then return false end -- avoid recursion if a table is its own metatable
-     o = o2
-  until not o
-  return false
+
+function object.typeinfo(o)
+  local mt = getmetatable(o)
+  return mt and mt.__typeinfo or core_type_info[rawtype(o)]
+end
+
+
+function object.isa(t, o)
+  local mt = getmetatable(o)
+  return (mt and mt.__typeinfo or core_type_info[rawtype(o)])[t]
 end
 
 
 function object.type(o)
-  local t = rawtype(o)
-  if t ~= "table" then return t end
-  
-  while true do
-    t = rawget(o, "__typename")
-    if t then return t end
-    local o2 = getmetatable(o)
-    if not o2 or o2 == o then return "table" end  -- avoid recursion again
-    o = o2
-  end
+  local mt = getmetatable(o)
+  return mt and mt.__typename or rawtype(o)
 end
 
 

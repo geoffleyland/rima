@@ -17,6 +17,7 @@ local expression = require("rima.expression")
 
 local call = _M
 call.__typename = "call"
+call.__typeinfo = { call = "true", [call] = true }
 call.precedence = 0
 
 

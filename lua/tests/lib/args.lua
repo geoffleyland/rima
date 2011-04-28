@@ -47,6 +47,7 @@ function test(options)
   T:expect_error(function() args.check_type(setmetatable({}, {}), "arg", {{}, "my_class"}) end,
     "expecting a my_class for 'arg', got 'table'")
   local mt = {}
+  mt.__typeinfo = { [mt] = true, table = true } 
   T:expect_ok(function() args.check_type(setmetatable({}, mt), "arg", {mt, "my_class"}) end)
 
   -- args.check_type with functions
