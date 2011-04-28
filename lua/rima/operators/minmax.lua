@@ -14,7 +14,7 @@ module(...)
 
 -- Min -------------------------------------------------------------------------
 
-min = object:new({}, "min")
+min = object:new_class({}, "min")
 min.precedence = 0
 
 function min.__eval(args, S)
@@ -43,7 +43,7 @@ end
 
 -- Max -------------------------------------------------------------------------
 
-max = object:new({}, "max")
+max = object:new_class({}, "max")
 max.precedence = 0
 
 function max.__eval(args, S)

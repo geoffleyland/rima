@@ -25,7 +25,7 @@ end
 
 -- Constructor -----------------------------------------------------------------
 
-local address = object:new(_M, "address")
+local address = object:new_class(_M, "address")
 
 
 local function add_element(a, v)

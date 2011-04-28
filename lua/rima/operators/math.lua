@@ -2,7 +2,7 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local assert, ipairs, type = assert, ipairs, type
+local assert, error, ipairs, type = assert, error, ipairs, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -78,7 +78,7 @@ end
 
 local function make_math_function(name)
   local f = assert(math[name], "The math function does not exist")
-  local op = object:new({ precedence=0 }, name) 
+  local op = object:new_class({ precedence=0 }, name) 
 
   op.__eval = function(args, S)
     args = proxy.O(args)

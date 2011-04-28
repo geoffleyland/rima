@@ -22,7 +22,7 @@ local closure = require("rima.closure")
 
 --- Constructor ----------------------------------------------------------------
 
-local scope = object:new(_M, "scope")
+local scope = object:new_class(_M, "scope")
 scope.proxy_mt = setmetatable({}, scope)
 
 
@@ -133,7 +133,7 @@ end
 
 set_default_marker = setmetatable({}, { __repr=function() return "<default>" end, __tostring=function() return "<default>" end })
 
-set_default_thinggy = object:new({}, "set_default_thinggy")
+set_default_thinggy = object:new_class({}, "set_default_thinggy")
 
 function set_default_thinggy:new(set_ref)
   return object.new(self, { set_ref=set_ref })
@@ -239,7 +239,7 @@ proxy_mt.__tostring = lib.__tostring
 
 -- Scope nodes -----------------------------------------------------------------
 
-node = object:new({}, "scope.node")
+node = object:new_class({}, "scope.node")
 
 
 function node:new(...)
@@ -328,7 +328,7 @@ end
 
 -- Setting ---------------------------------------------------------------------
 
-local write_ref = object:new({}, "scope.write_ref")
+local write_ref = object:new_class({}, "scope.write_ref")
 
 
 function write_ref.new(node, free_indexes)
@@ -402,7 +402,7 @@ end
 
 -- Getting ---------------------------------------------------------------------
 
-local read_ref = object:new({}, "scope.read_ref")
+local read_ref = object:new_class({}, "scope.read_ref")
 
 
 function read_ref.new(r)

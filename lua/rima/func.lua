@@ -15,7 +15,7 @@ module(...)
 
 -- Function type ---------------------------------------------------------------
 
-local func = object:new(_M, "func")
+local func = object:new_class(_M, "func")
 local counter = 1
 
 

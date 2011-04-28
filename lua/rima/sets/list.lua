@@ -18,7 +18,7 @@ local scope = require("rima.scope")
 
 -- Set list --------------------------------------------------------------------
 
-list = object:new(_M, "sets.list")
+list = object:new_class(_M, "sets.list")
 
 
 function list:new(l)

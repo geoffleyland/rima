@@ -15,7 +15,7 @@ module(...)
 
 --------------------------------------------------------------------------------
 
-local constraint = object:new(_M, "constraint")
+local constraint = object:new_class(_M, "constraint")
 
 function constraint:new(lhs, rel, rhs)
   assert(rel == "==" or rel == ">=" or rel == "<=")

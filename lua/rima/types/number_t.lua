@@ -13,7 +13,7 @@ module(...)
 
 -- Number type -----------------------------------------------------------------
 
-local number_t = undefined_t:new(_M, "number_t")
+local number_t = undefined_t:new_class(_M, "number_t")
 
 function number_t:new(lower, upper, integer)
   local fname, usage =

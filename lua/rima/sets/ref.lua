@@ -18,7 +18,7 @@ local scope = require("rima.scope")
 
 -- Set references --------------------------------------------------------------
 
-ref = object:new(_M, "sets.ref")
+ref = object:new_class(_M, "sets.ref")
 
 
 function ref:new(set, order, values, names, literal)

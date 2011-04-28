@@ -15,7 +15,7 @@ module(...)
 
 -- Ord -------------------------------------------------------------------------
 
-ord_op = object:new({}, "ord")
+ord_op = object:new_class({}, "ord")
 
 
 function ord_op.__eval(args_in, S)
@@ -40,7 +40,7 @@ end
 
 -- Ranges ----------------------------------------------------------------------
 
-local range_type = object:new({}, "range_type")
+local range_type = object:new_class({}, "range_type")
 function range_type:new(l, h)
   return object.new(self, { low = l, high = h} )
 end
@@ -71,7 +71,7 @@ function range_type:__iterindex(i)
 end
 
 
-range_op = object:new({}, "range")
+range_op = object:new_class({}, "range")
 function range_op.__eval(args_in, S)
   local args = proxy.O(args_in)
 

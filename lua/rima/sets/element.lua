@@ -14,7 +14,7 @@ module(...)
 
 -- Elements -------------------------------------------------------------------
 
-element = object:new(_M, "element")
+element = object:new_class(_M, "element")
 proxy_mt = setmetatable({}, element)
 
 function element:new(exp, key, value, set)

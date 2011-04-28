@@ -15,7 +15,7 @@ local scope = require("rima.scope")
 
 -- Closures --------------------------------------------------------------------
 
-local closure = object:new(_M, "closure")
+local closure = object:new_class(_M, "closure")
 local counter = 1
 
 function closure:new(exp, args)

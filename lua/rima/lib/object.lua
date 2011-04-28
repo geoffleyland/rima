@@ -12,13 +12,19 @@ module(...)
 
 local object = _M
 object.__typename = "object"
+object.__index = object
 
 
-function object:new(o, typename)
+function object:new_class(o, typename)
   o = o or {}
   if typename then o.__typename = typename end
-  self.__index = self
+  o.__index = o
   return setmetatable(o, self)
+end
+
+
+function object:new(o)
+  return setmetatable(o or {}, self)
 end
 
 

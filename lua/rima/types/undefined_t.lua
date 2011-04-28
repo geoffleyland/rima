@@ -9,7 +9,7 @@ module(...)
 
 -- Undefined (base) Type -------------------------------------------------------
 
-local undefined_t = object:new(_M, "undefined_t")
+local undefined_t = object:new_class(_M, "undefined_t")
 
 
 -- String representation -------------------------------------------------------

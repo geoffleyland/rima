@@ -15,7 +15,7 @@ function test(options)
   T:test(object:isa(o), "object:isa(o)")
   T:check_equal(object.type(o), "object", "type(object) == 'object'")
 
-  local subobj = object:new(nil, "subobj")
+  local subobj = object:new_class(nil, "subobj")
   T:check_equal(object.type(subobj), "subobj", "type(subobj) == 'subobj'")
   local s = subobj:new()
   T:check_equal(object.type(s), "subobj", "type(s) == 'subobj'")

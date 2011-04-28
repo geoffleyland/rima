@@ -20,7 +20,7 @@ local pow = require("rima.operators.pow")
 
 -- Multiplication --------------------------------------------------------------
 
-local mul = object:new(_M, "mul")
+local mul = object:new_class(_M, "mul")
 mul.precedence = 3
 
 

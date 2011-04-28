@@ -20,7 +20,7 @@ local index = require("rima.index")
 
 -- Constructor -----------------------------------------------------------------
 
-local expression = object:new(_M, "expression")
+local expression = object:new_class(_M, "expression")
 expression.proxy_mt = setmetatable({}, expression)
 
 
