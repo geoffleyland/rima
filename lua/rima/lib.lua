@@ -7,6 +7,8 @@ local table = require("table")
 
 local object = require("rima.lib.object")
 
+local typename = object.typename
+
 module(...)
 
 
@@ -67,11 +69,11 @@ end
 
 
 function simple_repr(o, format)
-  if type(o) == "number" then
+  local t = typename(o)
+  if t == "number" then
     local nf = format.numbers or number_format
     return nf:format(o)
   elseif format.format == "dump" then
-    local t = object.typename(o)
     if t == "string" then
       return ("%q"):format(o)
     elseif t == "boolean" then
@@ -93,7 +95,7 @@ function simple_repr(o, format)
       return t.."("..tostring(o)..")"
     end
   else
-    if object.typename(o) == "table" then
+    if t == "table" then
       return "table"
     else
       return tostring(o)

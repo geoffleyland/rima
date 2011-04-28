@@ -16,6 +16,8 @@ local element = require("rima.sets.element")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
 
+local typeinfo = object.typeinfo
+
 module(...)
 
 local add_op = require("rima.operators.add")
@@ -33,7 +35,7 @@ index.proxy_mt = setmetatable({}, index)
 
 function index:new(base, ...)
   local a
-  if self:isa(base) then
+  if typeinfo(base).index then
     base = proxy.O(base)
     a = address:new(base.address, ...)
     base = base.base
@@ -79,16 +81,16 @@ proxy_mt.__tostring = lib.__tostring
 function proxy_mt.__repr(i, format)
   local I = proxy.O(i)
   local base, addr = I.base, I.address
-  local bt = typename(base)
+  local bt = typeinfo(base)
   if format.format == "dump" then
     if base then
       return ("index(%s, %s)"):format(lib.repr(base, format), lib.repr(addr, format))
     else
       return ("index(%s)"):format(lib.repr(addr, format))
     end
-  elseif format.scopes and bt == "scope" then
+  elseif format.scopes and bt.scope then
     return lib.repr(base, format)..lib.repr(addr, format)
-  elseif base and bt ~= "scope" and bt ~= "table" then
+  elseif base and (not bt.scope) and (not bt.table) then
     format.continued_address = true
     local lra = lib.repr(addr, format)
     format.continued_address = false
@@ -117,10 +119,10 @@ local function do_index(t, i, j, address)
     end
   end
 
-  if number_t:isa(t) then
+  if typeinfo(t).number then
     error("can't index a number", 0)
   end
-  if element:isa(i) then
+  if typeinfo(i).element then
 
     local k = element.key(i)
     local kvalue, ktype, kaddr = z(k)
@@ -149,7 +151,7 @@ end
 
 
 local function safe_index(t, i, base, address, length, depth, allow_undefined)
-  if not allow_undefined and index:isa(i) and not index:is_identifier(i) then
+  if not allow_undefined and typeinfo(i).index and not index:is_identifier(i) then
     local a2 = address:sub(1, length)
     error(("error indexing '%s' as '%s': variable indexes must be unbound identifiers"):format(lib.repr(a2), lib.repr(a2+i)), depth+1)
   end
@@ -182,7 +184,7 @@ end
 
 
 local function newindex_check(t, i, value, base, a, depth)
-  if index:isa(i) and not index:is_identifier(i) then
+  if typeinfo(i).index and not index:is_identifier(i) then
     local a2 = address:new(a)
     for j, v in proxy.O(i).address:values() do
       a2:append(v)
@@ -191,7 +193,7 @@ local function newindex_check(t, i, value, base, a, depth)
   else
     t = safe_index(t, i, base, a, -1, depth+1)
   end
-  if typename(value) == "table" then
+  if typeinfo(value).table then
     for k, v in pairs(value) do
       newindex_check(t, k, v, base, a+i, depth+1)
     end
@@ -210,7 +212,7 @@ end
 
 
 local function newindex_set(current, i, value)
-  if index:isa(i) and not index:is_identifier(i) then
+  if typeinfo(i).index and not index:is_identifier(i) then
     local a2 = proxy.O(i).address
     local a = a2:sub(1,-2)
     i = a2:value(-1)
@@ -219,7 +221,7 @@ local function newindex_set(current, i, value)
     end
   end
 
-  if typename(value) == "table" then
+  if typeinfo(value).table then
     current = create_table_element(current, i)
     for k, v in pairs(value) do
       newindex_set(current, k, v)
@@ -285,7 +287,7 @@ function index.resolve(r, s)
 
     current, ctype, addr2 = safe_index(current, v, base, addr, j-1, 3, true)
     local new_base = current or addr2
-    if index:isa(new_base) then
+    if typeinfo(new_base).index then
       base = new_base
       addr = addr:sub(j+1)
       j = 0
@@ -364,7 +366,7 @@ function proxy_mt.__list_variables(i, s, list)
 
     -- now run forwards through that creating an index
     for _, i in ipairs(addr2) do
-      if typename(i) == "sets.ref" then
+      if typeinfo(i)["sets.ref"] then
         result_index = result_index[index:new(nil, i.names[1])]
         result_sets[#result_sets+1] = i
       else

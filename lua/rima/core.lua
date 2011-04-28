@@ -5,7 +5,9 @@ local getmetatable, type = getmetatable, type
 
 local lib = require("rima.lib")
 local trace = require("rima.lib.trace")
-local undefined_t = require("rima.types.undefined_t")
+local object = require("rima.lib.object")
+
+local typeinfo = object.typeinfo
 
 module(...)
 
@@ -70,7 +72,7 @@ function eval(e, S)
   if f then
     value, type, addr = f(value)
   end
-  if undefined_t:isa(value) then
+  if typeinfo(value).undefined_t then
     type = value
     value = nil
   end

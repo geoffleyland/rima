@@ -7,7 +7,8 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local undefined_t = require("rima.types.undefined_t")
+
+local typeinfo = object.typeinfo
 
 module(...)
 
@@ -29,11 +30,13 @@ function element:expression() return proxy.O(self).exp end
 function element:display()
   self = proxy.O(self)
   local v = self.value
-  if v and not undefined_t:isa(v) and object.typename(v) ~= "table" then
-    return v
-  else
-    return self.key
+  if v then
+    local t = typeinfo(v)
+    if not t.undefined_t and not t.table then
+      return v
+    end
   end
+  return self.key
 end
 
 
@@ -79,10 +82,10 @@ element.__tostring = lib.__tostring
 -- Operators -------------------------------------------------------------------
 
 function element.extract(a)
-  if not element:isa(a) then return a end
+  if not typeinfo(a).element then return a end
   local e = proxy.O(a)
   local v = e.value
-  if undefined_t:isa(v) then return e.exp end
+  if typeinfo(v).undefined_t then return e.exp end
   return v
 end
 

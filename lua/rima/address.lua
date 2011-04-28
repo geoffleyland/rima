@@ -9,6 +9,8 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local element = require("rima.sets.element")
 
+local typeinfo = object.typeinfo
+
 module(...)
 
 
@@ -37,13 +39,12 @@ end
 function address:append(...)
   for i = 1, select("#", ...) do
     local e = select(i, ...)
-    local t = typename(e)
 
-    if t == "address" then
+    if typeinfo(e).address then
       for i, v in ipairs(e) do
         add_element(self, v)
       end
-    elseif t ~= "nil" then
+    elseif e then
       add_element(self, e)
     end
   end
@@ -137,7 +138,7 @@ function address:__repr(format)
   if ff == "latex" then
     local i = 1
     for _, a in ipairs(self) do
-      if element:isa(a) then
+      if typeinfo(a).element then
         a = element.display(a)
       end
       if not is_local_string(a) then
@@ -163,7 +164,8 @@ function address:__repr(format)
     local mode = "s"
 
     for _, a in ipairs(self) do
-      if element:isa(a) then
+      local t = typeinfo(a)
+      if t.element then
         a = element.display(a)
       end
       if is_local_string(a) then
@@ -186,7 +188,7 @@ function address:__repr(format)
           -- lua-readable format is [x][y], otherwise it's [x, y] for mathematicans
           append(r, (lua_format and "][") or ", ")
         end
-        if type(a) == "string" then
+        if t.string then
           -- non-identifier strings are ['1 str.ing']
           append(r, "'", a, "'")
         else

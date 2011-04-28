@@ -9,8 +9,8 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local index = require("rima.index")
 local core = require("rima.core")
-local undefined_t = require("rima.types.undefined_t")
-local number_t = require("rima.types.number_t")
+
+local typeinfo = object.typeinfo
 
 module(...)
 
@@ -30,7 +30,7 @@ function scope.append(nodes, ...)
   for i = 1, select("#", ...) do
     local arg = select(i, ...)
     if arg then
-      if typename(arg) == "scope.node" then
+      if typeinfo(arg)["scope.node"] then
         nodes[#nodes+1] = arg
       else
         for _, n in ipairs(proxy.O(arg)) do
@@ -74,7 +74,7 @@ function scope.real_new(mt, top_node, parent, ...)
   end
 
   local v1
-  if typename(parent) ~= "scope" then
+  if not typeinfo(parent)[scope] then
     v1 = parent
     parent = nil
   end
@@ -153,7 +153,7 @@ local function copy(n, t)
         copy(v, c)
       end
     else
-      if scope:isa(v.prototype) or (type(v.value) == "table" and not getmetatable(v.value)) then
+      if typeinfo(v.prototype)[scope] or (type(v.value) == "table" and not getmetatable(v.value)) then
         c = {}
         t[k] = c
         copy(v, c)
@@ -163,7 +163,7 @@ local function copy(n, t)
     end
   end
 
-  if scope:isa(n) then
+  if typeinfo(n)[scope] then
     local S = proxy.O(n)
     for _, n in ipairs(S) do
       copy(n, t)
@@ -271,7 +271,7 @@ node.__tostring = lib.__tostring
 function node:__repr(format)
   if format.format == "dump" then
     local f, r 
-    if typename(self.value) == "table" then
+    if typeinfo(self.value).table then
       if format.depth then
         f = "{%s}"
         if format.depth > (format.depth_limit or 2) then
@@ -338,8 +338,8 @@ end
 
 
 local function is_literal(i)
-  local t = typename(i)
-  return t == "number" or t == "string" or t == "sets.ref"
+  local t = typeinfo(i)
+  return t.number or t.string or t["sets.ref"]
 end
 
 
@@ -372,7 +372,8 @@ function write_ref:__newindex(i, value)
     index_names = self.free_indexes + i
   end
 
-  local value_or_prototype = scope:isa(value) and "prototype" or "value"
+  local is_scope = typeinfo(value)[scope]
+  local value_or_prototype = is_scope and "prototype" or "value"
   if not core.defined(value) then
     if index_names[1] then
       new_node.value = closure:new(value, index_names)
@@ -386,7 +387,7 @@ function write_ref:__newindex(i, value)
   if is_literal(i) then
     node:create_element(i, new_node)
   else
-    if scope:isa(value) then
+    if is_scope then
       node.set_prototype = node:new(node.set_prototype, new_node)
     else
       node.set_default = node:new(node.set_default, new_node)
@@ -425,14 +426,15 @@ end
 
 local function step_path(new_paths, parent, index)
   local used_prototype
-  
-  if parent.value and core.defined(index) then
-    if number_t:isa(parent.value) then
+
+  local pv = parent.value
+  if pv and core.defined(index) then
+    if typeinfo(pv).number_t then
       error("can't index a number", 0)
     end
-    local next_node = parent.value[index]
+    local next_node = pv[index]
     if next_node then
-      if not node:isa(next_node) then
+      if not typeinfo(next_node)[node] then
         new_paths[#new_paths+1] = node:new({ scope=parent.scope, collected_indexes=parent.collected_indexes, value=next_node, parent=parent })
       else
         if next_node.value then
@@ -542,7 +544,7 @@ function read_ref.__eval(r, s)
 
   local a
   local r1v = r[1].value
-  if #r == 1 and index:isa(r1v) then
+  if #r == 1 and typeinfo(r1v).index then
     local prefix = proxy.O(r[1].scope or s).prefix
     if prefix then
       a = index:new(prefix, proxy.O(r1v).address)
@@ -559,7 +561,7 @@ function read_ref.__eval(r, s)
     local eval_scope = path.scope or s
 
     if not core.defined(result) then
-      if closure:isa(result) and path.collected_indexes then
+      if typeinfo(result).closure and path.collected_indexes then
         local prefix = proxy.O(eval_scope).prefix
         eval_scope = result:set_args(eval_scope, path.collected_indexes)
         proxy.O(eval_scope).prefix = prefix
@@ -575,7 +577,7 @@ function read_ref.__eval(r, s)
   end
 
   local new_paths
-  if #results == 1 and read_ref:isa(results[1][1]) then
+  if #results == 1 and typeinfo(results[1][1])[read_ref] then
     local r1 = results[1]
     local result, path, scope = proxy.O(r1[1]), r1[2], r1[3]
     new_paths = { address=result.address or a, prefix=result.prefix or r.prefix }
@@ -586,7 +588,7 @@ function read_ref.__eval(r, s)
     new_paths = { address = a, prefix = r.prefix }
     for _, rp in ipairs(results) do
       local result, path, scope = rp[1], rp[2], rp[3]
-      if read_ref:isa(result) then
+      if typeinfo(result).read_ref then
         for _, p2 in ipairs(proxy.O(result)) do
           new_paths[#new_paths+1] = node:new({ scope=scope }, p2)
         end
@@ -612,9 +614,10 @@ function read_ref:__finish()
   for _, v in ipairs(self) do
     v = v.value
     if v then
-      if undefined_t:isa(v) then
+      local t = typeinfo(v)
+      if t.undefined_t then
         vtype = vtype or v
-      elseif typename(v) == "table" then
+      elseif t.table then
         if not (value or vtype) then is_table = true end
       else
         value = value or v
