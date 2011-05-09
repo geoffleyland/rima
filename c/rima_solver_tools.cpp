@@ -136,6 +136,8 @@ const char *check_variables(lua_State *L, unsigned variable_count)
 
     lua_pushstring(L, "type");
     lua_rawget(L, -2);
+    if (lua_type(L, -1) != LUA_TTABLE)
+      return "The constraint description must contain a table named type";
     {
       lua_pushstring(L, "lower");
       lua_rawget(L, -2);
