@@ -10,8 +10,6 @@ local rima = require("rima")
 
 local status, ipopt_core = pcall(require, "rima_ipopt_core")
 
-local print = print
-
 module(...)
 
 
@@ -119,7 +117,7 @@ local function solve_(options)
   F.constraint_jacobian, _, F.cj_sparsity = compile_jacobian(options.constraint_expressions, options.ordered_variables)
   F.hessian, _, F.hessian_sparsity = compile_hessian(options.objective, options.constraint_expressions, options.ordered_variables)
 
-  local M = ipopt_core.new(F)
+  local M = assert(ipopt_core.new(F))
   return M:solve()
 end
 

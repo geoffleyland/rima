@@ -543,6 +543,8 @@ static int rima_solve(lua_State *L)
   app.Options()->SetStringValue("mu_strategy", "adaptive");
   app.Initialize();
   Ipopt::ApplicationReturnStatus status = app.OptimizeTNLP(&model);
+  if (status != Ipopt::Solve_Succeeded)
+    return error(L, "Solve failed");
 
   lua_rawgeti(L, LUA_REGISTRYINDEX, model.model_index_);
   lua_getfield(L, -1, "results");
