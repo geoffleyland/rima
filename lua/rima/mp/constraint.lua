@@ -55,7 +55,7 @@ end
 
 local latex_compare_translation =
 {
-  ["<="] = "\\eq",
+  ["=="] = "=",
   ["<="] = "\\leq",
   [">="] = "\\geq",
 }
