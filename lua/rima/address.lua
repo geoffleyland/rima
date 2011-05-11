@@ -16,11 +16,6 @@ module(...)
 
 -- Utilities -------------------------------------------------------------------
 
-local function is_identifier_string(v)
-  return type(v) == "string" and v:match("^[_%a][_%w]*$")
-end
-
-
 local function is_local_string(v)
   return type(v) == "string" and v:sub(1, 1) == "$"
 end
@@ -59,12 +54,12 @@ end
 
 
 function address:starts_with_identifier()
-  return is_identifier_string(self[1])
+  return lib.is_identifier_string(self[1])
 end
 
 
 function address:is_identifier()
-  return #self == 1 and is_identifier_string(self[1])
+  return #self == 1 and lib.is_identifier_string(self[1])
 end
 
 
@@ -147,14 +142,8 @@ function address:__repr(format)
         elseif i > 2 then
           append(r, ",")
         end
-        a = lib.repr(a, format)
-        if a:len() == 1 then
-          append(r, a)
-        elseif is_identifier_string(a) then
-          append(r, "\\text{", a:gsub("_", "\\_"), "}")
-        else
-          append(r, "\\text{``", a:gsub("_", "\\_"), "''}")
-        end
+        local s = lib.repr(a, format)
+          append(r, s)
         i = i + 1
       end
     end
@@ -170,7 +159,7 @@ function address:__repr(format)
       end
       if is_local_string(a) then
         -- Ignore it!
-      elseif is_identifier_string(a) then
+      elseif lib.is_identifier_string(a) then
         -- for strings that can be identifiers, format as a.b
         if mode ~= "s" then
           mode = "s"

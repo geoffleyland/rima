@@ -68,6 +68,16 @@ function set_number_format(f)
 end
 
 
+function is_identifier(v)
+  return v:match("^[_%a][_%w]*$")
+end
+
+
+function is_identifier_string(v)
+  return type(v) == "string" and is_identifier(v)
+end
+
+
 function simple_repr(o, format)
   local t = typename(o)
   if t == "number" then
@@ -93,6 +103,24 @@ function simple_repr(o, format)
       return "nil"
     else
       return t.."("..tostring(o)..")"
+    end
+  elseif format.format == "latex" then
+    if t == "table" then
+      return "\\text{table}"
+    elseif t == "boolean" then
+      return "\\text{"..tostring(o).."}"
+    elseif t == "nil" then
+      return "\\text{nil}"
+    elseif t == "string" then
+      if o:len() == 1 then
+        return o
+      elseif is_identifier(o) then
+        return "\\text{"..o:gsub("_", "\\_").."}"
+      else
+        return "\\text{``"..o:gsub("_", "\\_").."''}"
+      end
+    else
+      return tostring(o)
     end
   else
     if t == "table" then
