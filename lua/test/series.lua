@@ -64,14 +64,16 @@ function series:check_equal(got, expected, description, depth)
     pass and ("got expected string \"%s\""):format(got) or
       ("result mismatch:\n  expected: \"%s\"\n  got:      \"%s\""):format(
         expected:gsub("\n", "\n             "),
-        got:gsub("\n", "\n             ")), (depth or 0) + 3)
+        got:gsub("\n", "\n             ")), (depth or 0) + 3), 1
+  -- The ", 1" above (and on following lines) is to prevent tail calls, which
+  -- can mess up the stack levels reported by LuaJIT
 end
 
 
 function series:expect_ok(f, description, depth)
   local status, message = xpcall(f, debug.traceback)
   return self:test(status, description, not status and
-    ("unexpected error%s"):format(message and (" \"%s\""):format(message) or ""), (depth or 0) + 3)
+    ("unexpected error%s"):format(message and (" \"%s\""):format(message) or ""), (depth or 0) + 3), 1
 end
 
 
@@ -83,13 +85,13 @@ function series:expect_error(f, expected, description, depth)
 
   if status then
     return self:test(false, description,
-      ("got ok, expected error:\n  \"%s\""):format(expected:gsub("\n", "\n   ")), depth)
+      ("got ok, expected error:\n  \"%s\""):format(expected:gsub("\n", "\n   ")), depth), 1
   elseif not message:match(expected) then
     return self:test(false, description, ("expected error:\n  \"%s\"\ngot error:\n  \"%s\""):
-      format(expected:gsub("\n", "\n   "), message:gsub("\n", "\n   ")), depth)
+      format(expected:gsub("\n", "\n   "), message:gsub("\n", "\n   ")), depth), 1
   else
     return self:test(true, description,
-      ("got expected error:\n  \"%s\""):format(message:gsub("\n", "\n   ")), depth)
+      ("got expected error:\n  \"%s\""):format(message:gsub("\n", "\n   ")), depth), 1
   end
 end
 
