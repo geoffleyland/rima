@@ -2,13 +2,14 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local assert, getmetatable, ipairs, pcall = assert, getmetatable, ipairs, pcall
+local assert, ipairs, pcall =
+      assert, ipairs, pcall
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local linearise = require("rima.mp.linearise")
-local add = require("rima.operators.add")
+local add_mul = require("rima.operators.add_mul")
 
 module(...)
 
@@ -31,8 +32,8 @@ end
 function constraint:characterise(S)
   local e = core.eval(0 + self.lhs - self.rhs, S)
   local rhs = 0
-  if getmetatable(e) == add then
-    local constant, new_e = add.extract_constant(e)
+  if object.typeinfo(e).add then
+    local constant, new_e = add_mul.extract_constant(e)
     if constant then rhs, e = -constant, new_e end
   end
   local comp = self.type

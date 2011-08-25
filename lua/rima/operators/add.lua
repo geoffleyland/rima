@@ -2,19 +2,19 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local error, getmetatable, ipairs, require, type =
-      error, getmetatable, ipairs, require, type
+local error, ipairs, require, type =
+      error, ipairs, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local add_mul = require("rima.operators.add_mul")
 local element = require("rima.sets.element")
 
 module(...)
 
 local expression = require("rima.expression")
+local add_mul = require("rima.operators.add_mul")
 local mul = require("rima.operators.mul")
 
 -- Addition --------------------------------------------------------------------
@@ -83,7 +83,7 @@ function add:__eval(S)
         elseif ti.add then                      -- if the term is another sum, hoist its terms
           sum(term_map, coeff, proxy.O(e))
         elseif ti.mul then                      -- if the term is a multiplication, try to hoist any constant
-          local new_c, new_e = extract_constant(e, getmetatable(e))
+          local new_c, new_e = add_mul.extract_constant(e)
           if new_c then                         -- if we did hoist a constant, re-simplify the resulting expression
             simplify(term_map, coeff * new_c, new_e)
           else                                  -- otherwise just add it
@@ -114,28 +114,6 @@ function add:__eval(S)
       new_terms[#new_terms+1] = { t.coeff, t.expression }
     end
     return expression:new_table(add, new_terms)
-  end
-end
-
-
--- Extract the constant from an add or mul (if there is one)
-function extract_constant(e, mt)
-  e = proxy.O(e)
-  mt = mt or add
-  if type(e[1][2]) == "number" then
-    local constant = e[1][2]
-    local new_terms = {}
-    for i = 2, #e do
-      new_terms[i-1] = e[i]
-    end
-    if #new_terms == 1 and new_terms[1][1] == 1 then
-      -- there's a constant and only one other argument with a coefficient/exponent of 1 - hoist the other argument
-      return constant, new_terms[1][2]
-    else
-      return constant, expression:new_table(mt, new_terms)
-    end
-  else                                          -- there's no constant to extract
-    return nil
   end
 end
 

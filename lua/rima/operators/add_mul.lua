@@ -2,13 +2,16 @@
 -- see LICENSE for license information
 
 local table = require("table")
-local ipairs, pairs =
-      ipairs, pairs
+local getmetatable, ipairs, pairs, require, type =
+      getmetatable, ipairs, pairs, require, type
 
 local lib = require("rima.lib")
 local core = require("rima.core")
+local proxy = require("rima.lib.proxy")
 
 module(...)
+
+local expression = require("rima.expression")
 
 
 -- Evaluate all terms, and return the same object if nothing changed -----------
@@ -68,6 +71,34 @@ function sort_terms(term_map)
   end
   table.sort(ordered_terms, function(a, b) return a.name < b.name end)
   return ordered_terms, term_count
+end
+
+
+-- Extract the constant from an add or mul (if there is one) -------------------
+
+function extract_constant(e)
+  local terms = proxy.O(e)
+  local constant = terms[1][2]
+
+  if type(constant) == "number" then
+    local term_count = #terms
+
+    if term_count == 1 then
+      return constant                           -- There was just a constant
+    end
+
+    if term_count == 2 and terms[2][1] == 1 then
+      -- there's a constant and only one other argument with a
+      -- coefficient/exponent of 1 - hoist the other argument
+      return constant, terms[2][2]
+    end
+            
+    local new_terms = {}
+    for i = 2, term_count do
+      new_terms[i-1] = terms[i]
+    end
+    return constant, expression:new_table(getmetatable(e), new_terms)
+  end
 end
 
 
