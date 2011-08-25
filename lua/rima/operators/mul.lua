@@ -77,41 +77,44 @@ function mul:__eval(S)
   -- the constant and see if what's left is a product.
   local terms = add_mul.evaluate_terms(proxy.O(self), S)
 
-  local coeff = 1
-
   local product
 
   -- Simplify a single term
   local function simplify(term_map, exponent, e)
+    local coeff = 1
     local ti = object.typeinfo(e)
     if core.arithmetic(e) then              -- if the term evaluated to a number, then multiply the coefficient by it
-      coeff = coeff * e ^ exponent
+      coeff = e ^ exponent
     else
       local terms = proxy.O(e)
       if ti.mul then                        -- if the term is another product, hoist its terms
-        product(term_map, exponent, terms)
+        coeff = product(term_map, exponent, terms)
       elseif ti.add and #terms == 1 then    -- if the term is a sum with a single term, hoist it
-        coeff = coeff * terms[1][1] ^ exponent
-        simplify(term_map, exponent, terms[1][2])
+        coeff = terms[1][1] ^ exponent
+        local c2 = simplify(term_map, exponent, terms[1][2])
+        coeff = coeff * c2
       elseif ti.pow and type(terms[2]) == "number" then
         -- if the term is an exponentiation to a constant power, hoist it
-        simplify(term_map, exponent * terms[2], terms[1])
+        coeff = simplify(term_map, exponent * terms[2], terms[1])
       else                                    -- if there's nothing else to do, add the term
         add_mul.add_term(term_map, exponent, element.extract(e))
       end
     end
+    return coeff
   end
  
    -- Run through all the terms in a product
    function product(term_map, exponent, terms)
-    exponent = exponent or 1
+    local coeff
     for _, t in ipairs(terms) do
-      simplify(term_map, exponent * t[1], t[2])
+      local c2 = simplify(term_map, exponent * t[1], t[2])
+      coeff = (coeff or 1) * c2
     end
+    return coeff
   end
 
   local term_map = {}
-  product(term_map, 1, terms)
+  local coeff = product(term_map, 1, terms)
 
   ordered_terms, term_count = add_mul.sort_terms(term_map)
 
