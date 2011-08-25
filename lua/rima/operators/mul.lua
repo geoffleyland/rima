@@ -76,10 +76,7 @@ function mul:__eval(S)
   -- sums with one term we pull it up and if any are pows, we try to hoist out
   -- the constant and see if what's left is a product.
   local terms = add_mul.evaluate_terms(proxy.O(self), S)
-  return simplify(terms)
-end
 
-function mul.simplify(terms)
   local coeff = 1
 
   local product
