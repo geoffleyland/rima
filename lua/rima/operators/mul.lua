@@ -1,9 +1,9 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local math, table = require("math"), require("table")
-local error, getmetatable, ipairs, pairs, require, type, unpack =
-      error, getmetatable, ipairs, pairs, require, type, unpack
+local math = require("math")
+local error, getmetatable, ipairs, require, type =
+      error, getmetatable, ipairs, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -116,24 +116,14 @@ function mul.simplify(terms)
   end
   prod(terms)
 
-  -- sort the terms alphabetically, so that when we group by a string representation,
-  -- like terms look alike
-  local ordered_terms = {}
-  local i = 1
-  for name, t in pairs(term_map) do
-    if t.coeff ~= 0 then
-      ordered_terms[i] = t
-      i = i + 1
-    end
-  end
-  table.sort(ordered_terms, function(a, b) return a.name < b.name end)
+  ordered_terms, term_count = add_mul.sort_terms(term_map)
 
   if coeff == 0 then
     return 0
   elseif not ordered_terms[1] then              -- if there's no terms, we're just a constant
     return coeff
   elseif coeff == 1 and                         -- if the coefficient is one, and there's one term without an exponent,
-         #ordered_terms == 1 and                -- we're the identity, so return the term
+         term_count == 1 and                    -- we're the identity, so return the term
          ordered_terms[1].coeff == 1 then
     return ordered_terms[1].expression
   else                                          -- return the constant and the terms

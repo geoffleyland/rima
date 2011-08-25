@@ -1,9 +1,9 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local math, table = require("math"), require("table")
-local error, getmetatable, ipairs, pairs, require, type =
-      error, getmetatable, ipairs, pairs, require, type
+local math = require("math")
+local error, getmetatable, ipairs, require, type =
+      error, getmetatable, ipairs, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -103,22 +103,12 @@ function add:__eval(S)
   end
   sum(terms)
 
-  -- sort the terms alphabetically, so that when we group by a string representation,
-  -- like terms look alike
-  local ordered_terms = {}
-  local i = 1
-  for name, t in pairs(term_map) do
-    if t.coeff ~= 0 then
-      ordered_terms[i] = t
-      i = i + 1
-    end
-  end
-  table.sort(ordered_terms, function(a, b) return a.name < b.name end)
+  ordered_terms, term_count = add_mul.sort_terms(term_map)
 
   if not ordered_terms[1] then                  -- if there's no terms, we're just a constant
     return constant
   elseif constant == 0 and                      -- if there's no constant, and one term without a coefficent,
-         #ordered_terms == 1 and                -- we're the identity, so return the term
+         term_count == 1 and                    -- we're the identity, so return the term
          ordered_terms[1].coeff == 1 then
     return ordered_terms[1].expression
   else                                          -- return the constant and the terms
