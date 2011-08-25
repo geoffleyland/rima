@@ -68,8 +68,6 @@ function add:__eval(S)
   -- sum.
   local terms = add_mul.evaluate_terms(proxy.O(self), S)
 
-  local constant, term_map = 0, {}
-
   -- Run through all the terms in a sum
   local function sum(term_map, coeff, terms)
     coeff = coeff or 1
@@ -79,7 +77,7 @@ function add:__eval(S)
       local function simplify(term_map, coeff, e)
         local ti = object.typeinfo(e)
         if core.arithmetic(e) then              -- if the term evaluated to a number, then add it to the constant
-          constant = constant + coeff * e
+          add_mul.add_term(term_map, coeff * e, " ")
         elseif ti.add then                      -- if the term is another sum, hoist its terms
           sum(term_map, coeff, proxy.O(e))
         elseif ti.mul then                      -- if the term is a multiplication, try to hoist any constant
@@ -97,21 +95,35 @@ function add:__eval(S)
 
     end
   end
+
+  local term_map = {}
   sum(term_map, 1, terms)
 
   ordered_terms, term_count = add_mul.sort_terms(term_map)
 
-  if not ordered_terms[1] then                  -- if there's no terms, we're just a constant
+  if term_count == 0 then return 0 end
+
+  local constant_term = term_map[" "]
+  local constant = constant_term and constant_term.coeff
+  if constant == 0 then constant = nil end
+
+  if constant and term_count == 1 then          -- if there's no terms, we're just a constant
     return constant
-  elseif constant == 0 and                      -- if there's no constant, and one term without a coefficent,
+
+  elseif not constant and                       -- if there's no constant, and one term without a coefficent,
          term_count == 1 and                    -- we're the identity, so return the term
          ordered_terms[1].coeff == 1 then
     return ordered_terms[1].expression
+
   else                                          -- return the constant and the terms
     local new_terms = {}
-    if constant ~= 0 then new_terms[1] = {1, constant} end
     for i, t in ipairs(ordered_terms) do
-      new_terms[#new_terms+1] = { t.coeff, t.expression }
+      local e = t.expression
+      if e == " " then
+        new_terms[i] = { 1, t.coeff }
+      else
+        new_terms[i] = { t.coeff, e }
+      end
     end
     return expression:new_table(add, new_terms)
   end
