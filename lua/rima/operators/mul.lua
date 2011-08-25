@@ -9,6 +9,7 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
+local add_mul = require("rima.operators.add_mul")
 local expression = require("rima.expression")
 local element = require("rima.sets.element")
 
@@ -75,10 +76,8 @@ function mul.__eval(args, S)
   -- If any subexpressions are products, we dive into them, if any are
   -- sums with one term we pull it up and if any are pows, we try to hoist out
   -- the constant and see if what's left is a product.
-  args = proxy.O(args)
-
-  -- evaluate or bind all arguments
-  return simplify(lib.imap(function(a) return { a[1], core.eval(a[2], S) } end, args))
+  args = add_mul.evaluate_terms(proxy.O(args), S)
+  return simplify(args)
 end
 
 function mul.simplify(args)

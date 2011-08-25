@@ -9,6 +9,7 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
+local add_mul = require("rima.operators.add_mul")
 local element = require("rima.sets.element")
 
 module(...)
@@ -67,29 +68,7 @@ function add.__eval(args_in, S)
   -- If any subexpressions are sums, we dive into them, and if any are
   -- products, we try to hoist out the constant and see if what's left is a
   -- sum.
-  local args = proxy.O(args_in)
-
-  -- evaluate or bind all arguments
-  local new_args
-  for i, a in ipairs(args) do
-    local a2 = core.eval(a[2], S)
-    if not new_args and a2 ~= a[2] then
-      new_args = {}
-      for j = 1, i-1 do
-        new_args[j] = { args[j][1], args[j][2] }
-      end
-    end
-    if new_args then
-      if a2 == a[2] then
-        new_args[i] = { a[1], a[2] }
-      else
-        new_args[i] = { a[1], a2 }
-      end
-    end
-  end
-  if new_args then
-    args = new_args
-  end
+  local args = add_mul.evaluate_terms(proxy.O(args_in), S)
 
   local constant, terms = 0, {}
   
