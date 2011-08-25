@@ -118,11 +118,17 @@ function mul:__eval(S)
   local term_map = {}
   local coeff = product(term_map, 1, terms)
 
-  ordered_terms, term_count = add_mul.sort_terms(term_map)
+  if coeff == 0 then return 0 end
 
-  if coeff == 0 then
-    return 0
-  elseif not ordered_terms[1] then              -- if there's no terms, we're just a constant
+  if coeff ~= 1 then
+    term_map[" "] = { name = " ", coeff=1, expression=coeff }
+  end
+
+  local ordered_terms, term_count = add_mul.sort_terms(term_map)
+
+  if term_count == 0 then return coeff end
+
+  if coeff ~= 1 and term_count == 1 then        -- if there's no terms, we're just a constant
     return coeff
   elseif coeff == 1 and                         -- if the coefficient is one, and there's one term without an exponent,
          term_count == 1 and                    -- we're the identity, so return the term
@@ -130,9 +136,8 @@ function mul:__eval(S)
     return ordered_terms[1].expression
   else                                          -- return the constant and the terms
     local new_terms = {}
-    if coeff ~= 1 then new_terms[1] = {1, coeff} end
     for i, t in ipairs(ordered_terms) do
-      new_terms[#new_terms+1] = { t.coeff, t.expression }
+      new_terms[i] = { t.coeff, t.expression }
     end
     return expression:new_table(mul, new_terms)
   end
