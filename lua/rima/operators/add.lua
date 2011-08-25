@@ -25,18 +25,18 @@ add.precedence = 5
 
 -- String Representation -------------------------------------------------------
 
-function add.__repr(args, format)
-  args = proxy.O(args)
+function add:__repr(format)
+  local terms = proxy.O(self)
   if format.format == "dump" then
     return "+("..
-      lib.concat(args, ", ",
-        function(a) return lib.simple_repr(a[1], format).."*"..lib.repr(a[2], format) end)..
+      lib.concat(terms, ", ",
+        function(t) return lib.simple_repr(t[1], format).."*"..lib.repr(t[2], format) end)..
       ")"
   end
 
   local s = ""
-  for i, a in ipairs(args) do
-    local c, e = a[1], a[2]
+  for i, t in ipairs(terms) do
+    local c, e = t[1], t[2]
     
     -- If it's the first argument and it's negative, put a "-" out front
     if i == 1 then
@@ -62,31 +62,31 @@ end
 
 local SCOPE_FORMAT = { scopes = true }
 
-function add.__eval(args_in, S)
+function add:__eval(S)
   -- Sum all the arguments, keeping track of the sum of any constants,
   -- and of all remaining unresolved terms.
   -- If any subexpressions are sums, we dive into them, and if any are
   -- products, we try to hoist out the constant and see if what's left is a
   -- sum.
-  local args = add_mul.evaluate_terms(proxy.O(args_in), S)
+  local terms = add_mul.evaluate_terms(proxy.O(self), S)
 
-  local constant, terms = 0, {}
+  local constant, term_map = 0, {}
   
   local function add_term(c, e)
     local s = lib.repr(e, SCOPE_FORMAT)
-    local t = terms[s]
+    local t = term_map[s]
     if t then
       t.coeff = t.coeff + c
     else
-      terms[s] = { name=lib.repr(e), coeff=c, expression=e }
+      term_map[s] = { name=lib.repr(e), coeff=c, expression=e }
     end
   end
 
   -- Run through all the terms in a sum
-  local function sum(args, multiplier)
+  local function sum(terms, multiplier)
     multiplier = multiplier or 1
-    for _, a in ipairs(args) do
-      local c, e = multiplier * a[1], a[2]
+    for _, t in ipairs(terms) do
+      local c, e = multiplier * t[1], t[2]
 
       -- Simplify a single term
       local function simplify(c, e)
@@ -111,13 +111,13 @@ function add.__eval(args_in, S)
 
     end
   end
-  sum(args)
+  sum(terms)
 
   -- sort the terms alphabetically, so that when we group by a string representation,
   -- like terms look alike
   local ordered_terms = {}
   local i = 1
-  for name, t in pairs(terms) do
+  for name, t in pairs(term_map) do
     if t.coeff ~= 0 then
       ordered_terms[i] = t
       i = i + 1
@@ -132,12 +132,12 @@ function add.__eval(args_in, S)
          ordered_terms[1].coeff == 1 then
     return ordered_terms[1].expression
   else                                          -- return the constant and the terms
-    local new_args = {}
-    if constant ~= 0 then new_args[1] = {1, constant} end
+    local new_terms = {}
+    if constant ~= 0 then new_terms[1] = {1, constant} end
     for i, t in ipairs(ordered_terms) do
-      new_args[#new_args+1] = { t.coeff, t.expression }
+      new_terms[#new_terms+1] = { t.coeff, t.expression }
     end
-    return expression:new_table(add, new_args)
+    return expression:new_table(add, new_terms)
   end
 end
 
@@ -148,15 +148,15 @@ function extract_constant(e, mt)
   mt = mt or add
   if type(e[1][2]) == "number" then
     local constant = e[1][2]
-    local new_args = {}
+    local new_terms = {}
     for i = 2, #e do
-      new_args[i-1] = e[i]
+      new_terms[i-1] = e[i]
     end
-    if #new_args == 1 and new_args[1][1] == 1 then
+    if #new_terms == 1 and new_terms[1][1] == 1 then
       -- there's a constant and only one other argument with a coefficient/exponent of 1 - hoist the other argument
-      return constant, new_args[1][2]
+      return constant, new_terms[1][2]
     else
-      return constant, expression:new_table(mt, new_args)
+      return constant, expression:new_table(mt, new_terms)
     end
   else                                          -- there's no constant to extract
     return nil
@@ -166,25 +166,25 @@ end
 
 -- Automatic differentiation ---------------------------------------------------
 
-function add.__diff(args, v)
-  local dargs = {}
-  for _, a in ipairs(proxy.O(args)) do
-    local c, e = a[1], a[2]
+function add:__diff(v)
+  local diff_terms = {}
+  for _, t in ipairs(proxy.O(self)) do
+    local c, e = t[1], t[2]
     local dedv = core.diff(e, v)
     if dedv ~= 0 then
-      dargs[#dargs+1] = {c, dedv}
+      diff_terms[#diff_terms+1] = {c, dedv}
     end
   end
   
-  return expression:new_table(add, dargs)
+  return expression:new_table(add, diff_terms)
 end
 
 
 -- Introspection? --------------------------------------------------------------
 
-function add.__list_variables(args, S, list)
-  for _, a in ipairs(proxy.O(args)) do
-    core.list_variables(a[2], S, list)
+function add:__list_variables(S, list)
+  for _, t in ipairs(proxy.O(self)) do
+    core.list_variables(t[2], S, list)
   end
 end
 

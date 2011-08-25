@@ -26,20 +26,20 @@ mul.precedence = 3
 
 -- String Representation -------------------------------------------------------
 
-function mul.__repr(args, format)
-  args = proxy.O(args)
+function mul:__repr(format)
+  local terms = proxy.O(self)
   local ff = format.format
 
   if ff == "dump" then
     return "*("..
-      lib.concat(args, ", ",
-        function(a) return lib.repr(a[2], format).."^"..lib.simple_repr(a[1], format) end)..
+      lib.concat(terms, ", ",
+        function(t) return lib.repr(t[2], format).."^"..lib.simple_repr(t[1], format) end)..
       ")"
   end
 
   local s = ""
-  for i, a in ipairs(args) do
-    local c, e = a[1], a[2]
+  for i, t in ipairs(terms) do
+    local c, e = t[1], t[2]
     
     -- If it's the first argument and it's 1/something, put a "1/" out front
     if i == 1 then
@@ -70,35 +70,35 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function mul.__eval(args, S)
+function mul:__eval(S)
   -- Multiply all the arguments, keeping track of the product of any exponents,
   -- and of all remaining unresolved terms
   -- If any subexpressions are products, we dive into them, if any are
   -- sums with one term we pull it up and if any are pows, we try to hoist out
   -- the constant and see if what's left is a product.
-  args = add_mul.evaluate_terms(proxy.O(args), S)
-  return simplify(args)
+  local terms = add_mul.evaluate_terms(proxy.O(self), S)
+  return simplify(terms)
 end
 
-function mul.simplify(args)
-  local coeff, terms = 1, {}
+function mul.simplify(terms)
+  local coeff, term_map = 1, {}
   
   local function add_term(exp, e)
     local n = lib.repr(e)
     local s = lib.repr(e, { scopes = true })
-    local t = terms[s]
+    local t = term_map[s]
     if t then
       t.exponent = t.exponent + exp
     else
-      terms[s] = { name=n, exponent=exp, expression=e }
+      term_map[s] = { name=n, exponent=exp, expression=e }
     end
   end
 
   -- Run through all the terms in a product
-  local function prod(args, exponent)
+  local function prod(terms, exponent)
     exponent = exponent or 1
-    for _, a in ipairs(args) do
-      local exp, e = exponent * a[1], a[2]
+    for _, t in ipairs(terms) do
+      local exp, e = exponent * t[1], t[2]
 
       -- Simplify a single term
       local function simplify(exp, e)
@@ -123,13 +123,13 @@ function mul.simplify(args)
 
     end
   end
-  prod(args)
+  prod(terms)
 
   -- sort the terms alphabetically, so that when we group by a string representation,
   -- like terms look alike
   local ordered_terms = {}
   local i = 1
-  for name, t in pairs(terms) do
+  for name, t in pairs(term_map) do
     if t.exponent ~= 0 then
       ordered_terms[i] = t
       i = i + 1
@@ -146,57 +146,57 @@ function mul.simplify(args)
          ordered_terms[1].exponent == 1 then
     return ordered_terms[1].expression
   else                                          -- return the constant and the terms
-    local new_args = {}
-    if coeff ~= 1 then new_args[1] = {1, coeff} end
+    local new_terms = {}
+    if coeff ~= 1 then new_terms[1] = {1, coeff} end
     for i, t in ipairs(ordered_terms) do
-      new_args[#new_args+1] = { t.exponent, t.expression }
+      new_terms[#new_terms+1] = { t.exponent, t.expression }
     end
-    return expression:new(mul, unpack(new_args))
+    return expression:new_table(mul, new_terms)
   end
 end
 
 
 -- Automatic differentiation ---------------------------------------------------
 
-function mul.__diff(args, v)
-  args = proxy.O(args)
-  local dargs = {}
-  for i in ipairs(args) do
-    local t = {}
-    for j, a in ipairs(args) do
-      local exponent, expression = a[1], a[2]
+function mul:__diff(v)
+  local terms = proxy.O(self)
+  local diff_terms = {}
+  for i in ipairs(terms) do
+    local t1 = {}
+    for j, t2 in ipairs(terms) do
+      local exponent, expression = t2[1], t2[2]
       if i == j then
         local d = core.diff(expression, v)
         if d == 0 then
-          t = nil
+          t1 = nil
           break
         else
           if d ~= 1 then
-            t[#t+1] = {1, d}
+            t1[#t1+1] = {1, d}
           end
           if exponent ~= 1 then
-            t[#t+1] = {exponent-1, expression}
-            t[#t+1] = {1, exponent}
+            t1[#t1+1] = {exponent-1, expression}
+            t1[#t1+1] = {1, exponent}
           end
         end
       else
-        t[#t+1] = {exponent, expression}
+        t1[#t1+1] = {exponent, expression}
       end
     end
-    if t then
-      dargs[#dargs+1] = {1, expression:new_table(mul, t)}
+    if t1 then
+      diff_terms[#diff_terms+1] = {1, expression:new_table(mul, t1)}
     end
   end
   
-  return expression:new_table(add, dargs)
+  return expression:new_table(add, diff_terms)
 end
 
 
 -- Introspection? --------------------------------------------------------------
 
-function mul.__list_variables(args, S, list)
-  for _, a in ipairs(proxy.O(args)) do
-    core.list_variables(a[2], S, list)
+function mul:__list_variables(S, list)
+  for _, t in ipairs(proxy.O(self)) do
+    core.list_variables(t[2], S, list)
   end
 end
 
