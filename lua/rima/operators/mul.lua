@@ -80,17 +80,18 @@ function mul:__eval(S)
   return simplify(terms)
 end
 
+local SCOPE_FORMAT = { scopes = true }
+
 function mul.simplify(terms)
   local coeff, term_map = 1, {}
   
-  local function add_term(exp, e)
-    local n = lib.repr(e)
-    local s = lib.repr(e, { scopes = true })
+  local function add_term(coeff, e)
+    local s = lib.repr(e, SCOPE_FORMAT)
     local t = term_map[s]
     if t then
-      t.exponent = t.exponent + exp
+      t.coeff = t.coeff + coeff
     else
-      term_map[s] = { name=n, exponent=exp, expression=e }
+      term_map[s] = { name=lib.repr(e), coeff=coeff, expression=e }
     end
   end
 
@@ -130,7 +131,7 @@ function mul.simplify(terms)
   local ordered_terms = {}
   local i = 1
   for name, t in pairs(term_map) do
-    if t.exponent ~= 0 then
+    if t.coeff ~= 0 then
       ordered_terms[i] = t
       i = i + 1
     end
@@ -143,13 +144,13 @@ function mul.simplify(terms)
     return coeff
   elseif coeff == 1 and                         -- if the coefficient is one, and there's one term without an exponent,
          #ordered_terms == 1 and                -- we're the identity, so return the term
-         ordered_terms[1].exponent == 1 then
+         ordered_terms[1].coeff == 1 then
     return ordered_terms[1].expression
   else                                          -- return the constant and the terms
     local new_terms = {}
     if coeff ~= 1 then new_terms[1] = {1, coeff} end
     for i, t in ipairs(ordered_terms) do
-      new_terms[#new_terms+1] = { t.exponent, t.expression }
+      new_terms[#new_terms+1] = { t.coeff, t.expression }
     end
     return expression:new_table(mul, new_terms)
   end

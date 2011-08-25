@@ -72,13 +72,13 @@ function add:__eval(S)
 
   local constant, term_map = 0, {}
   
-  local function add_term(c, e)
+  local function add_term(coeff, e)
     local s = lib.repr(e, SCOPE_FORMAT)
     local t = term_map[s]
     if t then
-      t.coeff = t.coeff + c
+      t.coeff = t.coeff + coeff
     else
-      term_map[s] = { name=lib.repr(e), coeff=c, expression=e }
+      term_map[s] = { name=lib.repr(e), coeff=coeff, expression=e }
     end
   end
 
