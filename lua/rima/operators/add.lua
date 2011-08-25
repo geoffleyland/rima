@@ -60,6 +60,36 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
+local sum
+
+-- Simplify a single term
+local function simplify(term_map, coeff, e)
+  local ti = object.typeinfo(e)
+  if core.arithmetic(e) then                    -- if the term evaluated to a number, then add it to the constant
+    add_mul.add_term(term_map, coeff * e, " ")
+  elseif ti.add then                            -- if the term is another sum, hoist its terms
+    sum(term_map, coeff, proxy.O(e))
+  elseif ti.mul then                            -- if the term is a multiplication, try to hoist any constant
+    local new_c, new_e = add_mul.extract_constant(e)
+    if new_c then                               -- if we did hoist a constant, re-simplify the resulting expression
+      simplify(term_map, coeff * new_c, new_e)
+    else                                        -- otherwise just add it
+      add_mul.add_term(term_map, coeff, element.extract(e))
+    end
+  else                                          -- if there's nothing else to do, add the term
+    add_mul.add_term(term_map, coeff, element.extract(e))
+  end
+end
+
+
+-- Run through all the terms in a sum
+function sum(term_map, coeff, terms)
+  for _, t in ipairs(terms) do
+    simplify(term_map, coeff * t[1], t[2])
+  end
+end
+
+
 function add:__eval(S)
   -- Sum all the arguments, keeping track of the sum of any constants,
   -- and of all remaining unresolved terms.
@@ -68,38 +98,10 @@ function add:__eval(S)
   -- sum.
   local terms = add_mul.evaluate_terms(proxy.O(self), S)
 
-  -- Run through all the terms in a sum
-  local function sum(term_map, coeff, terms)
-    coeff = coeff or 1
-    for _, t in ipairs(terms) do
-
-      -- Simplify a single term
-      local function simplify(term_map, coeff, e)
-        local ti = object.typeinfo(e)
-        if core.arithmetic(e) then              -- if the term evaluated to a number, then add it to the constant
-          add_mul.add_term(term_map, coeff * e, " ")
-        elseif ti.add then                      -- if the term is another sum, hoist its terms
-          sum(term_map, coeff, proxy.O(e))
-        elseif ti.mul then                      -- if the term is a multiplication, try to hoist any constant
-          local new_c, new_e = add_mul.extract_constant(e)
-          if new_c then                         -- if we did hoist a constant, re-simplify the resulting expression
-            simplify(term_map, coeff * new_c, new_e)
-          else                                  -- otherwise just add it
-            add_mul.add_term(term_map, coeff, element.extract(e))
-          end
-        else                                    -- if there's nothing else to do, add the term
-          add_mul.add_term(term_map, coeff, element.extract(e))
-        end
-      end
-      simplify(term_map, coeff * t[1], t[2])
-
-    end
-  end
-
   local term_map = {}
   sum(term_map, 1, terms)
 
-  ordered_terms, term_count = add_mul.sort_terms(term_map)
+  local ordered_terms, term_count = add_mul.sort_terms(term_map)
 
   if term_count == 0 then return 0 end
 
