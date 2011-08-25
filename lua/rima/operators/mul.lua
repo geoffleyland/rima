@@ -100,8 +100,8 @@ local function simplify(term_map, exponent, e)
 end
 
 
- -- Run through all the terms in a product
- function product(term_map, exponent, terms)
+-- Run through all the terms in a product
+function product(term_map, exponent, terms)
   local coeff, changed
   for _, t in ipairs(terms) do
     local ch2, c2 = simplify(term_map, exponent * t[1], t[2])
@@ -128,7 +128,7 @@ function mul:__eval(S)
   if coeff == 0 then return 0 end
 
   if coeff ~= 1 then
-    term_map[" "] = { name = " ", coeff=1, expression=coeff }
+    term_map[" "] = { name=" ", coeff=1, expression=coeff }
   end
 
   local ordered_terms, term_count = add_mul.sort_terms(term_map)
@@ -138,21 +138,17 @@ function mul:__eval(S)
   if coeff ~= 1 and term_count == 1 then        -- if there's no terms, we're just a constant
     return coeff
 
-  elseif coeff == 1 and                         -- if the coefficient is one, and there's one term without an exponent,
-         term_count == 1 and                    -- we're the identity, so return the term
-         ordered_terms[1].coeff == 1 then
-    return ordered_terms[1].expression
+  elseif coeff == 1 and                         -- if the coefficient is one
+         term_count == 1 and                    -- and there's one term
+         ordered_terms[1][1] == 1 then          -- without an exponent
+    return ordered_terms[1][2]                  -- then we're the identity, so return the expression
 
   elseif not evaluate_changed and not simplify_changed then
     -- if nothing changed, return the original object
     return self
 
   else                                          -- return the constant and the terms
-    local new_terms = {}
-    for i, t in ipairs(ordered_terms) do
-      new_terms[i] = { t.coeff, t.expression }
-    end
-    return expression:new_table(mul, new_terms)
+    return expression:new_table(mul, ordered_terms)
   end
 end
 

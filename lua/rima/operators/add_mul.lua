@@ -61,16 +61,21 @@ end
 function sort_terms(term_map)
   -- sort the new terms alphabetically, so that when we group by a string
   -- representation, like terms look alike
-  local ordered_terms = {}
+  local terms = {}
   local term_count = 0
   for name, t in pairs(term_map) do
     if t.coeff ~= 0 then
       term_count = term_count + 1
-      ordered_terms[term_count] = t
+      local c, e = t.coeff, t.expression
+      if e == " " then
+        c, e = 1, c
+      end
+      terms[term_count] = { c, e, name=t.name }
     end
   end
-  table.sort(ordered_terms, function(a, b) return a.name < b.name end)
-  return ordered_terms, term_count
+  table.sort(terms, function(a, b) return a.name < b.name end)
+  for _, t in ipairs(terms) do t.name = nil end
+  return terms, term_count
 end
 
 

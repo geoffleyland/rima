@@ -128,26 +128,17 @@ function add:__eval(S)
   if constant and term_count == 1 then          -- if there's no terms, we're just a constant
     return constant
 
-  elseif not constant and                       -- if there's no constant, and one term without a coefficent,
-         term_count == 1 and                    -- we're the identity, so return the term
-         ordered_terms[1].coeff == 1 then
-    return ordered_terms[1].expression
+  elseif not constant and                       -- if there's no constant
+         term_count == 1 and                    -- and one term
+         ordered_terms[1][1] == 1 then          -- without a coefficent,
+    return ordered_terms[1][2]                  -- then we're the identity, so return the expression
 
   elseif not evaluate_changed and not simplify_changed then
     -- if nothing changed, return the original object
     return self
 
   else                                          -- return the constant and the terms
-    local new_terms = {}
-    for i, t in ipairs(ordered_terms) do
-      local e = t.expression
-      if e == " " then
-        new_terms[i] = { 1, t.coeff }
-      else
-        new_terms[i] = { t.coeff, e }
-      end
-    end
-    return expression:new_table(add, new_terms)
+    return expression:new_table(add, ordered_terms)
   end
 end
 
