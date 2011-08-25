@@ -60,8 +60,6 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-local SCOPE_FORMAT = { scopes = true }
-
 function add:__eval(S)
   -- Sum all the arguments, keeping track of the sum of any constants,
   -- and of all remaining unresolved terms.
@@ -73,35 +71,33 @@ function add:__eval(S)
   local constant, term_map = 0, {}
 
   -- Run through all the terms in a sum
-  local function sum(terms, multiplier)
-    multiplier = multiplier or 1
+  local function sum(term_map, coeff, terms)
+    coeff = coeff or 1
     for _, t in ipairs(terms) do
-      local c, e = multiplier * t[1], t[2]
 
       -- Simplify a single term
-      local function simplify(c, e)
-        local E = proxy.O(e)
-        local mt = getmetatable(e)
+      local function simplify(term_map, coeff, e)
+        local ti = object.typeinfo(e)
         if core.arithmetic(e) then              -- if the term evaluated to a number, then add it to the constant
-          constant = constant + e * c
-        elseif mt == add then                   -- if the term is another sum, hoist its terms
-          sum(E, c)
-        elseif mt == mul then                   -- if the term is a multiplication, try to hoist any constant
-          local new_c, new_e = extract_constant(E, mt)
+          constant = constant + coeff * e
+        elseif ti.add then                      -- if the term is another sum, hoist its terms
+          sum(term_map, coeff, proxy.O(e))
+        elseif ti.mul then                      -- if the term is a multiplication, try to hoist any constant
+          local new_c, new_e = extract_constant(e, getmetatable(e))
           if new_c then                         -- if we did hoist a constant, re-simplify the resulting expression
-            simplify(c * new_c, new_e)
+            simplify(term_map, coeff * new_c, new_e)
           else                                  -- otherwise just add it
-            add_mul.add_term(term_map, c, element.extract(e))
+            add_mul.add_term(term_map, coeff, element.extract(e))
           end
         else                                    -- if there's nothing else to do, add the term
-          add_mul.add_term(term_map, c, element.extract(e))
+          add_mul.add_term(term_map, coeff, element.extract(e))
         end
       end
-      simplify(c, e)
+      simplify(term_map, coeff * t[1], t[2])
 
     end
   end
-  sum(terms)
+  sum(term_map, 1, terms)
 
   ordered_terms, term_count = add_mul.sort_terms(term_map)
 

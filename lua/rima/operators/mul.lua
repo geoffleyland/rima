@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local error, getmetatable, ipairs, require, type =
-      error, getmetatable, ipairs, require, type
+local error, ipairs, require, type =
+      error, ipairs, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -16,7 +16,6 @@ local element = require("rima.sets.element")
 module(...)
 
 local add = require("rima.operators.add")
-local pow = require("rima.operators.pow")
 
 -- Multiplication --------------------------------------------------------------
 
@@ -80,41 +79,39 @@ function mul:__eval(S)
   return simplify(terms)
 end
 
-local SCOPE_FORMAT = { scopes = true }
-
 function mul.simplify(terms)
   local coeff, term_map = 1, {}
 
   -- Run through all the terms in a product
-  local function prod(terms, exponent)
+  local function product(term_map, exponent, terms)
     exponent = exponent or 1
     for _, t in ipairs(terms) do
-      local exp, e = exponent * t[1], t[2]
 
       -- Simplify a single term
-      local function simplify(exp, e)
-        local E = proxy.O(e)
-        local mt = getmetatable(e)
+      local function simplify(term_map, exponent, e)
+        local ti = object.typeinfo(e)
         if core.arithmetic(e) then              -- if the term evaluated to a number, then multiply the coefficient by it
-          coeff = coeff * e ^ exp
-        elseif mt == mul then                   -- if the term is another product, hoist its terms
-          prod(E, exp)
-        elseif mt == add and                    -- if the term is a sum with a single term, hoist it
-               #E == 1 then
-          coeff = coeff * E[1][1] ^ exp
-          simplify(exp, E[1][2])
-        elseif mt == pow and                    -- if the term is an exponentiation to a constant power, hoist it
-          type(E[2]) == "number" then
-          simplify(exp * E[2], E[1])
-        else                                    -- if there's nothing else to do, add the term
-          add_mul.add_term(term_map, exp, element.extract(e))
+          coeff = coeff * e ^ exponent
+        else
+          local terms = proxy.O(e)
+          if ti.mul then                        -- if the term is another product, hoist its terms
+            product(term_map, exponent, terms)
+          elseif ti.add and #terms == 1 then    -- if the term is a sum with a single term, hoist it
+            coeff = coeff * terms[1][1] ^ exponent
+            simplify(term_map, exponent, terms[1][2])
+          elseif ti.pow and type(terms[2]) == "number" then
+            -- if the term is an exponentiation to a constant power, hoist it
+            simplify(term_map, exponent * terms[2], terms[1])
+          else                                    -- if there's nothing else to do, add the term
+            add_mul.add_term(term_map, exponent, element.extract(e))
+          end
         end
       end
-      simplify(exp, e)
+      simplify(term_map, exponent * t[1], t[2])
 
     end
   end
-  prod(terms)
+  product(term_map, 1, terms)
 
   ordered_terms, term_count = add_mul.sort_terms(term_map)
 
