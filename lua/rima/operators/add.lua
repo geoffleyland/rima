@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local error, ipairs, require, type =
-      error, ipairs, require, type
+local ipairs, require =
+      ipairs, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
