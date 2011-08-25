@@ -64,29 +64,45 @@ local sum
 
 -- Simplify a single term
 local function simplify(term_map, coeff, e)
+  local changed
   local ti = object.typeinfo(e)
   if core.arithmetic(e) then                    -- if the term evaluated to a number, then add it to the constant
-    add_mul.add_term(term_map, coeff * e, " ")
+    changed = coeff ~= 1
+    if add_mul.add_term(term_map, coeff * e, " ") then
+                                                -- use space because it has a low sort order
+      changed = true
+    end
   elseif ti.add then                            -- if the term is another sum, hoist its terms
     sum(term_map, coeff, proxy.O(e))
+    changed = true
   elseif ti.mul then                            -- if the term is a multiplication, try to hoist any constant
     local new_c, new_e = add_mul.extract_constant(e)
     if new_c then                               -- if we did hoist a constant, re-simplify the resulting expression
+      if new_e then
       simplify(term_map, coeff * new_c, new_e)
+      else
+        add_mul.add_term(term_map, coeff * new_c, " ")
+      end
+      changed = true
     else                                        -- otherwise just add it
-      add_mul.add_term(term_map, coeff, element.extract(e))
+      changed = add_mul.add_term(term_map, coeff, element.extract(e))
     end
   else                                          -- if there's nothing else to do, add the term
-    add_mul.add_term(term_map, coeff, element.extract(e))
+    changed = add_mul.add_term(term_map, coeff, element.extract(e))
   end
+  return changed
 end
 
 
 -- Run through all the terms in a sum
 function sum(term_map, coeff, terms)
+  local changed
   for _, t in ipairs(terms) do
-    simplify(term_map, coeff * t[1], t[2])
+    if simplify(term_map, coeff * t[1], t[2]) then
+      changed = true
+    end
   end
+  return changed
 end
 
 
@@ -96,10 +112,10 @@ function add:__eval(S)
   -- If any subexpressions are sums, we dive into them, and if any are
   -- products, we try to hoist out the constant and see if what's left is a
   -- sum.
-  local terms = add_mul.evaluate_terms(proxy.O(self), S)
+  local terms, evaluate_changed = add_mul.evaluate_terms(proxy.O(self), S)
 
   local term_map = {}
-  sum(term_map, 1, terms)
+  local simplify_changed = sum(term_map, 1, terms)
 
   local ordered_terms, term_count = add_mul.sort_terms(term_map)
 
@@ -116,6 +132,10 @@ function add:__eval(S)
          term_count == 1 and                    -- we're the identity, so return the term
          ordered_terms[1].coeff == 1 then
     return ordered_terms[1].expression
+
+  elseif not evaluate_changed and not simplify_changed then
+    -- if nothing changed, return the original object
+    return self
 
   else                                          -- return the constant and the terms
     local new_terms = {}
