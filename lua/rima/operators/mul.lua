@@ -73,37 +73,44 @@ local product
 
 -- Simplify a single term
 local function simplify(term_map, exponent, e)
-  local coeff = 1
+  local coeff, changed = 1
   local ti = object.typeinfo(e)
   if core.arithmetic(e) then              -- if the term evaluated to a number, then multiply the coefficient by it
+    changed = exponent ~= 1 or e == 1
     coeff = e ^ exponent
   else
     local terms = proxy.O(e)
     if ti.mul then                        -- if the term is another product, hoist its terms
-      coeff = product(term_map, exponent, terms)
+      _, coeff = product(term_map, exponent, terms)
+      changed = true
     elseif ti.add and #terms == 1 then    -- if the term is a sum with a single term, hoist it
       coeff = terms[1][1] ^ exponent
-      local c2 = simplify(term_map, exponent, terms[1][2])
+      local _, c2 = simplify(term_map, exponent, terms[1][2])
       coeff = coeff * c2
+      changed = true
     elseif ti.pow and type(terms[2]) == "number" then
       -- if the term is an exponentiation to a constant power, hoist it
-      coeff = simplify(term_map, exponent * terms[2], terms[1])
+      _, coeff = simplify(term_map, exponent * terms[2], terms[1])
+      changed = true
     else                                    -- if there's nothing else to do, add the term
-      add_mul.add_term(term_map, exponent, element.extract(e))
+      changed = add_mul.add_term(term_map, exponent, element.extract(e))
     end
   end
-  return coeff
+  return changed, coeff
 end
 
 
  -- Run through all the terms in a product
  function product(term_map, exponent, terms)
-  local coeff
+  local coeff, changed
   for _, t in ipairs(terms) do
-    local c2 = simplify(term_map, exponent * t[1], t[2])
+    local ch2, c2 = simplify(term_map, exponent * t[1], t[2])
+    if ch2 or (coeff and c2 ~= 1) then
+      changed = true
+    end
     coeff = (coeff or 1) * c2
   end
-  return coeff
+  return changed, coeff or 1
 end
 
 
@@ -113,10 +120,10 @@ function mul:__eval(S)
   -- If any subexpressions are products, we dive into them, if any are
   -- sums with one term we pull it up and if any are pows, we try to hoist out
   -- the constant and see if what's left is a product.
-  local terms = add_mul.evaluate_terms(proxy.O(self), S)
+  local terms, evaluate_changed = add_mul.evaluate_terms(proxy.O(self), S)
 
   local term_map = {}
-  local coeff = product(term_map, 1, terms)
+  local simplify_changed, coeff = product(term_map, 1, terms)
 
   if coeff == 0 then return 0 end
 
@@ -130,10 +137,16 @@ function mul:__eval(S)
 
   if coeff ~= 1 and term_count == 1 then        -- if there's no terms, we're just a constant
     return coeff
+
   elseif coeff == 1 and                         -- if the coefficient is one, and there's one term without an exponent,
          term_count == 1 and                    -- we're the identity, so return the term
          ordered_terms[1].coeff == 1 then
     return ordered_terms[1].expression
+
+  elseif not evaluate_changed and not simplify_changed then
+    -- if nothing changed, return the original object
+    return self
+
   else                                          -- return the constant and the terms
     local new_terms = {}
     for i, t in ipairs(ordered_terms) do
