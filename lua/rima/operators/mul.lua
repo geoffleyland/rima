@@ -69,6 +69,44 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
+local product
+
+-- Simplify a single term
+local function simplify(term_map, exponent, e)
+  local coeff = 1
+  local ti = object.typeinfo(e)
+  if core.arithmetic(e) then              -- if the term evaluated to a number, then multiply the coefficient by it
+    coeff = e ^ exponent
+  else
+    local terms = proxy.O(e)
+    if ti.mul then                        -- if the term is another product, hoist its terms
+      coeff = product(term_map, exponent, terms)
+    elseif ti.add and #terms == 1 then    -- if the term is a sum with a single term, hoist it
+      coeff = terms[1][1] ^ exponent
+      local c2 = simplify(term_map, exponent, terms[1][2])
+      coeff = coeff * c2
+    elseif ti.pow and type(terms[2]) == "number" then
+      -- if the term is an exponentiation to a constant power, hoist it
+      coeff = simplify(term_map, exponent * terms[2], terms[1])
+    else                                    -- if there's nothing else to do, add the term
+      add_mul.add_term(term_map, exponent, element.extract(e))
+    end
+  end
+  return coeff
+end
+
+
+ -- Run through all the terms in a product
+ function product(term_map, exponent, terms)
+  local coeff
+  for _, t in ipairs(terms) do
+    local c2 = simplify(term_map, exponent * t[1], t[2])
+    coeff = (coeff or 1) * c2
+  end
+  return coeff
+end
+
+
 function mul:__eval(S)
   -- Multiply all the arguments, keeping track of the product of any exponents,
   -- and of all remaining unresolved terms
@@ -76,42 +114,6 @@ function mul:__eval(S)
   -- sums with one term we pull it up and if any are pows, we try to hoist out
   -- the constant and see if what's left is a product.
   local terms = add_mul.evaluate_terms(proxy.O(self), S)
-
-  local product
-
-  -- Simplify a single term
-  local function simplify(term_map, exponent, e)
-    local coeff = 1
-    local ti = object.typeinfo(e)
-    if core.arithmetic(e) then              -- if the term evaluated to a number, then multiply the coefficient by it
-      coeff = e ^ exponent
-    else
-      local terms = proxy.O(e)
-      if ti.mul then                        -- if the term is another product, hoist its terms
-        coeff = product(term_map, exponent, terms)
-      elseif ti.add and #terms == 1 then    -- if the term is a sum with a single term, hoist it
-        coeff = terms[1][1] ^ exponent
-        local c2 = simplify(term_map, exponent, terms[1][2])
-        coeff = coeff * c2
-      elseif ti.pow and type(terms[2]) == "number" then
-        -- if the term is an exponentiation to a constant power, hoist it
-        coeff = simplify(term_map, exponent * terms[2], terms[1])
-      else                                    -- if there's nothing else to do, add the term
-        add_mul.add_term(term_map, exponent, element.extract(e))
-      end
-    end
-    return coeff
-  end
- 
-   -- Run through all the terms in a product
-   function product(term_map, exponent, terms)
-    local coeff
-    for _, t in ipairs(terms) do
-      local c2 = simplify(term_map, exponent * t[1], t[2])
-      coeff = (coeff or 1) * c2
-    end
-    return coeff
-  end
 
   local term_map = {}
   local coeff = product(term_map, 1, terms)
