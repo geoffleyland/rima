@@ -15,7 +15,7 @@ module(...)
 
 local expression = require("rima.expression")
 local add_mul = require("rima.operators.add_mul")
-local mul = require("rima.operators.mul")
+
 
 -- Addition --------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ function add:__repr(format)
 
     -- If the coefficient's not 1, make a sub-expression with a multiplication
     local ac = math.abs(c)
-    e = ac == 1 and e or mul.simplify({{1, ac}, {1, e}})
+    e = ac == 1 and e or core.eval(ac * e)
 
     -- If the constant's not 1 then we need to parenthise (almost) like a multiplication
     s = s..core.parenthise(e, format, (c == 1 and 5) or 4)
