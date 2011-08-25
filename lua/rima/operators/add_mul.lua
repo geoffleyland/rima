@@ -3,6 +3,7 @@
 
 local ipairs = ipairs
 
+local lib = require("rima.lib")
 local core = require("rima.core")
 
 module(...)
@@ -28,6 +29,25 @@ function evaluate_terms(terms, S)
   end
 
   return new_terms or terms, new_terms and true or false
+end
+
+
+-- Add a term to the term_map --------------------------------------------------
+
+local SCOPE_FORMAT = { scopes = true }
+
+function add_term(term_map, coeff, e)
+  local s = lib.repr(e, SCOPE_FORMAT)
+  local t = term_map[s]
+  if coeff == 0 then
+    return true                                 -- Do nothing, but either way we removed a term
+  end
+  if t then
+    t.coeff = t.coeff + coeff
+    return true
+  else
+    term_map[s] = { name=lib.repr(e), coeff=coeff, expression=e }
+  end
 end
 
 

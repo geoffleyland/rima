@@ -84,16 +84,6 @@ local SCOPE_FORMAT = { scopes = true }
 
 function mul.simplify(terms)
   local coeff, term_map = 1, {}
-  
-  local function add_term(coeff, e)
-    local s = lib.repr(e, SCOPE_FORMAT)
-    local t = term_map[s]
-    if t then
-      t.coeff = t.coeff + coeff
-    else
-      term_map[s] = { name=lib.repr(e), coeff=coeff, expression=e }
-    end
-  end
 
   -- Run through all the terms in a product
   local function prod(terms, exponent)
@@ -117,7 +107,7 @@ function mul.simplify(terms)
           type(E[2]) == "number" then
           simplify(exp * E[2], E[1])
         else                                    -- if there's nothing else to do, add the term
-          add_term(exp, element.extract(e))
+          add_mul.add_term(term_map, exp, element.extract(e))
         end
       end
       simplify(exp, e)

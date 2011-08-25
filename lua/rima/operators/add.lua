@@ -71,16 +71,6 @@ function add:__eval(S)
   local terms = add_mul.evaluate_terms(proxy.O(self), S)
 
   local constant, term_map = 0, {}
-  
-  local function add_term(coeff, e)
-    local s = lib.repr(e, SCOPE_FORMAT)
-    local t = term_map[s]
-    if t then
-      t.coeff = t.coeff + coeff
-    else
-      term_map[s] = { name=lib.repr(e), coeff=coeff, expression=e }
-    end
-  end
 
   -- Run through all the terms in a sum
   local function sum(terms, multiplier)
@@ -101,10 +91,10 @@ function add:__eval(S)
           if new_c then                         -- if we did hoist a constant, re-simplify the resulting expression
             simplify(c * new_c, new_e)
           else                                  -- otherwise just add it
-            add_term(c, element.extract(e))
+            add_mul.add_term(term_map, c, element.extract(e))
           end
         else                                    -- if there's nothing else to do, add the term
-          add_term(c, element.extract(e))
+          add_mul.add_term(term_map, c, element.extract(e))
         end
       end
       simplify(c, e)
