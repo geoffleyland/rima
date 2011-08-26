@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local ipairs, require =
-      ipairs, require
+local ipairs, next, require =
+      ipairs, next, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -67,7 +67,9 @@ local function simplify(term_map, coeff, e)
   local changed
   local ti = object.typeinfo(e)
   if core.arithmetic(e) then                    -- if the term evaluated to a number, then add it to the constant
-    changed = coeff ~= 1
+    -- if the coeff isn't 1, it's a change.
+    -- If this constant isn't the first term we've seen, then we're going to put it first, and that's a change
+    if coeff ~= 1 or next(term_map) then changed = true end
     if add_mul.add_term(term_map, coeff * e, " ") then
                                                 -- use space because it has a low sort order
       changed = true

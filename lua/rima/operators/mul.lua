@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local ipairs, require, type =
-      ipairs, require, type
+local ipairs, next, require, type =
+      ipairs, next, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -76,7 +76,10 @@ local function simplify(term_map, exponent, e)
   local coeff, changed = 1
   local ti = object.typeinfo(e)
   if core.arithmetic(e) then              -- if the term evaluated to a number, then multiply the coefficient by it
-    changed = exponent ~= 1 or e == 1
+    -- If the exponent's not one, that's a change.
+    -- If the expression is one, then we're going to remove it and that's a change
+    -- If this constant isn't the first term we've seen, then it'll move to the front and that's a change
+    if exponent ~= 1 or e == 1 or next(term_map) then changed = true end
     coeff = e ^ exponent
   else
     local terms = proxy.O(e)
