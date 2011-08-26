@@ -2,7 +2,8 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local error, type = error, type
+local error, require, type =
+      error, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -13,6 +14,8 @@ local mul = require("rima.operators.mul")
 local rima = rima
 
 module(...)
+
+require("rima.operators.math")
 
 
 -- Exponentiation --------------------------------------------------------------
