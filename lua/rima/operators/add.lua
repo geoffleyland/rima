@@ -19,7 +19,7 @@ local add_mul = require("rima.operators.add_mul")
 
 -- Addition --------------------------------------------------------------------
 
-local add = object:new_class(_M, "add")
+local add = expression:new_type(_M, "add")
 add.precedence = 5
 
 

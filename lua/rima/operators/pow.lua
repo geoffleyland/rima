@@ -17,7 +17,7 @@ module(...)
 
 -- Exponentiation --------------------------------------------------------------
 
-local pow = object:new_class(_M, "pow")
+local pow = expression:new_type(_M, "pow")
 pow.precedence = 0
 
 

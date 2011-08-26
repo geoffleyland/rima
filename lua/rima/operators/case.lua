@@ -15,7 +15,7 @@ module(...)
 
 -- Subscripts ------------------------------------------------------------------
 
-local case = object:new_class(_M, "case")
+local case = expression:new_type(_M, "case")
 case.precedence = 1
 
 

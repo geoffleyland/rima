@@ -18,7 +18,7 @@ local set_list = require("rima.sets.list")
 
 -- Subscripts ------------------------------------------------------------------
 
-local product = object:new_class(_M, "product")
+local product = expression:new_type(_M, "product")
 product.precedence = 1
 
 function product.construct(args)

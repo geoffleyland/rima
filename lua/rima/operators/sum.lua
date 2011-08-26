@@ -18,7 +18,7 @@ local set_list = require("rima.sets.list")
 
 -- Subscripts ------------------------------------------------------------------
 
-local sum = object:new_class(_M, "sum")
+local sum = expression:new_type(_M, "sum")
 sum.precedence = 1
 
 function sum.construct(args)

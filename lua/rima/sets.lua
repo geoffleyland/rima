@@ -15,7 +15,7 @@ module(...)
 
 -- Ord -------------------------------------------------------------------------
 
-ord_op = object:new_class({}, "ord")
+ord_op = expression:new_type({}, "ord")
 
 
 function ord_op.__eval(args_in, S)
@@ -71,7 +71,7 @@ function range_type:__iterindex(i)
 end
 
 
-range_op = object:new_class({}, "range")
+range_op = expression:new_type({}, "range")
 function range_op.__eval(args_in, S)
   local args = proxy.O(args_in)
 

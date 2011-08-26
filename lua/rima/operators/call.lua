@@ -19,6 +19,7 @@ local call = _M
 call.__typename = "call"
 call.__typeinfo = { call = "true", [call] = true }
 call.precedence = 0
+expression:copy_operators(call)
 
 
 -- String Representation -------------------------------------------------------
@@ -31,6 +32,7 @@ function call.__repr(args, format)
     return core.parenthise(args[1], format, 0).."("..lib.concat_repr({unpack(args, 2)}, format)..")"
   end
 end
+call.__tostring = lib.__tostring
 
 
 -- Evaluation ------------------------------------------------------------------

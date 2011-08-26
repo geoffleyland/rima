@@ -78,7 +78,7 @@ end
 
 local function make_math_function(name)
   local f = assert(math[name], "The math function does not exist")
-  local op = object:new_class({ precedence=0 }, name) 
+  local op = expression:new_type({ precedence=0 }, name) 
 
   op.__eval = function(args, S)
     args = proxy.O(args)
