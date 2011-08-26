@@ -1,20 +1,16 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, getmetatable, ipairs, pcall, require, type =
-      error, getmetatable, ipairs, pcall, require, type
+local error, ipairs, pcall =
+      error, ipairs, pcall
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local index = require("rima.index")
-local element = require("rima.sets.element")
 
 module(...)
 
-local scope = require("rima.scope")
-local operators = require("rima.operators")
 
 -- Getting a linear form -------------------------------------------------------
 
@@ -28,22 +24,25 @@ end
 
 
 function _linearise(l, S)
-
   local constant, terms = 0, {}
   local fail = false
 
-  if type(l) == "number" then
+  local lti = object.typeinfo(l)
+
+  if lti.number then
     constant = l
-  elseif object.typename(l) == "index" then
+  elseif lti.index then
     add_variable(terms, l, 1)
-  elseif element:isa(l) then
+  elseif lti.element then
     local exp = element.expression(l)
     add_variable(terms, exp, 1)
-  elseif getmetatable(l) == operators.add then
+  elseif lti.add then
     for i, a in ipairs(proxy.O(l)) do
-      a = proxy.O(a)
       local c, x = a[1], a[2]
-      if type(x) == "number" then
+
+      local xti = object.typeinfo(x)
+
+      if xti.number then
         if i ~= 1 then
           error(("term %d is constant (%s).  Only the first term should be constant"):
             format(i, lib.repr(x)), 0)
@@ -53,9 +52,9 @@ function _linearise(l, S)
             format(i, lib.repr(x)), 0)
         end
         constant = c * x
-      elseif object.typename(x) == "index" then
+      elseif xti.index then
         add_variable(terms, x, c)
-      elseif element:isa(x) then
+      elseif xti.element then
         local exp = element.expression(x)
         add_variable(terms, exp, c)
       else
