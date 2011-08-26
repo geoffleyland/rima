@@ -26,9 +26,9 @@ pow.precedence = 0
 
 -- String Representation -------------------------------------------------------
 
-function pow.__repr(args, format)
-  args = proxy.O(args)
-  local base, exponent = args[1], args[2]
+function pow:__repr(format)
+  terms = proxy.O(self)
+  local base, exponent = terms[1], terms[2]
   local repr = lib.repr
   local paren = core.parenthise
   local prec = pow.precedence
@@ -46,9 +46,9 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
-function pow.__eval(args_in, S)
-  local args = proxy.O(args_in)
-  local base, exponent = core.eval(args[1], S), core.eval(args[2], S)
+function pow:__eval(S)
+  local terms = proxy.O(self)
+  local base, exponent = core.eval(terms[1], S), core.eval(terms[2], S)
   
   local base_is_number = type(base) == "number"
   
@@ -65,15 +65,15 @@ function pow.__eval(args_in, S)
       return 1
     elseif exponent == 1 then
       return base
-    elseif not_base_is_number then
-      return expression:new(mul, {exponent, base})
-    else -- base is a number
+    elseif base_is_number then
       return base ^ exponent
+    else
+      return expression:new(mul, {exponent, base})
     end
  end
 
-  if base == args[1] and exponent == args[2] then
-    return args_in
+  if base == terms[1] and exponent == terms[2] then
+    return self
   else
     return base ^ exponent
   end

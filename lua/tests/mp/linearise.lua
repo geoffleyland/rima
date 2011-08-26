@@ -30,7 +30,7 @@ function test(options)
   T:expect_ok(LF(a))
   T:expect_ok(LF(1 + a))
   T:expect_error(LF(1 + (3 + a^2)),
-    "linear form: '4 %+ a^2'.-term 2 is not linear %(got 'a^2', pow%)")
+    "linear form: '4 %+ a^2'.-term 2 is not linear %(got 'a^2', mul%)")
   T:expect_error(LF(a * b),
     "linear form: 'a%*b'.-the expression does not evaluate to a sum of terms")
   T:expect_error(LF(1 + a[2]*5), "error indexing 'a' as 'a%[2%]': can't index a number")
