@@ -24,8 +24,14 @@ function constraint:new(lhs, rel, rhs)
 end
 
 
-function constraint:__eval(S)
-  return constraint:new(core.eval(self.lhs, S), self.type, core.eval(self.rhs, S))
+function constraint:__eval(S, args)
+  local lhs = core.eval(self.lhs, S, args)
+  local rhs = core.eval(self.rhs, S, args)
+  if lhs == self.lhs and rhs == self.rhs then
+    return self
+  else
+    return constraint:new(lhs, self.type, rhs)
+  end
 end
 
 
