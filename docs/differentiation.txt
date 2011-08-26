@@ -16,7 +16,8 @@ Rima can symbolically differentiate an expression with respect to a variable:
 or even:
 
     --! continue
-    print(rima.diff((rima.sin(x))^(x^2), x))          --> (cos(x)/sin(x)*x^2 + 2*log(sin(x))*x)*sin(x)^x^2
+    print(rima.diff((rima.sin(x))^(x^2), x))
+      --> (cos(x)/sin(x)*x^2 + 2*log(sin(x))*x)*sin(x)^(x^2)
 
 Rima uses automatic differentiation to generate gradients and hessians for
 nonlinear problems.
