@@ -72,7 +72,7 @@ end
 local product
 
 -- Simplify a single term
-local function simplify(term_map, exponent, e)
+local function simplify(term_map, exponent, e, id, sort)
   local coeff, changed = 1
   local ti = object.typeinfo(e)
   if core.arithmetic(e) then              -- if the term evaluated to a number, then multiply the coefficient by it
@@ -88,7 +88,7 @@ local function simplify(term_map, exponent, e)
       changed = true
     elseif ti.add and #terms == 1 then    -- if the term is a sum with a single term, hoist it
       coeff = terms[1][1] ^ exponent
-      local _, c2 = simplify(term_map, exponent, terms[1][2])
+      local _, c2 = simplify(term_map, exponent, terms[1][2], terms[1].id, terms[1].sort)
       coeff = coeff * c2
       changed = true
     elseif ti.pow and type(terms[2]) == "number" then
@@ -96,7 +96,7 @@ local function simplify(term_map, exponent, e)
       _, coeff = simplify(term_map, exponent * terms[2], terms[1])
       changed = true
     else                                    -- if there's nothing else to do, add the term
-      changed = add_mul.add_term(term_map, exponent, element.extract(e))
+      changed = add_mul.add_term(term_map, exponent, element.extract(e), id, sort)
     end
   end
   return changed, coeff
@@ -107,7 +107,7 @@ end
 function product(term_map, exponent, terms)
   local coeff, changed
   for _, t in ipairs(terms) do
-    local ch2, c2 = simplify(term_map, exponent * t[1], t[2])
+    local ch2, c2 = simplify(term_map, exponent * t[1], t[2], t.id, t.sort)
     if ch2 or (coeff and c2 ~= 1) then
       changed = true
     end
@@ -131,7 +131,7 @@ function mul:__eval(S)
   if coeff == 0 then return 0 end
 
   if coeff ~= 1 then
-    term_map[" "] = { name=" ", coeff=1, expression=coeff }
+    term_map[" "] = { 1, coeff, id=" ", sort=" " }
   end
 
   local ordered_terms, term_count = add_mul.sort_terms(term_map)

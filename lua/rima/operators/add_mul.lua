@@ -41,17 +41,17 @@ end
 
 local SCOPE_FORMAT = { scopes = true }
 
-function add_term(term_map, coeff, e)
-  local s = lib.repr(e, SCOPE_FORMAT)
-  local t = term_map[s]
+function add_term(term_map, coeff, e, id, sort)
+  local id = id or lib.repr(e, SCOPE_FORMAT)
+  local t = term_map[id]
   if coeff == 0 then
     return true                                 -- Do nothing, but either way we removed a term
   end
   if t then
-    t.coeff = t.coeff + coeff
+    t[1] = t[1] + coeff
     return true
   else
-    term_map[s] = { name=lib.repr(e), coeff=coeff, expression=e }
+    term_map[id] = { coeff, e, id=id, sort=sort or lib.repr(e) }
   end
 end
 
@@ -64,17 +64,17 @@ function sort_terms(term_map)
   local terms = {}
   local term_count = 0
   for name, t in pairs(term_map) do
-    if t.coeff ~= 0 then
+    if t[1] ~= 0 then
       term_count = term_count + 1
-      local c, e = t.coeff, t.expression
+      local e = t[2]
       if e == " " then
-        c, e = 1, c
+        terms[term_count] = { 1, t[1], id=" ", sort=" " }
+      else
+        terms[term_count] = t
       end
-      terms[term_count] = { c, e, name=t.name }
     end
   end
-  table.sort(terms, function(a, b) return a.name < b.name end)
-  for _, t in ipairs(terms) do t.name = nil end
+  table.sort(terms, function(a, b) return a.sort < b.sort end)
   return terms, term_count
 end
 

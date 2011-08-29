@@ -63,7 +63,7 @@ end
 local sum
 
 -- Simplify a single term
-local function simplify(term_map, coeff, e)
+local function simplify(term_map, coeff, e, id, sort)
   local changed
   local ti = object.typeinfo(e)
   if core.arithmetic(e) then                    -- if the term evaluated to a number, then add it to the constant
@@ -87,10 +87,10 @@ local function simplify(term_map, coeff, e)
       end
       changed = true
     else                                        -- otherwise just add it
-      changed = add_mul.add_term(term_map, coeff, element.extract(e))
+      changed = add_mul.add_term(term_map, coeff, element.extract(e), id, sort)
     end
   else                                          -- if there's nothing else to do, add the term
-    changed = add_mul.add_term(term_map, coeff, element.extract(e))
+    changed = add_mul.add_term(term_map, coeff, element.extract(e), id, sort)
   end
   return changed
 end
@@ -100,7 +100,7 @@ end
 function sum(term_map, coeff, terms)
   local changed
   for _, t in ipairs(terms) do
-    if simplify(term_map, coeff * t[1], t[2]) then
+    if simplify(term_map, coeff * t[1], t[2], t.id, t.sort) then
       changed = true
     end
   end
