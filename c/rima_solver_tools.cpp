@@ -132,12 +132,12 @@ const char *check_variables(lua_State *L, unsigned variable_count)
   {
     lua_rawgeti(L, 2, i+1);
     if (lua_type(L, -1) != LUA_TTABLE)
-      return "The elements of the constraints table must be tables of constraints";
+      return "The elements of the variables table must be tables of variables";
 
     lua_pushstring(L, "type");
     lua_rawget(L, -2);
     if (lua_type(L, -1) != LUA_TTABLE)
-      return "The constraint description must contain a table named type";
+      return "The variable description must contain a table named type";
     {
       lua_pushstring(L, "lower");
       lua_rawget(L, -2);
