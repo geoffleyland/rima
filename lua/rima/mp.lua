@@ -98,20 +98,26 @@ function find_constraints(S, callback)
   end
 
   search(scope.contents(S))
+  if callback then callback(#constraints, t0, true) end
   return constraints
 end
 
 
 -- Preparing problems ----------------------------------------------------------
 
-local function report_search_time(cc, t0)
-  io.stderr:write(("\rFound %d constraints in %.1f secs..."):format(cc, os.clock() - t0))
+local tl = 0
+local function report_search_time(cc, t0, last)
+  local t = os.clock()
+  if t - tl > 0.5 or last then
+    io.stderr:write(("\rFound %d constraints in %.1f secs..."):format(cc, t - t0))
+    tl = t
+  end
+  if last then io.stderr:write("\n") end
 end
 
 
 function prepare_constraints(S)
   local constraints = find_constraints(S, report_search_time)
-  io.stderr:write("\n")
 
   local constraint_expressions, constraint_info = {}, {}
   local linear = true
@@ -132,9 +138,13 @@ function prepare_constraints(S)
     constraint_info[i] = c
     constraint_expressions[i] = exp
 
+    local t = os.clock()
+    if t - tl > 0.5 then
     io.stderr:write(("\rGenerated %d constraints in %.1f secs..."):format(i, os.clock() - t0))
+      tl = t
   end
-  io.stderr:write("\n")
+  end
+  io.stderr:write(("\rGenerated %d constraints in %.1f secs...\n"):format(#constraints, os.clock() - t0))
   return linear, constraint_expressions, constraint_info
 end
 
