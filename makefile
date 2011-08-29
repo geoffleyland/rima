@@ -16,11 +16,7 @@ LPSOLVE_PREFIX=/usr/local
 LPSOLVE_LIBDIR=$(LPSOLVE_PREFIX)/lib
 LPSOLVE_INCDIR=$(LPSOLVE_PREFIX)/include/lpsolve
 
-IPOPT_PREFIX=/usr/local/
-IPOPT_LIBDIR=$(IPOPT_PREFIX)/lib
-IPOPT_INCDIR=$(IPOPT_PREFIX)/include/coin
-
-CPP=g++
+CPP=/usr/bin/g++
 #-DNOMINMAX is needed for some compilers on windows.  I'm not sure which, so I guess I'll just blanket-add it for now.  Can't hurt, right?
 CFLAGS=-O3 -DNOMINMAX -fPIC
 SO_SUFFIX=so
@@ -51,16 +47,16 @@ lpsolve: rima_lpsolve_core.$(SO_SUFFIX)
 ipopt: rima_ipopt_core.$(SO_SUFFIX)
 
 rima_clp_core.$(SO_SUFFIX): c/rima_clp_core.cpp c/rima_solver_tools.cpp
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils -lcoinmumps -lcoinmetis -lcoinglpk -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
 
 rima_cbc_core.$(SO_SUFFIX): c/rima_cbc_core.cpp c/rima_solver_tools.cpp
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lcbc -losiclp $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)/cbc -I$(COIN_INCDIR)/osi -I$(COIN_INCDIR)/clp -I$(COIN_INCDIR)/utils -I$(COIN_INCDIR)/headers
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lcbc -losi -losiclp -lclp -lcgl -lcoinutils -lcoinmumps -lcoinmetis -lcoinglpk -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
 
 rima_lpsolve_core.$(SO_SUFFIX): c/rima_lpsolve_core.cpp c/rima_solver_tools.cpp
 	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(LPSOLVE_LIBDIR) -llpsolve55 $(LIBS) -I$(LUA_INCDIR) -I$(LPSOLVE_INCDIR)
 
 rima_ipopt_core.$(SO_SUFFIX): c/rima_ipopt_core.cpp
-	$(CPP) $(IPOPT_CFLAGS) $(SHARED) $^ -o $@ -L$(IPOPT_LIBDIR) -lipopt -lgfortran -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(IPOPT_INCDIR)
+	$(CPP) $(IPOPT_CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lipopt -lcoinmumps -lcoinmetis -lgfortran -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
 
 test: all lua/rima.lua
 	-cp rima_*_core.so lua/
