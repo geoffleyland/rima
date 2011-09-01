@@ -108,16 +108,18 @@ function proxy_mt.__index(r, i)
 end
 
 
-local function do_index(t, i, j, address)
-  local function z(ii)
-    -- we have to call __index ourselves, because scope's __index returns several values.
-    local f = lib.getmetamethod(t, "__index")
-    if f then
-      return f(t, ii)
-    else
-      return t[ii]
-    end
+local function extended_index(t, ii)
+  -- we have to call __index ourselves, because scope's __index returns several values.
+  local f = lib.getmetamethod(t, "__index")
+  if f then
+    return f(t, ii)
+  else
+    return t[ii]
   end
+end
+
+
+local function do_index(t, i, j, address)
 
   if typeinfo(t).number then
     error("can't index a number", 0)
@@ -125,12 +127,12 @@ local function do_index(t, i, j, address)
   if typeinfo(i).element then
 
     local k = element.key(i)
-    local kvalue, ktype, kaddr = z(k)
+    local kvalue, ktype, kaddr = extended_index(t, k)
 
     local v = element.value(i)
     local vvalue, vtype, vaddr
     if lib.repr(v):sub(1,5) ~= "table" then
-      vvalue, vtype, vaddr = z(v)
+      vvalue, vtype, vaddr = extended_index(t, v)
     end
 
     if vvalue then
@@ -145,7 +147,7 @@ local function do_index(t, i, j, address)
 
     return nil, vtype or ktype, vaddr or kaddr
   else
-    return z(i)
+    return extended_index(t, i)
   end
 end
 
