@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local ipairs, next, require =
-      ipairs, next, require
+local ipairs, require =
+      ipairs, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -63,44 +63,47 @@ end
 local sum
 
 -- Simplify a single term
-local function simplify(term_map, coeff, e, id, sort)
+local function simplify(new_terms, term_map, coeff, e, id, sort)
   local changed
-  local ti = object.typeinfo(e)
   if core.arithmetic(e) then                    -- if the term evaluated to a number, then add it to the constant
     -- if the coeff isn't 1, it's a change.
     -- If this constant isn't the first term we've seen, then we're going to put it first, and that's a change
-    if coeff ~= 1 or next(term_map) then changed = true end
-    if add_mul.add_term(term_map, coeff * e, " ") then
+    if coeff ~= 1 or new_terms[1] then changed = true end
+    if add_mul.add_term(new_terms, term_map, coeff * e, " ", " ", " ") then
                                                 -- use space because it has a low sort order
       changed = true
     end
-  elseif ti.add then                            -- if the term is another sum, hoist its terms
-    sum(term_map, coeff, proxy.O(e))
-    changed = true
-  elseif ti.mul then                            -- if the term is a multiplication, try to hoist any constant
-    local new_c, new_e = add_mul.extract_constant(e)
-    if new_c then                               -- if we did hoist a constant, re-simplify the resulting expression
-      if new_e then
-      simplify(term_map, coeff * new_c, new_e)
-      else
-        add_mul.add_term(term_map, coeff * new_c, " ")
-      end
+  else
+    local ti = object.typeinfo(e)
+    if ti.add then                              -- if the term is another sum, hoist its terms
+      sum(new_terms, term_map, coeff, proxy.O(e))
       changed = true
-    else                                        -- otherwise just add it
-      changed = add_mul.add_term(term_map, coeff, element.extract(e), id, sort)
+    elseif ti.mul then                          -- if the term is a multiplication, try to hoist any constant
+      local new_c, new_e = add_mul.extract_constant(e)
+      if new_c then                             -- if we did hoist a constant, re-simplify the resulting expression
+        if new_e then
+          simplify(new_terms, term_map, coeff * new_c, new_e)
+        else
+          add_mul.add_term(new_terms, term_map, coeff * new_c, " ", " ", " ")
+        end
+        changed = true
+      else                                      -- otherwise just add it
+        changed = add_mul.add_term(new_terms, term_map, coeff, element.extract(e), id, sort)
+      end
+    else                                        -- if there's nothing else to do, add the term
+      changed = add_mul.add_term(new_terms, term_map, coeff, element.extract(e), id, sort)
     end
-  else                                          -- if there's nothing else to do, add the term
-    changed = add_mul.add_term(term_map, coeff, element.extract(e), id, sort)
   end
   return changed
 end
 
 
 -- Run through all the terms in a sum
-function sum(term_map, coeff, terms)
+function sum(new_terms, term_map, coeff, terms)
   local changed
-  for _, t in ipairs(terms) do
-    if simplify(term_map, coeff * t[1], t[2], t.id, t.sort) then
+  for i = 1, #terms do
+    local t = terms[i]
+    if simplify(new_terms, term_map, coeff * t[1], t[2], t.id, t.sort) then
       changed = true
     end
   end
@@ -116,15 +119,15 @@ function add:__eval(S)
   -- sum.
   local terms, evaluate_changed = add_mul.evaluate_terms(proxy.O(self), S)
 
-  local term_map = {}
-  local simplify_changed = sum(term_map, 1, terms)
+  local ordered_terms, term_map = {}, {}
+  local simplify_changed = sum(ordered_terms, term_map, 1, terms)
 
-  local ordered_terms, term_count = add_mul.sort_terms(term_map)
+  local term_count = add_mul.sort_terms(ordered_terms)
 
   if term_count == 0 then return 0 end
 
-  local constant_term = term_map[" "]
-  local constant = constant_term and constant_term.coeff
+  local constant_term = ordered_terms[1]
+  local constant = constant_term and constant_term.id == " " and constant_term[2]
   if constant == 0 then constant = nil end
 
   if constant and term_count == 1 then          -- if there's no terms, we're just a constant

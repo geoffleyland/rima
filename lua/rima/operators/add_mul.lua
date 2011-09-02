@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local table = require("table")
-local getmetatable, ipairs, pairs, require, type =
-      getmetatable, ipairs, pairs, require, type
+local getmetatable, require, type =
+      getmetatable, require, type
 
 local lib = require("rima.lib")
 local core = require("rima.core")
@@ -18,7 +18,9 @@ local expression = require("rima.expression")
 
 function evaluate_terms(terms, S)
   local new_terms
-  for i, t in ipairs(terms) do
+  local term_count = #terms
+  for i = 1, term_count do
+    local t = terms[i]
     local et2 = core.eval(t[2], S)
     if et2 ~= t[2] then
       new_terms = new_terms or {}
@@ -26,7 +28,8 @@ function evaluate_terms(terms, S)
     end
   end
   if new_terms then
-    for i, t in ipairs(terms) do
+    for i = 1, term_count do
+      local t = terms[i]
       if not new_terms[i] then
         new_terms[i] = t
       end
@@ -41,7 +44,7 @@ end
 
 local SCOPE_FORMAT = { scopes = true }
 
-function add_term(term_map, coeff, e, id, sort)
+function add_term(terms, term_map, coeff, e, id, sort)
   local id = id or lib.repr(e, SCOPE_FORMAT)
   local t = term_map[id]
   if coeff == 0 then
@@ -51,31 +54,36 @@ function add_term(term_map, coeff, e, id, sort)
     t[1] = t[1] + coeff
     return true
   else
-    term_map[id] = { coeff, e, id=id, sort=sort or lib.repr(e) }
+    local new_term = { coeff, e, id=id, sort=sort or lib.repr(e) }
+    terms[#terms+1] = new_term
+    term_map[id] = new_term
   end
 end
 
 
 -- Sort terms ------------------------------------------------------------------
 
-function sort_terms(term_map)
+local function term_order(a, b)
+  return a.sort < b.sort
+end
+
+function sort_terms(terms)
   -- sort the new terms alphabetically, so that when we group by a string
   -- representation, like terms look alike
-  local terms = {}
   local term_count = 0
-  for name, t in pairs(term_map) do
+  for i = 1, #terms do
+    local t = terms[i]
+    terms[i] = nil
     if t[1] ~= 0 then
-      term_count = term_count + 1
-      local e = t[2]
-      if e == " " then
-        terms[term_count] = { 1, t[1], id=" ", sort=" " }
-      else
-        terms[term_count] = t
+      if t[2] == " " then
+        t[1], t[2] = 1, t[1]
       end
+      term_count = term_count + 1
+      terms[term_count] = t
     end
   end
-  table.sort(terms, function(a, b) return a.sort < b.sort end)
-  return terms, term_count
+  table.sort(terms, term_order)
+  return term_count
 end
 
 

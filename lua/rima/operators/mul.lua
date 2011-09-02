@@ -2,8 +2,8 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local ipairs, next, require, type =
-      ipairs, next, require, type
+local ipairs, require, type =
+      ipairs, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -72,31 +72,32 @@ end
 local product
 
 -- Simplify a single term
-local function simplify(term_map, exponent, e, id, sort)
+local function simplify(new_terms, term_map, exponent, e, id, sort)
   local coeff, changed = 1
-  local ti = object.typeinfo(e)
-  if core.arithmetic(e) then              -- if the term evaluated to a number, then multiply the coefficient by it
+  if core.arithmetic(e) then                    -- if the term evaluated to a number, then multiply the coefficient by it
     -- If the exponent's not one, that's a change.
     -- If the expression is one, then we're going to remove it and that's a change
     -- If this constant isn't the first term we've seen, then it'll move to the front and that's a change
-    if exponent ~= 1 or e == 1 or next(term_map) then changed = true end
+    if exponent ~= 1 or e == 1 or new_terms[1] then changed = true end
     coeff = e ^ exponent
   else
+    local ti = object.typeinfo(e)
     local terms = proxy.O(e)
-    if ti.mul then                        -- if the term is another product, hoist its terms
-      _, coeff = product(term_map, exponent, terms)
+    if ti.mul then                              -- if the term is another product, hoist its terms
+      _, coeff = product(new_terms, term_map, exponent, terms)
       changed = true
-    elseif ti.add and #terms == 1 then    -- if the term is a sum with a single term, hoist it
-      coeff = terms[1][1] ^ exponent
-      local _, c2 = simplify(term_map, exponent, terms[1][2], terms[1].id, terms[1].sort)
+    elseif ti.add and #terms == 1 then          -- if the term is a sum with a single term, hoist it
+      local t1 = terms[1]
+      coeff = t1[1] ^ exponent
+      local _, c2 = simplify(new_terms, term_map, exponent, t1[2], t1.id, t1.sort)
       coeff = coeff * c2
       changed = true
     elseif ti.pow and type(terms[2]) == "number" then
       -- if the term is an exponentiation to a constant power, hoist it
-      _, coeff = simplify(term_map, exponent * terms[2], terms[1])
+      _, coeff = simplify(new_terms, term_map, exponent * terms[2], terms[1])
       changed = true
-    else                                    -- if there's nothing else to do, add the term
-      changed = add_mul.add_term(term_map, exponent, element.extract(e), id, sort)
+    else                                          -- if there's nothing else to do, add the term
+      changed = add_mul.add_term(new_terms, term_map, exponent, element.extract(e), id, sort)
     end
   end
   return changed, coeff
@@ -104,10 +105,11 @@ end
 
 
 -- Run through all the terms in a product
-function product(term_map, exponent, terms)
+function product(new_terms, term_map, exponent, terms)
   local coeff, changed
-  for _, t in ipairs(terms) do
-    local ch2, c2 = simplify(term_map, exponent * t[1], t[2], t.id, t.sort)
+  for i = 1, #terms do
+    local t = terms[i]
+    local ch2, c2 = simplify(new_terms, term_map, exponent * t[1], t[2], t.id, t.sort)
     if ch2 or (coeff and c2 ~= 1) then
       changed = true
     end
@@ -125,16 +127,16 @@ function mul:__eval(S)
   -- the constant and see if what's left is a product.
   local terms, evaluate_changed = add_mul.evaluate_terms(proxy.O(self), S)
 
-  local term_map = {}
-  local simplify_changed, coeff = product(term_map, 1, terms)
+  local ordered_terms, term_map = {}, {}
+  local simplify_changed, coeff = product(ordered_terms, term_map, 1, terms)
 
   if coeff == 0 then return 0 end
 
   if coeff ~= 1 then
-    term_map[" "] = { 1, coeff, id=" ", sort=" " }
+    ordered_terms[#ordered_terms+1] = { 1, coeff, id=" ", sort=" " }
   end
 
-  local ordered_terms, term_count = add_mul.sort_terms(term_map)
+  local term_count = add_mul.sort_terms(ordered_terms)
 
   if term_count == 0 then return coeff end
 
