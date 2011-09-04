@@ -14,7 +14,6 @@ local set_list = require("rima.sets.list")
 local closure = require("rima.closure")
 local constraint = require("rima.mp.constraint")
 local linearise = require("rima.mp.linearise")
-local types = require("rima.types")
 local solvers = require("rima.solvers")
 local rima = require("rima")
 
@@ -174,8 +173,9 @@ function prepare_variables(S, objective, constraints)
   local i = 1
   for n, v in pairs(variable_map) do
     local _, t = core.eval(v.ref, S)
-    if not types.number_t:isa(t) then
-      if types.undefined_t:isa(t) then
+    local ti = object.typeinfo(t)
+    if not ti.number_t then
+      if ti.undefined_t then
         error(("expecting a number type for '%s', got '%s'"):format(v.name, t:describe(v.name)), 0)
       else
         error(("expecting a number type for '%s', got '%s'"):format(v.name, lib.repr(t)), 0)

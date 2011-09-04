@@ -9,6 +9,8 @@ local constraint = require("rima.mp.constraint")
 
 local rima = require("rima")
 
+local math = require("math")
+
 module(...)
 
 -- Tests -----------------------------------------------------------------------
@@ -43,8 +45,8 @@ Subject to:
       T:check_equal(primal.y, 1)
       T:check_equal(primal.c1, 3)
       T:check_equal(primal.c2, 3)
-      T:check_equal(dual.x, -0)
-      T:check_equal(dual.y, -0)
+      T:check_equal(math.abs(dual.x), 0)
+      T:check_equal(math.abs(dual.y), 0)
       T:check_equal(dual.c1, 1/3)
       T:check_equal(dual.c2, 1/3)
     end
