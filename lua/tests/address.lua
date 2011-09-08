@@ -23,7 +23,7 @@ function test(options)
   -- constructors
   T:test(object.typeinfo(N()).address, "typeinfo(address:new()).address")
   T:test(object.typeinfo(N("a")).address, "typeinfo(address:new()).address")
-  T:test(object.typename(N("a"), "address"), "typename(address:new())=='address'")
+  T:check_equal(object.typename(N("a")), "address", "typename(address:new())=='address'")
 
   -- string representation
   T:check_equal(N(), "")
