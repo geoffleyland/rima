@@ -22,7 +22,7 @@ function ord_op.__eval(args_in, S)
   local args = proxy.O(args_in)
   local e = core.eval(args[1], S)
 
-  if element:isa(e) then
+  if object.typeinfo(e).element then
     return element.key(e)
   else
     if core.defined(e) then

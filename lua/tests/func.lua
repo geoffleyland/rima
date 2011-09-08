@@ -21,7 +21,7 @@ function test(options)
   local D = lib.dump
   local E = core.eval
 
-  T:test(func:isa(func:new({"a"}, 3)), "func:isa(func:new())")
+  T:test(object.typeinfo(func:new({"a"}, 3)).func, "typeinfo(func:new()).func")
   T:check_equal(object.typename(func:new({"a"}, 3)), "func", "typename(func:new()) == 'func'")
 
   T:expect_error(function() func:new({1}, 1) end,

@@ -23,7 +23,7 @@ function test(options)
   local E = rima.E
 
   -- Constructors
-  T:test(scope:isa(N()), "scope:isa(scope.new())")
+  T:test(object.typeinfo(N()).scope, "typeinfo(scope.new()).scope")
   T:check_equal(object.typename(N()), "scope", "typename(scope.new()) == 'scope'")
 
   -- Indexing

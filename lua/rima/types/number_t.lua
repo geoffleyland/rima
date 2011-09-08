@@ -102,13 +102,15 @@ function number_t:includes(x)
     "rima.types.number_t:includes",
     "includes(x<number or type>)"
 
-  if type(x) == "number" then
+  local tx = typeinfo(x)
+
+  if tx.number then
     if x < self.lower then return false end
     if x > self.upper then return false end
     if self.integer and x ~= math.floor(x) then return false end
     return true
-  elseif undefined_t:isa(x) then
-    if number_t:isa(x) then
+  elseif tx.undefined_t then
+    if tx.number_t then
       if x.lower < self.lower then return false end
       if x.upper > self.upper then return false end
       if self.integer and not x.integer then return false end

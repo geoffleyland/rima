@@ -23,7 +23,7 @@ sum.precedence = 1
 
 function sum.construct(args)
   local sets, exp = args[1], args[2]
-  if not set_list:isa(sets) then
+  if not object.typeinfo(sets).set_list then
     sets = set_list:read(sets)
   end
   return { closure:new(exp, sets) }

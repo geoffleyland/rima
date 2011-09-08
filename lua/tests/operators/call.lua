@@ -21,7 +21,7 @@ function test(options)
   local D = lib.dump
   local E = core.eval
 
-  T:test(object.isa(call, expression:new(call)), "call:isa(call)")
+  T:test(object.typeinfo(expression:new(call)).call, "typeinfo(call).call")
   T:check_equal(object.typename(expression:new(call)), "call")
 
   do

@@ -16,8 +16,8 @@ function test(options)
 
   local E = core.eval
 
-  T:test(number_t:isa(number_t:new()), "isa(number_t:new(), number_t)")
-  T:test(rima.types.undefined_t:isa(number_t:new()), "isa(number_t:new(), undefined_t)")
+  T:test(object.typeinfo(number_t:new()).number_t, "typeinfo(number_t:new()).number_t")
+  T:test(object.typeinfo(number_t:new()).undefined_t, "typeinfo(number_t:new()).undefined_t")
   T:check_equal(object.typename(number_t:new()), "number_t", "typename(number_t:new()) == 'number_t'")
 
   T:expect_error(function() number_t:new("lower") end, "expecting a number for 'lower_bound', got 'string'")

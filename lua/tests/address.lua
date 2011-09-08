@@ -21,8 +21,8 @@ function test(options)
   local function N(...) return address:new(...) end
 
   -- constructors
-  T:test(address:isa(N()), "address:isa(address:new())")
-  T:test(address:isa(N("a")), "address:isa(address:new())")
+  T:test(object.typeinfo(N()).address, "typeinfo(address:new()).address")
+  T:test(object.typeinfo(N("a")).address, "typeinfo(address:new()).address")
   T:test(object.typename(N("a"), "address"), "typename(address:new())=='address'")
 
   -- string representation

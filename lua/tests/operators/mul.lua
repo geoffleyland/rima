@@ -23,7 +23,7 @@ function test(options)
   local OS = function(e) return mul.__repr(e, {}) end
   local OE = function(e, S) return mul.__eval(e, S, E) end
 
-  T:test(mul:isa(mul:new()), "isa(mul:new(), mul)")
+  T:test(object.typeinfo(mul:new()).mul, "typeinfo(mul:new()).mul")
   T:check_equal(object.typename(mul:new()), "mul", "typename(mul:new()) == 'mul'")
 
   T:check_equal(OD({{1, 1}}), "*(1^1)")

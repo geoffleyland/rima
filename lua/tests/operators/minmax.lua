@@ -21,7 +21,7 @@ function test(options)
   local E = core.eval
 
   -- min
-  T:test(object.isa(minmax.min, rima.min(1, {1, 1})), "isa(min, min)")
+  T:test(object.typeinfo(rima.min(1, {1, 1})).min, "typeinfo(min).min")
   T:check_equal(object.typename(rima.min(1, {1, 1})), "min", "typename(min) == 'min'")
   
   do
@@ -35,7 +35,7 @@ function test(options)
   end
 
   -- max
-  T:test(object.isa(minmax.max, rima.max(1, {1, 1})), "isa(max, max)")
+  T:test(object.typeinfo(rima.max(1, {1, 1})).max, "typeinfo(max).max")
   T:check_equal(object.typename(rima.max(1, {1, 1})), "max", "typename(max) == 'max'")
   
   do

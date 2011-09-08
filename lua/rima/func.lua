@@ -24,7 +24,7 @@ local function read(args)
   for i, v in ipairs(args) do
     if type(v) == "string" then
       new_args[i] = v
-    elseif index:isa(v) then
+    elseif object.typeinfo(v).index then
       if index:is_identifier(v) then
         new_args[i] = lib.repr(v)
       else

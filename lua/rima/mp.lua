@@ -48,7 +48,7 @@ function find_constraints(S, callback)
     local set_index, undefined_index = 1, 1
     for i = 1, #current_address do
       local index = current_address[i]
-      if scope.set_default_thinggy:isa(index) then
+      if object.typeinfo(index).set_default_thinggy then
         index = core.eval(rima.R(sets[set_index].names[1]), S)
         if not core.defined(index) then
           index = sets[set_index]
@@ -68,12 +68,14 @@ function find_constraints(S, callback)
   local function search(t)
     for k, v in pairs(t) do
       current_address[#current_address+1] = k
-      if scope.set_default_thinggy:isa(k) then
+      local tik = object.typeinfo(k)
+      if tik.set_default_thinggy then
         current_sets:append(k.set_ref)
       end
-      if type(v) == "table" and not getmetatable(v) then
+      local tiv = object.typeinfo(v)
+      if tiv.table and not getmetatable(v) then
         search(v)
-      elseif constraint:isa(v) then
+      elseif tiv.constraint then
         if not current_sets[1] then
           add_constraint(core.eval(v, S), build_ref(S))
         else
@@ -82,7 +84,7 @@ function find_constraints(S, callback)
             add_constraint(core.eval(ref, S2), ref, undefined) 
           end
         end
-      elseif closure:isa(v) and constraint:isa(v.exp) then
+      elseif tiv.closure and object.typeinfo(v.exp).constraint then
         local cs2 = current_sets:copy()
         cs2:prepare(nil, v.name)
         for S2, undefined in cs2:iterate(scope.new(S), v.name) do
@@ -90,7 +92,7 @@ function find_constraints(S, callback)
         end
       end
       current_address[#current_address] = nil
-      if scope.set_default_thinggy:isa(k) then
+      if tik.set_default_thinggy then
         current_sets:pop()
       end
     end

@@ -22,7 +22,7 @@ function test(options)
   local D = lib.dump
   local E = core.eval
 
-  T:test(sum:isa(sum:new()), "isa(sum, sum:new())")
+  T:test(object.typeinfo(sum:new()).sum, "typeinfo(sum:new()).sum")
   T:check_equal(object.typename(sum:new()), "sum", "typename(sum:new()) == 'sum'")
 
   local U = expression_tester(T, "x, y, z, Q, q, R, r, V, v", { R={"a", "b", "c"}, V={"d", "e"}, y={1, 2, 3}, z={{1,2},{3,4},{5,6}} })

@@ -22,7 +22,7 @@ function test(options)
   local D = lib.dump
 
   -- Constructors
-  T:test(element:isa(N()), "element:isa(element:new())")
+  T:test(object.typeinfo(N()).element, "typeinfo(element:new()).element")
   T:check_equal(object.typename(N()), "element", "typename(element:new()) == 'element'")
 
   do

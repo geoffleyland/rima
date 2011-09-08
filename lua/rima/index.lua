@@ -42,11 +42,7 @@ function index:new(base, ...)
   else
     a = address:new(...)
   end
-  
---  if ref:isa(base) and not a:starts_with_identifier() then
---    error(("the first element of this index must be an identifier string.  Got '%s'"):
---      format(lib.repr(a)))
---  end
+
   return proxy:new(object.new(self, { base=base, address=a }), proxy_mt)
 end
 

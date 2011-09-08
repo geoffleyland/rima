@@ -20,7 +20,7 @@ function test(options)
   local E = core.eval
   local D = lib.dump
 
-  T:test(pow:isa(pow:new()), "isa(pow, pow:new())")
+  T:test(object.typeinfo(pow:new()).pow, "typeinfo(pow:new()).pow")
   T:check_equal(object.typename(pow:new()), "pow", "typename(pow:new()) == 'pow'")
 
   local a, b = rima.R"a, b"

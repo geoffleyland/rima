@@ -33,19 +33,19 @@ end
 
 
 function ref:read(s)
-  if ref:isa(s) then return s end
+  local tis = object.typeinfo(s)
+  if tis["sets.ref"] then return s end
 
   -- did we get 'S', '"S"' or '{n=S}'?
   local namestring, set
-  local t = object.typename(s)
-  if t == "index" then -- 's'
+  if tis.index then -- 's'
     namestring, set = index:identifier(s), nil
-  elseif t == "string" then -- '"s"'
+  elseif tis.string then -- '"s"'
     namestring, set = s, nil
-  elseif t == "table" and not getmetatable(s) then -- '{n=S}'
+  elseif tis.table and not getmetatable(s) then -- '{n=S}'
     namestring, set = next(s)
   else
-    error(("Got '%s', (%s)"):format(lib.repr(s), t))
+    error(("Got '%s', (%s)"):format(lib.repr(s), object.typename(s)))
   end
 
   -- did we get "['a, b']=l"?
@@ -56,11 +56,12 @@ function ref:read(s)
 
   -- what was l?
   local result
+  local tis = object.typeinfo(set)
   if not set then
     result = ref:new(nil, "a", "elements", names)  
-  elseif type(set) == "string" then
+  elseif tis.string then
     result = ref:new(index:new(nil, set), "a", "elements", names)
-  elseif ref:isa(set) then
+  elseif tis["sets.ref"] then
     set:set_names(names)
     result = set
   elseif not core.defined(set) then
