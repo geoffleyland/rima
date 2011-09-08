@@ -1,14 +1,16 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local type = type
+local undefined_t = require("rima.types.undefined_t")
 
 local series = require("test.series")
-local undefined_t = require("rima.types.undefined_t")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
+local index = require("rima.index")
 local rima = require("rima")
+
+local setmetatable = setmetatable
 
 module(...)
 
@@ -18,6 +20,7 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
+  local I = setmetatable({}, { __index = function(i, ...) return index:new(nil, ...) end })
   local E = core.eval
 
   T:test(object.typeinfo(undefined_t:new()).undefined_t, "typeinfo(undefined_t:new()).undefined_t")
@@ -32,14 +35,14 @@ function test(options)
   T:test(undefined_t:new():includes(nil), "undefined:includes()'")
   
   do
-    local x = rima.R"x"
+    local x = I.x
     local S = { x = undefined_t:new() }
     T:check_equal(E(x, S), "x")
     T:check_equal(E(x + 1, S), "1 + x")
   end
 
   do
-    local x, y, z = rima.R"x, y, z"
+    local x, y, z = I.x, I.y, I.z
     local S = { x = { undefined_t:new() }}
     local e = rima.sum{y=x}(x[y])
     T:check_equal(E(e, S), "x[1]")
@@ -47,7 +50,7 @@ function test(options)
   end
 
   do
-    local x, y, z = rima.R"x, y, z"
+    local x, y, z = I.x, I.y, I.z
     local e = rima.sum{y=x}(y.z)
 
     local S1 = { x = {{}}}
@@ -60,7 +63,7 @@ function test(options)
   end
 
   do
-    local x, X, y, Y, z = rima.R"x, X, y, Y, z"
+    local x, X, y, Y, z = I.x, I.X, I.y, I.Y, I.z
     local e = rima.sum{x=X}(rima.sum{y=x.Y}(y.z))
 
     local S1 = { X={{Y={{}}}}}
