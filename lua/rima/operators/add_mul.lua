@@ -114,5 +114,16 @@ function extract_constant(e)
 end
 
 
+-- List variables --------------------------------------------------------------
+
+function list_variables(op, S, list)
+  local terms = proxy.O(op)
+  for i = 1, #terms do
+    t = terms[i]
+    core.list_variables(t[2], S, list)
+  end
+end
+
+
 -- EOF -------------------------------------------------------------------------
 

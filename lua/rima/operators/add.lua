@@ -27,7 +27,9 @@ add.precedence = 5
 
 function add:__repr(format)
   local terms = proxy.O(self)
-  if format.format == "dump" then
+  local ff = format.format
+
+  if ff == "dump" then
     return "+("..
       lib.concat(terms, ", ",
         function(t) return lib.simple_repr(t[1], format).."*"..lib.repr(t[2], format) end)..
@@ -166,11 +168,7 @@ end
 
 -- Introspection? --------------------------------------------------------------
 
-function add:__list_variables(S, list)
-  for _, t in ipairs(proxy.O(self)) do
-    core.list_variables(t[2], S, list)
-  end
-end
+add.__list_variables = add_mul.list_variables
 
 
 -- EOF -------------------------------------------------------------------------

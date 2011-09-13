@@ -2,20 +2,21 @@
 -- see LICENSE for license information
 
 local math = require("math")
-local ipairs, require, type =
-      ipairs, require, type
+local ipairs, require =
+      ipairs, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local add_mul = require("rima.operators.add_mul")
-local expression = require("rima.expression")
 local element = require("rima.sets.element")
 
 module(...)
 
+local expression = require("rima.expression")
+local add_mul = require("rima.operators.add_mul")
 local add = require("rima.operators.add")
+
 
 -- Multiplication --------------------------------------------------------------
 
@@ -92,7 +93,7 @@ local function simplify(new_terms, term_map, exponent, e, id, sort)
       local _, c2 = simplify(new_terms, term_map, exponent, t1[2], t1.id, t1.sort)
       coeff = coeff * c2
       changed = true
-    elseif ti.pow and type(terms[2]) == "number" then
+    elseif ti.pow and core.arithmetic(terms[2]) then
       -- if the term is an exponentiation to a constant power, hoist it
       _, coeff = simplify(new_terms, term_map, exponent * terms[2], terms[1])
       changed = true
@@ -196,11 +197,7 @@ end
 
 -- Introspection? --------------------------------------------------------------
 
-function mul:__list_variables(S, list)
-  for _, t in ipairs(proxy.O(self)) do
-    core.list_variables(t[2], S, list)
-  end
-end
+mul.__list_variables = add_mul.list_variables
 
 
 -- EOF -------------------------------------------------------------------------
