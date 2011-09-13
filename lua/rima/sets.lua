@@ -64,7 +64,7 @@ end
 
 
 function range_type:__iterindex(i)
-  if i < 1 or 1 > self.high - self.low then
+  if i < 1 or i > self.high - self.low + 1 then
     error(("index out of range trying to index '%s' with '%s'"):format(lib.repr(self), lib.repr(i)))
   end
   return self.low + i - 1
