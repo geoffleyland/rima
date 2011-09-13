@@ -9,13 +9,12 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local expression = require("rima.expression")
 local mul = require("rima.operators.mul")
-local rima = rima
 
 module(...)
 
-require("rima.operators.math")
+local expression = require("rima.expression")
+local opmath = require("rima.operators.math")
 
 
 -- Exponentiation --------------------------------------------------------------
@@ -27,7 +26,7 @@ pow.precedence = 0
 -- String Representation -------------------------------------------------------
 
 function pow:__repr(format)
-  terms = proxy.O(self)
+  local terms = proxy.O(self)
   local base, exponent = terms[1], terms[2]
   local repr = lib.repr
   local paren = core.parenthise
@@ -97,7 +96,7 @@ function pow.__diff(args, v)
     return core.diff(exponent, v) * math.log(base) * base ^ exponent
   end
   
-  return core.diff(exponent * rima.log(base), v) * base ^ exponent
+  return core.diff(exponent * opmath.log(base), v) * base ^ exponent
 end
 
 

@@ -9,9 +9,9 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
-local rima = rima
 
 module(...)
+
 
 -- Math functions --------------------------------------------------------------
 
@@ -59,15 +59,15 @@ local function math_diff(args, v)
   if dadv == 0 then return 0 end
   
   if o == "exp" then
-    return dadv * rima.exp(a)
+    return dadv * exp(a)
   elseif o == "log" then
     return dadv / a 
   elseif o == "log10" then
     return dadv / (math.log(10) * a)
   elseif o == "sin" then
-    return dadv * rima.cos(a)
+    return dadv * cos(a)
   elseif o == "cos" then
-    return -dadv * rima.sin(a)
+    return -dadv * sin(a)
   elseif o == "sqrt" then
     return dadv * 0.5 * a ^ (-0.5)
   else
@@ -93,7 +93,7 @@ local function make_math_function(name)
   op.__repr = math_repr
   op.__diff = math_diff
 
-  rima[name] = function(e)
+  _M[name] = function(e)
     if type(e) == "number" then
       return f(e)
     else

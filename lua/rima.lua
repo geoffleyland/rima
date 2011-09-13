@@ -4,6 +4,7 @@
 local debug = require("debug")
 local error, getfenv, require, unpack, xpcall =
       error, getfenv, require, unpack, xpcall
+local rawpairs = pairs
 
 local lib = require("rima.lib")
 local args = require("rima.lib.args")
@@ -14,6 +15,7 @@ local func = require("rima.func")
 local sum_op = require("rima.operators.sum")
 local prod_op = require("rima.operators.product")
 local case_op = require("rima.operators.case")
+local math_op = require("rima.operators.math")
 local minmax = require("rima.operators.minmax")
 local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
@@ -22,7 +24,7 @@ local compiler = require("rima.compiler")
 
 module(...)
 
-require("rima.mp")
+mp = require("rima.mp")
 
 
 -- String representation -------------------------------------------------------
@@ -118,6 +120,13 @@ end
 
 function max(...)
   return expression:new(minmax.max, ...)
+end
+
+
+for k, v in rawpairs(math_op) do
+  if k:sub(1, 1) ~= "_" then
+    _M[k] = v
+  end
 end
 
 
