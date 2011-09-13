@@ -29,9 +29,8 @@ function evaluate_terms(terms, S)
   end
   if new_terms then
     for i = 1, term_count do
-      local t = terms[i]
       if not new_terms[i] then
-        new_terms[i] = t
+        new_terms[i] = terms[i]
       end
     end
   end
