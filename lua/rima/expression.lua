@@ -1,8 +1,8 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local ipairs, pairs, rawget, rawset, require, setmetatable =
-      ipairs, pairs, rawget, rawset, require, setmetatable
+local pairs, rawget, rawset, require =
+      pairs, rawget, rawset, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -55,25 +55,26 @@ function expression:new_table(op, terms)
 end
 
 
--- String representation -------------------------------------------------------
+-- Expression methods ----------------------------------------------------------
 
-expression_methods = {}
-
-function expression_methods:new(...)
-  return expression:_new(self, {...})
-end
-
-function expression_methods.__repr(e, format)
-  return object.typename(e).."("..lib.concat_repr(proxy.O(e), format)..")"
-end
-expression_methods.__tostring = lib.__tostring
+expression_methods =
+{
+  new        = function(self, ...)    return expression:_new(self, {...}) end,
+  new_table  = function(self, t)      return expression:new_table(self, t) end,
+  __tostring = lib.__tostring,
+  __repr =
+    function(self, format)
+      return typename(self).."("..lib.concat_repr(proxy.O(self), format)..")"
+    end,
+}
 
 
 -- Introspection? --------------------------------------------------------------
 
-function expression_methods.__list_variables(args, S, list)
-  for _, a in ipairs(proxy.O(args)) do
-    core.list_variables(a, S, list)
+function expression_methods:__list_variables(S, list)
+  local terms = proxy.O(self)
+  for i = 1, #terms do
+    core.list_variables(terms[i], S, list)
   end
 end
 
