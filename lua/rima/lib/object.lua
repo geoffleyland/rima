@@ -54,12 +54,6 @@ function object.typeinfo(o)
 end
 
 
-function object.isa(t, o)
-  local mt = getmetatable(o)
-  return (mt and mt.__typeinfo or core_type_info[type(o)])[t]
-end
-
-
 function object.typename(o)
   local mt = getmetatable(o)
   return mt and mt.__typename or type(o)

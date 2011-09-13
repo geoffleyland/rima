@@ -56,7 +56,7 @@ function func:new(args, exp, S)
   local fname, usage =
     "func:new",
     "new(inputs, expression, table or scope)"
-  libargs.check_types(S, "S", {"nil", "table", {scope, "scope"}}, usage, fname)
+  libargs.check_types(S, "S", {"nil", "table", "scope"}, usage, fname)
 
   local name = "$func"..counter
   counter = counter + 1

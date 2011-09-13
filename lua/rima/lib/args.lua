@@ -40,7 +40,7 @@ function check_type(arg, name, expected, caller_usage, caller_name)
     end
   elseif type(expected) == "table" then
     if type(expected[1]) == "table" then
-      if not object.isa(expected[1], arg) then
+      if not object.typeinfo(arg)[expected[1]] then
         fail(object.typename(arg), name, expected[2], caller_usage, caller_name, 3)
       end
     elseif type(expected[1]) == "function" then
@@ -70,7 +70,7 @@ function check_types(arg, name, expected, caller_usage, caller_name)
       if object.typename(arg) == e then return end
     elseif type(e) == "table" then
       if type(e[1]) == "table" then
-        if object.isa(e[1], arg) then return end
+        if object.typeinfo(arg)[e[1]] then return end
       elseif type(e[1]) == "function" then
         if e[1](arg) then return end
       else

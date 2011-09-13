@@ -28,10 +28,6 @@ function number_t:new(lower, upper, integer)
 
 --  lower, upper = rima.eval(lower), rima.eval(upper)
 
---  assert((type(lower) == "number" or variable.isa(lower) or expression.isa(lower)) and
---         (type(upper) == "number" or variable.isa(upper) or expression.isa(upper)),
---         "Upper and lower bounds must be numbers, variables or expressions")
-
   if type(lower) == "number" and type(upper) == "number" and lower > upper then
     error(("%s: lower bound must be <= upper bound, got %s and %s.\n  Usage: %s"):format(
           fname, lib.repr(lower), lib.repr(upper), usage))
