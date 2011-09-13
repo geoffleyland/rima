@@ -1,19 +1,21 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local getmetatable, setmetatable = getmetatable, setmetatable
+local setmetatable = setmetatable
 
 module(...)
+
 
 -- Types -----------------------------------------------------------------------
 
 local proxy = _M
 local objects = setmetatable({}, { __mode = "k" })
 
+
 function proxy:new(o, class)
-  local proxy = setmetatable({}, class)
-  objects[proxy] = o
-  return proxy
+  local p = setmetatable({}, class)
+  objects[p] = o
+  return p
 end
 
 
