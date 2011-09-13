@@ -1,8 +1,10 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, getmetatable, ipairs, pairs, pcall, require, setmetatable, type, xpcall =
-      error, getmetatable, ipairs, pairs, pcall, require, setmetatable, type, xpcall
+local error, getfenv, ipairs, pairs, pcall, require, type, unpack, xpcall =
+      error, getfenv, ipairs, pairs, pcall, require, type, unpack, xpcall
+local getmetatable, setmetatable =
+      getmetatable, setmetatable
 
 local debug = require("debug")
 
@@ -426,6 +428,25 @@ end
 
 function proxy_mt.__call(...)
   return expression:new(call_op, ...)
+end
+
+
+-- Creating indexes ------------------------------------------------------------
+
+function R(names)
+  local results = {}
+  for n in names:gmatch("[%a_][%w_]*") do
+    results[#results+1] = index:new(nil, n)
+  end
+  return unpack(results)
+end
+
+
+function define(names, depth)
+  local env = getfenv(2 + depth or 0)
+  for n in names:gmatch("[%a_][%w_]*") do
+    env[n] = index:new(nil, n)
+  end
 end
 
 

@@ -35,11 +35,7 @@ function R(names)
   local fname, usage = "rima.R", "Create references.\n  ref1, ..., refN = R(name: list of comma-separated reference names [string])"
   args.check_type(names, "names", "string", usage, fname)
 
-  local results = {}
-  for n in names:gmatch("[%a_][%w_]*") do
-    results[#results+1] = index:new(nil, n)
-  end
-  return unpack(results)
+  return index.R(names)
 end
 
 
@@ -47,11 +43,7 @@ function define(names)
   local fname, usage = "rima.define", "Create references in the caller's environment.\n  define(name: list of comma-separated reference names [string])"
   args.check_type(names, "names", "string", usage, fname)
 
-  local results = {}
-  local env = getfenv(2)
-  for n in names:gmatch("[%a_][%w_]*") do
-    env[n] = index:new(nil, n)
-  end
+  index.define(names, 1)
 end
 
 
