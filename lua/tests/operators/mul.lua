@@ -7,7 +7,7 @@ local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local rima = rima
+local index = require("rima.index")
 
 module(...)
 
@@ -16,8 +16,9 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local D = lib.dump
+  local R = index.R
   local E = core.eval
+  local D = lib.dump
 
   local OD = function(e) return mul.__repr(e, { format="dump" }) end
   local OS = function(e) return mul.__repr(e, {}) end
@@ -43,7 +44,7 @@ function test(options)
   end
 
   do
-    local a, b = rima.R"a,b"
+    local a, b = R"a,b"
     S = { a = 5 }
 
     T:check_equal(OD({{1, a}}), '*(index(address{"a"})^1)')

@@ -3,24 +3,27 @@
 
 require("rima.operators.math")
 
-local math = require("math")
-
 local series = require("test.series")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local rima = rima
+local index = require("rima.index")
+local rima = require("rima")
+
+local math = require("math")
 
 module(...)
+
 
 -- Tests -----------------------------------------------------------------------
 
 function test(options)
   local T = series:new(_M, options)
 
+  local R = index.R
   local E = core.eval
   local D = lib.dump
 
-  local a, b  = rima.R"a, b"
+  local a, b  = R"a, b"
 
   T:check_equal(rima.exp(1), math.exp(1))
 

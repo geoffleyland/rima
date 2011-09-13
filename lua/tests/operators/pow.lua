@@ -7,7 +7,7 @@ local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local rima = rima
+local index = require("rima.index")
 
 module(...)
 
@@ -17,13 +17,14 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
+  local R = index.R
   local E = core.eval
   local D = lib.dump
 
   T:test(object.typeinfo(pow:new()).pow, "typeinfo(pow:new()).pow")
   T:check_equal(object.typename(pow:new()), "pow", "typename(pow:new()) == 'pow'")
 
-  local a, b = rima.R"a, b"
+  local a, b = R"a, b"
   local S = { a = 5 }
 
   T:check_equal(D(a^2), '^(index(address{"a"}), 2)')

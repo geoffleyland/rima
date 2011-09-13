@@ -8,6 +8,7 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
+local index = require("rima.index")
 local rima = require("rima")
 
 module(...)
@@ -18,8 +19,9 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local D = lib.dump
+  local R = index.R
   local E = core.eval
+  local D = lib.dump
 
   T:test(object.typeinfo(func:new({"a"}, 3)).func, "typeinfo(func:new()).func")
   T:check_equal(object.typename(func:new({"a"}, 3)), "func", "typename(func:new()) == 'func'")
@@ -27,7 +29,7 @@ function test(options)
   T:expect_error(function() func:new({1}, 1) end,
     "expected string or identifier, got '1' %(number%)")
   do
-    local a = rima.R"a"
+    local a = R"a"
     T:expect_error(function() func:new({a[1]}, 1) end,
       "expected string or identifier, got 'a%[1%]' %(index%)")
     local S = scope.new{ b=rima.free() }
@@ -36,7 +38,7 @@ function test(options)
   end
 
   do
-    local a = rima.R"a"
+    local a = R"a"
     local f
     T:expect_ok(function() f = func:new({"a"}, 3) end)
     T:expect_ok(function() f = func:new({a}, 3) end)
@@ -46,7 +48,7 @@ function test(options)
   end
 
   do
-    local a, x, y = rima.R"a, x, y"
+    local a, x, y = R"a, x, y"
     T:expect_ok(function() f = func:new({"a"}, 3 + a) end)
     T:expect_ok(function() f = func:new({a}, 3 + a) end)    
     
@@ -72,7 +74,7 @@ function test(options)
   end
 
   do
-    local a, b, x, y = rima.R"a, b, x, y"
+    local a, b, x, y = R"a, b, x, y"
     local f
     T:expect_ok(function() f = func:new({"a"}, a + b) end)
     T:expect_ok(function() f = func:new({a}, a + b) end)    
@@ -99,7 +101,7 @@ function test(options)
   end
 
   do
-    local a, b, x, y = rima.R"a, b, x, y"
+    local a, b, x, y = R"a, b, x, y"
     local f
     T:expect_ok(function() f = func:new({"a", "b"}, a + 3*b) end)
     T:expect_ok(function() f = func:new({"a", b}, a + 3*b) end)    
@@ -123,7 +125,7 @@ function test(options)
   end
 
   do
-    local a, b, c, t, s, u = rima.R"a, b, c, t, s, u"
+    local a, b, c, t, s, u = R"a, b, c, t, s, u"
     local S = {
       a={w={{x=10,y={z=100}},{x=20,y={z=200}}}},
       t=rima.F({b}, a.w[b].x),
@@ -154,7 +156,7 @@ function test(options)
   end
 
   do
-    local a, b, i = rima.R"a, b, i"
+    local a, b, i = R"a, b, i"
     local S = { a = { { 5 } }, b = rima.F({i}, a[1][i]) }
     T:check_equal(E(a[1][1], S), 5)
     T:check_equal(E(b(1), S), 5)
@@ -162,7 +164,7 @@ function test(options)
   end
 
   do
-    local f, x, y = rima.R"f, x, y"
+    local f, x, y = R"f, x, y"
     local S = { f = rima.F({y}, y + x, { x=5 }) }
     T:check_equal(E(f(x), S), "5 + x")
     S.x = 100
@@ -170,24 +172,24 @@ function test(options)
   end
 
   do
-    local f, x, y = rima.R"f, x, y"
-    local S = rima.scope.new{ f = rima.F({y}, y + x, { x=5 }) }
+    local f, x, y = R"f, x, y"
+    local S = scope.new{ f = rima.F({y}, y + x, { x=5 }) }
     local e = E(f(x), S)
-    local S2 = rima.scope.new(S, {x=200})
+    local S2 = scope.new(S, {x=200})
     T:check_equal(E(e, S2), 205)
   end
 
   do
-    local f, x, y, u, v = rima.R"f, x, y, u, v"
+    local f, x, y, u, v = R"f, x, y, u, v"
     local F = rima.F{x}(x * y, { y=5 })
-    local e = rima.E(u * f(v), { f=F })
+    local e = E(u * f(v), { f=F })
     T:check_equal(e, 5*u*v)
-    T:check_equal(rima.E(e, { u=2, v=3 }), 30)
+    T:check_equal(E(e, { u=2, v=3 }), 30)
   end
 
   do
-    local f, x = rima.R"f, x"
-    T:check_equal(rima.E(f(x), { f=rima.F{x}(x) }), "x")
+    local f, x = R"f, x"
+    T:check_equal(E(f(x), { f=rima.F{x}(x) }), "x")
   end
 
   return T:close()

@@ -9,6 +9,7 @@ local scope = require("rima.scope")
 local core = require("rima.core")
 local lib = require("rima.lib")
 local linearise = require("rima.mp.linearise")
+local index = require("rima.index")
 local rima = require("rima")
 
 module(...)
@@ -19,8 +20,9 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
+  local R = index.R
 
-  local a, b, c, d = rima.R"a, b, c, d"
+  local a, b, c, d = R"a, b, c, d"
   local S = rima.scope.new{ a = rima.free(), b = rima.free(), c=rima.types.undefined_t:new() }
   S.d = { rima.free(), rima.free() }
   
@@ -99,7 +101,7 @@ function test(options)
   check_linear(1 + rima.sum({c=d}, d[c]*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
 
   do
-    local d, D = rima.R"d, D"
+    local d, D = R"d, D"
     T:expect_ok(LF(rima.sum{d=D}(d), rima.scope.new{ D = { rima.free() }}))
     T:expect_ok(LF(rima.sum{d=D}(d.a), rima.scope.new{ D = { {a=rima.free()} }}))
     local S = rima.scope.new{ D = { {a=1} }}
@@ -110,7 +112,7 @@ function test(options)
 
   -- element times variable
   do
-    local i, x, q, Q, r = rima.R"i, x, q, Q, r"
+    local i, x, q, Q, r = R"i, x, q, Q, r"
     local S = scope.new{ Q = { 3, 7, 11, 13 } }
     S.x[i] = rima.free()
     check_linear(rima.sum{["r,q"]=rima.ipairs(Q)}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)

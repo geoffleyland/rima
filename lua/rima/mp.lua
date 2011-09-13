@@ -15,7 +15,6 @@ local closure = require("rima.closure")
 local constraint = require("rima.mp.constraint")
 local linearise = require("rima.mp.linearise")
 local solvers = require("rima.solvers")
-local rima = require("rima")
 
 module(...)
 
@@ -47,15 +46,15 @@ function find_constraints(S, callback)
     local r = index:new()
     local set_index, undefined_index = 1, 1
     for i = 1, #current_address do
-      local index = current_address[i]
-      if object.typeinfo(index).set_default_thinggy then
-        index = core.eval(rima.R(sets[set_index].names[1]), S)
-        if not core.defined(index) then
-          index = sets[set_index]
+      local current_index = current_address[i]
+      if object.typeinfo(current_index).set_default_thinggy then
+        current_index = core.eval(index.R(sets[set_index].names[1]), S)
+        if not core.defined(current_index) then
+          current_index = sets[set_index]
         end
         set_index = set_index + 1
       end
-      r = r[index]
+      r = r[current_index]
     end
     return r
   end

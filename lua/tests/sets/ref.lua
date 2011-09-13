@@ -8,7 +8,7 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local rima = require("rima")
+local index = require("rima.index")
 
 module(...)
 
@@ -18,11 +18,12 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
+  local R = index.R
   local E = core.eval
   local D = lib.dump
 
   do
-    local a, A, b, c = rima.R"a, A, b, c"
+    local a, A, b, c = R"a, A, b, c"
     local S = scope.new{A={{x="onedotx"}}} 
     S.b[{a=A}] = a
     S.c[{a=A}] = A[a]

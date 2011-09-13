@@ -7,7 +7,7 @@ local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local rima = require("rima")
+local index = require("rima.index")
 
 module(...)
 
@@ -35,12 +35,13 @@ end
 function test(options)
   local T = series:new(_M, options)
 
+  local R = index.R
   local E = core.eval
   local D = lib.dump
 
   -- tests with add, mul and pow
   do
-    local a, b = rima.R"a, b"
+    local a, b = R"a, b"
     local S = {}
     equal(T, '+(1*3, 4*index(address{"a"}))', {3 + 4 * a, S, E, D})
     equal(T, "3 - 4*a", {4 * -a + 3, S, E})
@@ -64,12 +65,12 @@ function test(options)
 
   -- tests with references to expressions
   do
-    local a, b = rima.R"a,b"
+    local a, b = R"a,b"
     local S = { b = 3 * (a + 1)^2 }
     equal(T, {b, S, E, D}, {3 * (a + 1)^2, S, E, D})
     equal(T, {5 * b, S, E, D}, {5 * (3 * (a + 1)^2), S, E, D} )
     
-    local c, d = rima.R"c,d"
+    local c, d = R"c,d"
     S.d = 3 + (c * 5)^2
     T:expect_ok(function() E(5 * d, S) end)
     equal(T, "5*(3 + (5*c)^2)", {5 * d, S, E})

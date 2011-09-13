@@ -7,8 +7,8 @@ local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local rima = require("rima")
 local index = require("rima.index")
+local rima = require("rima")
 
 module(...)
 
@@ -19,8 +19,9 @@ function test(options)
   local T = series:new(_M, options)
 
   local function N(...) return scope.new(...) end
+  local R = index.R
+  local E = core.eval
   local D = lib.dump
-  local E = rima.E
 
   -- Constructors
   T:test(object.typeinfo(N()).scope, "typeinfo(scope.new()).scope")
@@ -86,8 +87,8 @@ function test(options)
 
   -- references to references
   do
-    local a, b, c = rima.R"a, b, c"
-    local S = rima.scope.new{ a={x=b}, b={y=7} }
+    local a, b, c = R"a, b, c"
+    local S = N{ a={x=b}, b={y=7} }
     S.a.q = S.c
     S.c.r = 13
     T:check_equal(E(a.x.y, S), 7)
@@ -99,18 +100,18 @@ function test(options)
 
   -- References to undefined things
   do
-    local x, i = rima.R"x, i"
+    local x, i = R"x, i"
     T:check_equal(E(x.y.z, { x=i[1][2] }), "i[1, 2].y.z")
-    T:check_equal(E(x.y.z, scope.new{ x=i[1][2] }), "i[1, 2].y.z")
+    T:check_equal(E(x.y.z, N{ x=i[1][2] }), "i[1, 2].y.z")
     T:check_equal(E(x.a, { x = i, i={b=1} }), "i.a")
-    T:check_equal(E(x.a, scope.new{ x = i }), "i.a")
-    T:check_equal(E(x.a, scope.new{ x = i, i={b=1} }), "i.a")
+    T:check_equal(E(x.a, N{ x = i }), "i.a")
+    T:check_equal(E(x.a, N{ x = i, i={b=1} }), "i.a")
   end
 
   -- Variable indexes
   do
     local S = N()
-    local i, j, m = rima.R"i, j, m"
+    local i, j, m = R"i, j, m"
     T:expect_ok(function() S.a[1] = 11 end)
     T:expect_ok(function() S.a[i] = 13 end)
     T:expect_ok(function() S.a[5] = 17 end)
@@ -152,17 +153,17 @@ function test(options)
 
   do
     local S = N()
-    local a, x, X = rima.R("a, x, X")
+    local a, x, X = R("a, x, X")
     T:expect_ok(function() S.a[{x=X}] = x end)
   end
 
   -- Subscopes
   do
-    local c, f = rima.R("c, f")
-    local subscope = scope.new()
+    local c, f = R("c, f")
+    local subscope = N()
     subscope.a.b = c.d
     subscope.c.d.e = 23
-    local superscope = scope.new()
+    local superscope = N()
     superscope.c.d.e = 29
     superscope.f.g = subscope
     
@@ -173,10 +174,10 @@ function test(options)
   end
 
   do
-    local c, f = rima.R("c, f")
-    local subscope = scope.new()
+    local c, f = R("c, f")
+    local subscope = N()
     subscope.a.b = c.d
-    local superscope = scope.new()
+    local superscope = N()
     superscope.c.d.e = 37
     superscope.f.g.c.d.e = 41
     superscope.f.g = subscope
@@ -185,10 +186,10 @@ function test(options)
   end
 
   do
-    local b, c, d = rima.R("b, c, d")
-    local subscope = scope.new()
+    local b, c, d = R("b, c, d")
+    local subscope = N()
     subscope.a = b
-    local superscope = scope.new()
+    local superscope = N()
     superscope.c = subscope
     superscope.c.b = d
     superscope.d = 47
@@ -198,10 +199,10 @@ function test(options)
   end
 
   do
-    local c, f, h = rima.R("c, f, h")
-    local subscope = scope.new()
+    local c, f, h = R("c, f, h")
+    local subscope = N()
     subscope.a.b = c.d
-    local superscope = scope.new()
+    local superscope = N()
     superscope.f.g = subscope
     superscope.f.g.c.d.e = h.i
     superscope.h.i.j = 47
@@ -211,40 +212,40 @@ function test(options)
   end
 
   do
-    local c, g = rima.R"c, g"
-    local subsub = scope.new{a={b=c.d}}
-    local sub = scope.new{e={f=subsub}}
-    local sup = scope.new{g={h=sub}}
+    local c, g = R"c, g"
+    local subsub = N{a={b=c.d}}
+    local sub = N{e={f=subsub}}
+    local sup = N{g={h=sub}}
     subsub.c.d = 59
     
     T:check_equal(E(g.h.e.f.a.b, sup), 59)
   end
 
   do
-    local c, g = rima.R"c, g"
-    local subsub = scope.new{a={b=c.d}}
-    local sub = scope.new{e={f=subsub}}
-    local sup = scope.new{g={h=sub}}
+    local c, g = R"c, g"
+    local subsub = N{a={b=c.d}}
+    local sub = N{e={f=subsub}}
+    local sup = N{g={h=sub}}
     sub.e.f.c.d = 59
     
     T:check_equal(E(g.h.e.f.a.b, sup), 59)
   end
 
   do
-    local c, g = rima.R"c, g"
-    local subsub = scope.new{a={b=c.d}}
-    local sub = scope.new{e={f=subsub}}
-    local sup = scope.new{g={h=sub}}
+    local c, g = R"c, g"
+    local subsub = N{a={b=c.d}}
+    local sub = N{e={f=subsub}}
+    local sup = N{g={h=sub}}
     sup.g.h.e.f.c.d = 59
     
     T:check_equal(E(g.h.e.f.a.b, sup), 59)
   end
 
   do
-    local c, g, i = rima.R"c, g, i"
-    local subsub = scope.new{a={b=c.d}}
-    local sub = scope.new{e={f=subsub}}
-    local sup = scope.new{g={h=sub}}
+    local c, g, i = R"c, g, i"
+    local subsub = N{a={b=c.d}}
+    local sub = N{e={f=subsub}}
+    local sup = N{g={h=sub}}
     sub.e.f.c.d = i.j
     sub.i.j = 67
     
@@ -252,10 +253,10 @@ function test(options)
   end
 
   do
-    local c, g, i = rima.R"c, g, i"
-    local subsub = scope.new{a={b=c.d}}
-    local sub = scope.new{e={f=subsub}}
-    local sup = scope.new{g={h=sub}}
+    local c, g, i = R"c, g, i"
+    local subsub = N{a={b=c.d}}
+    local sub = N{e={f=subsub}}
+    local sup = N{g={h=sub}}
     sup.g.h.e.f.c.d = i.j
     sup.i.j = 67
     
@@ -263,10 +264,10 @@ function test(options)
   end
 
   do
-    local c, g, i, k, m, o, q = rima.R"c, g, i, k, m, o, q"
-    local subsub = scope.new{a={b=c.d}}
-    local sub = scope.new{e={f=subsub}}
-    local sup = scope.new{g={h=sub}}
+    local c, g, i, k, m, o, q = R"c, g, i, k, m, o, q"
+    local subsub = N{a={b=c.d}}
+    local sub = N{e={f=subsub}}
+    local sup = N{g={h=sub}}
     subsub.c.d = i.j
     sub.e.f.i.j = k.l
     sub.k.l = m.n
@@ -279,8 +280,8 @@ function test(options)
 
   -- Set subscope
   do
-    local a, i = rima.R"a, i"
-    local subscope = scope.new()
+    local a, i = R"a, i"
+    local subscope = N()
     subscope.b = 13
     local superscope = N()
     superscope.a[i] = subscope
@@ -298,7 +299,7 @@ function test(options)
 
   -- Expressions with set subscopes
   do
-    local a, b, sub = rima.R"a, b, sub"
+    local a, b, sub = R"a, b, sub"
     local subscope = N()
     subscope.a = b
     local superscope = N()
@@ -307,7 +308,7 @@ function test(options)
   end
 
   do
-    local a, b, c, sub = rima.R"a, b, c, sub"
+    local a, b, c, sub = R"a, b, c, sub"
     local subscope = N()
     subscope.a = b + c
     local superscope = N()
@@ -317,7 +318,7 @@ function test(options)
   end
 
   do
-    local a, b, c, d, e, sub = rima.R"a, b, c, d, e, sub"
+    local a, b, c, d, e, sub = R"a, b, c, d, e, sub"
     local subscope = N()
     subscope.a.b = c + d.e
     local superscope = N()
@@ -327,7 +328,7 @@ function test(options)
   end
 
   do
-    local a, b, B, sub = rima.R"a, b, B, sub"
+    local a, b, B, sub = R"a, b, B, sub"
     local subscope = N()
     subscope.a = rima.sum{b=B}(b)
     local superscope = N()
@@ -337,7 +338,7 @@ function test(options)
   end
 
   do
-    local a, b, c, d, e, i, s, sub = rima.R"a, b, c, d, e, i, s, sub"
+    local a, b, c, d, e, i, s, sub = R"a, b, c, d, e, i, s, sub"
 
     local subscope = N()
     subscope.e1 = a
@@ -376,8 +377,8 @@ function test(options)
 
   -- sums in closures
   do
-    local a, b, c, d, i = rima.R"a, b, c, d, i"
-    local S = scope.new()
+    local a, b, c, d, i = R"a, b, c, d, i"
+    local S = N()
     S.a[i] = rima.sum{c=b[i]}(c)
     S.b = { { 3, 5, 7 }, { 11, 13 }}
     T:check_equal(E(a[1], S), 15)
@@ -388,8 +389,8 @@ function test(options)
   end    
 
   do
-    local a, b, c, d, i, j = rima.R"a, b, c, d, i, j"
-    local S = scope.new()
+    local a, b, c, d, i, j = R"a, b, c, d, i, j"
+    local S = N()
     S.a[i] = rima.sum{c=b}(c[i])
     S.b = { { 3, 5, 7 }, { 11, 13 }}
     T:check_equal(E(a[1], S), 14)
@@ -401,9 +402,9 @@ function test(options)
 
   -- Table aggregation
   do
-    local a = rima.R"a"
-    local S = scope.new{a={b={[1]="hello"}}}
-    local S2 = scope.new(S, {a={b={[2]="world"}}})
+    local a = R"a"
+    local S = N{a={b={[1]="hello"}}}
+    local S2 = N(S, {a={b={[2]="world"}}})
     T:check_equal(E(a.b[1], S2), "hello")
     T:check_equal(E(a.b[2], S2), "world")
     T:check_equal(E(a.b, S2)[1], "hello")
@@ -412,14 +413,14 @@ function test(options)
 
   -- Table contents
   do
-    local i, I = rima.R"i, I"
-    local sub, sub3 = rima.R"sub, sub3"
-    local def, def2 = rima.R"def, def2"
-    local c = rima.R"c"
-    local subscope1 = scope.new{a={x=7}}
-    local subscope2 = scope.new(subscope1, {b=11, a={y=13}})
-    local subscope3 = scope.new{q=23}
-    local superscope = scope.new{c=17, I={1, 2, 3}}
+    local i, I = R"i, I"
+    local sub, sub3 = R"sub, sub3"
+    local def, def2 = R"def, def2"
+    local c = R"c"
+    local subscope1 = N{a={x=7}}
+    local subscope2 = N(subscope1, {b=11, a={y=13}})
+    local subscope3 = N{q=23}
+    local superscope = N{c=17, I={1, 2, 3}}
     superscope.sub[{i=I}] = subscope2
     superscope.sub[i].a.z = 19+i
     superscope.sub3 = subscope3
@@ -451,8 +452,8 @@ function test(options)
 
   -- index introspection
   do
-    local a, i, I = rima.R"a, i, I"
-    local S = scope.new()
+    local a, i, I = R"a, i, I"
+    local S = N()
     S.a[{i=I}].b = 10
     local list = {}
     index.proxy_mt.__list_variables(a[1].b, S, list)
@@ -473,7 +474,7 @@ function test(options)
   
   -- what happens if I do this?
   do
-    local a, i = rima.R"a, i"
+    local a, i = R"a, i"
     T:check_equal(E(a[i.j], { a={3, 5, 7}, i={j=2,k=3}}), 5)
     T:check_equal(E(a[i.j], { a={3, 5, 7}, i={}}), "a[i.j]")
     T:check_equal(E(a[i.j], { a={3, 5, 7} }), "a[i.j]")
@@ -482,14 +483,14 @@ function test(options)
 
   -- Bug in knapsack
   do
-    local a, i, sub0 = rima.R"a i, sub0"
-    local sub = scope.new()
+    local a, i, sub0 = R"a i, sub0"
+    local sub = N()
     sub.b = a
     sub.c.d = a
     sub.e[i] = a
     sub.f[i].g = a
 
-    local super = scope.new()
+    local super = N()
     super.sub0 = sub
     T:check_equal(E(sub0.b, super), "sub0.a")
     T:check_equal(E(sub0.c.d, super), "sub0.a")
@@ -498,34 +499,34 @@ function test(options)
   end
 
   do
-    local a, i, I, j, sub0 = rima.R"a i, I, j, sub0"
-    local sub = scope.new()
+    local a, i, I, j, sub0 = R"a i, I, j, sub0"
+    local sub = N()
     sub.a = rima.sum{i=I}(i.x)
 
-    local super1 = scope.new()
+    local super1 = N()
     super1.sub0.I = { {y=1}, {y=2} }
     super1.sub0 = sub
     T:check_equal(E(sub0.a, super1), "sub0.I[1].x + sub0.I[2].x")
     
-    local super2 = scope.new()
+    local super2 = N()
     super2.sub0.I = { {y=1}, {y=2} }
-    local super3 = scope.new(super2)
+    local super3 = N(super2)
     super3.sub0 = sub
     T:check_equal(E(sub0.a, super3), "sub0.I[1].x + sub0.I[2].x")
   end
 
   do
-    local a, b, c, i, I, s, sub0, notsub0 = rima.R"a, b, c, i, I, s, sub0, notsub0"
-    local sub = scope.new()
+    local a, b, c, i, I, s, sub0, notsub0 = R"a, b, c, i, I, s, sub0, notsub0"
+    local sub = N()
     sub.a = rima.sum{i=I}(i.x)
 
-    local super1 = scope.new()
+    local super1 = N()
     super1.a = rima.sum{s=sub0}(s.a)
     super1.b = rima.sum{s=notsub0}(sub0[s].a)
     super1.c = rima.sum{s=notsub0}(s.a)
     T:check_equal(E(a, super1), "sum{s in sub0}(s.a)")
 
-    local super2 = scope.new(super1)
+    local super2 = N(super1)
     super2.sub0[{s=sub0}] = sub
 
     T:check_equal(E(sub0[1].a, super2), "sum{i in sub0[1].I}(i.x)")
@@ -533,21 +534,21 @@ function test(options)
     T:check_equal(E(b, super2), "sum{s in notsub0}(sum{i in sub0[s].I}(i.x))")
     T:check_equal(E(c, super2), "sum{s in notsub0}(sum{i in s.I}(i.x))")
     
-    local super3 = scope.new(super2, { sub0={{I={{x=3},{x=5}}},{I={{x=7},{x=11}}}} })
+    local super3 = N(super2, { sub0={{I={{x=3},{x=5}}},{I={{x=7},{x=11}}}} })
     T:check_equal(E(a, super3), 26)
 
-    local super4 = scope.new(super2, { notsub0=sub0 })
+    local super4 = N(super2, { notsub0=sub0 })
     T:check_equal(E(b, super4), "sum{s in sub0}(sum{i in sub0[s].I}(i.x))")
     T:check_equal(E(c, super4), "sum{s in sub0}(sum{i in s.I}(i.x))")
   end
 
   do
-    local a, z, i, j = rima.R"a, z, i, j"
+    local a, z, i, j = R"a, z, i, j"
     local S
-    T:expect_ok(function() S = scope.new{ [a[i].b[j].c] = 13 } end)
+    T:expect_ok(function() S = N{ [a[i].b[j].c] = 13 } end)
     T:check_equal(E(a[1].b[2].c, S), 13)
 
-    T:expect_ok(function() S = scope.new{ z = {[a[i].b[j].c] = 17 }} end)
+    T:expect_ok(function() S = N{ z = {[a[i].b[j].c] = 17 }} end)
     T:check_equal(E(z.a[1].b[2].c, S), 17)
   end
 

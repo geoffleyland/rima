@@ -5,6 +5,8 @@ local ipairs, loadstring, pcall, setfenv = ipairs, loadstring, pcall, setfenv
 
 local lib = require("rima.lib")
 local core = require("rima.core")
+local index = require("rima.index")
+local scope = require("rima.scope")
 local rima = require("rima")
 
 module(...)
@@ -15,7 +17,7 @@ module(...)
 local function load_expression(T, s, variables)
   local fenv = { rima=rima }
   for _, n in ipairs(variables) do
-    fenv[n] = rima.R(n)
+    fenv[n] = index.R(n)
   end
   local f, m = loadstring("return "..s)
   if not f then
@@ -32,12 +34,12 @@ local function load_expression(T, s, variables)
 end
 
 
-local function expression_tester(T, variables, scope)
+local function expression_tester(T, variables, S0)
   local V = {}
   for n in variables:gmatch("[%a_][%w_]*") do
     V[#V+1] = n
   end
-  local S = rima.scope.new(scope or {})
+  local S = scope.new(S0 or {})
 
   return function(t)
     local e = load_expression(T, t[1], V)

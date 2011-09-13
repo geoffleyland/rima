@@ -7,6 +7,7 @@ local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
+local index = require("rima.index")
 local rima = require("rima")
 
 module(...)
@@ -16,14 +17,15 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local D = lib.dump
+  local R = index.R
   local E = core.eval
+  local D = lib.dump
 
   T:test(object.typeinfo(rima.case(1, {1, 1})).case, "typeinfo(case).case")
   T:check_equal(object.typename(rima.case(1, {1, 1})), "case", "typename(case) == 'case'")
   
   do
-    local a, b, c, d, e, f, g, h = rima.R"a, b, c, d, e, f, g, h"
+    local a, b, c, d, e, f, g, h = R"a, b, c, d, e, f, g, h"
     local C = rima.case(a, {{b, c},{d, e},{f, g}}, h)
 
     T:check_equal(C, "case a (b: c; d: e; f: g; default: h; )")

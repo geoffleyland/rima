@@ -5,6 +5,7 @@ local core = require("rima.core")
 
 local series = require("test.series")
 local lib = require("rima.lib")
+local index = require("rima.index")
 local rima = require("rima")
 
 module(...)
@@ -15,7 +16,7 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local x = rima.R"x"
+  local x = index.R"x"
 
   T:check_equal(core.diff(1, x), 0)
   T:check_equal(core.diff(x, x), 1)

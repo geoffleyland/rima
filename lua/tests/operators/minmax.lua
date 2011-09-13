@@ -7,6 +7,7 @@ local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
+local index = require("rima.index")
 local rima = require("rima")
 
 module(...)
@@ -17,15 +18,16 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local D = lib.dump
+  local R = index.R
   local E = core.eval
+  local D = lib.dump
 
   -- min
   T:test(object.typeinfo(rima.min(1, {1, 1})).min, "typeinfo(min).min")
   T:check_equal(object.typename(rima.min(1, {1, 1})), "min", "typename(min) == 'min'")
   
   do
-    local a, b, c, d = rima.R"a, b, c, d"
+    local a, b, c, d = R"a, b, c, d"
     local C = rima.min(a, b, c, d)
 
     T:check_equal(C, "min(a, b, c, d)")
@@ -39,7 +41,7 @@ function test(options)
   T:check_equal(object.typename(rima.max(1, {1, 1})), "max", "typename(max) == 'max'")
   
   do
-    local a, b, c, d = rima.R"a, b, c, d"
+    local a, b, c, d = R"a, b, c, d"
     local C = rima.max(a, b, c, d)
 
     T:check_equal(C, "max(a, b, c, d)")

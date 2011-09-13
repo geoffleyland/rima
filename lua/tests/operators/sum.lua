@@ -9,6 +9,7 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
+local index = require("rima.index")
 local rima = require("rima")
 
 module(...)
@@ -19,8 +20,9 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local D = lib.dump
+  local R = index.R
   local E = core.eval
+  local D = lib.dump
 
   T:test(object.typeinfo(sum:new()).sum, "typeinfo(sum:new()).sum")
   T:check_equal(object.typename(sum:new()), "sum", "typename(sum:new()) == 'sum'")
@@ -56,14 +58,14 @@ function test(options)
   U{"rima.sum{Q=Q, r=R[Q]}(y[r])", S="sum{Q in Q, r in R[Q]}(y[r])", ES=8}
 
   -- Ranges
-  local y, z = rima.R"y, z"
+  local y, z = R"y, z"
   local U = expression_tester(T, "x, Y, y, Z, z", { Y=rima.range(1, y), Z=rima.range(1, z), z=5 })
 --  U{"rima.sum{x=Y}(x)", S="sum{x in Y}(x)", ES="sum{x in range(1, y)}(x)", ED="sum({x in range(1, ref(y))}, ref(x))"}
   U{"rima.sum{x=Z}(x)", S="sum{x in Z}(x)", ES=15}
   U{"rima.sum{x=Z}(x * y)", S="sum{x in Z}(x*y)", ES=15*y}
 
   do
-    local x, X = rima.R"x, X"
+    local x, X = R"x, X"
     local S = scope.new{ X={{y=rima.free()},{y=rima.free()},{y=rima.free()}} }
     local S2 = scope.new(S, { X={{y=1},{y=2},{y=3}} })
     local e1 = rima.sum({["_, x"]=rima.ipairs(X)}, x.y)
@@ -90,7 +92,7 @@ function test(options)
   end
 
   do
-    local x, X, i = rima.R"x, X, i"
+    local x, X, i = R"x, X, i"
     local S = scope.new()
     S.X[i].y = rima.free()
     local S2 = scope.new(S, { X={{y=1},{y=2},{y=3}} })
@@ -119,7 +121,7 @@ function test(options)
   end
 
   do
-    local x, X, i = rima.R"x, X, i"
+    local x, X, i = R"x, X, i"
     local S = scope.new()
     S.X[i].y = rima.free()
     local S2 = scope.new(S, { X={{z=11}} })
@@ -163,7 +165,7 @@ function test(options)
 
   -- sums in sums
   do
-    local A, i, I, j, J = rima.R"A, i, I, j, J"
+    local A, i, I, j, J = R"A, i, I, j, J"
 
     local e = rima.sum{i=I}(rima.sum{j=J}(A[i][j]))
     local S =

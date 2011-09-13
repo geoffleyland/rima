@@ -6,7 +6,8 @@ local mp = require("rima.mp")
 local series = require("test.series")
 local lib = require("rima.lib")
 local constraint = require("rima.mp.constraint")
-
+local index = require("rima.index")
+local number_t = require("rima.types.number_t")
 local rima = require("rima")
 
 local math = require("math")
@@ -18,15 +19,17 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
+  local R = index.R
+
   do
-    local x, y = rima.R"x, y"
+    local x, y = R"x, y"
     local S = mp.new()
     S.c1 = constraint:new(x + 2*y, "<=", 3)
     S.c2 = constraint:new(2*x + y, "<=", 3)
     S.objective = x + y
     S.sense = "maximise"
-    S.x = rima.positive()
-    S.y = rima.positive()
+    S.x = number_t.positive()
+    S.y = number_t.positive()
     T:check_equal(lib.repr(S),
 [[
 Maximise:
@@ -53,13 +56,13 @@ Subject to:
   end
 
   do
-    local x, i, j = rima.R"x, i, j"
+    local x, i, j = R"x, i, j"
     local S = mp.new()
     S.c1 = constraint:new(x[1][1].a + 2*x[1][2].a, "<=", 3)
     S.c2 = constraint:new(2*x[1][1].a + x[1][2].a, "<=", 3)
     S.objective = x[1][1].a + x[1][2].a
     S.sense = "maximise"
-    S.x[i][j].a = rima.positive()
+    S.x[i][j].a = number_t.positive()
     T:check_equal(S,
 [[
 Maximise:
@@ -82,13 +85,13 @@ Subject to:
   end
 
   do
-    local m, M, n, N = rima.R"m, M, n, N"
-    local A, b, c, x = rima.R"A, b, c, x"
+    local m, M, n, N = R"m, M, n, N"
+    local A, b, c, x = R"A, b, c, x"
     local S = mp.new()
     S.constraint[{m=M}] = constraint:new(rima.sum{n=N}(A[m][n] * x[n]), "<=", b[m])
     S.objective = rima.sum{n=N}(c[n] * x[n])
     S.sense = "maximise"
-    S.x[n] = rima.positive()
+    S.x[n] = number_t.positive()
     T:check_equal(S,
 [[
 Maximise:
@@ -117,8 +120,8 @@ Subject to:
   end
 
   do
-    local a, p, P, q, Q = rima.R"a, p, P, q, Q"
-    local S = rima.mp.new()
+    local a, p, P, q, Q = R"a, p, P, q, Q"
+    local S = mp.new()
     S.constraint1[{p=P}][{q=P[p].Q}] = constraint:new(a, "<=", P[p].Q[q])
     S.constraint2[{p=P}][{q=p.Q}] = constraint:new(a, "<=", q)
     T:check_equal(S,
