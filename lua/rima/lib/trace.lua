@@ -54,7 +54,9 @@ function leave(tag, arg_count, ...)
   io.write("= ")
   for i = arg_count + 1, select('#', ...) do
     local a = select(i, ...)
-    io.write(("%s: %s "):format(lib.repr(a), lib.dump(a)))
+    if a then
+      io.write(("%s: %s "):format(lib.repr(a), lib.dump(a)))
+    end
   end
   io.write("\n")
 end
