@@ -1,0 +1,6 @@
+E $a * $b + $c * $d
+P     a*b + c*d
+S   b = 3
+s   d = 5
+P     3*a + 5*c
+

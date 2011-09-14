@@ -1,0 +1,5 @@
+E rima.sum{a=$A}($a)
+P     sum{a in A}(a)
+S   A = { 1, 2, 3 }
+P     6
+

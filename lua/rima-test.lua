@@ -25,12 +25,20 @@ for _, v in ipairs{...} do
   end
 end
 
-require("test.directory")
+local directory = require("test.directory")
+local expressions = require("test.expression_files")
+
 if strict then
   require("test.strict")
 end
 
-local passed, tests, fails = test.directory.test("rima", "tests", options, patterns)
+local p1, t1, f1 = directory.test("rima", "tests", options, patterns)
+local p2, t2, f2 = expressions.test("../expressions")
+
+local passed = p1 and p2
+local tests = t1 + t2
+local fails = f1 + f2
+
 if passed then
   io.stderr:write("All tests completed successfully\n")
   os.exit(0)
