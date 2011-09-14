@@ -82,7 +82,7 @@ end
 
 function ref:__repr(format)
   local s = lib.repr(self.set, format)
-  local n = (self.names and table.concat(self.names, ", "))
+  local n = (self.names and table.concat(self.names, ", ")) or ""
 
   local ff = format.format
 
