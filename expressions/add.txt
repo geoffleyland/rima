@@ -32,6 +32,11 @@ P     a + a
 S
 P     2*a
 
+E - $a
+P     -a
+S   a = 5
+P     -5
+
 E $a - $a
 P     a - a
 S
@@ -53,3 +58,9 @@ P     a + b + c
 S
 D     +(1*index(address{"a"}), 1*index(address{"b"}), 1*index(address{"c"}))
 
+E 2 - (3 + $a)
+P     2 - (3 + a)
+S
+P      -1 - a
+S   a = 5
+P     -6
