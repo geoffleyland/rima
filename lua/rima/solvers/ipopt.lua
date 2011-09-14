@@ -6,7 +6,7 @@ local assert, getmetatable, ipairs, pcall = assert, getmetatable, ipairs, pcall
 
 local core = require("rima.core")
 local index = require("rima.index")
-local rima = require("rima")
+local compiler = require("rima.compiler")
 
 local status, ipopt_core = pcall(require, "rima_ipopt_core")
 
@@ -47,7 +47,7 @@ local function compile_jacobian(expressions, variables)
     end
   end
 
-  local f, function_string = rima.compile(e2, variables)
+  local f, function_string = compiler.compile(e2, variables)
   return f, function_string, sparsity
 end
 
@@ -82,7 +82,7 @@ local function compile_hessian(objective, constraints, variables)
     end
   end
 
-  local f, function_string = rima.compile(e2, variables, "args, sigma, lambda")
+  local f, function_string = compiler.compile(e2, variables, "args, sigma, lambda")
   return f, function_string, sparsity
 end
 
@@ -110,8 +110,8 @@ local function solve_(options)
   {
     variables = options.ordered_variables,
     constraint_bounds = options.constraint_info,
-    objective_function = rima.compile(options.objective, options.ordered_variables),
-    constraint_function = rima.compile(options.constraint_expressions, options.ordered_variables)
+    objective_function = compiler.compile(options.objective, options.ordered_variables),
+    constraint_function = compiler.compile(options.constraint_expressions, options.ordered_variables)
   }
   F.objective_jacobian, _, F.oj_sparsity = compile_jacobian(options.objective, options.ordered_variables)
   F.constraint_jacobian, _, F.cj_sparsity = compile_jacobian(options.constraint_expressions, options.ordered_variables)

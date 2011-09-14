@@ -21,10 +21,10 @@ local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
 local compiler = require("rima.compiler")
+local mp = require("rima.mp")
 
 module(...)
 
-mp = require("rima.mp")
 
 
 -- String representation -------------------------------------------------------
