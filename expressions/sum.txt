@@ -3,3 +3,83 @@ P     sum{a in A}(a)
 S   A = { 1, 2, 3 }
 P     6
 
+E rima.sum{a=$A}($x)
+P     sum{a in A}(x)
+S   A = { 1, 2, 3 }
+P     3*x
+s   x = 5
+P     15
+
+E rima.sum{a=$A}($x[$a])
+P     sum{a in A}(x[a])
+S   A = { 1, 2, 3 }
+P     x[1] + x[2] + x[3]
+s   x = { 4, 5, 6 }
+P     15
+S   A = { "a", "b", "c" }
+P     x.a + x.b + x.c
+s   x = { a=10, b=20, c=30 }
+P     60
+
+E rima.sum{a=$A}($x[$a]*$y[$a])
+P     sum{a in A}(x[a]*y[a])
+S   A = { 1, 2, 3 }
+P     x[1]*y[1] + x[2]*y[2] + x[3]*y[3]
+s   x = { 4, 5, 6 }
+P     4*y[1] + 5*y[2] + 6*y[3]
+s   y = { 10, 20, 30 }
+P     320
+S   A = { "a", "b", "c" }
+P     x.a*y.a + x.b*y.b + x.c*y.c
+s   x = { a=4, b=5, c=6 }
+P     4*y.a + 5*y.b + 6*y.c
+s   y = { a=10, b=20, c=30 }
+P     320
+
+E rima.sum{A=$A}($x[$A]*$y[$A])
+P     sum{A in A}(x[A]*y[A])
+S   A = { 1, 2, 3 }
+P     x[1]*y[1] + x[2]*y[2] + x[3]*y[3]
+s   x = { 4, 5, 6 }
+P     4*y[1] + 5*y[2] + 6*y[3]
+s   y = { 10, 20, 30 }
+P     320
+S   A = { "a", "b", "c" }
+P     x.a*y.a + x.b*y.b + x.c*y.c
+s   x = { a=4, b=5, c=6 }
+P     4*y.a + 5*y.b + 6*y.c
+s   y = { a=10, b=20, c=30 }
+P     320
+
+E rima.sum{a=$A, b=$B}($x[$a][$b])
+P     sum{a in A, b in B}(x[a, b])
+S   A = { 1, 2, 3 }
+P     sum{b in B}(x[1, b] + x[2, b] + x[3, b])
+s   B = { "q", "r" }
+P      x[1].q + x[1].r + x[2].q + x[2].r + x[3].q + x[3].r
+s   x = {{q=1, r=1},{q=2, r=2},{q=3, r=3}}
+P      12
+
+E rima.sum{a=$A, b=$B[$a]}($x[$b])
+P     sum{a in A, b in B[a]}(x[b])
+S   A = { 1, 2 }
+P     sum{b in B[1]}(x[b]) + sum{b in B[2]}(x[b])
+s   B = {{"q", "r"},{"r", "s"}}
+P     x.q + 2*x.r + x.s
+s   x = { q=1, r=2, s=3 }
+P     8
+
+E rima.sum{x=$X}($x)
+P     sum{x in X}(x)
+S   X = rima.range(1, $xx)
+P     sum{x in range(1, xx)}(x)
+s   xx = 3
+P      6
+
+E rima.sum{x=$X}($x*$y)
+P     sum{x in X}(x*y)
+S   X = rima.range(1, $xx)
+P     sum{x in range(1, xx)}(x*y)
+s   xx = 5
+P      15*y
+

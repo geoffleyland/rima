@@ -29,43 +29,6 @@ function test(options)
   T:test(object.typeinfo(sum:new()).sum, "typeinfo(sum:new()).sum")
   T:check_equal(object.typename(sum:new()), "sum", "typename(sum:new()) == 'sum'")
 
-  local U = expression_tester(T, "x, y, z, Q, q, R, r, V, v", { R={"a", "b", "c"}, V={"d", "e"}, y={1, 2, 3}, z={{1,2},{3,4},{5,6}} })
-  U{"rima.sum{q=Q}(x)", S="sum{q in Q}(x)", ES="sum{q in Q}(x)"} --, D="sum(closure({ref{names={q}, order={aelements}, set=index(address{\"Q\"})}}, index(address{\"x\"})))"}
-  U{"rima.sum{r=R}(x)", S="sum{r in R}(x)", ES="3*x" }
-  U{"rima.sum{q=Q}(x[q])", S="sum{q in Q}(x[q])"}
-  U{"rima.sum{r=R}(x[r])", S="sum{r in R}(x[r])", ES="x.a + x.b + x.c"}
-
-  U{"rima.sum{r=R}(y[r])", S="sum{r in R}(y[r])", ES=6}
-
-  U{"rima.sum{q=Q}(x*v)", S="sum{q in Q}(v*x)" }
-  U{"rima.sum{q=Q}(x[q]*y[q])", S="sum{q in Q}(x[q]*y[q])"}  
-  U{"rima.sum{r=R}(x[r]*y[r])", S="sum{r in R}(x[r]*y[r])", ES="x.a + 2*x.b + 3*x.c"}
-  U{"rima.sum{q=Q, R=R}(x[q][R])", S="sum{R in R, q in Q}(x[q, R])", ES="sum{q in Q}(x[q].a + x[q].b + x[q].c)"}
-  U{"rima.sum{q=Q, r=R}(x[q][r])", S="sum{q in Q, r in R}(x[q, r])", ES="sum{q in Q}(x[q].a + x[q].b + x[q].c)"}
-  U{"rima.sum{q=Q, r=R}(x[q][r] * y[q])", S="sum{q in Q, r in R}(x[q, r]*y[q])", ES="sum{q in Q}(x[q].a*y[q] + x[q].b*y[q] + x[q].c*y[q])"}
-  U{"rima.sum{q=Q, r=R}(x[q][r] * y[r])", S="sum{q in Q, r in R}(x[q, r]*y[r])", ES="sum{q in Q}(x[q].a + 2*x[q].b + 3*x[q].c)"}
-
-  U{"rima.sum{Q=Q, R=R}(x[Q][R])", S="sum{Q in Q, R in R}(x[Q, R])", ES="sum{Q in Q}(x[Q].a + x[Q].b + x[Q].c)"}
-  U{"rima.sum{Q=Q, R=R}(z[Q][R])", S="sum{Q in Q, R in R}(z[Q, R])", ES="sum{Q in Q}(z[Q].a + z[Q].b + z[Q].c)"}
-  U{"rima.sum{V=V, Q=Q}(x[V][Q])", S="sum{Q in Q, V in V}(x[V, Q])", ES="sum{Q in Q}(x.d[Q] + x.e[Q])"}
-  U{"rima.sum{R=R, V=V}(x[R][V])", S="sum{R in R, V in V}(x[R, V])", ES="x.a.d + x.a.e + x.b.d + x.b.e + x.c.d + x.c.e"}
-  U{"rima.sum{R=R, V=V}(z[R][V])", S="sum{R in R, V in V}(z[R, V])", ES=21}
-
-  -- Recursive indexes
-  local U = expression_tester(T, "x, y, q, Q, R, r, V", { Q={"a", "b"}, R={ a={ "x", "y" }, b={ "y", "z" } }, y={ x=1, y=2, z=3} })
-  U{"rima.sum{q=Q, r=R[q]}(x[r])", S="sum{q in Q, r in R[q]}(x[r])", ES="x.x + 2*x.y + x.z"}
-  U{"rima.sum{Q=Q, r=R[Q]}(x[r])", S="sum{Q in Q, r in R[Q]}(x[r])", ES="x.x + 2*x.y + x.z"}
-  U{"rima.sum{V=V, r=R[V]}(x[r])", S="sum{V in V, r in R[V]}(x[r])", ES="sum{V in V, r in R[V]}(x[r])"}
-  U{"rima.sum{Q=Q, r=V[Q]}(x[r])", S="sum{Q in Q, r in V[Q]}(x[r])", ES="sum{r in V.a}(x[r]) + sum{r in V.b}(x[r])"}
-  U{"rima.sum{Q=Q, r=R[Q]}(y[r])", S="sum{Q in Q, r in R[Q]}(y[r])", ES=8}
-
-  -- Ranges
-  local y, z = R"y, z"
-  local U = expression_tester(T, "x, Y, y, Z, z", { Y=sets.range(1, y), Z=sets.range(1, z), z=5 })
---  U{"rima.sum{x=Y}(x)", S="sum{x in Y}(x)", ES="sum{x in range(1, y)}(x)", ED="sum({x in range(1, ref(y))}, ref(x))"}
-  U{"rima.sum{x=Z}(x)", S="sum{x in Z}(x)", ES=15}
-  U{"rima.sum{x=Z}(x * y)", S="sum{x in Z}(x*y)", ES=15*y}
-
   do
     local x, X = R"x, X"
     local S = scope.new{ X={{y=number_t.free()},{y=number_t.free()},{y=number_t.free()}} }
