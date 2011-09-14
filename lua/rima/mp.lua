@@ -19,16 +19,29 @@ local solvers = require("rima.solvers")
 module(...)
 
 
--- Utilities -------------------------------------------------------------------
+-- Model -----------------------------------------------------------------------
 
-local function sense(S)
-  local sense = core.eval(index:new(nil, "sense"), S)
-  if not core.defined(sense) then return end
-  if type(sense) ~= "string" then
+local proxy_mt = {}
+
+
+function new(parent, ...)
+  return scope.new_with_metatable(proxy_mt, parent, ...)
+end
+
+
+-- Solve tools -----------------------------------------------------------------
+
+local function sense(M)
+  local sense = core.eval(index:new().sense, M)
+  local ti = object.typeinfo(sense)
+  if ti.index then return end
+    if not ti.string then
     error(("Optimisation sense must be a string.  Got '%s'"):format(lib.repr(sense)),2)
   end
   sense = sense:lower():gsub("z", "s")
-  assert(sense == "minimise" or sense == "maximise", "Optimisation sense must be 'minimise' or 'maximise'")
+  if sense ~= "minimise" and sense ~= "maximise" then
+    error("Optimisation sense must be 'minimise' or 'maximise'", 2)
+  end
   return sense
 end
 
@@ -116,8 +129,8 @@ local function report_search_time(cc, t0, last)
 end
 
 
-function prepare_constraints(S)
-  local constraints = find_constraints(S, report_search_time)
+local function prepare_constraints(M)
+  local constraints = find_constraints(M, report_search_time)
 
   local constraint_expressions, constraint_info = {}, {}
   local linear = true
@@ -129,7 +142,7 @@ function prepare_constraints(S)
         format(lib.repr(c.constraint)), 0)
     end
 
-    local lower, upper, exp, linear_exp = c.constraint:characterise(S)
+    local lower, upper, exp, linear_exp = c.constraint:characterise(M)
     if not linear_exp then linear = false end
 
     c.lower = lower
@@ -149,7 +162,7 @@ function prepare_constraints(S)
 end
 
 
-function prepare_variables(S, objective, constraints)
+local function prepare_variables(M, objective, constraints)
   local has_integer_variables = false
 
   -- List all the variables in the constraints
@@ -173,7 +186,7 @@ function prepare_variables(S, objective, constraints)
   local sorted_variables = {}
   local i = 1
   for n, v in pairs(variable_map) do
-    local _, t = core.eval(v.ref, S)
+    local _, t = core.eval(v.ref, M)
     local ti = object.typeinfo(t)
     if not ti.number_t then
       if ti.undefined_t then
@@ -201,13 +214,53 @@ function prepare_variables(S, objective, constraints)
 end
 
 
--- Model -----------------------------------------------------------------------
+local function choose_solver(objective_is_linear, constraints_are_linear, has_integer_variables)
+  local objective_type = objective_is_linear and "linear" or "nonlinear"
+  local constraint_type = constraints_are_linear and "linear" or "nonlinear"
+  local variable_type = has_integer_variables and "integer" or "continuous"
 
-local proxy_mt = {}
+  local best_preference, best_solver, best_name = math.huge
+  for n, s in pairs(solvers) do
+    if s.available and
+       s.objective[objective_type] and
+       s.constraints[constraint_type] and
+       s.variables[variable_type] and
+       s.preference < best_preference then
+      best_preference = s.preference
+      best_solver = s
+      best_name = n
+    end
+  end
+
+  return best_solver, best_name
+end
 
 
-function new(parent, ...)
-  return scope.new_with_metatable(proxy_mt, parent, ...)
+local function format_results(r, variables, constraints)
+  local primal, dual = {}, {}
+  local has_dual = true
+  primal.objective = r.objective
+  for i, v in ipairs(r.variables) do
+    local ref = variables[i].ref
+    if type(v) == "table" then
+      index.set(ref, primal, v.p)
+      index.set(ref, dual, v.d)
+    else
+      index.set(ref, primal, v)
+      has_dual = false
+    end
+  end
+  for i, v in ipairs(r.constraints) do
+    local ref = constraints[i].ref
+    if type(v) == "table" then
+      index.set(ref, primal, v.p)
+      index.set(ref, dual, v.d)
+    else
+      index.set(ref, primal, v)
+      has_dual = false
+    end
+  end
+  return primal, has_dual and dual or nil
 end
 
 
@@ -284,41 +337,26 @@ proxy_mt.__tostring = lib.__tostring
 
 -- Solving ---------------------------------------------------------------------
 
-function solve(S, ...)
-  S = new(S, ...)
+function solve(M, ...)
+  M = new(M, ...)
 
-  local objective = core.eval(index:new(nil, "objective"), S)
-  local objective_is_linear, objective_constant, linear_objective = pcall(linearise.linearise, objective, S)
+  local objective = core.eval(index:new().objective, M)
+  local objective_is_linear, objective_constant, linear_objective = pcall(linearise.linearise, objective, M)
 
-  local constraints_are_linear, constraint_expressions, constraint_info = prepare_constraints(S)
+  local constraints_are_linear, constraint_expressions, constraint_info = prepare_constraints(M)
 
-  local has_integer_variables, variable_map, ordered_variables = prepare_variables(S, objective, constraint_expressions)
+  local has_integer_variables, variable_map, ordered_variables = prepare_variables(M, objective, constraint_expressions)
 
-  local objective_type = objective_is_linear and "linear" or "nonlinear"
-  local constraint_type = constraints_are_linear and "linear" or "nonlinear"
-  local variable_type = has_integer_variables and "integer" or "continuous"
+  local solver, solver_name = choose_solver(objective_is_linear, constraints_are_linear, has_integer_variables)
 
-  local best_preference, best_solver, best_name = math.huge
-  for n, s in pairs(solvers) do
-    if s.available and
-       s.objective[objective_type] and
-       s.constraints[constraint_type] and
-       s.variables[variable_type] and
-       s.preference < best_preference then
-      best_preference = s.preference
-      best_solver = s
-      best_name = n
-    end
-  end
-  
-  if not best_solver then
+  if not solver then
     return nil, "No available solver can handle this type of problem"
   end
 
-  io.stderr:write(("Solving with %s...\n"):format(best_name))
+  io.stderr:write(("Solving with %s...\n"):format(solver_name))
 
-  local r, message = best_solver.solve{
-    sense = sense(S),
+  local r, message = solver.solve{
+    sense = sense(M),
     objective = objective,
     linear_objective = linear_objective,
     constraint_expressions = constraint_expressions,
@@ -331,35 +369,14 @@ function solve(S, ...)
     return nil, message
   end
 
-  local primal, dual = {}, {}
-  local has_dual = true
-  primal.objective = r.objective
-  for i, v in ipairs(r.variables) do
-    if type(v) == "table" then
-      index.set(ordered_variables[i].ref, primal, v.p)
-      index.set(ordered_variables[i].ref, dual, v.d)
-    else
-      index.set(ordered_variables[i].ref, primal, v)
-      has_dual = false
-    end
-  end
-  for i, v in ipairs(r.constraints) do
-    if type(v) == "table" then
-      index.set(constraint_info[i].ref, primal, v.p)
-      index.set(constraint_info[i].ref, dual, v.d)
-    else
-      index.set(constraint_info[i].ref, primal, v)
-      has_dual = false
-    end
-  end
-  return primal, has_dual and dual or nil
+  return format_results(r, ordered_variables, constraint_info)
 end
 
 
-function solve_with(solver, S, ...)
+function solve_with(solver, M, ...)
   local p0 = solvers[solver].preference
   solvers[solver].preference = -1
-  local r1, r2, r3 = solve(S, ...)
+  local r1, r2, r3 = solve(M, ...)
   solvers[solver].preference = p0
   return r1, r2, r3
 end
