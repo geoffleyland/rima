@@ -8,6 +8,7 @@ local lib = require("rima.lib")
 local constraint = require("rima.mp.constraint")
 local index = require("rima.index")
 local number_t = require("rima.types.number_t")
+local sum = require("rima.operators.sum")
 local rima = require("rima")
 
 local math = require("math")
@@ -88,8 +89,8 @@ Subject to:
     local m, M, n, N = R"m, M, n, N"
     local A, b, c, x = R"A, b, c, x"
     local S = mp.new()
-    S.constraint[{m=M}] = constraint:new(rima.sum{n=N}(A[m][n] * x[n]), "<=", b[m])
-    S.objective = rima.sum{n=N}(c[n] * x[n])
+    S.constraint[{m=M}] = constraint:new(sum.build{n=N}(A[m][n] * x[n]), "<=", b[m])
+    S.objective = sum.build{n=N}(c[n] * x[n])
     S.sense = "maximise"
     S.x[n] = number_t.positive()
     T:check_equal(S,

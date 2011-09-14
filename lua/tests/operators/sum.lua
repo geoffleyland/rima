@@ -68,7 +68,7 @@ function test(options)
     local x, X = R"x, X"
     local S = scope.new{ X={{y=rima.free()},{y=rima.free()},{y=rima.free()}} }
     local S2 = scope.new(S, { X={{y=1},{y=2},{y=3}} })
-    local e1 = rima.sum({["_, x"]=rima.ipairs(X)}, x.y)
+    local e1 = sum.build{["_, x"]=rima.ipairs(X)}(x.y)
 
 --    T:check_equal(TYPE(X[1].y, S), rima.free())
     T:check_equal(E(X[1].y, S), "X[1].y")
@@ -78,13 +78,13 @@ function test(options)
     T:check_equal(E(e1, S), "X[1].y + X[2].y + X[3].y")
     T:check_equal(E(e1, S2), 6)
 
-    local e2 = rima.sum({X=X}, X.y)
+    local e2 = sum.build{X=X}(X.y)
     T:check_equal(e2, "sum{X in X}(X.y)")
 --    T:check_equal(D(e2), "sum({X in ref(X)}, index(ref(X), address{\"y\"}))")
     T:check_equal(E(e2, S), "X[1].y + X[2].y + X[3].y")
     T:check_equal(E(e2, S2), 6)
 
-    local e3 = rima.sum({x=X}, x.y)
+    local e3 = sum.build{x=X}(x.y)
     T:check_equal(e3, "sum{x in X}(x.y)")
 --    T:check_equal(D(e3), "sum({x in ref(X)}, index(ref(x), address{\"y\"}))")
     T:check_equal(E(e3, S), "X[1].y + X[2].y + X[3].y")
@@ -100,20 +100,20 @@ function test(options)
 --    T:check_equal(TYPE(X[1].y, S), rima.free())
     T:check_equal(E(X[1].y, S), "X[1].y")
 
-    local e1 = rima.sum({["_, x"]=rima.ipairs(X)}, x.y)
+    local e1 = sum.build{["_, x"]=rima.ipairs(X)}(x.y)
     T:check_equal(e1, "sum{_, x in ipairs(X)}(x.y)")
 --    T:check_equal(D(e1), "sum({_, x in ipairs(ref(X))}, index(ref(x), address{\"y\"}))")
     T:check_equal(E(e1, S), "sum{_, x in ipairs(X)}(x.y)")
     T:check_equal(E(e1, S2), 6)
 
-    local e2 = rima.sum({X=X}, X.y)
+    local e2 = sum.build{X=X}(X.y)
     T:check_equal(e2, "sum{X in X}(X.y)")
 --    T:check_equal(D(e2), "sum({X in ref(X)}, index(ref(X), address{\"y\"}))")
     T:check_equal(E(e2, S), "sum{X in X}(X.y)")
-    T:check_equal(E(rima.sum{x=X}(x.y), S2), 6)
+    T:check_equal(E(sum.build{x=X}(x.y), S2), 6)
     T:check_equal(E(e2, S2), 6)
 
-    local e3 = rima.sum({x=X}, x.y)
+    local e3 = sum.build{x=X}(x.y)
     T:check_equal(e3, "sum{x in X}(x.y)")
 --    T:check_equal(D(e3), "sum({x in ref(X)}, index(ref(x), address{\"y\"}))")
     T:check_equal(E(e3, S), "sum{x in X}(x.y)")
@@ -132,32 +132,32 @@ function test(options)
     T:check_equal(E(X[1].y, S2), "X[1].y")
     T:check_equal(E(X[1].y, S3), "X[1].y")
 
-    e = rima.sum{["_, x"]=rima.ipairs(X)}(x.y)
+    e = sum.build{["_, x"]=rima.ipairs(X)}(x.y)
     T:check_equal(e, "sum{_, x in ipairs(X)}(x.y)")
     T:check_equal(E(e, S2), "X[1].y")
     T:check_equal(E(e, S3), "X[1].y + X[2].y + X[3].y")
 
-    e = rima.sum{["_, x"]=rima.ipairs(X)}(x.y * x.z)
+    e = sum.build{["_, x"]=rima.ipairs(X)}(x.y * x.z)
     T:check_equal(e, "sum{_, x in ipairs(X)}(x.y*x.z)")
     T:check_equal(E(e, S2), "11*X[1].y")
     T:check_equal(E(e, S3), "11*X[1].y + 13*X[2].y + 17*X[3].y")
 
-    e = rima.sum{X=X}(X.y)
+    e = sum.build{X=X}(X.y)
     T:check_equal(e, "sum{X in X}(X.y)")
     T:check_equal(E(e, S2), "X[1].y")
     T:check_equal(E(e, S3), "X[1].y + X[2].y + X[3].y")
 
-    e = rima.sum{X=X}(X.y * X.z)
+    e = sum.build{X=X}(X.y * X.z)
     T:check_equal(e, "sum{X in X}(X.y*X.z)")
     T:check_equal(E(e, S2), "11*X[1].y")
     T:check_equal(E(e, S3), "11*X[1].y + 13*X[2].y + 17*X[3].y")
 
-    e = rima.sum{x=X}(x.y)
+    e = sum.build{x=X}(x.y)
     T:check_equal(e, "sum{x in X}(x.y)")
     T:check_equal(E(e, S2), "X[1].y")
     T:check_equal(E(e, S3), "X[1].y + X[2].y + X[3].y")
 
-    e = rima.sum{x=X}(x.y * x.z)
+    e = sum.build{x=X}(x.y * x.z)
     T:check_equal(e, "sum{x in X}(x.y*x.z)")
     T:check_equal(E(e, S2), "11*X[1].y")
     T:check_equal(E(e, S3), "11*X[1].y + 13*X[2].y + 17*X[3].y")
@@ -167,7 +167,7 @@ function test(options)
   do
     local A, i, I, j, J = R"A, i, I, j, J"
 
-    local e = rima.sum{i=I}(rima.sum{j=J}(A[i][j]))
+    local e = sum.build{i=I}(sum.build{j=J}(A[i][j]))
     local S =
     {
       A = {{3, 5, 7}, {11, 13, 19}},

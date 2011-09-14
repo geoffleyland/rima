@@ -90,13 +90,7 @@ compile = compiler.compile
 
 -- Operators -------------------------------------------------------------------
 
-function sum(sets, e)
-  if e then
-    return expression:new(sum_op, sets, e)
-  else
-    return function(e2) return expression:new(sum_op, sets, e2) end
-  end
-end
+sum = sum_op.build
 
 
 function product(sets, e)

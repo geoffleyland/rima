@@ -116,5 +116,22 @@ function sum.__list_variables(args, S, list)
 end
 
 
+-- sum constuctor --------------------------------------------------------------
+
+function build(x)
+  local term_count, terms = 1, { x }
+  local function next_term(y)
+    term_count = term_count + 1
+    terms[term_count] = y
+    if object.typename(y) == "table" then
+      return next_term
+    else
+      return expression:new_table(sum, terms)
+    end
+  end
+  return next_term
+end
+
+
 -- EOF -------------------------------------------------------------------------
 

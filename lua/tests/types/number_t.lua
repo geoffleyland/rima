@@ -8,7 +8,7 @@ local object = require("rima.lib.object")
 local core = require("rima.core")
 local index = require("rima.index")
 local undefined_t = require("rima.types.undefined_t")
-local rima = require("rima")
+local sum = require("rima.operators.sum")
 
 module(...)
 
@@ -89,7 +89,7 @@ function test(options)
     local x = R"x"
     local S1 = { x = {1} }
     local S2 = { x = {number_t:new()} }
-    local e = rima.sum{x=x}(x.a)
+    local e = sum.build{x=x}(x.a)
     T:expect_error(function() E(e, S1) end, "error indexing 'x%[1%]' as 'x%[1%]%.a': can't index a number")
     T:expect_error(function() E(e, S2) end, "error indexing 'x%[1%]' as 'x%[1%]%.a': can't index a number")
   end

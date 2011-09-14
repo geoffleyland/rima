@@ -8,9 +8,8 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
-local rima = require("rima")
+local sum = require("rima.operators.sum")
 
-local setmetatable = setmetatable
 
 module(...)
 
@@ -20,7 +19,7 @@ module(...)
 function test(options)
   local T = series:new(_M, options)
 
-  local I = setmetatable({}, { __index = function(i, ...) return index:new(nil, ...) end })
+  local R = index.R
   local E = core.eval
 
   T:test(object.typeinfo(undefined_t:new()).undefined_t, "typeinfo(undefined_t:new()).undefined_t")
@@ -35,23 +34,23 @@ function test(options)
   T:test(undefined_t:new():includes(nil), "undefined:includes()'")
   
   do
-    local x = I.x
+    local x = R"x"
     local S = { x = undefined_t:new() }
     T:check_equal(E(x, S), "x")
     T:check_equal(E(x + 1, S), "1 + x")
   end
 
   do
-    local x, y, z = I.x, I.y, I.z
+    local x, y, z = R"x, y, z"
     local S = { x = { undefined_t:new() }}
-    local e = rima.sum{y=x}(x[y])
+    local e = sum.build{y=x}(x[y])
     T:check_equal(E(e, S), "x[1]")
     T:check_equal(lib.dump(E(e, S)), "index(address{\"x\", 1})")
   end
 
   do
-    local x, y, z = I.x, I.y, I.z
-    local e = rima.sum{y=x}(y.z)
+    local x, y, z = R"x, y, z"
+    local e = sum.build{y=x}(y.z)
 
     local S1 = { x = {{}}}
     local S2 = { x = {{z=undefined_t:new()}}}
@@ -63,8 +62,8 @@ function test(options)
   end
 
   do
-    local x, X, y, Y, z = I.x, I.X, I.y, I.Y, I.z
-    local e = rima.sum{x=X}(rima.sum{y=x.Y}(y.z))
+    local x, X, y, Y, z = R"x, X, y, Y, z"
+    local e = sum.build{x=X}(sum.build{y=x.Y}(y.z))
 
     local S1 = { X={{Y={{}}}}}
     local S2 = { X={{Y={{z=undefined_t:new()}}}}}

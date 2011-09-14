@@ -10,6 +10,7 @@ local core = require("rima.core")
 local lib = require("rima.lib")
 local linearise = require("rima.mp.linearise")
 local index = require("rima.index")
+local sum = require("rima.operators.sum")
 local rima = require("rima")
 
 module(...)
@@ -23,7 +24,7 @@ function test(options)
   local R = index.R
 
   local a, b, c, d = R"a, b, c, d"
-  local S = rima.scope.new{ a = rima.free(), b = rima.free(), c=rima.types.undefined_t:new() }
+  local S = scope.new{ a = rima.free(), b = rima.free(), c=rima.types.undefined_t:new() }
   S.d = { rima.free(), rima.free() }
   
   local L = function(e, _S) return linearise.linearise(e, _S or S) end
@@ -97,17 +98,17 @@ function test(options)
   check_nonlinear(1 + a*b, S)
   check_linear(1 + a*b, 1, {a=5}, scope.new(S, {b=5}))
   check_linear(1 + d[2]*5, 1, {["d[2]"]=5}, S)
-  check_linear(1 + rima.sum({c=d}, c*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
-  check_linear(1 + rima.sum({c=d}, d[c]*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
+  check_linear(1 + sum.build{c=d}(c*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
+  check_linear(1 + sum.build{c=d}(d[c]*5), 1, {["d[1]"]=5, ["d[2]"]=5}, S)
 
   do
     local d, D = R"d, D"
-    T:expect_ok(LF(rima.sum{d=D}(d), rima.scope.new{ D = { rima.free() }}))
-    T:expect_ok(LF(rima.sum{d=D}(d.a), rima.scope.new{ D = { {a=rima.free()} }}))
-    local S = rima.scope.new{ D = { {a=1} }}
+    T:expect_ok(LF(sum.build{d=D}(d), scope.new{ D = { rima.free() }}))
+    T:expect_ok(LF(sum.build{d=D}(d.a), scope.new{ D = { {a=rima.free()} }}))
+    local S = scope.new{ D = { {a=1} }}
     S.D[d].b = rima.free()
-    T:expect_ok(LF(rima.sum{d=D}(d.b), S))
-    T:expect_ok(LF(rima.sum{d=D}(d.a * d.b), S))
+    T:expect_ok(LF(sum.build{d=D}(d.b), S))
+    T:expect_ok(LF(sum.build{d=D}(d.a * d.b), S))
   end
 
   -- element times variable
@@ -115,8 +116,8 @@ function test(options)
     local i, x, q, Q, r = R"i, x, q, Q, r"
     local S = scope.new{ Q = { 3, 7, 11, 13 } }
     S.x[i] = rima.free()
-    check_linear(rima.sum{["r,q"]=rima.ipairs(Q)}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
-    check_linear(rima.sum{["r,q"]=rima.ipairs(Q)}(q * x[r]), 0, {["x[1]"]=3,["x[2]"]=7,["x[3]"]=11,["x[4]"]=13}, S)
+    check_linear(sum.build{["r,q"]=rima.ipairs(Q)}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
+    check_linear(sum.build{["r,q"]=rima.ipairs(Q)}(q * x[r]), 0, {["x[1]"]=3,["x[2]"]=7,["x[3]"]=11,["x[4]"]=13}, S)
   end
 
   return T:close()
