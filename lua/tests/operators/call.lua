@@ -10,7 +10,7 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
 local index = require("rima.index")
-local rima = require("rima")
+local func = require("rima.func")
 
 module(...)
 
@@ -46,7 +46,7 @@ function test(options)
   -- The a here ISN'T in the global scope, it's in the function scope
   do
     local a, f, x = R"a, f, x"
-    local S = { f = rima.F({a}, 2 * a) }
+    local S = { f = func.build{a}(2 * a) }
 
     local c = f(3 + x)
     T:check_equal(c, "f(3 + x)")

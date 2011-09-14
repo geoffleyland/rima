@@ -68,7 +68,7 @@ You can call a Rima function like a regular Lua function.
 Keep in mind that the result might be an expression rather than a number:
 
     y = rima.R"y"
-    F = rima.F({y}, y^2)
+    F = rima.F{y}(y^2)
     print(F(5))                                         --> 25
 
 You can also call a Lua function as a Rima function.

@@ -9,7 +9,7 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
 local index = require("rima.index")
-local rima = require("rima")
+local number_t = require("rima.types.number_t")
 
 module(...)
 
@@ -32,7 +32,7 @@ function test(options)
     local a = R"a"
     T:expect_error(function() func:new({a[1]}, 1) end,
       "expected string or identifier, got 'a%[1%]' %(index%)")
-    local S = scope.new{ b=rima.free() }
+    local S = scope.new{ b=number_t.free() }
     T:expect_error(function() func:new({S.b}, 1) end,
       "expected string or identifier, got 'b' %(index%)")
   end
@@ -128,9 +128,9 @@ function test(options)
     local a, b, c, t, s, u = R"a, b, c, t, s, u"
     local S = {
       a={w={{x=10,y={z=100}},{x=20,y={z=200}}}},
-      t=rima.F({b}, a.w[b].x),
-      s=rima.F({b}, a.w[b].y),
-      u=rima.F({b}, a.q[b].y) }
+      t=func.build{b}(a.w[b].x),
+      s=func.build{b}(a.w[b].y),
+      u=func.build{b}(a.q[b].y) }
 
     T:check_equal(D(t(1)), "call(index(address{\"t\"}), 1)")
     T:check_equal(t(1), "t(1)")
@@ -157,7 +157,7 @@ function test(options)
 
   do
     local a, b, i = R"a, b, i"
-    local S = { a = { { 5 } }, b = rima.F({i}, a[1][i]) }
+    local S = { a = { { 5 } }, b = func.build{i}(a[1][i]) }
     T:check_equal(E(a[1][1], S), 5)
     T:check_equal(E(b(1), S), 5)
     T:expect_error(function() E(b(1)[1], S) end, "can't index a number")
@@ -165,7 +165,7 @@ function test(options)
 
   do
     local f, x, y = R"f, x, y"
-    local S = { f = rima.F({y}, y + x, { x=5 }) }
+    local S = { f = func.build{y}(y + x, { x=5 }) }
     T:check_equal(E(f(x), S), "5 + x")
     S.x = 100
     T:check_equal(E(f(x), S), 105)
@@ -173,7 +173,7 @@ function test(options)
 
   do
     local f, x, y = R"f, x, y"
-    local S = scope.new{ f = rima.F({y}, y + x, { x=5 }) }
+    local S = scope.new{ f = func.build{y}(y + x, { x=5 }) }
     local e = E(f(x), S)
     local S2 = scope.new(S, {x=200})
     T:check_equal(E(e, S2), 205)
@@ -181,7 +181,7 @@ function test(options)
 
   do
     local f, x, y, u, v = R"f, x, y, u, v"
-    local F = rima.F{x}(x * y, { y=5 })
+    local F = func.build{x}(x * y, { y=5 })
     local e = E(u * f(v), { f=F })
     T:check_equal(e, 5*u*v)
     T:check_equal(E(e, { u=2, v=3 }), 30)
@@ -189,7 +189,7 @@ function test(options)
 
   do
     local f, x = R"f, x"
-    T:check_equal(E(f(x), { f=rima.F{x}(x) }), "x")
+    T:check_equal(E(f(x), { f=func.build{x}(x) }), "x")
   end
 
   return T:close()

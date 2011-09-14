@@ -67,13 +67,7 @@ end
 
 -- Creating functions ----------------------------------------------------------
 
-function F(inputs, e, S) -- create a function
-  if e then
-    return func:new(inputs, e, S)
-  else
-    return function(e, S) return func:new(inputs, e, S) end
-  end
-end
+F = func.build
 
 
 -- Automatic differentiation ---------------------------------------------------

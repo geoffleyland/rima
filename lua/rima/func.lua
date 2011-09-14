@@ -106,5 +106,12 @@ function func:__call(...)
 end
 
 
+-- Building a function ---------------------------------------------------------
+
+function build(inputs)
+  return function(e, S) return func:new(inputs, e, S) end
+end
+
+
 -- EOF -------------------------------------------------------------------------
 
