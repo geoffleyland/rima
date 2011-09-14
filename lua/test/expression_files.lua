@@ -109,7 +109,7 @@ local function directory(path)
       local mode = lfs.attributes(f, "mode")
       if mode == "directory" then
         T:run(function(options) return test(f:gsub("/", "."), f, options, patterns) end)
-      elseif f:match("%.txt$") then
+      elseif f:match("%.txt$") and not f:match("%.results%.txt$") then
         local infile = io.open(f, "r")
         local f2 = f:gsub("%.txt$", ".results.txt")
         local outfile = io.open(f2, "w")
