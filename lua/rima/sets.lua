@@ -38,6 +38,11 @@ function ord_op.__eval(args_in, S)
 end
 
 
+function ord(e)
+  return expression:new(ord_op, e)
+end
+
+
 -- Ranges ----------------------------------------------------------------------
 
 local range_type = object:new_class({}, "range_type")
@@ -86,6 +91,11 @@ function range_op.__eval(args_in, S)
       return expression:new(range_op, l, h)
     end
   end
+end
+
+
+function range(l, h)
+  return expression:new(range_op, l, h)
 end
 
 

@@ -99,24 +99,10 @@ end
 
 -- Set tools -------------------------------------------------------------------
 
-function ord(e)
-  return expression:new(sets.ord_op, e)
-end
-
-
-function range(l, h)
-  return expression:new(sets.range_op, l, h)
-end
-
-
-function pairs(exp)
-  return set_ref:new(exp, "", "pairs")
-end
-
-
-function ipairs(exp)
-  return set_ref:new(exp, "i", "pairs")
-end
+ord = sets.ord
+range = sets.range
+pairs = set_ref.pairs
+ipairs = set_ref.ipairs
 
 
 -- Types -----------------------------------------------------------------------

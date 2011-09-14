@@ -9,7 +9,7 @@ local constraint = require("rima.mp.constraint")
 local index = require("rima.index")
 local number_t = require("rima.types.number_t")
 local sum = require("rima.operators.sum")
-local rima = require("rima")
+local sets = require("rima.sets")
 
 local math = require("math")
 
@@ -104,8 +104,8 @@ Subject to:
 
     local primal, dual = mp.solve_with("lpsolve", S,
       {
-        M = rima.range(1, 2),
-        N = rima.range(1, 2),
+        M = sets.range(1, 2),
+        N = sets.range(1, 2),
         A = {{1, 2}, {2, 1}},
         b = {3, 3},
         c = {1, 1},

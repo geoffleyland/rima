@@ -10,7 +10,9 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
 local index = require("rima.index")
-local rima = require("rima")
+local sets = require("rima.sets")
+local set_ref = require("rima.sets.ref")
+local number_t = require("rima.types.number_t")
 
 module(...)
 
@@ -59,18 +61,18 @@ function test(options)
 
   -- Ranges
   local y, z = R"y, z"
-  local U = expression_tester(T, "x, Y, y, Z, z", { Y=rima.range(1, y), Z=rima.range(1, z), z=5 })
+  local U = expression_tester(T, "x, Y, y, Z, z", { Y=sets.range(1, y), Z=sets.range(1, z), z=5 })
 --  U{"rima.sum{x=Y}(x)", S="sum{x in Y}(x)", ES="sum{x in range(1, y)}(x)", ED="sum({x in range(1, ref(y))}, ref(x))"}
   U{"rima.sum{x=Z}(x)", S="sum{x in Z}(x)", ES=15}
   U{"rima.sum{x=Z}(x * y)", S="sum{x in Z}(x*y)", ES=15*y}
 
   do
     local x, X = R"x, X"
-    local S = scope.new{ X={{y=rima.free()},{y=rima.free()},{y=rima.free()}} }
+    local S = scope.new{ X={{y=number_t.free()},{y=number_t.free()},{y=number_t.free()}} }
     local S2 = scope.new(S, { X={{y=1},{y=2},{y=3}} })
-    local e1 = sum.build{["_, x"]=rima.ipairs(X)}(x.y)
+    local e1 = sum.build{["_, x"]=set_ref.ipairs(X)}(x.y)
 
---    T:check_equal(TYPE(X[1].y, S), rima.free())
+--    T:check_equal(TYPE(X[1].y, S), number_t.free())
     T:check_equal(E(X[1].y, S), "X[1].y")
 
     T:check_equal(e1, "sum{_, x in ipairs(X)}(x.y)")
@@ -94,13 +96,13 @@ function test(options)
   do
     local x, X, i = R"x, X, i"
     local S = scope.new()
-    S.X[i].y = rima.free()
+    S.X[i].y = number_t.free()
     local S2 = scope.new(S, { X={{y=1},{y=2},{y=3}} })
     
---    T:check_equal(TYPE(X[1].y, S), rima.free())
+--    T:check_equal(TYPE(X[1].y, S), number_t.free())
     T:check_equal(E(X[1].y, S), "X[1].y")
 
-    local e1 = sum.build{["_, x"]=rima.ipairs(X)}(x.y)
+    local e1 = sum.build{["_, x"]=set_ref.ipairs(X)}(x.y)
     T:check_equal(e1, "sum{_, x in ipairs(X)}(x.y)")
 --    T:check_equal(D(e1), "sum({_, x in ipairs(ref(X))}, index(ref(x), address{\"y\"}))")
     T:check_equal(E(e1, S), "sum{_, x in ipairs(X)}(x.y)")
@@ -123,7 +125,7 @@ function test(options)
   do
     local x, X, i = R"x, X, i"
     local S = scope.new()
-    S.X[i].y = rima.free()
+    S.X[i].y = number_t.free()
     local S2 = scope.new(S, { X={{z=11}} })
     local S3 = scope.new(S, { X={{z=11},{z=13},{z=17}} })
     local e
@@ -132,12 +134,12 @@ function test(options)
     T:check_equal(E(X[1].y, S2), "X[1].y")
     T:check_equal(E(X[1].y, S3), "X[1].y")
 
-    e = sum.build{["_, x"]=rima.ipairs(X)}(x.y)
+    e = sum.build{["_, x"]=set_ref.ipairs(X)}(x.y)
     T:check_equal(e, "sum{_, x in ipairs(X)}(x.y)")
     T:check_equal(E(e, S2), "X[1].y")
     T:check_equal(E(e, S3), "X[1].y + X[2].y + X[3].y")
 
-    e = sum.build{["_, x"]=rima.ipairs(X)}(x.y * x.z)
+    e = sum.build{["_, x"]=set_ref.ipairs(X)}(x.y * x.z)
     T:check_equal(e, "sum{_, x in ipairs(X)}(x.y*x.z)")
     T:check_equal(E(e, S2), "11*X[1].y")
     T:check_equal(E(e, S3), "11*X[1].y + 13*X[2].y + 17*X[3].y")
@@ -171,8 +173,8 @@ function test(options)
     local S =
     {
       A = {{3, 5, 7}, {11, 13, 19}},
-      I = rima.range(1,2),
-      J = rima.range(1,3),
+      I = sets.range(1,2),
+      J = sets.range(1,3),
     }
     T:check_equal(E(e, S), 58)
   end

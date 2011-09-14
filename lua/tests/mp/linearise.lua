@@ -11,7 +11,9 @@ local lib = require("rima.lib")
 local linearise = require("rima.mp.linearise")
 local index = require("rima.index")
 local sum = require("rima.operators.sum")
-local rima = require("rima")
+local set_ref = require("rima.sets.ref")
+local undefined_t = require("rima.types.undefined_t")
+local number_t = require("rima.types.number_t")
 
 module(...)
 
@@ -24,8 +26,8 @@ function test(options)
   local R = index.R
 
   local a, b, c, d = R"a, b, c, d"
-  local S = scope.new{ a = rima.free(), b = rima.free(), c=rima.types.undefined_t:new() }
-  S.d = { rima.free(), rima.free() }
+  local S = scope.new{ a = number_t.free(), b = number_t.free(), c=undefined_t:new() }
+  S.d = { number_t.free(), number_t.free() }
   
   local L = function(e, _S) return linearise.linearise(e, _S or S) end
   local LF = function(e, _S) return function() linearise.linearise(e, _S or S) end end
@@ -103,10 +105,10 @@ function test(options)
 
   do
     local d, D = R"d, D"
-    T:expect_ok(LF(sum.build{d=D}(d), scope.new{ D = { rima.free() }}))
-    T:expect_ok(LF(sum.build{d=D}(d.a), scope.new{ D = { {a=rima.free()} }}))
+    T:expect_ok(LF(sum.build{d=D}(d), scope.new{ D = { number_t.free() }}))
+    T:expect_ok(LF(sum.build{d=D}(d.a), scope.new{ D = { {a=number_t.free()} }}))
     local S = scope.new{ D = { {a=1} }}
-    S.D[d].b = rima.free()
+    S.D[d].b = number_t.free()
     T:expect_ok(LF(sum.build{d=D}(d.b), S))
     T:expect_ok(LF(sum.build{d=D}(d.a * d.b), S))
   end
@@ -115,9 +117,9 @@ function test(options)
   do
     local i, x, q, Q, r = R"i, x, q, Q, r"
     local S = scope.new{ Q = { 3, 7, 11, 13 } }
-    S.x[i] = rima.free()
-    check_linear(sum.build{["r,q"]=rima.ipairs(Q)}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
-    check_linear(sum.build{["r,q"]=rima.ipairs(Q)}(q * x[r]), 0, {["x[1]"]=3,["x[2]"]=7,["x[3]"]=11,["x[4]"]=13}, S)
+    S.x[i] = number_t.free()
+    check_linear(sum.build{["r,q"]=set_ref.ipairs(Q)}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
+    check_linear(sum.build{["r,q"]=set_ref.ipairs(Q)}(q * x[r]), 0, {["x[1]"]=3,["x[2]"]=7,["x[3]"]=11,["x[4]"]=13}, S)
   end
 
   return T:close()
