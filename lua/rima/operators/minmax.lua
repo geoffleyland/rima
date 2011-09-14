@@ -41,6 +41,11 @@ function min.__eval(args, S)
 end
 
 
+function build_min(...)
+  return expression:new(min, ...)
+end
+
+
 -- Max -------------------------------------------------------------------------
 
 max = expression:new_type({}, "max")
@@ -67,6 +72,11 @@ function max.__eval(args, S)
   else
     return m
   end
+end
+
+
+function build_max(...)
+  return expression:new(max, ...)
 end
 
 

@@ -8,7 +8,6 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
-local rima = require("rima")
 
 module(...)
 
@@ -23,12 +22,12 @@ function test(options)
   local D = lib.dump
 
   -- min
-  T:test(object.typeinfo(rima.min(1, {1, 1})).min, "typeinfo(min).min")
-  T:check_equal(object.typename(rima.min(1, {1, 1})), "min", "typename(min) == 'min'")
+  T:test(object.typeinfo(minmax.build_min(1, {1, 1})).min, "typeinfo(min).min")
+  T:check_equal(object.typename(minmax.build_min(1, {1, 1})), "min", "typename(min) == 'min'")
   
   do
     local a, b, c, d = R"a, b, c, d"
-    local C = rima.min(a, b, c, d)
+    local C = minmax.build_min(a, b, c, d)
 
     T:check_equal(C, "min(a, b, c, d)")
     T:check_equal(E(C, {a = 1}), "min(b, c, d, 1)")
@@ -37,12 +36,12 @@ function test(options)
   end
 
   -- max
-  T:test(object.typeinfo(rima.max(1, {1, 1})).max, "typeinfo(max).max")
-  T:check_equal(object.typename(rima.max(1, {1, 1})), "max", "typename(max) == 'max'")
+  T:test(object.typeinfo(minmax.build_max(1, {1, 1})).max, "typeinfo(max).max")
+  T:check_equal(object.typename(minmax.build_max(1, {1, 1})), "max", "typename(max) == 'max'")
   
   do
     local a, b, c, d = R"a, b, c, d"
-    local C = rima.max(a, b, c, d)
+    local C = minmax.build_max(a, b, c, d)
 
     T:check_equal(C, "max(a, b, c, d)")
     T:check_equal(E(C, {a = 1}), "max(b, c, d, 1)")

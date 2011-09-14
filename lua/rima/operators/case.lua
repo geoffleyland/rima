@@ -86,6 +86,12 @@ function case.__eval(args, S)
   end
 end
 
+-- build a case ----------------------------------------------------------------
+
+function build(value, cases, default)
+  return expression:new(case, value, cases, default)
+end
+
 
 -- EOF -------------------------------------------------------------------------
 

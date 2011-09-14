@@ -86,22 +86,9 @@ compile = compiler.compile
 
 sum = sum_op.build
 product = prod_op.build
-
-
-function case(value, cases, default)
-  return expression:new(case_op, value, cases, default)
-end
-
-
-function min(...)
-  return expression:new(minmax.min, ...)
-end
-
-
-function max(...)
-  return expression:new(minmax.max, ...)
-end
-
+case = case_op.build
+min = minmax.build_min
+max = minmax.build_max
 
 for k, v in rawpairs(math_op) do
   if k:sub(1, 1) ~= "_" then
