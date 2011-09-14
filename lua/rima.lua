@@ -91,15 +91,7 @@ compile = compiler.compile
 -- Operators -------------------------------------------------------------------
 
 sum = sum_op.build
-
-
-function product(sets, e)
-  if e then
-    return expression:new(prod_op, sets, e)
-  else
-    return function(e2) return expression:new(prod_op, sets, e2) end
-  end
-end
+product = prod_op.build
 
 
 function case(value, cases, default)
