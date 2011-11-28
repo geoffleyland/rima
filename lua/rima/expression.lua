@@ -40,7 +40,6 @@ end
 
 
 function expression:_new(op, terms)
-  if rawget(op, "construct") then terms = op.construct(terms) end
   local e = proxy:new(terms, op)
   if op.simplify then e = op.simplify(e) end
   return e

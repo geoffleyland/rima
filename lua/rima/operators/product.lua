@@ -21,12 +21,14 @@ local set_list = require("rima.sets.list")
 local product = expression:new_type(_M, "product")
 product.precedence = 1
 
-function product.construct(args)
-  local sets, exp = args[1], args[2]
-  if not object.typeinfo(sets).set_list then
-    sets = set_list:read(sets)
+
+function product:simplify()
+  local terms = proxy.O(self)
+  if not object.typeinfo(terms[1]).closure then
+    local sets = set_list:read(terms[1])
+    return expression:new_table(product, { closure:new(terms[2], sets) })
   end
-  return { closure:new(exp, sets) }
+  return self
 end
 
 
