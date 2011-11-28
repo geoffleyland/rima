@@ -162,7 +162,11 @@ local function safe_index(t, i, base, address, length, depth, allow_undefined)
   if not status then
     local a2 = address:sub(1, length)
     if base then
-      a2 = proxy.O(base).address + a2
+      local ba = base
+      while ba and object.typename(ba) ~= "address" do
+        ba = proxy.O(ba).address
+      end
+      a2 = ba + a2
     end
     if message:sub(1, 11) == "can't index" then
       error(("error indexing '%s' as '%s': %s"):format(lib.repr(a2), lib.repr(a2+i), message), depth+1)
