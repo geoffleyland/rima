@@ -45,33 +45,29 @@ end
 
 -- Evaluation ------------------------------------------------------------------
 
+function pow:simplify()
+  local terms = proxy.O(self)
+  local base, exponent = terms[1], terms[2]
+
+  if base == 0 then
+    return 0
+  elseif base == 1 or exponent == 0 then
+    return 1
+  elseif exponent == 1 then
+    return base
+  elseif type(exponent) == "number" then
+    return expression:new(mul, {exponent, base})
+  else
+    return self
+  end
+end
+
+
 function pow:__eval(S)
   local terms = proxy.O(self)
-  local base, exponent = core.eval(terms[1], S), core.eval(terms[2], S)
-  
-  local base_is_number = type(base) == "number"
-  
-  if base_is_number then
-    if base == 0 then
-      return 0
-    elseif base == 1 then
-      return 1
-    end
-  end
-
-  if type(exponent) == "number" then
-    if exponent == 0 then
-      return 1
-    elseif exponent == 1 then
-      return base
-    elseif base_is_number then
-      return base ^ exponent
-    else
-      return expression:new(mul, {exponent, base})
-    end
- end
-
-  if base == terms[1] and exponent == terms[2] then
+  local t1, t2 = terms[1], terms[2]
+  local base, exponent = core.eval(t1, S), core.eval(t2, S)
+  if base == t1 and exponent == t2 then
     return self
   else
     return base ^ exponent

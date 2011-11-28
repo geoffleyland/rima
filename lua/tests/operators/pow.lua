@@ -27,7 +27,7 @@ function test(options)
   local a, b = R"a, b"
   local S = { a = 5 }
 
-  T:check_equal(D(a^2), '^(index(address{"a"}), 2)')
+  T:check_equal(D(a^2), '*(index(address{"a"})^2)')
   T:check_equal(a^2, "a^2")
   T:check_equal(a^b, "a^b")
   T:check_equal(E(a^2, S), 25)
