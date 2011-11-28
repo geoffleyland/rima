@@ -91,6 +91,7 @@ function load_expression_ops()
     local add_op = require("rima.operators.add")
     local mul_op = require("rima.operators.mul")
     local pow_op = require("rima.operators.pow")
+    local mod_op = require("rima.operators.mod")
     local call_op = require("rima.operators.call")
     local index = require("rima.index")
 
@@ -102,6 +103,7 @@ function load_expression_ops()
       __mul   = function(a, b) return expression:new(mul_op, { 1, a}, { 1, b}) end,
       __div   = function(a, b) return expression:new(mul_op, { 1, a}, {-1, b}) end,
       __pow   = function(a, b) return expression:new(pow_op, a, b) end,
+      __mod   = function(a, b) return expression:new(mod_op, a, b) end,
       __call  = function(...)  return expression:new(call_op, ...) end,
       __index = function(...)  return index:new(...) end,
     }

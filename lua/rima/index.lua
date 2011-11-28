@@ -25,6 +25,7 @@ module(...)
 local add_op = require("rima.operators.add")
 local mul_op = require("rima.operators.mul")
 local pow_op = require("rima.operators.pow")
+local mod_op = require("rima.operators.mod")
 local call_op = require("rima.operators.call")
 local expression = require("rima.expression")
 
@@ -428,6 +429,10 @@ end
 
 function proxy_mt.__pow(a, b)
   return expression:new(pow_op, a, b)
+end
+
+function proxy_mt.__mod(a, b)
+  return expression:new(mod_op, a, b)
 end
 
 function proxy_mt.__call(...)

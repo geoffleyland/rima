@@ -16,5 +16,6 @@ require("rima.operators.sum")
 require("rima.operators.product")
 require("rima.operators.case")
 require("rima.operators.minmax")
+require("rima.operators.mod")
 
 -- EOF -------------------------------------------------------------------------
