@@ -4,9 +4,6 @@ S
 P     3
 
 E 0 + $a
-P     0 + a
-D     +(1*0, 1*index(address{"a"}))
-S
 P     a
 D     index(address{"a"})
 
@@ -22,14 +19,9 @@ s   b = 7
 P     8
 
 E 1 + $a - 1
-P     1 + a - 1
-D     +(1*+(1*1, 1*index(address{"a"})), -1*1)
-S
 P     a
 
 E $a + $a
-P     a + a
-S
 P     2*a
 
 E - $a
@@ -38,8 +30,6 @@ S   a = 5
 P     -5
 
 E $a - $a
-P     a - a
-S
 P     0
 
 E $a + $b
@@ -59,8 +49,6 @@ S
 D     +(1*index(address{"a"}), 1*index(address{"b"}), 1*index(address{"c"}))
 
 E 2 - (3 + $a)
-P     2 - (3 + a)
-S
 P      -1 - a
 S   a = 5
 P     -6

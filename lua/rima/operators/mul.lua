@@ -73,13 +73,12 @@ end
 local product
 
 -- Simplify a single term
-local function simplify(new_terms, term_map, exponent, e, id, sort)
+local function _simplify(new_terms, term_map, exponent, e, id, sort)
   local coeff, changed = 1
   if core.arithmetic(e) then                    -- if the term evaluated to a number, then multiply the coefficient by it
     -- If the exponent's not one, that's a change.
     -- If the expression is one, then we're going to remove it and that's a change
-    -- If this constant isn't the first term we've seen, then it'll move to the front and that's a change
-    if exponent ~= 1 or e == 1 or new_terms[1] then changed = true end
+    if exponent ~= 1 or e == 1 then changed = true end
     coeff = e ^ exponent
   else
     local ti = object.typeinfo(e)
@@ -90,16 +89,20 @@ local function simplify(new_terms, term_map, exponent, e, id, sort)
     elseif ti.add and #terms == 1 then          -- if the term is a sum with a single term, hoist it
       local t1 = terms[1]
       coeff = t1[1] ^ exponent
-      local _, c2 = simplify(new_terms, term_map, exponent, t1[2], t1.id, t1.sort)
+      local _, c2 = _simplify(new_terms, term_map, exponent, t1[2], t1.id, t1.sort)
       coeff = coeff * c2
       changed = true
     elseif ti.pow and core.arithmetic(terms[2]) then
       -- if the term is an exponentiation to a constant power, hoist it
-      _, coeff = simplify(new_terms, term_map, exponent * terms[2], terms[1])
+      _, coeff = _simplify(new_terms, term_map, exponent * terms[2], terms[1])
       changed = true
     else                                          -- if there's nothing else to do, add the term
-      changed = add_mul.add_term(new_terms, term_map, exponent, element.extract(e), id, sort)
+      local e2 = element.extract(e)
+      changed = add_mul.add_term(new_terms, term_map, exponent, e2, id, sort) or e2 ~= e
     end
+  end
+  if coeff ~= 1 then
+    add_mul.add_term(new_terms, term_map, 1, 0, " ", " ")
   end
   return changed, coeff
 end
@@ -110,7 +113,7 @@ function product(new_terms, term_map, exponent, terms)
   local coeff, changed
   for i = 1, #terms do
     local t = terms[i]
-    local ch2, c2 = simplify(new_terms, term_map, exponent * t[1], t[2], t.id, t.sort)
+    local ch2, c2 = _simplify(new_terms, term_map, exponent * t[1], t[2], t.id, t.sort)
     if ch2 or (coeff and c2 ~= 1) then
       changed = true
     end
@@ -120,24 +123,20 @@ function product(new_terms, term_map, exponent, terms)
 end
 
 
-function mul:__eval(S)
-  -- Multiply all the arguments, keeping track of the product of any exponents,
-  -- and of all remaining unresolved terms
-  -- If any subexpressions are products, we dive into them, if any are
-  -- sums with one term we pull it up and if any are pows, we try to hoist out
-  -- the constant and see if what's left is a product.
-  local terms, evaluate_changed = add_mul.evaluate_terms(proxy.O(self), S)
-
+function mul:simplify()
+  local terms = proxy.O(self)
   local ordered_terms, term_map = {}, {}
   local simplify_changed, coeff = product(ordered_terms, term_map, 1, terms)
 
   if coeff == 0 then return 0 end
 
-  if coeff ~= 1 then
-    ordered_terms[#ordered_terms+1] = { 1, coeff, id=" ", sort=" " }
+  local ci = term_map[" "]
+  if ci then
+    ci[1] = coeff ~= 1 and 1 or 0
+    ci[2] = coeff
   end
 
-  local term_count = add_mul.sort_terms(ordered_terms)
+  local term_count, sort_changed = add_mul.sort_terms(ordered_terms)
 
   if term_count == 0 then return coeff end
 
@@ -148,14 +147,20 @@ function mul:__eval(S)
          term_count == 1 and                    -- and there's one term
          ordered_terms[1][1] == 1 then          -- without an exponent
     return ordered_terms[1][2]                  -- then we're the identity, so return the expression
+  end
 
-  elseif not evaluate_changed and not simplify_changed then
-    -- if nothing changed, return the original object
-    return self
-
-  else                                          -- return the constant and the terms
+  if simplify_changed or sort_changed then
     return expression:new_table(mul, ordered_terms)
   end
+
+  return self
+end
+
+
+function mul:__eval(S)
+  local terms = add_mul.evaluate_terms(proxy.O(self), S)
+  if not terms then return self end
+  return expression:new_table(mul, terms)
 end
 
 

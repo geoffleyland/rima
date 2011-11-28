@@ -35,7 +35,7 @@ function evaluate_terms(terms, S)
     end
   end
 
-  return new_terms or terms, new_terms and true or false
+  return new_terms
 end
 
 
@@ -70,6 +70,7 @@ function sort_terms(terms)
   -- sort the new terms alphabetically, so that when we group by a string
   -- representation, like terms look alike
   local term_count = 0
+  local prev, need_sort
   for i = 1, #terms do
     local t = terms[i]
     terms[i] = nil
@@ -79,10 +80,16 @@ function sort_terms(terms)
       end
       term_count = term_count + 1
       terms[term_count] = t
+      if prev and prev.sort > t.sort then
+        need_sort = true
+      end
+      prev = t
     end
   end
-  table.sort(terms, term_order)
-  return term_count
+  if need_sort then
+    table.sort(terms, term_order)
+  end
+  return term_count, need_sort
 end
 
 

@@ -58,7 +58,7 @@ function test(options)
     equal(T, '+(1*1, 1.5**(index(address{"a"})^-1))', {1 + 3 / (a + a), S, E, D})
     equal(T, "1 + 1.5/a", {1 + 3 / (a + a), S, E})
 
-    equal(T, '*(3^1, *(index(address{"a"})^2)^1)', {3 * a^2, "", D})
+    equal(T, '*(3^1, index(address{"a"})^2)', {3 * a^2, "", D})
     equal(T, '*(3^1, index(address{"a"})^2)', {3 * a^2, S, E, D})
     equal(T, '*(3^1, +(1*1, 1*index(address{"a"}))^2)', {3 * (a+1)^2, S, E, D})
   end
