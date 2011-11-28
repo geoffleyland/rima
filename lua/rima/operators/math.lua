@@ -80,25 +80,27 @@ local function make_math_function(name)
   local f = assert(math[name], "The math function does not exist")
   local op = expression:new_type({ precedence=0 }, name) 
 
-  op.__eval = function(args, S)
-    args = proxy.O(args)
-    local r = core.eval(args[1], S)
-    if type(r) == "number" then
-      return f(r)
+  op.simplify = function(self)
+    local t1 = proxy.O(self)[1]
+    if type(t1) == "number" then
+      return f(t1)
     else
-      return expression:new(op, r)
+      return self
     end
+  end
+
+  op.__eval = function(self, S)
+    local t1 = proxy.O(self)[1]
+    local e = core.eval(t1, S)
+    if e == t1 then return self end
+    return expression:new(op, e)
   end
 
   op.__repr = math_repr
   op.__diff = math_diff
 
   _M[name] = function(e)
-    if type(e) == "number" then
-      return f(e)
-    else
-      return expression:new(op, e)
-    end
+    return expression:new(op, e)
   end
 end
 
