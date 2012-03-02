@@ -29,7 +29,7 @@ Expressions can be treated just like variables, and used to build more complex e
 
     x, y = rima.R"x, y"
     e = 2 + y
-    print(x * e)                                         --> x*(2 + y)
+    print(x * e)                                         --> (2 + y)*x
 
 
 ## Evaluating Expressions
@@ -65,7 +65,7 @@ which you can evaluate later:
 
     x, y = rima.R"x, y"
     e = x * x * y * y^2
-    print(e)                                            --> x*x*y*y^2
+    print(e)                                            --> x^2*y^3
     print(rima.E(e))                                    --> x^2*y^3
 
 
