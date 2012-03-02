@@ -22,8 +22,7 @@ list = object:new_class(_M, "sets.list")
 
 
 function list:new(l)
-  l = l or {}
-  return object.new(self, l)
+  return object.new(self, l or {})
 end
 
 
