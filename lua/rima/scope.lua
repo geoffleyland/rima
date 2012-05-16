@@ -16,7 +16,6 @@ module(...)
 
 local set_list = require("rima.sets.list")
 local set_ref = require("rima.sets.ref")
-local element = require("rima.sets.element")
 local closure = require("rima.closure")
 
 
