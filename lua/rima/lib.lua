@@ -60,6 +60,19 @@ function getmetamethod(obj, methodname)
 end
 
 
+-- Object conversion -----------------------------------------------------------
+
+-- Convert an object if it has a metamethod with the right name
+function convert(obj, methodname)
+  local f = getmetamethod(obj, methodname)
+  if f then
+    return f(obj)
+  else
+    return obj
+  end
+end
+
+
 -- String representation -------------------------------------------------------
 
 local number_format = "%.4g"

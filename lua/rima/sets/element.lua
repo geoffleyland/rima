@@ -81,20 +81,27 @@ element.__tostring = lib.__tostring
 
 -- Operators -------------------------------------------------------------------
 
-function element.extract(a)
-  if not typeinfo(a).element then return a end
-  local e = proxy.O(a)
+function element:extract()
+  local e = proxy.O(self)
   local v = e.value
-  if typeinfo(v).undefined_t then return e.exp end
-  return v
+  if typeinfo(v).undefined_t then
+    return e.exp
+  else
+    return v
+  end
 end
 
 
-function proxy_mt.__add(a, b) return extract(a) + extract(b) end
-function proxy_mt.__sub(a, b) return extract(a) - extract(b) end
-function proxy_mt.__mul(a, b) return extract(a) * extract(b) end
-function proxy_mt.__div(a, b) return extract(a) / extract(b) end
-function proxy_mt.__pow(a, b) return extract(a) ^ extract(b) end
+local function ex(a)
+  return lib.convert(a, "extract")
+end
+
+
+function proxy_mt.__add(a, b) return ex(a) + ex(b) end
+function proxy_mt.__sub(a, b) return ex(a) - ex(b) end
+function proxy_mt.__mul(a, b) return ex(a) * ex(b) end
+function proxy_mt.__div(a, b) return ex(a) / ex(b) end
+function proxy_mt.__pow(a, b) return ex(a) ^ ex(b) end
 
 function proxy_mt:__unm() return -proxy.O(self).value end
 function proxy_mt:__index(i) return proxy.O(self).exp[i] end

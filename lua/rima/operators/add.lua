@@ -9,7 +9,6 @@ local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local element = require("rima.sets.element")
 
 module(...)
 
@@ -90,11 +89,11 @@ local function _simplify(new_terms, term_map, coeff, e, id, sort)
         end
         changed = true
       else                                      -- otherwise just add it
-        local e2 = element.extract(e)
+        local e2 = lib.convert(e, "extract")
         changed = add_mul.add_term(new_terms, term_map, coeff, e2, id, sort) or e2 ~= e
       end
     else                                        -- if there's nothing else to do, add the term
-      local e2 = element.extract(e)
+      local e2 = lib.convert(e, "extract")
       changed = add_mul.add_term(new_terms, term_map, coeff, e2, id, sort) or e2 ~= e
     end
   end
