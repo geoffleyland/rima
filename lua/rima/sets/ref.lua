@@ -193,7 +193,7 @@ function ref:index(S, Sn, i)
       error(("Index out of bounds when indexing %s as %s[%s]"):format(lib.repr(self), lib.repr(self.set), lib.repr(i)))
     end
     local value = v and v.value
-    self:set_args(Sn, element:new(self.set[i], i, v, literal))
+    self:set_args(Sn, element:new(self.set[i], i, v))
   end
 end
 
@@ -225,7 +225,7 @@ local function set_ref_ielements(state, i)
   i = i + 1
   local v = l[i]
   if not v then return end
-  r:set_args(state.scope, element:new(r.set[i], i, v.value, l))
+  r:set_args(state.scope, element:new(r.set[i], i, v.value))
   return i
 end
 
@@ -236,7 +236,7 @@ local function set_ref_elements(state, k)
   local v
   k, v = next(l, k)
   if not k then return end
-  r:set_args(state.scope, element:new(r.set[k], k, v.value, l))
+  r:set_args(state.scope, element:new(r.set[k], k, v.value))
   return k
 end
 
@@ -283,7 +283,7 @@ function ref:fake_iterate(S)
   if self.values == "pairs" then
     self:set_args(S, nil, self.set[index:new(nil, self.names[2])])
   else
-    self:set_args(S, element:new(self.set[index:new(nil, self.names[1])], nil, nil, nil))
+    self:set_args(S, element:new(self.set[index:new(nil, self.names[1])], 0, 0))
   end
 end
 
