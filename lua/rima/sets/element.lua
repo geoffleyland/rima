@@ -4,7 +4,6 @@
 local setmetatable = setmetatable
 
 local object = require("rima.lib.object")
-local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 
@@ -16,19 +15,22 @@ module(...)
 -- Elements -------------------------------------------------------------------
 
 element = object:new_class(_M, "element")
-proxy_mt = setmetatable({}, element)
+local elements = setmetatable({}, { __mode="k" })
 
 function element:new(exp, key, value)
-  return proxy:new(object.new(self, { exp=exp, key=key, value=value }), proxy_mt)
+  local e = { exp=exp, key=key, value=value }
+  local p = object.new(element, {})
+  elements[p] = e
+  return p
 end
 
 
-function element:key() return proxy.O(self).key end
-function element:value() return proxy.O(self).value end
-function element:expression() return proxy.O(self).exp end
+function element:key() return elements[self].key end
+function element:value() return elements[self].value end
+function element:expression() return elements[self].exp end
 
 function element:display()
-  self = proxy.O(self)
+  self = elements[self]
   local v = self.value
   if v then
     local t = typeinfo(v)
@@ -41,7 +43,7 @@ end
 
 
 function element:__eval(S)
-  local s = proxy.O(self)
+  local s = elements[self]
   local value, type, addr = core.eval(s.exp, S)
   if value == s.exp then
     return self
@@ -52,18 +54,18 @@ end
 
 
 function element:__defined()
-  local v = proxy.O(self).value
+  local v = elements[self].value
   return v ~= nil
 end
 
 
 function element:__arithmetic()
-  return core.arithmetic(proxy.O(self).value)
+  return core.arithmetic(elements[self].value)
 end
 
 
 function element:__repr(format)
-  self = proxy.O(self)
+  self = elements[self]
   if format.format == "dump" then
     return ("element(%s, key=%s, value=%s)"):
       format(lib.repr(self.exp, format), lib.repr(self.key, format), lib.repr(self.value, format))
@@ -75,17 +77,16 @@ function element:__repr(format)
     end
   end
 end
-proxy_mt.__tostring = lib.__tostring
 element.__tostring = lib.__tostring
 
 
 -- Operators -------------------------------------------------------------------
 
 function element:extract()
-  local e = proxy.O(self)
-  local v = e.value
+  self = elements[self]
+  local v = self.value
   if typeinfo(v).undefined_t then
-    return e.exp
+    return self.exp
   else
     return v
   end
@@ -97,14 +98,14 @@ local function ex(a)
 end
 
 
-function proxy_mt.__add(a, b) return ex(a) + ex(b) end
-function proxy_mt.__sub(a, b) return ex(a) - ex(b) end
-function proxy_mt.__mul(a, b) return ex(a) * ex(b) end
-function proxy_mt.__div(a, b) return ex(a) / ex(b) end
-function proxy_mt.__pow(a, b) return ex(a) ^ ex(b) end
+function element.__add(a, b) return ex(a) + ex(b) end
+function element.__sub(a, b) return ex(a) - ex(b) end
+function element.__mul(a, b) return ex(a) * ex(b) end
+function element.__div(a, b) return ex(a) / ex(b) end
+function element.__pow(a, b) return ex(a) ^ ex(b) end
 
-function proxy_mt:__unm() return -proxy.O(self).value end
-function proxy_mt:__index(i) return proxy.O(self).exp[i] end
+function element:__unm() return -elements[self].value end
+function element:__index(i) return elements[self].exp[i] end
 
 
 -- EOF -------------------------------------------------------------------------
