@@ -18,8 +18,8 @@ module(...)
 element = object:new_class(_M, "element")
 proxy_mt = setmetatable({}, element)
 
-function element:new(exp, key, value, set)
-  return proxy:new(object.new(self, { exp=exp, key=key, value=value, set=set }), proxy_mt)
+function element:new(exp, key, value)
+  return proxy:new(object.new(self, { exp=exp, key=key, value=value }), proxy_mt)
 end
 
 
@@ -47,7 +47,7 @@ function element:__eval(S)
     return self
   end
   if core.defined(value) then value = addr or s.exp end
-  return element:new(value, s.key, s.value, s.set)
+  return element:new(value, s.key, s.value)
 end
 
 
