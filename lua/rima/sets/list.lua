@@ -33,40 +33,26 @@ function list.copy(sets)
 end
 
 
-function list:read(sets)
-  if not sets then return object.new(self, {}) end
+function list:read(sets, count)
+  if not sets or count == 0 then return object.new(self, {}) end
 
-  local sorted_sets = {}
-
-  for k, s in pairs(sets) do
-    local status, seq = pcall(function()
-      if type(k) == "number" then
-        return ref:read(s)
-      else
-        return ref:read({[k]=s})
-      end
-    end)
+  local new_sets = {}
+  for i = 1, count do
+    local status
+    status, message = pcall(function()
+        local s = sets[i]
+        if s[1] then
+          new_sets[i] = ref:read(s[1])
+        else
+          new_sets[i] = ref:read(s)
+        end
+      end)
     if not status then
-      error(("error: sets.list:read: didn't understand set argument %s.  %s")
-        :format(lib.repr(k), seq))
+      error(("error: sets.list:read: didn't understand set argument %s.\n  %s")
+        :format(lib.repr(sets[i]), message))
     end
-    sorted_sets[#sorted_sets+1] = { k, seq }
   end
-
-  -- sort the sets - numbered entries first, in numerical order,
-  -- and then string keys in alphabetical order
-  table.sort(sorted_sets, function(a, b)
-    a, b = a[1], b[1]
-    if type(a) == "number" then
-      return (type(b) ~= "number" and true) or a < b 
-    else
-      return (type(b) ~= "number" and a < b) or false
-    end
-  end)
-
-  local result = {}
-  for i, v in ipairs(sorted_sets) do result[i] = v[2] end
-  return list:new(result)
+  return list:new(new_sets)
 end
 
 
@@ -89,7 +75,7 @@ end
 
 
 function list:__repr(format)
-  return "{"..lib.concat_repr(self, format).."}"
+  return "{"..lib.concat_repr(self, format, "}{").."}"
 end
 list.__tostring = lib.__tostring
 

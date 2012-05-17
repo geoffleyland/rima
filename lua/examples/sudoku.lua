@@ -23,7 +23,7 @@ sudoku = rima.mp.new()
 sudoku.one_value_per_cell[{r=rows}][{c=columns}] = rima.mp.C(rima.sum{v=values}(answer[r][c][v]), "==", 1)
 sudoku.each_value_once_per_row[{r=rows}][{v=values}] = rima.mp.C(rima.sum{c=columns}(answer[r][c][v]), "==", 1)
 sudoku.each_value_once_per_column[{c=columns}][{v=values}] = rima.mp.C(rima.sum{r=rows}(answer[r][c][v]), "==", 1)
-sudoku.each_value_once_per_square[{g1=groups}][{g2=groups}][{v=values}] = rima.mp.C(rima.sum{r=rima.range(g1, g1+2),c=rima.range(g2, g2+2)}(answer[r][c][v]), "==", 1)
+sudoku.each_value_once_per_square[{g1=groups}][{g2=groups}][{v=values}] = rima.mp.C(rima.sum{r=rima.range(g1, g1+2)}{c=rima.range(g2, g2+2)}(answer[r][c][v]), "==", 1)
 
 -- We don't have an objective, we just want a feasible solution
 sudoku.objective = 1
@@ -40,7 +40,7 @@ Subject to:
   one_value_per_cell[r in rows, c in columns]:                         sum{v in values}(answer[r, c, v]) == 1
   each_value_once_per_column[c in columns, v in values]:               sum{r in rows}(answer[r, c, v]) == 1
   each_value_once_per_row[r in rows, v in values]:                     sum{c in columns}(answer[r, c, v]) == 1
-  each_value_once_per_square[g1 in groups, g2 in groups, v in values]: sum{c in range(g2, 2 + g2), r in range(g1, 2 + g1)}(answer[r, c, v]) == 1
+  each_value_once_per_square[g1 in groups, g2 in groups, v in values]: sum{c in range(g2, 2 + g2)}{r in range(g1, 2 + g1)}(answer[r, c, v]) == 1
 --]]
 
 -- We use the initial solution to decide whether each of the elements of answer

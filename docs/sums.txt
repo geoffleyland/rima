@@ -16,7 +16,7 @@ and an expression to sum as its second:
 The `{x=X}` syntax is especially useful if you want to sum over the same table more than once:
 
     x1, x2, X = rima.R"x1, x2, X"
-    e = rima.sum{x1=X, x2=X}(x1 * x2)
+    e = rima.sum{x1=X}{x2=X}(x1 * x2)
     print(rima.E(e, {X={2, 3, 4}}))                     --> 81
 
 Often, you'll want your sum expression to operate on data from more than one array:

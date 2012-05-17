@@ -21,14 +21,14 @@ assignment = rima.mp.new()
 assignment.meet_demand[{s=stores}] = rima.mp.C(rima.sum{p=plants}(flow[p][s]), "==", s.demand)
 assignment.respect_capacity[{p=plants}] = rima.mp.C(rima.sum{s=stores}(flow[p][s]), "<=", p.capacity)
 assignment.flow[{p=plants}][{s=stores}] = rima.positive()
-assignment.total_transport_cost = rima.sum{p=plants, s=store_order}(flow[p][s] * transport_cost[p][s])
+assignment.total_transport_cost = rima.sum{p=plants}{s=store_order}(flow[p][s] * transport_cost[p][s])
 --assignment.objective = total_transport_cost
 assignment.sense = "minimise"
 
 io.write("Assignment:\n", tostring(assignment), "\n")
 --[[
 Minimise:
-  sum{p in plants, s in store_order}(flow[p, s]*transport_cost[p, s])
+  sum{p in plants}{s in store_order}(flow[p, s]*transport_cost[p, s])
 Subject to:
   meet_demand:      sum{p in plants}(flow[p, s]) == s.demand for all {s in stores}
   respect_capacity: sum{s in stores}(flow[p, s]) <= p.capacity for all {p in plants}
@@ -103,7 +103,7 @@ facility_location.objective = total_transport_cost + build_cost
 io.write("\nFacility Location:\n", tostring(facility_location), "\n")
 --[[
 Minimise:
-  sum{p in plants, s in store_order}(flow[p, s]*transport_cost[p, s]) + sum{p in plants}(p.build_cost*p.built)
+  sum{p in plants}{s in store_order}(flow[p, s]*transport_cost[p, s]) + sum{p in plants}(p.build_cost*p.built)
 Subject to:
   respect_capacity[p in plants]: sum{s in stores}(flow[p, s]) <= p.capacity
   build_plants[p in plants]:     sum{s in store_order}(flow[p, s]) <= p.built*p.capacity

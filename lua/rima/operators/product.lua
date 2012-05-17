@@ -24,11 +24,16 @@ product.precedence = 1
 
 function product:simplify()
   local terms = proxy.O(self)
-  if not object.typeinfo(terms[1]).closure then
-    local sets = set_list:read(terms[1])
-    return expression:new_table(product, { closure:new(terms[2], sets) })
+  local ti = object.typeinfo(terms[1])
+  if ti.closure then
+    return self
+  elseif ti["sets.list"] then
+    return expression:new_table(product, { closure:new(terms[2], terms[1]) })
+  else
+    local term_count = #terms
+    local sets = set_list:read(terms, term_count-1)
+    return expression:new_table(product, { closure:new(terms[term_count], sets) })
   end
-  return self
 end
 
 
