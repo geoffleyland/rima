@@ -164,8 +164,8 @@ function __tostring(o)
 end
 
 
-function concat_repr(t, format)
-  return concat(t, ", ", function(i) return repr(i, format) end)
+function concat_repr(t, format, sep)
+  return concat(t, sep or ", ", function(i) return repr(i, format) end)
 end
 
 
