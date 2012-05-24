@@ -48,13 +48,13 @@ function ref:read(s)
     error(("Got '%s', (%s)"):format(lib.repr(s), object.typename(s)))
   end
 
-  -- did we get "['a, b']=l"?
+  -- did we get "['a, b']=set"?
   local names = {}
   for n in namestring:gmatch("[%a_][%w_]*") do
     names[#names+1] = n
   end
 
-  -- what was l?
+  -- what was set?
   local result
   local tis = object.typeinfo(set)
   if not set then
@@ -193,7 +193,7 @@ function ref:index(S, Sn, i)
       error(("Index out of bounds when indexing %s as %s[%s]"):format(lib.repr(self), lib.repr(self.set), lib.repr(i)))
     end
     local value = v and v.value
-    self:set_args(Sn, element:new(self.set[i], i, v))
+    self:set_args(Sn, element:new(self.set[i], i))
   end
 end
 
@@ -225,7 +225,7 @@ local function set_ref_ielements(state, i)
   i = i + 1
   local v = l[i]
   if not v then return end
-  r:set_args(state.scope, element:new(r.set[i], i, v.value))
+  r:set_args(state.scope, element:new(r.set[i], i))
   return i
 end
 
@@ -236,7 +236,7 @@ local function set_ref_elements(state, k)
   local v
   k, v = next(l, k)
   if not k then return end
-  r:set_args(state.scope, element:new(r.set[k], k, v.value))
+  r:set_args(state.scope, element:new(r.set[k], k))
   return k
 end
 

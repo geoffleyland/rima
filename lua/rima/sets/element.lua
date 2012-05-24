@@ -44,18 +44,20 @@ end
 
 function element:__eval(S)
   local s = elements[self]
-  local value, type, addr = core.eval(s.exp, S)
-  if value == s.exp then
+  if s.value then return self end
+
+  local value, _, exp = core.eval(s.exp, S)
+  if value == s.value and lib.repr(exp) == lib.repr(s.exp) then
     return self
   end
-  if core.defined(value) then value = addr or s.exp end
-  return element:new(value, s.key, s.value)
+
+  value = core.defined(value) and value or nil
+  return element:new(exp or s.exp, s.key, value)
 end
 
 
 function element:__defined()
-  local v = elements[self].value
-  return v ~= nil
+  return elements[self].value ~= nil
 end
 
 
@@ -85,7 +87,7 @@ element.__tostring = lib.__tostring
 function element:extract()
   self = elements[self]
   local v = self.value
-  if typeinfo(v).undefined_t then
+  if not v or typeinfo(v).undefined_t then
     return self.exp
   else
     return v
