@@ -126,7 +126,7 @@ function address:__repr(format)
     return ("address{%s}"):format(lib.concat_repr(self, format))
   end
 
-  if not self[1] then return "" end
+  if not self[1] then return "?" end
   local append, repr = lib.append, lib.repr
   local r = {}
   

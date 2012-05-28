@@ -26,7 +26,7 @@ function test(options)
   T:check_equal(object.typename(N("a")), "address", "typename(address:new())=='address'")
 
   -- string representation
-  T:check_equal(N(), "")
+  T:check_equal(N(), "?")
   T:check_equal(N("a"), "a")
   T:check_equal(N("a", "b"), "a.b")
   T:check_equal(N("a", 1), "a[1]")
