@@ -144,8 +144,8 @@ function add:simplify()
 end
 
 
-function add:__eval(S)
-  local terms = add_mul.evaluate_terms(proxy.O(self), S)
+function add:__eval(...)
+  local terms = add_mul.evaluate_terms(proxy.O(self), ...)
   if not terms then return self end
   return expression:new_table(add, terms)
 end

@@ -205,13 +205,13 @@ end
 
 -- evaluation ------------------------------------------------------------------
 
-function address:__eval(S)
+function address:__eval(...)
   local new_address
 
   local length = #self
   for i = 1, length do
     local a = self[i]
-    local b = core.eval(a, S, stack)
+    local b = core.eval(a, ...)
     if b ~= a then
       new_address = new_address or {}
       new_address[i] = b

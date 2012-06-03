@@ -89,9 +89,9 @@ local function make_math_function(name)
     end
   end
 
-  op.__eval = function(self, S)
+  op.__eval = function(self, ...)
     local t1 = proxy.O(self)[1]
-    local e = core.eval(t1, S)
+    local e = core.eval(t1, ...)
     if e == t1 then return self end
     return expression:new(op, e)
   end

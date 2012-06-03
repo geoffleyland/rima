@@ -42,11 +42,11 @@ function element:display()
 end
 
 
-function element:__eval(S)
+function element:__eval(...)
   local s = elements[self]
   if s.value then return self end
 
-  local value, _, exp = core.eval(s.exp, S)
+  local value, _, exp = core.eval(s.exp, ...)
   if value == s.value and lib.repr(exp) == lib.repr(s.exp) then
     return self
   end

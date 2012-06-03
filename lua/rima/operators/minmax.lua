@@ -17,12 +17,12 @@ module(...)
 min = expression:new_type({}, "min")
 min.precedence = 0
 
-function min.__eval(args, S)
+function min.__eval(args, ...)
   args = proxy.O(args)
   local a2 = {}
   local m = math.huge
   for _, a in ipairs(args) do
-    a = core.eval(a, S)
+    a = core.eval(a, ...)
     if type(a) == "number" then
       if a < m then
         m = a
@@ -51,12 +51,12 @@ end
 max = expression:new_type({}, "max")
 max.precedence = 0
 
-function max.__eval(args, S)
+function max.__eval(args, ...)
   args = proxy.O(args)
   local a2 = {}
   local m = -math.huge
   for _, a in ipairs(args) do
-    a = core.eval(a, S)
+    a = core.eval(a, ...)
     if type(a) == "number" then
       if a > m then
         m = a

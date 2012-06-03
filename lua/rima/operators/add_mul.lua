@@ -16,12 +16,12 @@ local expression = require("rima.expression")
 
 -- Evaluate all terms, and return the same object if nothing changed -----------
 
-function evaluate_terms(terms, S)
+function evaluate_terms(terms, ...)
   local new_terms
   local term_count = #terms
   for i = 1, term_count do
     local t = terms[i]
-    local et2 = core.eval(t[2], S)
+    local et2 = core.eval(t[2], ...)
     if et2 ~= t[2] then
       new_terms = new_terms or {}
       new_terms[i] = { t[1], et2 }

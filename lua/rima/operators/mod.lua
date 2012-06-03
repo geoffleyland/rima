@@ -54,10 +54,10 @@ function mod:simplify()
 end
 
 
-function mod:__eval(S)
+function mod:__eval(...)
   local terms = proxy.O(self)
   local t1, t2 = terms[1], terms[2]
-  local numerator, denominator = core.eval(t1, S), core.eval(t2, S)
+  local numerator, denominator = core.eval(t1, ...), core.eval(t2, ...)
 
   if numerator == t1 and denominator == t2 then
     return self

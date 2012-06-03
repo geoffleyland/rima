@@ -24,7 +24,7 @@ local function add_variable(terms, ref, coeff)
 end
 
 
-function _linearise(l, S)
+function _linearise(l)
   local constant, terms = 0, {}
   local fail = false
 
@@ -70,9 +70,9 @@ function _linearise(l, S)
 end
 
 
-function linearise(e, S)
-  local l = core.eval(e, S)
-  local status, constant, terms = pcall(_linearise, l, S)
+function linearise(e, ...)
+  local l = core.eval(e, ...)
+  local status, constant, terms = pcall(_linearise, l)
   if not status then
     error(("Error linearising '%s' (linear form: '%s'):\n  %s"):format(lib.repr(e), lib.repr(l), constant:gsub("\n", "\n    ")), 0)
   end
