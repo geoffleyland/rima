@@ -16,7 +16,7 @@ local expression = require("rima.expression")
 local set_list = require("rima.sets.list")
 
 
--- Subscripts ------------------------------------------------------------------
+-- Sums ------------------------------------------------------------------------
 
 local sum = expression:new_type(_M, "sum")
 sum.precedence = 1
@@ -39,32 +39,30 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function sum.__repr(args, format)
-  local ar = lib.repr(proxy.O(args)[1], format)
-  local ff = format.format
-  local f
-  if ff == "dump" then
-    f = "sum(%s)"
-  elseif ff == "lua" then
-    f = "rima.sum%s"
-  elseif ff == "latex" then
-    f = "\\sum_%s"
-  else
-    f = "sum%s"
-  end
-  return f:format(ar)
+local formats =
+{
+  dump = "sum(%s)",
+  lua = "rima.sum%s",
+  latex = "\\sum_%s",
+  other = "sum%s"
+}
+
+function sum:__repr(format)
+  local f = formats[format.format] or formats.other
+  local terms = proxy.O(self)
+  return f:format(lib.repr(terms[1], format))
 end
 
 
 -- Evaluation ------------------------------------------------------------------
 
-function sum.__eval(args, S)
-  args = proxy.O(args)
-  local cl = args[1]
-  local defined_terms, undefined_terms = {}, {}
+function sum:__eval(S)
+  local terms = proxy.O(self)
+  local cl = terms[1]
 
   -- Iterate through all the elements of the sets, collecting defined and
   -- undefined terms
+  local defined_terms, undefined_terms = {}, {}
   for S2, undefined in cl:iterate(S) do
     local z = core.eval(cl.exp+0, S2)  -- the +0 helps to "cast" e to a number (if it's a set element)
     if undefined and undefined[1] then
@@ -86,9 +84,8 @@ function sum.__eval(args, S)
     end
   end
 
-  local total_terms = {}
-
   -- Run through all the undefined terms, rebuilding the sums
+  local total_terms = {}
   for n, t in pairs(undefined_terms) do
     local z
     if #t.terms > 1 then
