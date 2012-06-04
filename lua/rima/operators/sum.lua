@@ -111,8 +111,8 @@ end
 
 -- Introspection? --------------------------------------------------------------
 
-function sum.__list_variables(args, S, list)
-  local cl = proxy.O(args)[1]
+function sum:__list_variables(S, list)
+  local cl = proxy.O(self)[1]
   for S2, undefined in cl:iterate(S) do
     local S3 = cl:fake_iterate(S2, undefined)
     core.list_variables(core.eval(cl, S3), S3, list)

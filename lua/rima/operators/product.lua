@@ -16,7 +16,7 @@ local expression = require("rima.expression")
 local set_list = require("rima.sets.list")
 
 
--- Subscripts ------------------------------------------------------------------
+-- Products --------------------------------------------------------------------
 
 local product = expression:new_type(_M, "product")
 product.precedence = 1
@@ -39,37 +39,35 @@ end
 
 -- String Representation -------------------------------------------------------
 
-function product.__repr(args, format)
-  local ar = lib.repr(proxy.O(args)[1], format)
-  local ff = format.format
-  local f
-  if ff == "dump" then
-    f = "product(%s)"
-  elseif ff == "lua" then
-    f = "rima.product%s"
-  elseif ff == "latex" then
-    f = "\\prod_%s"
-  else
-    f = "product%s"
-  end
-  return f:format(ar)
+local formats =
+{
+  dump = "product(%s)",
+  lua = "rima.product%s",
+  latex = "\\prod_%s",
+  other = "prod%s"
+}
+
+function product:__repr(format)
+  local f = formats[format.format] or formats.other
+  local terms = proxy.O(self)
+  return f:format(lib.repr(terms[1], format))
 end
 
 
 -- Evaluation ------------------------------------------------------------------
 
-function product.__eval(args, S)
-  args = proxy.O(args)
-  local cl = args[1]
-  local defined_terms, undefined_terms = {}, {}
+function product:__eval(S)
+  local terms = proxy.O(self)
+  local cl = terms[1]
 
   -- Iterate through all the elements of the sets, collecting defined and
   -- undefined terms
+  local defined_terms, undefined_terms = {}, {}
   for S2, undefined in cl:iterate(S) do
     local z = core.eval(cl.exp+0, S2)  -- the +0 helps to "cast" e to a number (if it's a set element)
     if undefined and undefined[1] then
       -- Undefined terms are stored in groups based on the undefined product
-      -- indices (so we can group them back into prods over the same indices)
+      -- indices (so we can group them back into products over the same indices)
       local name = lib.concat(undefined, ",", lib.repr)
       local terms
       local udn = undefined_terms[name]
@@ -86,9 +84,8 @@ function product.__eval(args, S)
     end
   end
 
+  -- Run through all the undefined terms, rebuilding the products
   local total_terms = {}
-
-  -- Run through all the undefined terms, rebuilding the prods
   for n, t in pairs(undefined_terms) do
     local z
     if #t.terms > 1 then
@@ -99,7 +96,7 @@ function product.__eval(args, S)
     total_terms[#total_terms+1] = {1, expression:new(product, t.iterators, cl:undo(z, t.iterators)) }
   end
 
-  -- mul the defined terms onto the end
+  -- Add the defined terms onto the end
   for _, t in ipairs(defined_terms) do
     total_terms[#total_terms+1] = t
   end
@@ -114,8 +111,8 @@ end
 
 -- Introspection? --------------------------------------------------------------
 
-function product.__list_variables(args, S, list)
-  local cl = proxy.O(args)[1]
+function product:__list_variables(S, list)
+  local cl = proxy.O(self)[1]
   for S2, undefined in cl:iterate(S) do
     local S3 = cl:fake_iterate(S2, undefined)
     core.list_variables(core.eval(cl, S3), S3, list)
