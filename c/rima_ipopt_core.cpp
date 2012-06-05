@@ -42,7 +42,6 @@ class rima_ipopt_problem : public Ipopt::TNLP
       int cj_count,
       int hessian_count,
       int model_index);
-    ~rima_ipopt_problem(void);
 
   private:
     rima_ipopt_problem(const rima_ipopt_problem &);
@@ -134,10 +133,6 @@ rima_ipopt_problem::rima_ipopt_problem(
 {
 }
 
-rima_ipopt_problem::~rima_ipopt_problem(void)
-{
-  luaL_unref(L_, LUA_REGISTRYINDEX, model_index_);
-}
 
 bool rima_ipopt_problem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
                                       Index& nnz_h_lag, IndexStyleEnum& index_style)
@@ -150,6 +145,7 @@ bool rima_ipopt_problem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
   return true;
 }
+
 
 bool rima_ipopt_problem::get_bounds_info(Index n, Number* x_l, Number* x_u,
                                          Index m, Number* g_l, Number* g_u)
@@ -665,8 +661,10 @@ static int rima_eval(lua_State *L)
 static int rima_delete(lua_State *L)
 {
   rima_ipopt_problem *model = (rima_ipopt_problem*)luaL_checkudata(L, 1, metatable_name);
-  model->ReleaseRef((Ipopt::Referencer*)L);
-  model->~rima_ipopt_problem(); 
+  int model_index = model->model_index_;
+  model->ReleaseRef((Ipopt::Referencer*)model->L_);
+  luaL_unref(L, LUA_REGISTRYINDEX, model_index);
+
   return 0;
 }
 
