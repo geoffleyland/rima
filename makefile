@@ -25,8 +25,7 @@ SO_SUFFIX=so
 UNAME=$(shell uname -s)
 ifneq (,$(findstring Darwin,$(UNAME)))
   # OS X
-  IPOPT_CFLAGS:=$(CFLAGS) # can't seem to build a fat ipopt
-  CFLAGS:=$(CFLAGS) -arch i686 -arch x86_64
+#  CFLAGS:=$(CFLAGS) -arch i686 -arch x86_64 # coin's really not set up for fat binaries
   SHARED=-bundle -undefined dynamic_lookup
   LIBS=
 else
@@ -38,28 +37,27 @@ endif
 
 all: clp cbc lpsolve
 
-clp: rima_clp_core.$(SO_SUFFIX)
+clp: lua/rima_clp_core.$(SO_SUFFIX)
 
-cbc: rima_cbc_core.$(SO_SUFFIX)
+cbc: lua/rima_cbc_core.$(SO_SUFFIX)
 
-lpsolve: rima_lpsolve_core.$(SO_SUFFIX)
+lpsolve: lua/rima_lpsolve_core.$(SO_SUFFIX)
 
-ipopt: rima_ipopt_core.$(SO_SUFFIX)
+ipopt: lua/rima_ipopt_core.$(SO_SUFFIX)
 
-rima_clp_core.$(SO_SUFFIX): c/rima_clp_core.cpp c/rima_solver_tools.cpp
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils -lcoinmumps -lcoinmetis -lcoinglpk -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
+lua/rima_clp_core.$(SO_SUFFIX): c/rima_clp_core.cpp c/rima_solver_tools.cpp
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils -lcoinmumps -lcoinmetis -lcoinglpk -lbz2 -lz -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
 
-rima_cbc_core.$(SO_SUFFIX): c/rima_cbc_core.cpp c/rima_solver_tools.cpp
+lua/rima_cbc_core.$(SO_SUFFIX): c/rima_cbc_core.cpp c/rima_solver_tools.cpp
 	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lcbc -losi -losiclp -lclp -lcgl -lcoinutils -lcoinmumps -lcoinmetis -lcoinglpk -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
 
-rima_lpsolve_core.$(SO_SUFFIX): c/rima_lpsolve_core.cpp c/rima_solver_tools.cpp
+lua/rima_lpsolve_core.$(SO_SUFFIX): c/rima_lpsolve_core.cpp c/rima_solver_tools.cpp
 	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(LPSOLVE_LIBDIR) -llpsolve55 $(LIBS) -I$(LUA_INCDIR) -I$(LPSOLVE_INCDIR)
 
-rima_ipopt_core.$(SO_SUFFIX): c/rima_ipopt_core.cpp
-	$(CPP) $(IPOPT_CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lipopt -lcoinmumps -lcoinmetis -lgfortran -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
+lua/rima_ipopt_core.$(SO_SUFFIX): c/rima_ipopt_core.cpp
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lipopt -lcoinmumps -lcoinmetis -lgfortran -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
 
 test: all lua/rima.lua
-	-cp rima_*_core.so lua/
 	cd lua; $(LUA) rima-test.lua; $(LUA) rima-test-solvers.lua
 	cd lua; for f in `find ../docs -name "*.txt"`; do $(LUA) test/doctest.lua -i $$f > /dev/null; done
 
@@ -68,7 +66,7 @@ install: lua/rima.lua
 	mkdir -p $(LUA_LIBDIR)
 	cp lua/rima.lua $(LUA_SHAREDIR)
 	cp -r lua/rima $(LUA_SHAREDIR)
-	-cp rima_*_core.so $(LUA_LIBDIR)
+	-cp lua/rima_*_core.so $(LUA_LIBDIR)
 
 uninstall: 
 	rm -f $(LUA_SHAREDIR)/rima.lua
@@ -76,7 +74,6 @@ uninstall:
 	-rm $(LUA_LIBDIR)/rima_*_core.so
 
 doc: lua/rima.lua
-	-cp rima_*_core.so lua/
 	cd lua; for f in `find ../docs -name "*.txt"`; do n=`basename $$f .txt`; $(LUA) test/doctest.lua -sh -i $$f | markdown.lua -e ../docs/header.html -f ../docs/footer.html > ../htmldocs/$$n.html; done
 
 dist: doc
@@ -91,7 +88,7 @@ dist: doc
 	rm -rf $(PACKAGE)-$(VERSION)
 
 clean:
-	rm -f rima_*_core.so lua/rima_*_core.so
+	rm -f lua/rima_*_core.so
 	rm -f htmldocs/*.html
 	rm -f $(PACKAGE)-$(VERSION).tar.gz
 	rm -f lua/luacov.*.out
