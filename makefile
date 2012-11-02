@@ -46,10 +46,10 @@ lpsolve: lua/rima_lpsolve_core.$(SO_SUFFIX)
 ipopt: lua/rima_ipopt_core.$(SO_SUFFIX)
 
 lua/rima_clp_core.$(SO_SUFFIX): c/rima_clp_core.cpp c/rima_solver_tools.cpp
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils -lcoinmumps -lcoinmetis -lcoinglpk -lbz2 -lz -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR)  -lclp -lcoinutils -lcoinmumps -lcoinmetis -lbz2 -lz -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
 
 lua/rima_cbc_core.$(SO_SUFFIX): c/rima_cbc_core.cpp c/rima_solver_tools.cpp
-	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lcbc -losi -losiclp -lclp -lcgl -lcoinutils -lcoinmumps -lcoinmetis -lcoinglpk -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
+	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(COIN_LIBDIR) -lcbc -losi -losiclp -lclp -lcgl -lcoinutils -lcoinmumps -lcoinmetis -framework vecLib $(LIBS) -I$(LUA_INCDIR) -I$(COIN_INCDIR)
 
 lua/rima_lpsolve_core.$(SO_SUFFIX): c/rima_lpsolve_core.cpp c/rima_solver_tools.cpp
 	$(CPP) $(CFLAGS) $(SHARED) $^ -o $@ -L$(LPSOLVE_LIBDIR) -llpsolve55 $(LIBS) -I$(LUA_INCDIR) -I$(LPSOLVE_INCDIR)
