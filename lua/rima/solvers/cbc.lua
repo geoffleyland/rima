@@ -13,6 +13,7 @@ module(...)
 --------------------------------------------------------------------------------
 
 available = status
+problem = not available and core
 objective = { linear = true }
 constraints = { linear = true }
 variables = { continuous = true, integer = true }

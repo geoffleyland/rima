@@ -374,6 +374,9 @@ end
 
 
 function solve_with(solver, M, ...)
+  if not solvers[solver].available then
+    error("The solver '"..solver.."' is not available: '"..solvers[solver].problem.."'")
+  end
   local p0 = solvers[solver].preference
   solvers[solver].preference = -1
   local r1, r2, r3 = solve(M, ...)

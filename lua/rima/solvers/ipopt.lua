@@ -16,6 +16,7 @@ module(...)
 --------------------------------------------------------------------------------
 
 available = status
+problem = not available and ipopt_core
 objective = { linear = true, nonlinear = true }
 constraints = { linear = true, nonlinear = true }
 variables = { continuous = true }
