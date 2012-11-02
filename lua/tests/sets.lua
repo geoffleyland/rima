@@ -2,7 +2,7 @@
 -- see LICENSE for license information
 
 local sets = require("rima.sets")
-local set_ref = require("rima.sets.ref")
+local ref = require("rima.sets.ref")
 
 local series = require("test.series")
 local object = require("rima.lib.object")
@@ -25,13 +25,20 @@ function test(options)
   local E = core.eval
 
   do
-    local x, Q = R"x, Q"
-    T:check_equal(sum.build{Q}(x[Q]), "sum{Q}(x[Q])")
-    T:check_equal(E(sum.build{Q}(x[Q])), "sum{Q}(x[Q])")
+    local i, j, I, X, Y = R"i, j, I, X, Y"
+    local S = { X={10}, Y={a=20}, I={"a"} }
+    T:check_equal(sum.build{i=ref.pairs(I)}(X[i]), "sum{i in pairs(I)}(X[i])")
+    T:check_equal(E(sum.build{i=ref.pairs(I)}(X[i]), S), 10)
+
+    T:check_equal(sum.build{["i,j"]=ref.pairs(I)}(Y[j]), "sum{i, j in pairs(I)}(Y[j])")
+    T:check_equal(E(sum.build{["i,j"]=ref.pairs(I)}(Y[j]), S), 20)
+
+    T:check_equal(sum.build{["i,j"]=ref.pairs(I)}((i+1)*X[i]*Y[j]), "sum{i, j in pairs(I)}((1 + i)*X[i]*Y[j])")
+    T:check_equal(E(sum.build{["i,j"]=ref.pairs(I)}((i+1)*X[i]*Y[j]), S), 400)
   end
 
   do
-    local x, y, z, Q, R, r = R"x, y, z, Q, R, r"
+    local x, y, Q, r = R"x, y, Q, r"
     local S = { x = {10}, Q = {"a"}, y={{z=13}} }
     T:check_equal(sum.build{r=Q}(x[r]), "sum{r in Q}(x[r])")
     T:check_equal(E(sum.build{r=Q}(x[r]), S), 10)
@@ -41,7 +48,53 @@ function test(options)
     T:check_equal(E(sum.build{r=y}(r.z), S), 13)
   end
 
-  do 
+  do
+    local x, y, z, Q = R"x, y, z, Q"
+    local S = { Q = {"a"}, x = { number_t.free() }, z = { a=number_t.free() } }
+    T:check_equal(E(sum.build{y=x}(y), S), "x[1]")
+    T:check_equal(E(sum.build{y=z}(y), S), "z.a")
+    T:check_equal(E(sum.build{y=x}(x[y]), S), "x[1]")
+    T:check_equal(E(sum.build{y=z}(z[y]), S), "z.a")
+    T:check_equal(E(sum.build{y=Q}(x[y]), S), "x[1]")
+    T:check_equal(lib.dump(E(sum.build{y=Q}(x[y]), S)), "index(address{\"x\", 1})")
+    T:check_equal(lib.dump(E(sum.build{y=Q}(z[y]), S)), "index(address{\"z\", \"a\"})")
+    T:check_equal(E(sum.build{y=Q}(x[y] + z[y]), S), "x[1] + z.a")
+  end
+
+  do
+    local x, y, z, Q = R"x, y, z, Q"
+    local S =
+    {
+      Q = {"a", "b", "c"},
+      x = { number_t.free(), number_t.free(), number_t.free() },
+      z = { a=number_t.free(), b=number_t.free(), c=number_t.free() }
+    }
+    T:check_equal(E(sum.build{y=x}(y), S), "x[1] + x[2] + x[3]")
+    T:check_equal(E(sum.build{y=z}(y), S), "z.a + z.b + z.c")
+    T:check_equal(E(sum.build{y=x}(x[y]), S), "x[1] + x[2] + x[3]")
+    T:check_equal(E(sum.build{y=z}(z[y]), S), "z.a + z.b + z.c")
+    T:check_equal(E(sum.build{y=Q}(x[y]), S), "x[1] + x[2] + x[3]")
+    T:check_equal(E(sum.build{y=Q}(x[y] + z[y]), S), "x[1] + x[2] + x[3] + z.a + z.b + z.c")
+  end
+
+  do
+    local x, y, k, v = R"x, y, k, v"
+    local S = { x = { 10, 20, 30 }, y = { 10, 20, 30, a = 10 } }
+    T:check_equal(sum.build{["k, v"]=ref.pairs(x)}(k + v), "sum{k, v in pairs(x)}(k + v)")
+    T:check_equal(E(sum.build{["k, v"]=ref.pairs(x)}(k + v), S), 66)
+    T:check_equal(E(sum.build{["k, v"]=ref.pairs(y)}(v), S), 70)
+  end
+
+  do
+    local x, y, k, v = R"x, y, k, v"
+    local S = { x = { 10, 20, 30 }, y = { 10, 20, 30, a = 10 } }
+    T:check_equal(sum.build{["k, v"]=ref.ipairs(x)}(k + v), "sum{k, v in ipairs(x)}(k + v)")
+    T:check_equal(E(sum.build{["k, v"]=ref.ipairs(x)}(k + v), S), 66)
+    T:check_equal(E(sum.build{["k, v"]=ref.ipairs(y)}(k + v), S), 66)
+    T:check_equal(E(sum.build{["k, v"]=ref.ipairs(y)}(v), S), 60)
+  end
+
+  do
     local x, y, z, Q, R, r = R"x, y, z, Q, R, r"
     local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = sets.range(2, r) }  
     T:check_equal(E(sum.build{r=Q}(x[r]), S), 60)
@@ -56,30 +109,6 @@ function test(options)
     T:check_equal(E(sum.build{y=x}(x[y]), S), 60)
     T:check_equal(E(sum.build{y=x}(x[y] + y), S), 120)
     T:check_equal(E(sum.build{y=Q}(x[y] + z[y]), S), 660)
-  end
-
-  do
-    local x, y, z, Q, R, r = R"x, y, z, Q, R, r"
-    local S = scope.new{ Q = {"a"}, x = { number_t.free() }, z = { a=number_t.free() } }
-    T:check_equal(E(sum.build{y=x}(y), S), "x[1]")
-    T:check_equal(E(sum.build{y=z}(y), S), "z.a")
-    T:check_equal(E(sum.build{y=x}(x[y]), S), "x[1]")
-    T:check_equal(E(sum.build{y=z}(z[y]), S), "z.a")
-    T:check_equal(E(sum.build{y=Q}(x[y]), S), "x[1]")
-    T:check_equal(lib.dump(E(sum.build{y=Q}(x[y]), S)), "index(address{\"x\", 1})")
-    T:check_equal(lib.dump(E(sum.build{y=Q}(z[y]), S)), "index(address{\"z\", \"a\"})")
-    T:check_equal(E(sum.build{y=Q}(x[y] + z[y]), S), "x[1] + z.a")
-  end
-
-  do
-    local x, y, z, Q, R, r = R"x, y, z, Q, R, r"
-    local S = scope.new{ Q = {"a", "b", "c"}, x = { number_t.free(), number_t.free(), number_t.free() }, z = { a=number_t.free(), b=number_t.free(), c=number_t.free() } }
-    T:check_equal(E(sum.build{y=x}(y), S), "x[1] + x[2] + x[3]")
-    T:check_equal(E(sum.build{y=z}(y), S), "z.a + z.b + z.c")
-    T:check_equal(E(sum.build{y=x}(x[y]), S), "x[1] + x[2] + x[3]")
-    T:check_equal(E(sum.build{y=z}(z[y]), S), "z.a + z.b + z.c")
-    T:check_equal(E(sum.build{y=Q}(x[y]), S), "x[1] + x[2] + x[3]")
-    T:check_equal(E(sum.build{y=Q}(x[y] + z[y]), S), "x[1] + x[2] + x[3] + z.a + z.b + z.c")
   end
 
   do
@@ -99,38 +128,28 @@ function test(options)
   end
 
   do
-    local x, y, k, v = R"x, y, k, v"
-    local S = scope.new{ x = { 10, 20, 30 }, y = { 10, 20, 30, a = 10 } }
-    T:check_equal(sum.build{["k, v"]=set_ref.pairs(x)}(k + v), "sum{k, v in pairs(x)}(k + v)")
-    T:check_equal(sum.build{["k, v"]=set_ref.ipairs(x)}(k + v), "sum{k, v in ipairs(x)}(k + v)")
-    T:check_equal(E(sum.build{["k, v"]=set_ref.pairs(x)}(k + v), S), 66)
-    T:check_equal(E(sum.build{["k, v"]=set_ref.pairs(y)}(v), S), 70)
-    T:check_equal(E(sum.build{["k, v"]=set_ref.ipairs(y)}(v), S), 60)
-  end
-
-  do
     local t, v = R"t, v"
     local S = scope.new{ t={ {b=5} }}
-    T:check_equal(sum.build{["_, v"]=set_ref.ipairs(t)}(v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
-    T:check_equal(E(sum.build{["_, v"]=set_ref.ipairs(t)}(v.b), S), 5)
-    T:check_equal(E(sum.build{["_, v"]=set_ref.ipairs(t)}(v.a), S), "t[1].a")
-    T:check_equal(E(sum.build{["_, v"]=set_ref.ipairs(t)}(v.a * v.b), S), "5*t[1].a")
+    T:check_equal(sum.build{["_, v"]=ref.ipairs(t)}(v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
+    T:check_equal(E(sum.build{["_, v"]=ref.ipairs(t)}(v.b), S), 5)
+    T:check_equal(E(sum.build{["_, v"]=ref.ipairs(t)}(v.a), S), "t[1].a")
+    T:check_equal(E(sum.build{["_, v"]=ref.ipairs(t)}(v.a * v.b), S), "5*t[1].a")
   end
 
   do
     local t, v = R"t, v"
     local S = scope.new{ t={ {b=5}, {b=6}, {b=7} }}
-    T:check_equal(sum.build{["_, v"]=set_ref.ipairs(t)}(v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
-    T:check_equal(E(sum.build{["_, v"]=set_ref.ipairs(t)}(v.b), S), 18)
-    T:check_equal(E(sum.build{["_, v"]=set_ref.ipairs(t)}(v.a * v.b), S), "5*t[1].a + 6*t[2].a + 7*t[3].a")
+    T:check_equal(sum.build{["_, v"]=ref.ipairs(t)}(v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
+    T:check_equal(E(sum.build{["_, v"]=ref.ipairs(t)}(v.b), S), 18)
+    T:check_equal(E(sum.build{["_, v"]=ref.ipairs(t)}(v.a * v.b), S), "5*t[1].a + 6*t[2].a + 7*t[3].a")
   end
 
   do
     local x, X = R"x, X"
     local S = scope.new{ X = {a=1, b=2} }
-    T:check_equal(E(sum.build{["_, x"]=set_ref.pairs(X)}(x), S), 3)
+    T:check_equal(E(sum.build{["_, x"]=ref.pairs(X)}(x), S), 3)
     local S1 = scope.new(S, { X = {c=3, d=4} })
-    T:check_equal(E(sum.build{["_, x"]=set_ref.pairs(X)}(x), S1), 10)
+    T:check_equal(E(sum.build{["_, x"]=ref.pairs(X)}(x), S1), 10)
   end
 
   do
