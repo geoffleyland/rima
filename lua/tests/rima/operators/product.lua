@@ -3,7 +3,6 @@
 
 local product = require("rima.operators.product")
 
-local expression_tester = require("test.expression_tester")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
