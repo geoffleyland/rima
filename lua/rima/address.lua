@@ -1,8 +1,10 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, ipairs, select, type =
-      error, ipairs, select, type
+--- Store the address pointed to by an index.
+--  An address is an array of keys by which to index tables.  For example,
+--  to index `base.a.b.c`, then the address will be `{ "a", "b", "c" }`.
+--  @module rima.address
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
@@ -11,36 +13,33 @@ local element = require("rima.sets.element")
 
 local typeinfo = object.typeinfo
 
-module(...)
 
-
--- Utilities -------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local function is_local_string(v)
   return type(v) == "string" and v:sub(1, 1) == "$"
 end
 
 
--- Constructor -----------------------------------------------------------------
+------------------------------------------------------------------------------
 
-local address = object:new_class(_M, "address")
-
-
-local function add_element(a, v)
-  a[#a+1] = v
-end
+local address = object:new_class({}, "address")
 
 
 function address:append(...)
+  local l = #self
+
   for i = 1, select("#", ...) do
     local e = select(i, ...)
 
     if typeinfo(e).address then
-      for i, v in ipairs(e) do
-        add_element(self, v)
+      for _, v in ipairs(e) do
+        l = l + 1
+        self[l] = v
       end
     elseif e then
-      add_element(self, e)
+      l = l + 1
+      self[l] = e
     end
   end
 end
@@ -53,19 +52,24 @@ function address:new(...)
 end
 
 
-function address:starts_with_identifier()
-  return lib.is_identifier_string(self[1])
-end
-
-
 function address:is_identifier()
-  return #self == 1 and lib.is_identifier_string(self[1])
+  return self[1] and not self[2] and lib.is_identifier_string(self[1])
 end
 
 
--- Substrings ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function address:sub(i, j)
+--- Get a part of an address.
+--  @treturn address: a new address containing the elements [i, j] of `self`.
+function address:sub(
+  i,                    -- integer: where to start the sub-address.  If
+                        -- negative, `i` counts back from the end of the
+                        -- address (-1 is the end).  If absent `i` is assumed
+                        -- to be 1.
+  j)                    -- integer: where to end the sub-address.  If
+                        -- negative, `j` counts back from the end of the
+                        -- address (-1 is the end).  If absent `j` is assumed
+                        -- to be -1.
   local length = #self
   i = i or 1
   j = j or length
@@ -74,20 +78,18 @@ function address:sub(i, j)
 
   local a = {}
   for k = i, j do
-    add_element(a, self[k])
+    a[k - i + 1] = self[k]
   end
   return object.new(address, a)
 end
 
 
--- Appending -------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function address.__add(a, b)
   return address:new(a, b)
 end
 
-
--- Element access --------------------------------------------------------------
 
 function address:value(i)
   if i < 0 then i = #self + i + 1 end
@@ -95,14 +97,12 @@ function address:value(i)
 end
 
 
--- Modifying -------------------------------------------------------------------
-
 function address:set(i, v)
   self[i] = v
 end
 
 
--- Iterating -------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local function avnext(a, i)
   i = i + 1
@@ -117,8 +117,9 @@ function address:values()
 end
 
 
--- string representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
+address.__tostring = lib.__tostring
 function address:__repr(format)
   local ff = format.format
 
@@ -142,8 +143,7 @@ function address:__repr(format)
         elseif i > 2 then
           append(r, ",")
         end
-        local s = lib.repr(a, format)
-          append(r, s)
+        append(r, lib.repr(a, format))
         i = i + 1
       end
     end
@@ -174,12 +174,12 @@ function address:__repr(format)
           mode = "v"
           append(r, "[")
         else
-          -- lua-readable format is [x][y], otherwise it's [x, y] for mathematicans
+          -- lua-readable format is [x][y], otherwise it's [x, y]
           append(r, (lua_format and "][") or ", ")
         end
         if t.string then
           -- non-identifier strings are ['1 str.ing']
-          append(r, "'", a, "'")
+          append(r, ("%q"):format(a))
         else
           append(r, repr(a, format))
         end
@@ -188,12 +188,11 @@ function address:__repr(format)
     if mode == "v" then append(r, "]") end
   end
 
-  return lib.concat(r)
+  return table.concat(r)
 end
-__tostring = lib.__tostring
 
 
--- equality --------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function address:__eq(b)
   for i, a in ipairs(self) do
@@ -203,7 +202,7 @@ function address:__eq(b)
 end
 
 
--- evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function address:__eval(...)
   local new_address
@@ -220,9 +219,7 @@ function address:__eval(...)
 
   if new_address then
     for i = 1, length do
-      if not new_address[i] then
-        new_address[i] = self[i]
-      end
+      new_address[i] = new_address[i] or self[i]
     end
   end
 
@@ -244,5 +241,9 @@ function address:__defined()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return address
+
+------------------------------------------------------------------------------
 

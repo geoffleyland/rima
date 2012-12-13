@@ -24,7 +24,7 @@ return function(T)
   T:check_equal(N("a", 1), "a[1]")
   T:check_equal(N("a", 1, "b"), "a[1].b")
   T:check_equal(N("a", 1, 2, "b"), "a[1, 2].b")
-  T:check_equal(N("a", "b b"), "a['b b']")
+  T:check_equal(N("a", "b b"), 'a["b b"]')
 
   T:check_equal(lib.repr(N("a"), {format="dump"}), "address{\"a\"}")
   T:check_equal(lib.repr(N("a",1), {format="dump"}), "address{\"a\", 1}")
@@ -37,14 +37,6 @@ return function(T)
   T:check_equal(N("a", "b", "c", "d"):sub(-2,-1), "c.d")
 
   -- checking identifiers
-  T:test(not N():starts_with_identifier())
-  T:test(N("a"):starts_with_identifier())
-  T:test(N("a", 1):starts_with_identifier())
-  T:test(not N(1):starts_with_identifier())
-  T:test(not N(1, "a"):starts_with_identifier())
-  T:test(not N("b b"):starts_with_identifier())
-  T:test(not N("b b", "a"):starts_with_identifier())
-
   T:test(not N():is_identifier())
   T:test(N("a"):is_identifier())
   T:test(not N("a", 1):is_identifier())
