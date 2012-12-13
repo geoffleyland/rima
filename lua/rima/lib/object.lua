@@ -40,10 +40,10 @@ object.__typeinfo = { object = true, [object] = true }
 --  Create a subclass of self.  Set `__typename` and `__typeinfo`.
 --  `__typeinfo` is copied from self and the new typename and class object
 --  are added.
---  @treturn table: the new class
+--  @treturn table: the new class.
 function object:new_class(
-  o,                    -- ?table: the new class object
-  new_type_name)        -- ?string: the name of the new class
+  o,                    -- ?table: the new class object.
+  new_type_name)        -- ?string: the name of the new class.
   o = o or {}
   if new_type_name then o.__typename = new_type_name end
   local parent_typeinfo = self.__typeinfo
@@ -61,9 +61,9 @@ end
 --- Create a new object.
 --  All the heavy lifting was done in @{rima.lib.object.object:new_class}, so just
 --  set the new object's metatable.
---  @treturn table: the new object
+--  @treturn table: the new object.
 function object:new(
-  o)                    -- ?table: the table to turn into the class
+  o)                    -- ?table: the table to turn into the class.
   return setmetatable(o or {}, self)
 end
 
@@ -72,19 +72,19 @@ end
 --  if a value `v` is of type `T` then
 --  `object.typeinfo(v).T == true`.
 --  This works for the core Lua types.
---  @treturn table: typeinfo about the value
+--  @treturn table: typeinfo about the value.
 function object.typeinfo(
-  v)                    -- ?anything: the value to get typeinfo for
+  v)                    -- ?anything: the value to get typeinfo for.
   local mt = getmetatable(v)
   return mt and mt.__typeinfo or core_type_info[type(v)]
 end
 
 
---- Return a value's typname.
+--- Return a value's typename.
 --  This works for the core Lua types.
---  @treturn string: the typename of the value
+--  @treturn string: the typename of the value.
 function object.typename(
-  v)                    -- ?anything: the value to get typeinfo for
+  v)                    -- ?anything: the value to get typeinfo for.
   local mt = getmetatable(v)
   return mt and mt.__typename or type(v)
 end
