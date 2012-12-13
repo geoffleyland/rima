@@ -1,10 +1,9 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local math = require("math")
 local error, type = error, type
 
-local args = require("rima.lib.args")
 local lib = require("rima.lib")
 local undefined_t = require("rima.types.undefined_t")
 
@@ -16,29 +15,22 @@ module(...)
 local number_t = undefined_t:new_class(_M, "number_t")
 
 function number_t:new(lower, upper, integer)
-  local fname, usage =
-    "rima.types.number_t:new",
-    "new([lower_bound [, upper_bound, [, is_integral]]])"
-
   lower, upper = lower or -math.huge, upper or math.huge
   integer = (integer and true) or false
-
-  args.check_type(lower, "lower_bound", "number", usage, fname)
-  args.check_type(upper, "upper_bound", "number", usage, fname)
 
 --  lower, upper = rima.eval(lower), rima.eval(upper)
 
   if type(lower) == "number" and type(upper) == "number" and lower > upper then
-    error(("%s: lower bound must be <= upper bound, got %s and %s.\n  Usage: %s"):format(
-          fname, lib.repr(lower), lib.repr(upper), usage))
+    error(("lower bound must be <= upper bound, got %s and %s."):format(
+          lib.repr(lower), lib.repr(upper)))
   end
   if type(lower) == "number" and integer and math.floor(lower) ~= lower then
-    error(("%s: lower bound is not integer, got %s.\n  Usage: %s"):format(
-          fname, lib.repr(lower), usage))
+    error(("lower bound is not integer, got %s."):format(
+          lib.repr(lower)))
   end
   if type(upper) == "number" and integer and math.floor(upper) ~= upper then
-    error(("%s: upper bound is not integer, got %s.\n  Usage: %s"):format(
-          fname, lib.repr(upper), usage))
+    error(("upper bound is not integer, got %s."):format(
+          lib.repr(upper)))
   end
 
   return undefined_t.new(self, { lower=lower, upper=upper, integer=integer })

@@ -1,9 +1,8 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local error, ipairs, require, type = error, ipairs, require, type
 
-local libargs = require("rima.lib.args")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
@@ -53,11 +52,6 @@ end
 
 
 function func:new(args, exp, S)
-  local fname, usage =
-    "func:new",
-    "new(inputs, expression, table or scope)"
-  libargs.check_types(S, "S", {"nil", "table", "scope"}, usage, fname)
-
   local name = "$func"..counter
   counter = counter + 1
   args = read(args)

@@ -1,4 +1,4 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local debug = require("debug")
@@ -7,7 +7,6 @@ local error, getfenv, require, unpack, xpcall =
 local rawpairs = pairs
 
 local lib = require("rima.lib")
-local args = require("rima.lib.args")
 local trace = require("rima.lib.trace")
 local index = require("rima.index")
 local core = require("rima.core")
@@ -34,17 +33,11 @@ repr = lib.repr
 -- Creating references ---------------------------------------------------------
 
 function R(names)
-  local fname, usage = "rima.R", "Create references.\n  ref1, ..., refN = R(name: list of comma-separated reference names [string])"
-  args.check_type(names, "names", "string", usage, fname)
-
   return index.R(names)
 end
 
 
 function define(names)
-  local fname, usage = "rima.define", "Create references in the caller's environment.\n  define(name: list of comma-separated reference names [string])"
-  args.check_type(names, "names", "string", usage, fname)
-
   index.define(names, 1)
 end
 
@@ -52,9 +45,6 @@ end
 -- Evaluation ------------------------------------------------------------------
 
 function E(e, S) -- evaluate an expression
-  local fname, usage = "rima.E", "Evaluate an expression.\n  result = E(e:any expression, s: scope to evaluate e in [nil|table|scope])"
-  args.check_types(S, "S", {"nil", "table", "scope"}, usage, fname)
-
   local status, r = xpcall(function() return core.eval(e, S) end, debug.traceback)
   if status then
     return r

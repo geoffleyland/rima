@@ -20,8 +20,6 @@ return function(T)
   T:test(object.typeinfo(number_t:new()).undefined_t, "typeinfo(number_t:new()).undefined_t")
   T:check_equal(object.typename(number_t:new()), "number_t", "typename(number_t:new()) == 'number_t'")
 
-  T:expect_error(function() number_t:new("lower") end, "expecting a number for 'lower_bound', got 'string'")
-  T:expect_error(function() number_t:new(1, {}) end, "expecting a number for 'upper_bound', got 'table'")
   T:expect_error(function() number_t:new(2, 1) end, "lower bound must be <= upper bound")
   T:expect_error(function() number_t:new(1.1, 2, true) end, "lower bound is not integer")
   T:expect_error(function() number_t:new(1, 2.1, true) end, "upper bound is not integer")
