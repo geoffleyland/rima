@@ -1,22 +1,17 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local add = require("rima.operators.add")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local index = require("rima.index")
 local expression = require("rima.expression")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local A = add:new({1,1}, {1, index.R"a"})
 
   -- constructors
@@ -37,10 +32,8 @@ function test(options)
   -- string representation
   T:check_equal(A, "1 + a")
   T:check_equal(A2, "5 + a")
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

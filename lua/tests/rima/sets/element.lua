@@ -1,22 +1,17 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local element = require("rima.sets.element")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local function N(...) return element:new(...) end
   local E = core.eval
   local D = lib.dump
@@ -39,10 +34,8 @@ function test(options)
     T:check_equal(E(a + 19, S), 32)
     T:check_equal(D(E(a + 19, S)), 32)
   end
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

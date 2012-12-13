@@ -1,17 +1,13 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local series = require("test.series")
 local proxy = require("rima.lib.proxy")
 local object = require("rima.lib.object")
 
-module(...)
 
--- Tests -----------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local my_type = object:new_class({}, "my_type")
 
   local p = proxy:new({}, my_type)
@@ -22,10 +18,8 @@ function test(options)
   local p = proxy:new(o, my_type)
   T:check_equal(proxy.O(p), o)
   T:check_equal(proxy.O(o), o)
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

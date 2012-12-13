@@ -3,19 +3,12 @@
 
 local core = require("rima.core")
 
-local setmetatable = setmetatable
-
-local series = require("test.series")
 local lib = require("rima.lib")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local E = core.eval
   local D = lib.dump
   local DE = function(...) return D(E(...)) end
@@ -41,9 +34,8 @@ function test(options)
     T:check_equal(core.defined(o2), true)
   end
 
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

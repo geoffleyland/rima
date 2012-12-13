@@ -1,21 +1,16 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local core = require("rima.core")
 
-local series = require("test.series")
 local lib = require("rima.lib")
 local index = require("rima.index")
 local opmath = require("rima.operators.math")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local x = index.R"x"
 
   T:check_equal(core.diff(1, x), 0)
@@ -43,10 +38,8 @@ function test(options)
   T:check_equal(core.eval(core.diff(opmath.cos(x), x)), "-1*sin(x)")
 
   T:check_equal(core.eval(core.diff((opmath.sin(x))^(x^2), x)), "(cos(x)/sin(x)*x^2 + 2*log(sin(x))*x)*sin(x)^(x^2)")
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

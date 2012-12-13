@@ -1,33 +1,30 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local assert, error, pairs = assert, error, pairs
 
 local series = require("test.series")
 
-module(...)
 
--- Tests -----------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function test(options)
+return function(T)
   local o2 = {}
-  for k, v in pairs(options) do o2[k] = v end
+  for k, v in pairs(T.options) do o2[k] = v end
   o2.dont_show_fails = true
-  local T = series:new(_M, o2)
+  local T = series:new(o2, "series")
 
   local function a(options)
     local o2 = {}
     for k, v in pairs(options) do o2[k] = v end
     if not (options.quiet) then o2.show_passes = true end
-    local LT = series:new("test test", o2)
+    local LT = series:new(o2, "test test")
     local ok, t, f = LT:close()
     T:expect_ok(function() assert(ok == true and t == 0 and f == 0, "empty test") end, "empty test ok")
     LT:test(true, "showing a pass")
     return LT:close()
   end
-  T:run(a)
+  T:run(a, "path")
 
-  local LT = series:new("NOT REAL ERRORS", o2)
+  local LT = series:new(o2, "NOT REAL ERRORS")
 
   -- series:test()    
   T:expect_ok(function() LT:test(true, "description", "message") end, "series:test")
@@ -54,11 +51,8 @@ function test(options)
   T:test(not LT:expect_error(function() error("an error!") end, "another_error"), "series:expect_error")
   T:test(LT:expect_error(function() error("an error!") end, "an error!"), "series:expect_error")
   T:test(not LT:expect_error(function() end, "no error"), "series:expect_error")
-  
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

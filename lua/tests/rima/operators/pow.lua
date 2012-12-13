@@ -1,22 +1,17 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local pow = require("rima.operators.pow")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
   local E = core.eval
   local D = lib.dump
@@ -41,10 +36,8 @@ function test(options)
   T:check_equal(D(E(b^1, S)), 'index(address{"b"})')
 
   -- Tests including add and mul are in rima.expression
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

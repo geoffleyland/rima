@@ -1,9 +1,8 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local mp = require("rima.mp")
 
-local series = require("test.series")
 local lib = require("rima.lib")
 local constraint = require("rima.mp.constraint")
 local index = require("rima.index")
@@ -11,15 +10,10 @@ local number_t = require("rima.types.number_t")
 local sum = require("rima.operators.sum")
 local sets = require("rima.sets")
 
-local math = require("math")
 
-module(...)
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
 
   do
@@ -149,9 +143,7 @@ Subject to:
   constraint2[2, 13]: a <= 13
 ]])
   end
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------

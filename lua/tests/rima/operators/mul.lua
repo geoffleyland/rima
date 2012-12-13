@@ -1,20 +1,15 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local mul = require("rima.operators.mul")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local index = require("rima.index")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local A = mul:new({1,3}, {1, index.R"a"})
 
   -- constructors
@@ -26,10 +21,8 @@ function test(options)
   
   local B = mul:new({1,0}, {1,2})
   T:check_equal(B, 0)
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

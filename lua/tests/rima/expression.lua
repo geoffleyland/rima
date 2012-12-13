@@ -1,17 +1,15 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local expression = require("rima.expression")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
 
-module(...)
 
--- Tests -----------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local function equal(T, expected, got)
   local function prep(z)
@@ -32,9 +30,7 @@ local function equal(T, expected, got)
   T:check_equal(g, e, nil, 1)
 end
 
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
   local E = core.eval
   local D = lib.dump
@@ -76,9 +72,8 @@ function test(options)
     equal(T, "5*(3 + 25*c^2)", {5 * d, S, E})
   end
 
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

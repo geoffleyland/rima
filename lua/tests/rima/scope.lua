@@ -1,23 +1,18 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local scope = require("rima.scope")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
 local sum = require("rima.operators.sum")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local function N(...) return scope.new(...) end
   local R = index.R
   local E = core.eval
@@ -551,10 +546,8 @@ function test(options)
     T:expect_ok(function() S = N{ z = {[a[i].b[j].c] = 17 }} end)
     T:check_equal(E(z.a[1].b[2].c, S), 17)
   end
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

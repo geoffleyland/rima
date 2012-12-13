@@ -1,18 +1,12 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local setmetatable, type = setmetatable, type
-
-local series = require("test.series")
 local args = require("rima.lib.args")
 
-module(...)
 
--- Tests -----------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   -- fail
   T:expect_error(function() args.fail("number" ,"arg", "string", "fn()", "fname") end,
     "fname: expecting a string for 'arg', got 'number'%.\n  Usage: fn()")
@@ -86,10 +80,8 @@ function test(options)
   T:expect_ok(function() args.check_types("a", "arg", {"string", {no, "nothing"}})  end)
   T:expect_ok(function() args.check_types(1, "arg", {"string", {yes, "anything"}})  end)
   T:expect_ok(function() args.check_types("a", "arg", {"string", {yes, "anything"}})  end)
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

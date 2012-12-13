@@ -1,20 +1,15 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local index = require("rima.index")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local core = require("rima.core")
 
-module(...)
- 
 
--- Tests -----------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local N = function(...) return index:new(...) end
   local IE = index.proxy_mt.__eval
   local E = core.eval
@@ -99,10 +94,8 @@ function test(options)
   local i = N(nil, "a", 1, "b")
   index.proxy_mt.__list_variables(i, {}, list)
   T:check_equal(list["a[1].b"].ref, "a[1].b")
-  
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

@@ -1,23 +1,18 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local number_t = require("rima.types.number_t")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local core = require("rima.core")
 local index = require("rima.index")
 local undefined_t = require("rima.types.undefined_t")
 local sum = require("rima.operators.sum")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
   local E = core.eval
 
@@ -93,11 +88,8 @@ function test(options)
     T:expect_error(function() E(e, S1) end, "error indexing 'x%[1%]' as 'x%[1%]%.a': can't index a number")
     T:expect_error(function() E(e, S2) end, "error indexing 'x%[1%]' as 'x%[1%]%.a': can't index a number")
   end
-
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

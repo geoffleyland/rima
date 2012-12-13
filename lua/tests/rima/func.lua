@@ -1,9 +1,8 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local func = require("rima.func")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
@@ -11,14 +10,10 @@ local scope = require("rima.scope")
 local index = require("rima.index")
 local number_t = require("rima.types.number_t")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
   local E = core.eval
   local D = lib.dump
@@ -49,6 +44,7 @@ function test(options)
 
   do
     local a, x, y = R"a, x, y"
+    local f
     T:expect_ok(function() f = func:new({"a"}, 3 + a) end)
     T:expect_ok(function() f = func:new({a}, 3 + a) end)    
     
@@ -191,10 +187,8 @@ function test(options)
     local f, x = R"f, x"
     T:check_equal(E(f(x), { f=func.build{x}(x) }), "x")
   end
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

@@ -1,23 +1,16 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local opmath = require("rima.operators.math")
 
-local series = require("test.series")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
 
-local math = require("math")
 
-module(...)
+------------------------------------------------------------------------------
 
-
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
   local E = core.eval
   local D = lib.dump
@@ -31,10 +24,8 @@ function test(options)
   T:check_equal(E(opmath.exp(a), S), "exp(a)")
   S.a = 4
   T:check_equal(E(opmath.sqrt(a), S), 2)
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

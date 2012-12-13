@@ -1,16 +1,12 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 
-module(...)
 
--- Tests -----------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local o = object:new()
   T:test(object.typeinfo(o).object, "typeinfo(o).object")
   T:check_equal(object.typename(o), "object", "typename(object) == 'object'")
@@ -29,10 +25,8 @@ function test(options)
 
   T:check_equal(object.typename(s), "subobj", "typename(s) == 'subobj'")
   T:check_equal(object.typename(1), "number", "typename(1) == 'number'")
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

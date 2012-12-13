@@ -1,23 +1,15 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local address = require("rima.address")
 
-local series = require("test.series")
-local object = require("rima.lib.object")
 local lib = require("rima.lib")
-
-local tostring = tostring
-local table = require("table")
-
-module(...)
+local object = require("rima.lib.object")
 
 
--- Tests -----------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local function N(...) return address:new(...) end
 
   -- constructors
@@ -71,9 +63,8 @@ function test(options)
   end
   T:check_equal(table.concat(r, ","), "a,1,b")
 
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

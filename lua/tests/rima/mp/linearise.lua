@@ -1,28 +1,21 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local ipairs, pairs, pcall = ipairs, pairs, pcall
-local table = require("table")
+local linearise = require("rima.mp.linearise")
 
-local series = require("test.series")
 local scope = require("rima.scope")
 local core = require("rima.core")
 local lib = require("rima.lib")
-local linearise = require("rima.mp.linearise")
 local index = require("rima.index")
 local sum = require("rima.operators.sum")
 local set_ref = require("rima.sets.ref")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
 
   local a, b, c, d = R"a, b, c, d"
@@ -121,10 +114,8 @@ function test(options)
     check_linear(sum.build{["r,q"]=set_ref.ipairs(Q)}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
     check_linear(sum.build{["r,q"]=set_ref.ipairs(Q)}(q * x[r]), 0, {["x[1]"]=3,["x[2]"]=7,["x[3]"]=11,["x[4]"]=13}, S)
   end
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

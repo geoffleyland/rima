@@ -1,11 +1,9 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local sets = require("rima.sets")
 local ref = require("rima.sets.ref")
 
-local series = require("test.series")
-local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
@@ -13,14 +11,10 @@ local index = require("rima.index")
 local sum = require("rima.operators.sum")
 local number_t = require("rima.types.number_t")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
   local E = core.eval
 
@@ -181,9 +175,7 @@ function test(options)
     T:check_equal(E(sum.build{d=D}(d*d), scope.new{D={a}}), "a^2")
     T:check_equal(E(sum.build{d=D}(d^2), scope.new{D={a}}), "a^2")
   end
-
-  return T:close()
 end
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

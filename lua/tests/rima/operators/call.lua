@@ -1,10 +1,8 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local call = require("rima.operators.call")
 
-local string = require("string")
-local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
@@ -12,13 +10,10 @@ local expression = require("rima.expression")
 local index = require("rima.index")
 local func = require("rima.func")
 
-module(...)
 
--- Tests -----------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
   local E = core.eval
   local D = lib.dump
@@ -62,10 +57,8 @@ function test(options)
     local S = { f = string.sub, a = "hello", b = 2 }
     T:check_equal(E(f(a, b), S), "ello")  
   end
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 

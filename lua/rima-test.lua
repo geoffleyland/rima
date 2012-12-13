@@ -29,10 +29,13 @@ local directory = require("test.directory")
 local expressions = require("test.expression_files")
 
 if strict then
-  require("test.strict")
+  ok, message = pcall(require, "test.strict")
+  if not ok then
+    io.stderr:write("warning: strict not available\n")
+  end
 end
 
-local p1, t1, f1 = directory.test("rima", "tests", options, patterns)
+local p1, t1, f1 = directory.test("tests", options, patterns)
 local p2, t2, f2 = expressions.test("../expressions")
 
 local passed = p1 and p2

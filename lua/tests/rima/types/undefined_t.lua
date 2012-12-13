@@ -1,9 +1,8 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
 local undefined_t = require("rima.types.undefined_t")
 
-local series = require("test.series")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
@@ -11,14 +10,9 @@ local index = require("rima.index")
 local sum = require("rima.operators.sum")
 
 
-module(...)
+------------------------------------------------------------------------------
 
-
--- Tests -----------------------------------------------------------------------
-
-function test(options)
-  local T = series:new(_M, options)
-
+return function(T)
   local R = index.R
   local E = core.eval
 
@@ -73,10 +67,8 @@ function test(options)
     T:check_equal(E(e, S2), "X[1].Y[1].z")
     T:check_equal(lib.dump(E(e, S2)), "index(address{\"X\", 1, \"Y\", 1, \"z\"})")
   end
-
-  return T:close()
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
