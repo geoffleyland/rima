@@ -1,70 +1,48 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local ipairs, getmetatable, pairs, select, tostring, type, unpack =
-      ipairs, getmetatable, pairs, select, tostring, type, unpack
-local table = require("table")
-
 local object = require("rima.lib.object")
-
 local typename = object.typename
 
-module(...)
+
+------------------------------------------------------------------------------
+
+local lib = {}
+
+------------------------------------------------------------------------------
+
+function lib.getmetamethod(obj, methodname)
+  local mt = getmetatable(obj)
+  return mt and mt[methodname]
+end
 
 
---------------------------------------------------------------------------------
-
-function append(t, ...)
-  local l = #t+1
+function lib.append(t, ...)
+  local l = #t
   for i = 1, select("#", ...) do
-    t[l] = select(i, ...)
-    l = l + 1
+    t[l + i] = select(i, ...)
   end
 end
 
 
-function imap(f, t)
+function lib.imap(f, t)
   local r = {}
   for i, v in ipairs(t) do r[i] = f(v) end
   return r
 end
 
 
-function concat(t, s, f)
-  if f then
-    return table.concat(imap(f, t), s)
-  else
-    return table.concat(t, s)
-  end
+function lib.concat(t, s, f)
+  t = (f and lib.imap(f, t)) or t
+  return table.concat(t, s)
 end
 
 
-function packn(...)
-  return { n=select("#", ...), ... }
-end
-
-
-function packs(status, ...)
-  return status, { n=select("#", ...), ... }
-end
-
-
-function unpackn(t)
-  return unpack(t, 1, t.n)
-end
-
-
-function getmetamethod(obj, methodname)
-  local mt = getmetatable(obj)
-  return mt and mt[methodname]
-end
-
-
--- Object conversion -----------------------------------------------------------
+------------------------------------------------------------------------------
 
 -- Convert an object if it has a metamethod with the right name
-function convert(obj, methodname)
-  local f = getmetamethod(obj, methodname)
+function lib.convert(obj, methodname)
+  local f = lib.getmetamethod(obj, methodname)
   if f then
     return f(obj)
   else
@@ -73,25 +51,27 @@ function convert(obj, methodname)
 end
 
 
--- String representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
-local number_format = "%.4g"
-function set_number_format(f)
-  number_format = f
-end
-
-
-function is_identifier(v)
+local function is_identifier(v)
   return v:match("^[_%a][_%w]*$")
 end
 
 
-function is_identifier_string(v)
+function lib.is_identifier_string(v)
   return type(v) == "string" and is_identifier(v)
 end
 
 
-function simple_repr(o, format)
+------------------------------------------------------------------------------
+
+local number_format = "%.4g"
+function lib.set_number_format(f)
+  number_format = f
+end
+
+
+function lib.simple_repr(o, format)
   local t = typename(o)
   if t == "number" then
     local nf = format.numbers or number_format
@@ -147,33 +127,37 @@ end
 
 local no_format = {}
 
-function repr(o, format)
+function lib.repr(o, format)
   format = format or no_format
 
-  local f = getmetamethod(o, "__repr")
+  local f = lib.getmetamethod(o, "__repr")
   if f then
     return f(o, format)
   else
-    return simple_repr(o, format)
+    return lib.simple_repr(o, format)
   end
 end
 
 
-function __tostring(o)
+function lib.__tostring(o)
   return getmetatable(o).__repr(o, no_format)
 end
 
 
-function concat_repr(t, format, sep)
-  return concat(t, sep or ", ", function(i) return repr(i, format) end)
+function lib.concat_repr(t, format, sep)
+  return lib.concat(t, sep or ", ", function(i) return lib.repr(i, format) end)
 end
 
 
 local dump_format = { format="dump" }
-function dump(e)
-  return repr(e, dump_format)
+function lib.dump(e)
+  return lib.repr(e, dump_format)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return lib
+
+------------------------------------------------------------------------------
 
