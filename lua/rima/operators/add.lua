@@ -1,28 +1,21 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local math = require("math")
-local ipairs, require =
-      ipairs, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-
-module(...)
-
 local expression = require("rima.expression")
 local add_mul = require("rima.operators.add_mul")
 
 
--- Addition --------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-local add = expression:new_type(_M, "add")
+local add = expression:new_type({}, "add")
 add.precedence = 5
 
 
--- String Representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
 function add:__repr(format)
   local terms = proxy.O(self)
@@ -59,7 +52,7 @@ function add:__repr(format)
 end
 
 
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local sum
 
@@ -151,7 +144,7 @@ function add:__eval(...)
 end
 
 
--- Automatic differentiation ---------------------------------------------------
+------------------------------------------------------------------------------
 
 function add:__diff(v)
   local diff_terms = {}
@@ -167,10 +160,14 @@ function add:__diff(v)
 end
 
 
--- Introspection? --------------------------------------------------------------
+------------------------------------------------------------------------------
 
 add.__list_variables = add_mul.list_variables
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return add
+
+------------------------------------------------------------------------------
 

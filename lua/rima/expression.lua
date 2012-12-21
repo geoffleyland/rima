@@ -1,21 +1,16 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local pairs, rawget, rawset, require =
-      pairs, rawget, rawset, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Constructor -----------------------------------------------------------------
-
-local expression = object:new_class(_M, "expression")
-local expression_methods, load_expression_ops
+local expression = object:new_class({}, "expression")
+local expression_methods, expression_ops
 
 
 local function copy_methods(m, t)
@@ -28,13 +23,13 @@ end
 
 
 function expression:copy_operators(t)
-  copy_methods(load_expression_ops(), t)
+  copy_methods(expression_ops, t)
 end
 
 
 function expression:new_type(t, typename)
   copy_methods(expression_methods, t)
-  copy_methods(load_expression_ops(), t)
+  self:copy_operators(t)
   return self:new_class(t, typename)
 end
 
@@ -56,7 +51,7 @@ function expression:new_table(op, terms)
 end
 
 
--- Expression methods ----------------------------------------------------------
+------------------------------------------------------------------------------
 
 expression_methods =
 {
@@ -65,12 +60,10 @@ expression_methods =
   __tostring = lib.__tostring,
   __repr =
     function(self, format)
-      return typename(self).."("..lib.concat_repr(proxy.O(self), format)..")"
+      return object.typename(self).."("..lib.concat_repr(proxy.O(self), format)..")"
     end,
 }
 
-
--- Introspection? --------------------------------------------------------------
 
 function expression_methods:__list_variables(S, list)
   local terms = proxy.O(self)
@@ -80,37 +73,35 @@ function expression_methods:__list_variables(S, list)
 end
 
 
--- Overloaded operators --------------------------------------------------------
+------------------------------------------------------------------------------
 
 -- The expression operators are lazy loaded to avoid a require conflict between
 -- the operators (which require expression) and expression (which requires
--- operators).  It would be nice if there was a better workaround
-local expression_ops
-function load_expression_ops()
-  if not expression_ops then
-    local add_op = require("rima.operators.add")
-    local mul_op = require("rima.operators.mul")
-    local pow_op = require("rima.operators.pow")
-    local mod_op = require("rima.operators.mod")
-    local call_op = require("rima.operators.call")
-    local index = require("rima.index")
+-- operators).  It would be nice if there was a better workaround.
 
-    expression_ops =
-    {
-      __add   = function(a, b) return expression:new(add_op, { 1, a}, { 1, b}) end,
-      __sub   = function(a, b) return expression:new(add_op, { 1, a}, {-1, b}) end,
-      __unm   = function(a)    return expression:new(add_op, {-1, a}) end,
-      __mul   = function(a, b) return expression:new(mul_op, { 1, a}, { 1, b}) end,
-      __div   = function(a, b) return expression:new(mul_op, { 1, a}, {-1, b}) end,
-      __pow   = function(a, b) return expression:new(pow_op, a, b) end,
-      __mod   = function(a, b) return expression:new(mod_op, a, b) end,
-      __call  = function(...)  return expression:new(call_op, ...) end,
-      __index = function(...)  return index:new(...) end,
-    }
-  end
-  return expression_ops
-end
+local function load_op(t, k) t[k] = require("rima.operators."..k) return t[k] end
+local op_mods = setmetatable({}, { __index = load_op })
+
+local function load_index(t, k) t[k] = require("rima."..k) return t[k] end
+local index_mods = setmetatable({}, { __index = load_index })
+
+expression_ops =
+{
+  __add   = function(a, b) return expression:new(op_mods.add, { 1, a}, { 1, b}) end,
+  __sub   = function(a, b) return expression:new(op_mods.add, { 1, a}, {-1, b}) end,
+  __unm   = function(a)    return expression:new(op_mods.add, {-1, a}) end,
+  __mul   = function(a, b) return expression:new(op_mods.mul, { 1, a}, { 1, b}) end,
+  __div   = function(a, b) return expression:new(op_mods.mul, { 1, a}, {-1, b}) end,
+  __pow   = function(a, b) return expression:new(op_mods.pow, a, b) end,
+  __mod   = function(a, b) return expression:new(op_mods.mod, a, b) end,
+  __call  = function(...)  return expression:new(op_mods.call, ...) end,
+  __index = function(...)  return index_mods.index:new(...) end,
+}
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return expression
+
+------------------------------------------------------------------------------
 
