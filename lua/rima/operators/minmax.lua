@@ -1,18 +1,14 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local math = require("math")
-local ipairs, type = ipairs, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local core = require("rima.core")
 local expression = require("rima.expression")
 
-module(...)
+local minmax = {}
 
-
--- Min -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 min = expression:new_type({}, "min")
 min.precedence = 0
@@ -41,12 +37,12 @@ function min.__eval(args, ...)
 end
 
 
-function build_min(...)
+function minmax.build_min(...)
   return expression:new(min, ...)
 end
 
 
--- Max -------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 max = expression:new_type({}, "max")
 max.precedence = 0
@@ -75,10 +71,14 @@ function max.__eval(args, ...)
 end
 
 
-function build_max(...)
+function minmax.build_max(...)
   return expression:new(max, ...)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return minmax
+
+------------------------------------------------------------------------------
 

@@ -1,28 +1,22 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local debug = require("debug")
-local error, ipairs, require, type, unpack, xpcall =
-      error, ipairs, require, type, unpack, xpcall
 
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-
-module(...)
-
 local expression = require("rima.expression")
 
--- Addition --------------------------------------------------------------------
 
-local call = _M
+------------------------------------------------------------------------------
+
+local call = {}
 call.__typename = "call"
 call.__typeinfo = { call = "true", [call] = true }
 call.precedence = 0
 expression:copy_operators(call)
 
 
--- String Representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
 function call.__repr(args, format)
   args = proxy.O(args)
@@ -35,7 +29,7 @@ end
 call.__tostring = lib.__tostring
 
 
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function call.__eval(args, S)
   args = proxy.O(args)
@@ -66,5 +60,9 @@ function call.__eval(args, S)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return call
+
+------------------------------------------------------------------------------
 

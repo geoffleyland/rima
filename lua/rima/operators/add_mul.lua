@@ -1,22 +1,17 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local table = require("table")
-local getmetatable, require, type =
-      getmetatable, require, type
 
 local lib = require("rima.lib")
 local core = require("rima.core")
 local proxy = require("rima.lib.proxy")
-
-module(...)
-
 local expression = require("rima.expression")
 
 
--- Evaluate all terms, and return the same object if nothing changed -----------
+local add_mul = {}
 
-function evaluate_terms(terms, ...)
+------------------------------------------------------------------------------
+
+function add_mul.evaluate_terms(terms, ...)
   local new_terms
   local term_count = #terms
   for i = 1, term_count do
@@ -39,11 +34,11 @@ function evaluate_terms(terms, ...)
 end
 
 
--- Add a term to the term_map --------------------------------------------------
+------------------------------------------------------------------------------
 
 local SCOPE_FORMAT = { scopes = true }
 
-function add_term(terms, term_map, coeff, e, id, sort)
+function add_mul.add_term(terms, term_map, coeff, e, id, sort)
   local id = id or lib.repr(e, SCOPE_FORMAT)
   local t = term_map[id]
   if coeff == 0 then
@@ -60,13 +55,13 @@ function add_term(terms, term_map, coeff, e, id, sort)
 end
 
 
--- Sort terms ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local function term_order(a, b)
   return a.sort < b.sort
 end
 
-function sort_terms(terms)
+function add_mul.sort_terms(terms)
   -- sort the new terms alphabetically, so that when we group by a string
   -- representation, like terms look alike
   local term_count = 0
@@ -93,9 +88,9 @@ function sort_terms(terms)
 end
 
 
--- Extract the constant from an add or mul (if there is one) -------------------
+------------------------------------------------------------------------------
 
-function extract_constant(e)
+function add_mul.extract_constant(e)
   local terms = proxy.O(e)
   local constant = terms[1][2]
 
@@ -121,16 +116,20 @@ function extract_constant(e)
 end
 
 
--- List variables --------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function list_variables(op, S, list)
+function add_mul.list_variables(op, S, list)
   local terms = proxy.O(op)
   for i = 1, #terms do
-    t = terms[i]
+    local t = terms[i]
     core.list_variables(t[2], S, list)
   end
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return add_mul
+
+------------------------------------------------------------------------------
 

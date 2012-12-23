@@ -1,29 +1,22 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local math = require("math")
-local error, require, type =
-      error, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local mul = require("rima.operators.mul")
-
-module(...)
-
 local expression = require("rima.expression")
 local opmath = require("rima.operators.math")
 
 
--- Exponentiation --------------------------------------------------------------
+------------------------------------------------------------------------------
 
-local pow = expression:new_type(_M, "pow")
+local pow = expression:new_type({}, "pow")
 pow.precedence = 0
 
 
--- String Representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
 function pow:__repr(format)
   local terms = proxy.O(self)
@@ -43,7 +36,7 @@ function pow:__repr(format)
 end
 
 
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function pow:simplify()
   local terms = proxy.O(self)
@@ -75,7 +68,7 @@ function pow:__eval(...)
 end
 
 
--- Automatic differentiation ---------------------------------------------------
+------------------------------------------------------------------------------
 
 function pow.__diff(args, v)
   args = proxy.O(args)
@@ -96,5 +89,9 @@ function pow.__diff(args, v)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return pow
+
+------------------------------------------------------------------------------
 

@@ -1,24 +1,19 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local ipairs, pairs, require = ipairs, pairs, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local closure = require("rima.closure")
-
-module(...)
-
 local add = require("rima.operators.add")
 local expression = require("rima.expression")
 local set_list = require("rima.sets.list")
 
 
--- Sums ------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-local sum = expression:new_type(_M, "sum")
+local sum = expression:new_type({}, "sum")
 sum.precedence = 1
 
 
@@ -37,7 +32,7 @@ function sum:simplify()
 end
 
 
--- String Representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
 local formats =
 {
@@ -54,7 +49,7 @@ function sum:__repr(format)
 end
 
 
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function sum:__eval(S)
   local terms = proxy.O(self)
@@ -109,7 +104,7 @@ function sum:__eval(S)
 end
 
 
--- Introspection? --------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function sum:__list_variables(S, list)
   local cl = proxy.O(self)[1]
@@ -120,9 +115,9 @@ function sum:__list_variables(S, list)
 end
 
 
--- sum constuctor --------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function build(x)
+function sum.build(x)
   local term_count, terms = 1, { x }
   local function next_term(y)
     term_count = term_count + 1
@@ -137,5 +132,9 @@ function build(x)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return sum
+
+------------------------------------------------------------------------------
 

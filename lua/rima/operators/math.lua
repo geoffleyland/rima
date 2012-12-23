@@ -1,8 +1,5 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local math = require("math")
-local assert, error, ipairs, type = assert, error, ipairs, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -10,10 +7,9 @@ local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
 
-module(...)
+local rmath = {}
 
-
--- Math functions --------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local math_functions =
 {
@@ -59,15 +55,15 @@ local function math_diff(args, v)
   if dadv == 0 then return 0 end
   
   if o == "exp" then
-    return dadv * exp(a)
+    return dadv * rmath.exp(a)
   elseif o == "log" then
     return dadv / a 
   elseif o == "log10" then
     return dadv / (math.log(10) * a)
   elseif o == "sin" then
-    return dadv * cos(a)
+    return dadv * rmath.cos(a)
   elseif o == "cos" then
-    return -dadv * sin(a)
+    return -dadv * rmath.sin(a)
   elseif o == "sqrt" then
     return dadv * 0.5 * a ^ (-0.5)
   else
@@ -99,7 +95,7 @@ local function make_math_function(name)
   op.__repr = math_repr
   op.__diff = math_diff
 
-  _M[name] = function(e)
+  rmath[name] = function(e)
     return expression:new(op, e)
   end
 end
@@ -110,5 +106,9 @@ for _, name in ipairs(math_functions) do
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return rmath
+
+------------------------------------------------------------------------------
 

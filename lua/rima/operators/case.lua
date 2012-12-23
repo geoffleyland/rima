@@ -1,7 +1,5 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local ipairs, rawget = ipairs, rawget
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -10,16 +8,14 @@ local core = require("rima.core")
 local expression = require("rima.expression")
 local undefined_t = require("rima.types.undefined_t")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Subscripts ------------------------------------------------------------------
-
-local case = expression:new_type(_M, "case")
+local case = expression:new_type({}, "case")
 case.precedence = 1
 
 
--- String Representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
 function case.__repr(args, format)
   args = proxy.O(args)
@@ -35,7 +31,7 @@ function case.__repr(args, format)
 end
 
 
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local function eval_preserve(value, type, addr, ...)
   local t, a
@@ -86,12 +82,17 @@ function case.__eval(args, ...)
   end
 end
 
--- build a case ----------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function build(value, cases, default)
+function case.build(value, cases, default)
   return expression:new(case, value, cases, default)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return case
+
+------------------------------------------------------------------------------
+
 

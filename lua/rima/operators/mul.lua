@@ -1,29 +1,22 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local math = require("math")
-local ipairs, require =
-      ipairs, require
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-
-module(...)
-
 local expression = require("rima.expression")
 local add_mul = require("rima.operators.add_mul")
 local add = require("rima.operators.add")
 
 
--- Multiplication --------------------------------------------------------------
+------------------------------------------------------------------------------
 
-local mul = expression:new_type(_M, "mul")
+local mul = expression:new_type({}, "mul")
 mul.precedence = 3
 
 
--- String Representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
 function mul:__repr(format)
   local terms = proxy.O(self)
@@ -67,7 +60,7 @@ function mul:__repr(format)
 end
 
 
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local product
 
@@ -83,6 +76,7 @@ local function _simplify(new_terms, term_map, exponent, e, id, sort)
     local ti = object.typeinfo(e)
     local terms = proxy.O(e)
     if ti.mul then                              -- if the term is another product, hoist its terms
+      local _
       _, coeff = product(new_terms, term_map, exponent, terms)
       changed = true
     elseif ti.add and #terms == 1 then          -- if the term is a sum with a single term, hoist it
@@ -163,7 +157,7 @@ function mul:__eval(...)
 end
 
 
--- Automatic differentiation ---------------------------------------------------
+------------------------------------------------------------------------------
 
 function mul:__diff(v)
   local terms = proxy.O(self)
@@ -199,10 +193,15 @@ function mul:__diff(v)
 end
 
 
--- Introspection? --------------------------------------------------------------
+------------------------------------------------------------------------------
 
 mul.__list_variables = add_mul.list_variables
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return mul
+
+------------------------------------------------------------------------------
+
 

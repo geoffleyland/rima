@@ -1,29 +1,20 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local math = require("math")
-local error, require, type =
-      error, require, type
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local mul = require("rima.operators.mul")
-
-module(...)
-
 local expression = require("rima.expression")
-local opmath = require("rima.operators.math")
 
 
--- Exponentiation --------------------------------------------------------------
+------------------------------------------------------------------------------
 
-local mod = expression:new_type(_M, "mod")
+local mod = expression:new_type({}, "mod")
 mod.precedence = 3
 
 
--- String Representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
 function mod:__repr(format)
   local terms = proxy.O(self)
@@ -43,7 +34,7 @@ function mod:__repr(format)
 end
 
 
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function mod:simplify()
   if proxy.O(self)[1] == 0 then
@@ -67,5 +58,9 @@ function mod:__eval(...)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return mod
+
+------------------------------------------------------------------------------
 
