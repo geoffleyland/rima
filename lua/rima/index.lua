@@ -1,12 +1,5 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
-
-local error, getfenv, ipairs, pairs, pcall, require, type, unpack, xpcall =
-      error, getfenv, ipairs, pairs, pcall, require, type, unpack, xpcall
-local getmetatable, setmetatable =
-      getmetatable, setmetatable
-
-local debug = require("debug")
 
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
@@ -17,23 +10,17 @@ local core = require("rima.core")
 local element = require("rima.sets.element")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
+local expression = require("rima.expression")
 
 local typeinfo = object.typeinfo
 
-module(...)
 
-local add_op = require("rima.operators.add")
-local mul_op = require("rima.operators.mul")
-local pow_op = require("rima.operators.pow")
-local mod_op = require("rima.operators.mod")
-local call_op = require("rima.operators.call")
-local expression = require("rima.expression")
-
-
--- Constructor -----------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local index = object:new_class(_M, "index")
-index.proxy_mt = setmetatable({}, index)
+local proxy_mt = setmetatable({}, index)
+index.proxy_mt = proxy_mt
+expression:copy_operators(proxy_mt)
 
 
 function index:new(base, ...)
@@ -74,7 +61,7 @@ function index:identifier(i)
 end
 
 
--- String Representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
 proxy_mt.__tostring = lib.__tostring
 function proxy_mt.__repr(i, format)
@@ -100,7 +87,7 @@ function proxy_mt.__repr(i, format)
 end
 
 
--- Indexing --------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function proxy_mt.__index(r, i)
   return index:new(r, i)
@@ -157,7 +144,7 @@ local function safe_index(t, i, base, address, length, depth, allow_undefined)
     error(("error indexing '%s' as '%s': variable indexes must be unbound identifiers"):format(lib.repr(a2), lib.repr(a2+i)), depth+1)
   end
   if not t then return end
-  local r1, r2
+  local value, vtype, vaddr
 --  local status, message = xpcall(function() value, vtype, vaddr = do_index(t, i, length, address) end, debug.traceback)
   local status, message = pcall(function() value, vtype, vaddr = do_index(t, i, length, address) end)
   if not status then
@@ -176,7 +163,7 @@ local function safe_index(t, i, base, address, length, depth, allow_undefined)
       if f then
         t = f(t)
       end
-      local tt = typename(t)
+      local tt = object.typename(t)
       local article = ""
       if tt ~= "nil" then
         article = tt:sub(1,1):match("[aeiouAEIOU]") and " an" or " a"
@@ -268,7 +255,7 @@ function proxy_mt.__newindex(r, i, value)
 end
 
 
--- Resolving -------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 function index.resolve(r, s)
   local I = proxy.O(r)
@@ -322,7 +309,7 @@ function proxy_mt.__eval(e, s)
 end
 
 
--- Listing variables -----------------------------------------------------------
+------------------------------------------------------------------------------
 
 function proxy_mt.__list_variables(i, s, list)
   local I = proxy.O(i)
@@ -359,8 +346,8 @@ function proxy_mt.__list_variables(i, s, list)
     addr2[#indexes] = indexes[#indexes][1].value
     local search_for = indexes[#indexes][1].parent
     for k = #indexes-1, 1, -1 do
-      indx = indexes[k]
-      for j, s in ipairs(indx) do
+      local index = indexes[k]
+      for j, s in ipairs(index) do
         if s.node == search_for then
           addr2[k] = s.value
           search_for = s.parent
@@ -392,7 +379,7 @@ function proxy_mt.__list_variables(i, s, list)
 end
 
 
--- Automatic differentiation ---------------------------------------------------
+------------------------------------------------------------------------------
 
 function index.__diff(i, v)
   local I = proxy.O(i)
@@ -405,44 +392,9 @@ function index.__diff(i, v)
 end
 
 
--- Operators -------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function proxy_mt.__add(a, b)
-  return expression:new(add_op, {1, a}, {1, b})
-end
-
-function proxy_mt.__sub(a, b)
-  return expression:new(add_op, {1, a}, {-1, b})
-end
-
-function proxy_mt.__unm(a)
-  return expression:new(add_op, {-1, a})
-end
-
-function proxy_mt.__mul(a, b, c)
-  return expression:new(mul_op, {1, a}, {1, b})
-end
-
-function proxy_mt.__div(a, b)
-  return expression:new(mul_op, {1, a}, {-1, b})
-end
-
-function proxy_mt.__pow(a, b)
-  return expression:new(pow_op, a, b)
-end
-
-function proxy_mt.__mod(a, b)
-  return expression:new(mod_op, a, b)
-end
-
-function proxy_mt.__call(...)
-  return expression:new(call_op, ...)
-end
-
-
--- Creating indexes ------------------------------------------------------------
-
-function R(names)
+function index.R(names)
   local results = {}
   for n in names:gmatch("[%a_][%w_]*") do
     results[#results+1] = index:new(nil, n)
@@ -451,7 +403,7 @@ function R(names)
 end
 
 
-function define(names, depth)
+function index.define(names, depth)
   local env = getfenv(2 + depth or 0)
   for n in names:gmatch("[%a_][%w_]*") do
     env[n] = index:new(nil, n)
@@ -459,5 +411,9 @@ function define(names, depth)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return index
+
+------------------------------------------------------------------------------
 
