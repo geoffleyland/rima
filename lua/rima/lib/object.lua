@@ -1,4 +1,4 @@
--- Copyright (c) 2009-2012 Incremental IP Limited
+-- Copyright (c) 2009-2013 Incremental IP Limited
 -- see LICENSE for license information
 
 --- Yet *another* Lua type system.
@@ -7,9 +7,6 @@
 --  field that's a set of all the object's and its ancestors' names,
 --  and all their metatables.
 --  @module rima.lib.object
-
-local error, getmetatable, pairs, setmetatable, rawget, type =
-      error, getmetatable, pairs, setmetatable, rawget, type
 
 
 ------------------------------------------------------------------------------
