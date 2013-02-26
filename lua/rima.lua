@@ -69,7 +69,7 @@ rima.compile = compiler.compile
 ------------------------------------------------------------------------------
 
 rima.sum = interface.sum
-rima.product = prod_op.build
+rima.product = interface.product
 rima.case = case_op.build
 rima.min = minmax.build_min
 rima.max = minmax.build_max

@@ -9,6 +9,7 @@ local core = require("rima.core")
 local scope = require("rima.scope")
 local index = require("rima.index")
 local number_t = require("rima.types.number_t")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
@@ -23,8 +24,8 @@ return function(T)
 
   local x, X = R"x, X"
 
-  T:check_equal(E(product.build{x=X}(x), {X={1, 2, 3, 4, 5}}), 120)
-  T:check_equal(E(product.build{x=X}(x), {X={number_t.free(), number_t.free(), number_t.free()}}), "X[1]*X[2]*X[3]")
+  T:check_equal(E(interface.product{x=X}(x), {X={1, 2, 3, 4, 5}}), 120)
+  T:check_equal(E(interface.product{x=X}(x), {X={number_t.free(), number_t.free(), number_t.free()}}), "X[1]*X[2]*X[3]")
 end
 
 
