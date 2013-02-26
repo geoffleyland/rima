@@ -1,11 +1,6 @@
 -- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local debug = require("debug")
-local error, getfenv, require, unpack, xpcall =
-      error, getfenv, require, unpack, xpcall
-local rawpairs = pairs
-
 local lib = require("rima.lib")
 local trace = require("rima.lib.trace")
 local index = require("rima.index")
@@ -20,31 +15,30 @@ local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
 local compiler = require("rima.compiler")
-local mp = require("rima.mp")
-
-module(...)
 
 
-
--- String representation -------------------------------------------------------
-
-repr = lib.repr
-
--- Creating references ---------------------------------------------------------
-
-function R(names)
-  return index.R(names)
-end
+rima = {}
+rima.mp = require("rima.mp")
+rima.scope = require("rima.scope")
 
 
-function define(names)
+------------------------------------------------------------------------------
+
+rima.repr = lib.repr
+
+------------------------------------------------------------------------------
+
+rima.R = index.R
+
+function rima.define(names)
   index.define(names, 1)
 end
 
 
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function E(e, S) -- evaluate an expression
+--- Evaluate an expression
+function rima.E(e, S)
   local status, r = xpcall(function() return core.eval(e, S) end, debug.traceback)
   if status then
     return r
@@ -55,54 +49,58 @@ function E(e, S) -- evaluate an expression
 end
 
 
--- Creating functions ----------------------------------------------------------
+------------------------------------------------------------------------------
 
-F = func.build
+rima.F = func.build
 
 
--- Automatic differentiation ---------------------------------------------------
+------------------------------------------------------------------------------
 
-function diff(exp, var)
+function rima.diff(exp, var)
   return (core.eval(core.diff(exp, var)))
 end
 
 
--- Compiling expressions -------------------------------------------------------
+------------------------------------------------------------------------------
 
-compile = compiler.compile
+rima.compile = compiler.compile
 
 
--- Operators -------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-sum = sum_op.build
-product = prod_op.build
-case = case_op.build
-min = minmax.build_min
-max = minmax.build_max
+rima.sum = sum_op.build
+rima.product = prod_op.build
+rima.case = case_op.build
+rima.min = minmax.build_min
+rima.max = minmax.build_max
 
-for k, v in rawpairs(math_op) do
+for k, v in pairs(math_op) do
   if k:sub(1, 1) ~= "_" then
-    _M[k] = v
+    rima[k] = v
   end
 end
 
 
--- Set tools -------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-ord = sets.ord
-range = sets.range
-pairs = set_ref.pairs
-ipairs = set_ref.ipairs
-
-
--- Types -----------------------------------------------------------------------
-
-free = number_t.free
-positive = number_t.positive
-negative = number_t.negative
-integer = number_t.integer
-binary = number_t.binary
+rima.ord = sets.ord
+rima.range = sets.range
+rima.pairs = set_ref.pairs
+rima.ipairs = set_ref.ipairs
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+rima.free = number_t.free
+rima.positive = number_t.positive
+rima.negative = number_t.negative
+rima.integer = number_t.integer
+rima.binary = number_t.binary
+
+
+------------------------------------------------------------------------------
+
+return rima
+
+------------------------------------------------------------------------------
 
