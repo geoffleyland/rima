@@ -6,7 +6,6 @@ local proxy = require("rima.lib.proxy")
 local core = require("rima.core")
 local expression = require("rima.expression")
 
-local minmax = {}
 
 ------------------------------------------------------------------------------
 
@@ -34,11 +33,6 @@ function min.__eval(args, ...)
   else
     return m
   end
-end
-
-
-function minmax.build_min(...)
-  return expression:new(min, ...)
 end
 
 
@@ -71,14 +65,9 @@ function max.__eval(args, ...)
 end
 
 
-function minmax.build_max(...)
-  return expression:new(max, ...)
-end
-
-
 ------------------------------------------------------------------------------
 
-return minmax
+return { min = min, max = max }
 
 ------------------------------------------------------------------------------
 

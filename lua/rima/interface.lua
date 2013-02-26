@@ -5,6 +5,7 @@ local object = require"rima.lib.object"
 local sum = require"rima.operators.sum"
 local product = require"rima.operators.product"
 local case = require"rima.operators.case"
+local minmax = require"rima.operators.minmax"
 local expression = require"rima.expression"
 
 ------------------------------------------------------------------------------
@@ -45,6 +46,16 @@ end
 
 function interface.case(value, cases, default)
   return expression:new(case, value, cases, default)
+end
+
+
+function interface.min(...)
+  return expression:new(minmax.min, ...)
+end
+
+
+function interface.max(...)
+  return expression:new(minmax.max, ...)
 end
 
 

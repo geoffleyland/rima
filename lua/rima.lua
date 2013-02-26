@@ -66,11 +66,11 @@ rima.compile = compiler.compile
 
 ------------------------------------------------------------------------------
 
-rima.sum = interface.sum
+rima.sum     = interface.sum
 rima.product = interface.product
-rima.case = interface.case
-rima.min = minmax.build_min
-rima.max = minmax.build_max
+rima.case    = interface.case
+rima.min     = interface.min
+rima.max     = interface.max
 
 for k, v in pairs(math_op) do
   if k:sub(1, 1) ~= "_" then
