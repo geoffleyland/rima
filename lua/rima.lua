@@ -6,7 +6,6 @@ local trace = require("rima.lib.trace")
 local index = require("rima.index")
 local core = require("rima.core")
 local func = require("rima.func")
-local sum_op = require("rima.operators.sum")
 local prod_op = require("rima.operators.product")
 local case_op = require("rima.operators.case")
 local math_op = require("rima.operators.math")
@@ -15,6 +14,7 @@ local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
 local compiler = require("rima.compiler")
+local interface = require("rima.interface")
 
 
 rima = {}
@@ -68,7 +68,7 @@ rima.compile = compiler.compile
 
 ------------------------------------------------------------------------------
 
-rima.sum = sum_op.build
+rima.sum = interface.sum
 rima.product = prod_op.build
 rima.case = case_op.build
 rima.min = minmax.build_min

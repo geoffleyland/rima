@@ -7,7 +7,7 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
-local sum = require("rima.operators.sum")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
@@ -15,6 +15,7 @@ local sum = require("rima.operators.sum")
 return function(T)
   local R = index.R
   local E = core.eval
+  local sum = interface.sum
 
   T:test(object.typeinfo(undefined_t:new()).undefined_t, "typeinfo(undefined_t:new()).undefined_t")
   T:check_equal(object.typename(undefined_t:new()), 'undefined_t', "typename(undefined_t:new()) == 'undefined_t'")
@@ -37,14 +38,14 @@ return function(T)
   do
     local x, y, z = R"x, y, z"
     local S = { x = { undefined_t:new() }}
-    local e = sum.build{y=x}(x[y])
+    local e = sum{y=x}(x[y])
     T:check_equal(E(e, S), "x[1]")
     T:check_equal(lib.dump(E(e, S)), "index(address{\"x\", 1})")
   end
 
   do
     local x, y, z = R"x, y, z"
-    local e = sum.build{y=x}(y.z)
+    local e = sum{y=x}(y.z)
 
     local S1 = { x = {{}}}
     local S2 = { x = {{z=undefined_t:new()}}}
@@ -57,7 +58,7 @@ return function(T)
 
   do
     local x, X, y, Y, z = R"x, X, y, Y, z"
-    local e = sum.build{x=X}(sum.build{y=x.Y}(y.z))
+    local e = sum{x=X}(sum{y=x.Y}(y.z))
 
     local S1 = { X={{Y={{}}}}}
     local S2 = { X={{Y={{z=undefined_t:new()}}}}}

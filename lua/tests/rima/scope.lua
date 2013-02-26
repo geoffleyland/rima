@@ -7,7 +7,7 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
-local sum = require("rima.operators.sum")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
@@ -17,6 +17,7 @@ return function(T)
   local R = index.R
   local E = core.eval
   local D = lib.dump
+  local sum = interface.sum
 
   -- Constructors
   T:test(object.typeinfo(N()).scope, "typeinfo(scope.new()).scope")
@@ -325,7 +326,7 @@ return function(T)
   do
     local a, b, B, sub = R"a, b, B, sub"
     local subscope = N()
-    subscope.a = sum.build{b=B}(b)
+    subscope.a = sum{b=B}(b)
     local superscope = N()
     superscope.sub = subscope
 
@@ -341,9 +342,9 @@ return function(T)
     subscope.e3 = c
     subscope.e4 = c + d
     subscope.e5 = a * c
-    subscope.e6 = sum.build{e=e}(e.a)
-    subscope.e7 = sum.build{e=e}(e.b)
-    subscope.e8 = sum.build{e=e}(e.a * e.b)
+    subscope.e6 = sum{e=e}(e.a)
+    subscope.e7 = sum{e=e}(e.b)
+    subscope.e8 = sum{e=e}(e.a * e.b)
     
     local superscope = N()
     superscope.sub[i] = subscope
@@ -354,45 +355,45 @@ return function(T)
     superscope.sub[1].e = { { a=23 }, { a=29 } }
     superscope.sub[2].e = { { a=31 }, { a=37 } }
     
-    T:check_equal(E(sum.build{s=sub}(s.a), superscope), 20)
-    T:check_equal(E(sum.build{s=sub}(s.b), superscope), 28)
-    T:check_equal(E(sum.build{s=sub}(s.e1), superscope), 20)
-    T:check_equal(E(sum.build{s=sub}(s.e2), superscope), 48)
+    T:check_equal(E(sum{s=sub}(s.a), superscope), 20)
+    T:check_equal(E(sum{s=sub}(s.b), superscope), 28)
+    T:check_equal(E(sum{s=sub}(s.e1), superscope), 20)
+    T:check_equal(E(sum{s=sub}(s.e2), superscope), 48)
 
-    T:check_equal(E(sum.build{s=sub}(s.c), superscope), "sub[1].c + sub[2].c")
-    T:check_equal(E(sum.build{s=sub}(s.d), superscope), "sub[1].d + sub[2].d")
-    T:check_equal(E(sum.build{s=sub}(s.e3), superscope), "sub[1].c + sub[2].c")
-    T:check_equal(E(sum.build{s=sub}(s.e4), superscope), "sub[1].c + sub[1].d + sub[2].c + sub[2].d")
+    T:check_equal(E(sum{s=sub}(s.c), superscope), "sub[1].c + sub[2].c")
+    T:check_equal(E(sum{s=sub}(s.d), superscope), "sub[1].d + sub[2].d")
+    T:check_equal(E(sum{s=sub}(s.e3), superscope), "sub[1].c + sub[2].c")
+    T:check_equal(E(sum{s=sub}(s.e4), superscope), "sub[1].c + sub[1].d + sub[2].c + sub[2].d")
 
-    T:check_equal(E(sum.build{s=sub}(s.e5), superscope), "7*sub[1].c + 13*sub[2].c")
-    T:check_equal(E(sum.build{s=sub}(s.e6), superscope), 120)
-    T:check_equal(E(sum.build{s=sub}(s.e7), superscope), "sub[1].e[1].b + sub[1].e[2].b + sub[2].e[1].b + sub[2].e[2].b")
-    T:check_equal(E(sum.build{s=sub}(s.e8), superscope), "23*sub[1].e[1].b + 29*sub[1].e[2].b + 31*sub[2].e[1].b + 37*sub[2].e[2].b")
+    T:check_equal(E(sum{s=sub}(s.e5), superscope), "7*sub[1].c + 13*sub[2].c")
+    T:check_equal(E(sum{s=sub}(s.e6), superscope), 120)
+    T:check_equal(E(sum{s=sub}(s.e7), superscope), "sub[1].e[1].b + sub[1].e[2].b + sub[2].e[1].b + sub[2].e[2].b")
+    T:check_equal(E(sum{s=sub}(s.e8), superscope), "23*sub[1].e[1].b + 29*sub[1].e[2].b + 31*sub[2].e[1].b + 37*sub[2].e[2].b")
   end
 
   -- sums in closures
   do
     local a, b, c, d, i = R"a, b, c, d, i"
     local S = N()
-    S.a[i] = sum.build{c=b[i]}(c)
+    S.a[i] = sum{c=b[i]}(c)
     S.b = { { 3, 5, 7 }, { 11, 13 }}
     T:check_equal(E(a[1], S), 15)
     T:check_equal(E(a[2], S), 24)
---    T:check_equal(D(E(sum.build{i=d}(a[i])), S), "xxx")
+--    T:check_equal(D(E(sum{i=d}(a[i])), S), "xxx")
     S.d = {1,2}
-    T:check_equal(E(sum.build{i=d}(a[i]), S), 39)
+    T:check_equal(E(sum{i=d}(a[i]), S), 39)
   end    
 
   do
     local a, b, c, d, i, j = R"a, b, c, d, i, j"
     local S = N()
-    S.a[i] = sum.build{c=b}(c[i])
+    S.a[i] = sum{c=b}(c[i])
     S.b = { { 3, 5, 7 }, { 11, 13 }}
     T:check_equal(E(a[1], S), 14)
     T:check_equal(E(a[2], S), 18)
---    T:check_equal(D(E(sum.build{i=d}(a[i])), S), "xxx")
+--    T:check_equal(D(E(sum{i=d}(a[i])), S), "xxx")
     S.d = {1,2}
-    T:check_equal(E(sum.build{i=d}(a[i]), S), 32)
+    T:check_equal(E(sum{i=d}(a[i]), S), 32)
   end    
 
   -- Table aggregation
@@ -496,7 +497,7 @@ return function(T)
   do
     local a, i, I, j, sub0 = R"a i, I, j, sub0"
     local sub = N()
-    sub.a = sum.build{i=I}(i.x)
+    sub.a = sum{i=I}(i.x)
 
     local super1 = N()
     super1.sub0.I = { {y=1}, {y=2} }
@@ -513,12 +514,12 @@ return function(T)
   do
     local a, b, c, i, I, s, sub0, notsub0 = R"a, b, c, i, I, s, sub0, notsub0"
     local sub = N()
-    sub.a = sum.build{i=I}(i.x)
+    sub.a = sum{i=I}(i.x)
 
     local super1 = N()
-    super1.a = sum.build{s=sub0}(s.a)
-    super1.b = sum.build{s=notsub0}(sub0[s].a)
-    super1.c = sum.build{s=notsub0}(s.a)
+    super1.a = sum{s=sub0}(s.a)
+    super1.b = sum{s=notsub0}(sub0[s].a)
+    super1.c = sum{s=notsub0}(s.a)
     T:check_equal(E(a, super1), "sum{s in sub0}(s.a)")
 
     local super2 = N(super1)
