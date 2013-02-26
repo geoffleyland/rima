@@ -6,6 +6,7 @@ local sum = require"rima.operators.sum"
 local product = require"rima.operators.product"
 local case = require"rima.operators.case"
 local minmax = require"rima.operators.minmax"
+local func = require"rima.func"
 local expression = require"rima.expression"
 
 ------------------------------------------------------------------------------
@@ -56,6 +57,11 @@ end
 
 function interface.max(...)
   return expression:new(minmax.max, ...)
+end
+
+
+function interface.func(inputs)
+  return function(e, S) return func:new(inputs, e, S) end
 end
 
 

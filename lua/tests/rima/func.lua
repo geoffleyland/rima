@@ -9,6 +9,7 @@ local core = require("rima.core")
 local scope = require("rima.scope")
 local index = require("rima.index")
 local number_t = require("rima.types.number_t")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
@@ -124,9 +125,9 @@ return function(T)
     local a, b, c, t, s, u = R"a, b, c, t, s, u"
     local S = {
       a={w={{x=10,y={z=100}},{x=20,y={z=200}}}},
-      t=func.build{b}(a.w[b].x),
-      s=func.build{b}(a.w[b].y),
-      u=func.build{b}(a.q[b].y) }
+      t=interface.func{b}(a.w[b].x),
+      s=interface.func{b}(a.w[b].y),
+      u=interface.func{b}(a.q[b].y) }
 
     T:check_equal(D(t(1)), "call(index(address{\"t\"}), 1)")
     T:check_equal(t(1), "t(1)")
@@ -153,7 +154,7 @@ return function(T)
 
   do
     local a, b, i = R"a, b, i"
-    local S = { a = { { 5 } }, b = func.build{i}(a[1][i]) }
+    local S = { a = { { 5 } }, b = interface.func{i}(a[1][i]) }
     T:check_equal(E(a[1][1], S), 5)
     T:check_equal(E(b(1), S), 5)
     T:expect_error(function() E(b(1)[1], S) end, "can't index a number")
@@ -161,7 +162,7 @@ return function(T)
 
   do
     local f, x, y = R"f, x, y"
-    local S = { f = func.build{y}(y + x, { x=5 }) }
+    local S = { f = interface.func{y}(y + x, { x=5 }) }
     T:check_equal(E(f(x), S), "5 + x")
     S.x = 100
     T:check_equal(E(f(x), S), 105)
@@ -169,7 +170,7 @@ return function(T)
 
   do
     local f, x, y = R"f, x, y"
-    local S = scope.new{ f = func.build{y}(y + x, { x=5 }) }
+    local S = scope.new{ f = interface.func{y}(y + x, { x=5 }) }
     local e = E(f(x), S)
     local S2 = scope.new(S, {x=200})
     T:check_equal(E(e, S2), 205)
@@ -177,7 +178,7 @@ return function(T)
 
   do
     local f, x, y, u, v = R"f, x, y, u, v"
-    local F = func.build{x}(x * y, { y=5 })
+    local F = interface.func{x}(x * y, { y=5 })
     local e = E(u * f(v), { f=F })
     T:check_equal(e, 5*u*v)
     T:check_equal(E(e, { u=2, v=3 }), 30)
@@ -185,7 +186,7 @@ return function(T)
 
   do
     local f, x = R"f, x"
-    T:check_equal(E(f(x), { f=func.build{x}(x) }), "x")
+    T:check_equal(E(f(x), { f=interface.func{x}(x) }), "x")
   end
 end
 

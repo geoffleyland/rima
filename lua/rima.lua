@@ -5,9 +5,7 @@ local lib = require("rima.lib")
 local trace = require("rima.lib.trace")
 local index = require("rima.index")
 local core = require("rima.core")
-local func = require("rima.func")
 local math_op = require("rima.operators.math")
-local minmax = require("rima.operators.minmax")
 local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
@@ -49,11 +47,6 @@ end
 
 ------------------------------------------------------------------------------
 
-rima.F = func.build
-
-
-------------------------------------------------------------------------------
-
 function rima.diff(exp, var)
   return (core.eval(core.diff(exp, var)))
 end
@@ -71,6 +64,7 @@ rima.product = interface.product
 rima.case    = interface.case
 rima.min     = interface.min
 rima.max     = interface.max
+rima.F       = interface.func
 
 for k, v in pairs(math_op) do
   if k:sub(1, 1) ~= "_" then
