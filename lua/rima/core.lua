@@ -1,20 +1,21 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local getmetatable, type = getmetatable, type
-
 local lib = require("rima.lib")
 local trace = require("rima.lib.trace")
 local object = require("rima.lib.object")
 
 local typeinfo = object.typeinfo
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Is an expression defined? ---------------------------------------------------
+local core = {}
 
-function defined(e)
+------------------------------------------------------------------------------
+
+--- Is an expression defined?
+function core.defined(e)
   local f = lib.getmetamethod(e, "__defined")
   if trace.on then trace.enter("defd", 1, f, e) end
   local d
@@ -29,9 +30,11 @@ function defined(e)
 end
 
 
--- Is an expression arithmetic? (Can you add it?) ------------------------------
+------------------------------------------------------------------------------
 
-function arithmetic(e)
+--- Is an expression arithmetic?
+--  An expression is arithmetic if we can add to it.
+function core.arithmetic(e)
   if trace.on then trace.enter("arth", 1, nil, e) end
   local result
 
@@ -63,11 +66,11 @@ function arithmetic(e)
 end
 
 
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function eval(e, S)
+function core.eval(e, S)
   if trace.on then trace.enter("eval", 1, nil, e) end
-  local value, type, addr = eval_to_paths(e, S, 1)
+  local value, type, addr = core.eval_to_paths(e, S, 1)
   local f = lib.getmetamethod(value, "__finish")
   if f then
     value, type, addr = f(value)
@@ -82,7 +85,7 @@ function eval(e, S)
 end
 
 
-function eval_to_paths(e, s, d)
+function core.eval_to_paths(e, s, d)
   local f = lib.getmetamethod(e, "__eval")
   if trace.on then trace.enter("evtp", d and d+1, f, e) end
   local value, type, addr
@@ -97,10 +100,10 @@ function eval_to_paths(e, s, d)
 end
 
 
--- Automatic differentiation ---------------------------------------------------
+------------------------------------------------------------------------------
 
--- differentiate e with respect to v
-function diff(e, v)
+--- Differentiate e with respect to v
+function core.diff(e, v)
   local f = lib.getmetamethod(e, "__diff")
   if trace.on then trace.enter("diff", d and d+1, f, e, v) end
   local dedv
@@ -116,9 +119,9 @@ function diff(e, v)
 end
 
 
--- Listing variables -----------------------------------------------------------
+------------------------------------------------------------------------------
 
-function list_variables(e, S, list)
+function core.list_variables(e, S, list)
   list = list or {}
   local f = lib.getmetamethod(e, "__list_variables")
   if f then f(e, S, list) end
@@ -126,9 +129,9 @@ function list_variables(e, S, list)
 end
 
 
--- Pretty strings --------------------------------------------------------------
+------------------------------------------------------------------------------
 
-function parenthise(e, format, parent_precedence)
+function core.parenthise(e, format, parent_precedence)
   parent_precedence = parent_precedence or 1
   local s = lib.repr(e, format)
   local precedence = lib.getmetamethod(e, "precedence") or 0
@@ -139,5 +142,9 @@ function parenthise(e, format, parent_precedence)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return core
+
+------------------------------------------------------------------------------
 
