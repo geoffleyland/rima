@@ -7,7 +7,7 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local index = require("rima.index")
-
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
@@ -17,12 +17,12 @@ return function(T)
   local E = core.eval
   local D = lib.dump
 
-  T:test(object.typeinfo(case.build(1, {1, 1})).case, "typeinfo(case).case")
-  T:check_equal(object.typename(case.build(1, {1, 1})), "case", "typename(case) == 'case'")
+  T:test(object.typeinfo(interface.case(1, {1, 1})).case, "typeinfo(case).case")
+  T:check_equal(object.typename(interface.case(1, {1, 1})), "case", "typename(case) == 'case'")
   
   do
     local a, b, c, d, e, f, g, h = R"a, b, c, d, e, f, g, h"
-    local C = case.build(a, {{b, c},{d, e},{f, g}}, h)
+    local C = interface.case(a, {{b, c},{d, e},{f, g}}, h)
 
     T:check_equal(C, "case a (b: c; d: e; f: g; default: h; )")
     T:check_equal(E(C, {a = 1, f = 1}), "case 1 (b: c; d: e; 1: g; )")

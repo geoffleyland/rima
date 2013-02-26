@@ -82,12 +82,6 @@ function case.__eval(args, ...)
   end
 end
 
-------------------------------------------------------------------------------
-
-function case.build(value, cases, default)
-  return expression:new(case, value, cases, default)
-end
-
 
 ------------------------------------------------------------------------------
 
