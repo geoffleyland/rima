@@ -258,6 +258,9 @@ function index.resolve(r, s)
   local addr, base
   addr = core.eval(I.address, s)
   base = I.base
+
+  local b0 = base
+
   if base then
     local addr2
     base, addr2 = core.eval_to_paths(I.base, s)
@@ -266,10 +269,17 @@ function index.resolve(r, s)
 
   local current, ctype = base or s
 
+  if object.typename(current) == "index" then
+    local I2 = proxy.O(current)
+    base = I2.base
+    current = base or s
+    addr = I2.address + addr
+  end
+
   local f = lib.getmetamethod(current, "__read_ref")
   if f then current = f(current) end
   local j = 1
-  for _, v in addr:values() do
+  for i, v in addr:values() do
     local addr2
     if trace.on then trace.enter("indx", 1, nil, v, current) end
 
@@ -289,6 +299,12 @@ function index.resolve(r, s)
       base = addr2
       addr = addr:sub(j+1)
       j = 0
+    end
+    if object.typename(current) == "index" then
+      local I2 = proxy.O(current)
+      base = I2.base
+      addr = I2.address + addr:sub(j+1)
+      current = nil
     end
 
     if not current then break end
