@@ -89,11 +89,6 @@ end
 
 ------------------------------------------------------------------------------
 
-function proxy_mt.__index(r, i)
-  return index:new(r, i)
-end
-
-
 local function extended_index(t, ii)
   -- we have to call __index ourselves, because scope's __index returns several values.
   local f = lib.getmetamethod(t, "__index")
@@ -253,11 +248,6 @@ function index.newindex(r, i, value, depth)
     error(("error assigning setting '%s' to '%s':\n  %s"):
       format(lib.repr(a+i), lib.repr(value), message:gsub("\n", "\n  ")), 2 + depth)
   end
-end
-
-
-function proxy_mt.__newindex(r, i, value)
-  return index.newindex(r, i, value, 1)
 end
 
 

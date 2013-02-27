@@ -96,6 +96,14 @@ expression_ops =
   __mod   = function(a, b) return expression:new(op_mods.mod, a, b) end,
   __call  = function(...)  return expression:new(op_mods.call, ...) end,
   __index = function(...)  return index_mods.index:new(...) end,
+  __newindex = function (t, k, v)
+    local tt = object.typename(t)
+    if tt == "index" then
+      return index_mods.index.newindex(t, k, v, 1)
+    else
+      error("Can't index an "..object.typename(tt))
+    end
+  end
 }
 
 
