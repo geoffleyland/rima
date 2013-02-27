@@ -39,7 +39,7 @@ local function prepare(exp, name, args)
   if args[1] then
     local S2 = scope.new()
     for i, a in ipairs(args) do
-      S2[a] = index:new(nil, name, a)
+      scope.newindex(S2, a, index:new(nil, name, a))
     end
     exp = core.eval(exp, S2)
   end
@@ -72,7 +72,7 @@ func.__tostring = lib.__tostring
 function func:call(args, S)
   if not args then return self end
   S = (S and not self.args[1]) and S or scope.new(S)
-  local Sn = S[self.name]
+  local Sn = scope.index(S, self.name)
 
   local new_args = {}
   for i, n in ipairs(self.args) do

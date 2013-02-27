@@ -37,7 +37,7 @@ end
 
 function closure:set_args(s, args)
   local eval_scope = scope.new_local(s)
-  local local_scope = eval_scope[self.name]
+  local local_scope = scope.index(eval_scope, self.name)
   local setc = #self.args
   local arg_offset = #args - setc
   for i = 1, setc do
@@ -54,7 +54,7 @@ end
 
 function closure:fake_iterate(s, undefined)
   local sn = scope.new_local(s)
-  local sf = sn[self.name]
+  local sf = scope.index(sn, self.name)
   for _, v in ipairs(undefined) do
     v:fake_iterate(sf)
   end

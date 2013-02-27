@@ -87,7 +87,7 @@ function list:prepare(e, name)
   for i, s in ipairs(self) do
     self[i] = core.eval(s, S)
     for _, n in ipairs(s.names) do
-      S[n] = index:new(nil, name, n)
+      scope.newindex(S, n, index:new(nil, name, n))
     end
   end
   if e then
@@ -98,7 +98,7 @@ end
 
 function list:unprepare(e, name)
   local S = scope.new()
-  local Sl = S[name]
+  local Sl = scope.index(S, name)
   for i, s in ipairs(self) do
     for _, n in ipairs(s.names) do
       index.newindex(Sl, n, index:new(nil, n))
@@ -119,7 +119,7 @@ end
 
 function list:iterate(S, name)
   local undefined_sets = {}
-  local Sn = S[name]
+  local Sn = scope.index(S, name)
 
   local function z(i)
     i = i or 1

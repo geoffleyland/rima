@@ -84,7 +84,7 @@ function scope.real_new(mt, top_node, parent, ...)
 
   if v1 then
     for k, v in pairs(v1) do
-      S[k] = v
+      scope.newindex(S, k, v)
     end
   end
 
@@ -92,7 +92,7 @@ function scope.real_new(mt, top_node, parent, ...)
     local values = select(i, ...)
     if values then
       for k, v in pairs(values) do
-        S[k] = v
+        scope.newindex(S, k, v)
       end
     end
   end
@@ -118,13 +118,23 @@ end
 
 -- Indexing --------------------------------------------------------------------
 
-function proxy_mt.__index(s, i)
-  return index:new(s, i)
+function scope.index(t, k)
+  return index:new(t, k)
 end
 
 
-function proxy_mt.__newindex(s, i, value)
-  index.newindex(index:new(s), i, value)
+function scope.newindex(t, k, v)
+  index.newindex(index:new(t), k, v)
+end
+
+
+function proxy_mt.__index(t, k)
+  return scope.index(t, k)
+end
+
+
+function proxy_mt.__newindex(t, k, v)
+  scope.newindex(t, k, v)
 end
 
 
