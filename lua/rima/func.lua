@@ -83,9 +83,9 @@ function func:call(args, S)
   for i, n in ipairs(self.args) do
     local a = args[i]
     if a then
-      Sn[n] = a
+      index.newindex(Sn, n, a)
     else
-      Sn[n] = index:new(nil, n)
+      index.newindex(Sn, n, index:new(nil, n))
       new_args[#new_args+1] = n
     end
   end

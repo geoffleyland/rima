@@ -45,7 +45,7 @@ end
 function index:set(base, value)
   local a = proxy.O(self).address
   local i = index:new(base, a:sub(1, -2))
-  i[a:value(-1)] = value
+  index.newindex(i, a:value(-1), value)
 end
 
 
@@ -224,21 +224,22 @@ local function newindex_set(current, i, value)
 end
 
 
-function proxy_mt.__newindex(r, i, value)
+function index.newindex(r, i, value, depth)
+  depth = depth or 0
   local I = proxy.O(r)
   local base, a = I.base, I.address
   if not base then
     local ar = lib.repr(a+i)
-    error(("error setting '%s' to '%s': '%s' isn't bound to a table or scope"):format(ar, lib.repr(value), ar), 2)
+    error(("error setting '%s' to '%s': '%s' isn't bound to a table or scope"):format(ar, lib.repr(value), ar), 2 + depth)
   end
   
   -- Check it's a legitimate address
   local f = lib.getmetamethod(base, "__read_ref")
   local current = (f and f(base)) or base
   for j, v in a:values() do
-    current = safe_index(current, v, base, a, j-1, 2)
+    current = safe_index(current, v, base, a, j-1, 2 + depth)
   end
-  newindex_check(current, i, value, base, a, 2)
+  newindex_check(current, i, value, base, a, 2 + depth)
 
   -- Now go ahead and do the assignment, creating intermediate tables as we go
   local f = lib.getmetamethod(base, "__write_ref")
@@ -250,8 +251,13 @@ function proxy_mt.__newindex(r, i, value)
   local status, message = xpcall(function() newindex_set(current, i, value) end, debug.traceback)
   if not status then
     error(("error assigning setting '%s' to '%s':\n  %s"):
-      format(lib.repr(a+i), lib.repr(value), message:gsub("\n", "\n  ")), 2)
+      format(lib.repr(a+i), lib.repr(value), message:gsub("\n", "\n  ")), 2 + depth)
   end
+end
+
+
+function proxy_mt.__newindex(r, i, value)
+  return index.newindex(r, i, value, 1)
 end
 
 

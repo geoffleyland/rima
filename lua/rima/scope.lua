@@ -124,7 +124,7 @@ end
 
 
 function proxy_mt.__newindex(s, i, value)
-  index:new(s)[i] = value
+  index.newindex(index:new(s), i, value)
 end
 
 

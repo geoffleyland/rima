@@ -157,7 +157,7 @@ function ref:set_args(S, ...)
   for i = 1, math.min(#names, select('#', ...)) do
     local n = names[i]
     if n and n ~= "_" then
-      S[n] = select(i, ...)
+      index.newindex(S, n, select(i, ...))
     end
   end
 end

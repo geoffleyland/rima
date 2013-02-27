@@ -101,7 +101,7 @@ function list:unprepare(e, name)
   local Sl = S[name]
   for i, s in ipairs(self) do
     for _, n in ipairs(s.names) do
-      Sl[n] = index:new(nil, n)
+      index.newindex(Sl, n, index:new(nil, n))
     end    
   end
   return core.eval(e, S)
@@ -136,7 +136,7 @@ function list:iterate(S, name)
       else
         undefined_sets[#undefined_sets+1] = it
         for _, n in ipairs(it.names) do
-          Sn[n] = nil
+          index.newindex(Sn, n, nil)
         end
         z(i+1)
         undefined_sets[#undefined_sets] = nil
