@@ -2,6 +2,7 @@
 -- see LICENSE for license information
 
 local object = require"rima.lib.object"
+local index = require"rima.index"
 local sum = require"rima.operators.sum"
 local product = require"rima.operators.product"
 local case = require"rima.operators.case"
@@ -13,6 +14,16 @@ local expression = require"rima.expression"
 ------------------------------------------------------------------------------
 
 local interface = {}
+
+------------------------------------------------------------------------------
+
+function interface.define(names, depth)
+  local env = getfenv(2 + (depth or 0))
+  for n in names:gmatch("[%a_][%w_]*") do
+    env[n] = index:new(nil, n)
+  end
+end
+
 
 ------------------------------------------------------------------------------
 

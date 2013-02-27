@@ -403,14 +403,6 @@ function index.R(names)
 end
 
 
-function index.define(names, depth)
-  local env = getfenv(2 + depth or 0)
-  for n in names:gmatch("[%a_][%w_]*") do
-    env[n] = index:new(nil, n)
-  end
-end
-
-
 ------------------------------------------------------------------------------
 
 return index

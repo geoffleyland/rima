@@ -24,10 +24,7 @@ rima.repr = lib.repr
 ------------------------------------------------------------------------------
 
 rima.R = index.R
-
-function rima.define(names)
-  index.define(names, 1)
-end
+rima.define = interface.define
 
 
 ------------------------------------------------------------------------------
