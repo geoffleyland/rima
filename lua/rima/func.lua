@@ -1,20 +1,16 @@
 -- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, ipairs, require, type = error, ipairs, require, type
-
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
 local index = require("rima.index")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Function type ---------------------------------------------------------------
-
-local func = object:new_class(_M, "func")
+local func = object:new_class({}, "func")
 local counter = 1
 
 
@@ -28,11 +24,11 @@ local function read(args)
         new_args[i] = lib.repr(v)
       else
         error(("bad input #%d to function constructor: expected string or identifier, got '%s' (%s)"):
-          format(i, lib.repr(v), typename(v)), 0)
+          format(i, lib.repr(v), object.typename(v)), 0)
       end
     else
       error(("bad input #%d to function constructor: expected string or identifier, got '%s' (%s)"):
-        format(i, lib.repr(v), typename(v)), 0)
+        format(i, lib.repr(v), object.typename(v)), 0)
     end
   end
   return new_args
@@ -62,16 +58,15 @@ function func:new(args, exp, S)
 end
 
 
--- String representation -------------------------------------------------------
+------------------------------------------------------------------------------
 
 function func:__repr(format)
   return ("function(%s) return %s"):
     format(lib.concat_repr(self.args, format), lib.repr(self.exp, format))
 end
-__tostring = lib.__tostring
+func.__tostring = lib.__tostring
 
-
--- Evaluation ------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 
 function func:call(args, S)
@@ -95,10 +90,16 @@ function func:call(args, S)
 end
 
 
+------------------------------------------------------------------------------
+
 function func:__call(...)
   return self:call{...}
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return func
+
+------------------------------------------------------------------------------
 
