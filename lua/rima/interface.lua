@@ -7,6 +7,7 @@ local product = require"rima.operators.product"
 local case = require"rima.operators.case"
 local minmax = require"rima.operators.minmax"
 local func = require"rima.func"
+local opmath = require"rima.operators.math"
 local expression = require"rima.expression"
 
 ------------------------------------------------------------------------------
@@ -62,6 +63,12 @@ end
 
 function interface.func(inputs)
   return function(e, S) return func:new(inputs, e, S) end
+end
+
+
+interface.math = {}
+for k, v in pairs(opmath) do
+  interface.math[k] = function(e) return v(e) end
 end
 
 

@@ -5,7 +5,6 @@ local lib = require("rima.lib")
 local trace = require("rima.lib.trace")
 local index = require("rima.index")
 local core = require("rima.core")
-local math_op = require("rima.operators.math")
 local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
@@ -66,7 +65,7 @@ rima.min     = interface.min
 rima.max     = interface.max
 rima.F       = interface.func
 
-for k, v in pairs(math_op) do
+for k, v in pairs(interface.math) do
   if k:sub(1, 1) ~= "_" then
     rima[k] = v
   end
