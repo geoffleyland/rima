@@ -3,7 +3,6 @@
 
 local lib = require("rima.lib")
 local trace = require("rima.lib.trace")
-local index = require("rima.index")
 local core = require("rima.core")
 local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
@@ -23,7 +22,7 @@ rima.repr = lib.repr
 
 ------------------------------------------------------------------------------
 
-rima.R = index.R
+rima.R = interface.R
 rima.define = interface.define
 
 

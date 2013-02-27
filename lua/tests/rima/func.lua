@@ -7,7 +7,6 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local index = require("rima.index")
 local number_t = require("rima.types.number_t")
 local interface = require("rima.interface")
 
@@ -15,9 +14,9 @@ local interface = require("rima.interface")
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
   local D = lib.dump
+  local R = interface.R
 
   T:test(object.typeinfo(func:new({"a"}, 3)).func, "typeinfo(func:new()).func")
   T:check_equal(object.typename(func:new({"a"}, 3)), "func", "typename(func:new()) == 'func'")

@@ -6,15 +6,15 @@ local ref = require("rima.sets.ref")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local index = require("rima.index")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
   local D = lib.dump
+  local R = interface.R
 
   do
     local a, A, b, c = R"a, A, b, c"

@@ -11,11 +11,19 @@ local func = require"rima.func"
 local opmath = require"rima.operators.math"
 local expression = require"rima.expression"
 
-------------------------------------------------------------------------------
-
 local interface = {}
 
+
 ------------------------------------------------------------------------------
+
+function interface.R(names)
+  local results = {}
+  for n in names:gmatch("[%a_][%w_]*") do
+    results[#results+1] = index:new(nil, n)
+  end
+  return unpack(results)
+end
+
 
 function interface.define(names, depth)
   local env = getfenv(2 + (depth or 0))

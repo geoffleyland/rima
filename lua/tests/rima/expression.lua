@@ -6,7 +6,7 @@ local expression = require("rima.expression")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local index = require("rima.index")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
@@ -31,9 +31,9 @@ local function equal(T, expected, got)
 end
 
 return function(T)
-  local R = index.R
   local E = core.eval
   local D = lib.dump
+  local R = interface.R
 
   -- tests with add, mul and pow
   do

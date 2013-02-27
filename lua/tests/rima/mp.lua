@@ -5,7 +5,6 @@ local mp = require("rima.mp")
 
 local lib = require("rima.lib")
 local constraint = require("rima.mp.constraint")
-local index = require("rima.index")
 local number_t = require("rima.types.number_t")
 local sets = require("rima.sets")
 local interface = require("rima.interface")
@@ -14,7 +13,7 @@ local interface = require("rima.interface")
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
+  local R = interface.R
   local sum = interface.sum
 
   do

@@ -5,14 +5,13 @@ local add = require("rima.operators.add")
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
-local index = require("rima.index")
 local expression = require("rima.expression")
-
+local interface = require("rima.interface")
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local A = add:new({1,1}, {1, index.R"a"})
+  local A = add:new({1,1}, {1, interface.R"a"})
 
   -- constructors
   T:test(object.typeinfo(A).add, "typeinfo(add).add")

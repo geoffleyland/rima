@@ -6,7 +6,6 @@ local linearise = require("rima.mp.linearise")
 local scope = require("rima.scope")
 local core = require("rima.core")
 local lib = require("rima.lib")
-local index = require("rima.index")
 local set_ref = require("rima.sets.ref")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
@@ -16,7 +15,7 @@ local interface = require("rima.interface")
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
+  local R = interface.R
   local sum = interface.sum
 
   local a, b, c, d = R"a, b, c, d"

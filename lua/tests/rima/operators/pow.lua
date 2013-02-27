@@ -6,15 +6,15 @@ local pow = require("rima.operators.pow")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local index = require("rima.index")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
   local D = lib.dump
+  local R = interface.R
 
   T:test(object.typeinfo(pow:new()).pow, "typeinfo(pow:new()).pow")
   T:check_equal(object.typename(pow:new()), "pow", "typename(pow:new()) == 'pow'")

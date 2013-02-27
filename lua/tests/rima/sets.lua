@@ -7,7 +7,6 @@ local ref = require("rima.sets.ref")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local index = require("rima.index")
 local number_t = require("rima.types.number_t")
 local interface = require("rima.interface")
 
@@ -15,8 +14,8 @@ local interface = require("rima.interface")
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
+  local R = interface.R
   local sum = interface.sum
 
   do

@@ -61,7 +61,7 @@ function find_constraints(S, callback)
     for i = 1, #current_address do
       local current_index = current_address[i]
       if object.typeinfo(current_index).set_default_thinggy then
-        current_index = core.eval(index.R(sets[set_index].names[1]), S)
+        current_index = core.eval(index:new(nil, sets[set_index].names[1]), S)
         if not core.defined(current_index) then
           current_index = sets[set_index]
         end

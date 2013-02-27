@@ -4,13 +4,13 @@
 local mul = require("rima.operators.mul")
 
 local object = require("rima.lib.object")
-local index = require("rima.index")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local A = mul:new({1,3}, {1, index.R"a"})
+  local A = mul:new({1,3}, {1, interface.R"a"})
 
   -- constructors
   T:test(object.typeinfo(A).mul, "typeinfo(mul).mul")

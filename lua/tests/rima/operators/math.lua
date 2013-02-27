@@ -5,15 +5,15 @@ local opmath = require("rima.operators.math")
 
 local lib = require("rima.lib")
 local core = require("rima.core")
-local index = require("rima.index")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
   local D = lib.dump
+  local R = interface.R
 
   local a, b  = R"a, b"
 

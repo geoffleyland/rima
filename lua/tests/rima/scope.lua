@@ -14,9 +14,9 @@ local interface = require("rima.interface")
 
 return function(T)
   local function N(...) return scope.new(...) end
-  local R = index.R
   local E = core.eval
   local D = lib.dump
+  local R = interface.R
   local sum = interface.sum
 
   -- Constructors

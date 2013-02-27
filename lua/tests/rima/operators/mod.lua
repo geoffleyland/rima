@@ -6,15 +6,15 @@ local mod = require("rima.operators.mod")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local index = require("rima.index")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
   local D = lib.dump
+  local R = interface.R
 
   T:test(object.typeinfo(mod:new()).mod, "typeinfo(mod:new()).mod")
   T:check_equal(object.typename(mod:new()), "mod", "typename(mod:new()) == 'mod'")

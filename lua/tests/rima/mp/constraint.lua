@@ -4,17 +4,15 @@
 local constraint = require("rima.mp.constraint")
 
 local core = require("rima.core")
-local index = require("rima.index")
 local number_t = require("rima.types.number_t")
-
-local math = require("math")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
+  local R = interface.R
 
   local a, b, c, d = R"a, b, c, d"
   local S = { a = number_t.free(), b = 3, c = number_t.free(), d = 5 }

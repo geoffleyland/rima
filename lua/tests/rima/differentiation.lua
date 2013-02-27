@@ -4,14 +4,14 @@
 local core = require("rima.core")
 
 local lib = require("rima.lib")
-local index = require("rima.index")
-local opmath = require("rima.operators.math")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local x = index.R"x"
+  local x = interface.R"x"
+  local opmath = interface.math
 
   T:check_equal(core.diff(1, x), 0)
   T:check_equal(core.diff(x, x), 1)

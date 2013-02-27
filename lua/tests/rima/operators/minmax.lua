@@ -6,16 +6,15 @@ local minmax = require("rima.operators.minmax")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local index = require("rima.index")
 local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
   local D = lib.dump
+  local R = interface.R
 
   -- min
   T:test(object.typeinfo(interface.min(1, {1, 1})).min, "typeinfo(min).min")

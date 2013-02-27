@@ -6,16 +6,15 @@ local case = require("rima.operators.case")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local index = require("rima.index")
 local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
   local D = lib.dump
+  local R = interface.R
 
   T:test(object.typeinfo(interface.case(1, {1, 1})).case, "typeinfo(case).case")
   T:check_equal(object.typename(interface.case(1, {1, 1})), "case", "typename(case) == 'case'")

@@ -6,15 +6,14 @@ local undefined_t = require("rima.types.undefined_t")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local index = require("rima.index")
 local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local R = index.R
   local E = core.eval
+  local R = interface.R
   local sum = interface.sum
 
   T:test(object.typeinfo(undefined_t:new()).undefined_t, "typeinfo(undefined_t:new()).undefined_t")
