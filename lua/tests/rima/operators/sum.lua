@@ -7,7 +7,6 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local scope = require("rima.scope")
-local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
 local interface = require("rima.interface")
@@ -130,8 +129,8 @@ return function(T)
     local S =
     {
       A = {{3, 5, 7}, {11, 13, 19}},
-      I = sets.range(1,2),
-      J = sets.range(1,3),
+      I = interface.range(1,2),
+      J = interface.range(1,3),
     }
     T:check_equal(E(e, S), 58)
   end

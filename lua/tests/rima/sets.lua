@@ -90,14 +90,14 @@ return function(T)
 
   do
     local x, y, z, Q, R, r = R"x, y, z, Q, R, r"
-    local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = sets.range(2, r) }  
+    local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = interface.range(2, r) }  
     T:check_equal(E(sum{r=Q}(x[r]), S), 60)
     T:check_equal(E(sum{Q=Q}(x[Q]), S), 60)
     T:check_equal(sum{y=Q}(x[y]), "sum{y in Q}(x[y])")
     T:check_equal(sum{Q=Q}(x[Q]), "sum{Q in Q}(x[Q])")
     T:check_equal(E(sum{y=Q}(x[y]), S), 60)
-    T:check_equal(sum{y=Q}(sets.ord(y)), "sum{y in Q}(ord(y))")
-    T:check_equal(E(sum{y=Q}(sets.ord(y)), S), 6)
+    T:check_equal(sum{y=Q}(interface.ord(y)), "sum{y in Q}(ord(y))")
+    T:check_equal(E(sum{y=Q}(interface.ord(y)), S), 6)
 
     T:check_equal(E(sum{y=x}(y), S), 60)
     T:check_equal(E(sum{y=x}(x[y]), S), 60)
@@ -107,18 +107,18 @@ return function(T)
 
   do
     local x, y, z, Q, R, r = R"x, y, z, Q, R, r"
-    local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = sets.range(2, r) }  
+    local S = scope.new{ x = { 10, 20, 30 }, Q = {"a", "b", "c"}, z = { a=100, b=200, c=300 }, R = interface.range(2, r) }  
     T:check_equal(sum{R=R}(R), "sum{R in R}(R)")
-    T:check_equal(sum{R=sets.range(2, r)}(R), "sum{R in range(2, r)}(R)")
-    T:check_equal(sum{R=sets.range(2, 10)}(R), "sum{R in range(2, 10)}(R)")
+    T:check_equal(sum{R=interface.range(2, r)}(R), "sum{R in range(2, r)}(R)")
+    T:check_equal(sum{R=interface.range(2, 10)}(R), "sum{R in range(2, 10)}(R)")
     T:check_equal(E(sum{R=R}(R), S), "sum{R in range(2, r)}(R)")
     T:check_equal(E(sum{y=R}(y), S), "sum{y in range(2, r)}(y)")
-    T:check_equal(E(sum{y=sets.range(2, r)}(y), S), "sum{y in range(2, r)}(y)")
-    T:check_equal(E(sum{y=sets.range(2, 10)}(y), S), 54)
+    T:check_equal(E(sum{y=interface.range(2, r)}(y), S), "sum{y in range(2, r)}(y)")
+    T:check_equal(E(sum{y=interface.range(2, 10)}(y), S), 54)
     S.r = 10
     T:check_equal(E(sum{R=R}(R), S), 54)
     T:check_equal(E(sum{y=R}(y), S), 54)
-    T:check_equal(E(sum{y=sets.range(2, r)}(y), S), 54)
+    T:check_equal(E(sum{y=interface.range(2, r)}(y), S), 54)
   end
 
   do
@@ -148,7 +148,7 @@ return function(T)
 
   do
     local x, X, r = R"x, X, r"
-    local S = scope.new{ r = sets.range(1, 3) }
+    local S = scope.new{ r = interface.range(1, 3) }
     S.X[r] = number_t.free()
     T:check_equal(E(sum{r=r}(r), S), 6)
     T:check_equal(E(sum{r=r}(r * x[r]), S), "x[1] + 2*x[2] + 3*x[3]")

@@ -4,7 +4,6 @@
 local lib = require("rima.lib")
 local trace = require("rima.lib.trace")
 local core = require("rima.core")
-local sets = require("rima.sets")
 local set_ref = require("rima.sets.ref")
 local number_t = require("rima.types.number_t")
 local compiler = require("rima.compiler")
@@ -60,6 +59,8 @@ rima.case    = interface.case
 rima.min     = interface.min
 rima.max     = interface.max
 rima.F       = interface.func
+rima.ord     = interface.ord
+rima.range   = interface.range
 
 for k, v in pairs(interface.math) do
   if k:sub(1, 1) ~= "_" then
@@ -70,8 +71,6 @@ end
 
 ------------------------------------------------------------------------------
 
-rima.ord = sets.ord
-rima.range = sets.range
 rima.pairs = set_ref.pairs
 rima.ipairs = set_ref.ipairs
 

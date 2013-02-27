@@ -8,6 +8,7 @@ local product = require"rima.operators.product"
 local case = require"rima.operators.case"
 local minmax = require"rima.operators.minmax"
 local func = require"rima.func"
+local sets = require"rima.sets"
 local opmath = require"rima.operators.math"
 local expression = require"rima.expression"
 
@@ -82,6 +83,16 @@ end
 
 function interface.func(inputs)
   return function(e, S) return func:new(inputs, e, S) end
+end
+
+
+function interface.ord(e)
+  return expression:new(sets.ord, e)
+end
+
+
+function interface.range(l, h)
+  return expression:new(sets.range, l, h)
 end
 
 

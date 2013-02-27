@@ -15,10 +15,10 @@ module(...)
 
 -- Ord -------------------------------------------------------------------------
 
-ord_op = expression:new_type({}, "ord")
+ord = expression:new_type({}, "ord")
 
 
-function ord_op.__eval(args_in, S)
+function ord.__eval(args_in, S)
   local args = proxy.O(args_in)
   local e = core.eval(args[1], S)
 
@@ -31,15 +31,10 @@ function ord_op.__eval(args_in, S)
       if e == args[1] then
         return args_in
       else
-        return expression:new(ord_op, e)
+        return expression:new(ord, e)
       end
     end
   end
-end
-
-
-function ord(e)
-  return expression:new(ord_op, e)
 end
 
 
@@ -76,8 +71,8 @@ function range_type:__iterindex(i)
 end
 
 
-range_op = expression:new_type({}, "range")
-function range_op.__eval(args_in, S)
+range = expression:new_type({}, "range")
+function range.__eval(args_in, S)
   local args = proxy.O(args_in)
 
   local l, h = core.eval(args[1], S), core.eval(args[2], S)
@@ -88,14 +83,9 @@ function range_op.__eval(args_in, S)
     if l == args[1] and h == args[2] then
       return args_in
     else
-      return expression:new(range_op, l, h)
+      return expression:new(range, l, h)
     end
   end
-end
-
-
-function range(l, h)
-  return expression:new(range_op, l, h)
 end
 
 

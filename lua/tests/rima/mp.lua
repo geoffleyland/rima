@@ -6,7 +6,6 @@ local mp = require("rima.mp")
 local lib = require("rima.lib")
 local constraint = require("rima.mp.constraint")
 local number_t = require("rima.types.number_t")
-local sets = require("rima.sets")
 local interface = require("rima.interface")
 
 
@@ -98,8 +97,8 @@ Subject to:
 
     local primal, dual = mp.solve_with("lpsolve", S,
       {
-        M = sets.range(1, 2),
-        N = sets.range(1, 2),
+        M = interface.range(1, 2),
+        N = interface.range(1, 2),
         A = {{1, 2}, {2, 1}},
         b = {3, 3},
         c = {1, 1},
