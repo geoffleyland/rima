@@ -9,6 +9,7 @@ local case = require"rima.operators.case"
 local minmax = require"rima.operators.minmax"
 local func = require"rima.func"
 local sets = require"rima.sets"
+local ref = require"rima.sets.ref"
 local opmath = require"rima.operators.math"
 local expression = require"rima.expression"
 
@@ -93,6 +94,16 @@ end
 
 function interface.range(l, h)
   return expression:new(sets.range, l, h)
+end
+
+
+function interface.pairs(exp)
+  return ref:new(exp, "", "pairs")
+end
+
+
+function interface.ipairs(exp)
+  return ref:new(exp, "i", "pairs")
 end
 
 

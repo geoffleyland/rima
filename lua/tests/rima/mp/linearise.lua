@@ -6,7 +6,6 @@ local linearise = require("rima.mp.linearise")
 local scope = require("rima.scope")
 local core = require("rima.core")
 local lib = require("rima.lib")
-local set_ref = require("rima.sets.ref")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
 local interface = require("rima.interface")
@@ -111,8 +110,8 @@ return function(T)
     local i, x, q, Q, r = R"i, x, q, Q, r"
     local S = scope.new{ Q = { 3, 7, 11, 13 } }
     S.x[i] = number_t.free()
-    check_linear(sum{["r,q"]=set_ref.ipairs(Q)}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
-    check_linear(sum{["r,q"]=set_ref.ipairs(Q)}(q * x[r]), 0, {["x[1]"]=3,["x[2]"]=7,["x[3]"]=11,["x[4]"]=13}, S)
+    check_linear(sum{["r,q"]=interface.ipairs(Q)}(q * x[q]), 0, {["x[3]"]=3,["x[7]"]=7,["x[11]"]=11,["x[13]"]=13}, S)
+    check_linear(sum{["r,q"]=interface.ipairs(Q)}(q * x[r]), 0, {["x[1]"]=3,["x[2]"]=7,["x[3]"]=11,["x[4]"]=13}, S)
   end
 end
 

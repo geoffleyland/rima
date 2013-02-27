@@ -21,14 +21,14 @@ return function(T)
   do
     local i, j, I, X, Y = R"i, j, I, X, Y"
     local S = { X={10}, Y={a=20}, I={"a"} }
-    T:check_equal(sum{i=ref.pairs(I)}(X[i]), "sum{i in pairs(I)}(X[i])")
-    T:check_equal(E(sum{i=ref.pairs(I)}(X[i]), S), 10)
+    T:check_equal(sum{i=interface.pairs(I)}(X[i]), "sum{i in pairs(I)}(X[i])")
+    T:check_equal(E(sum{i=interface.pairs(I)}(X[i]), S), 10)
 
-    T:check_equal(sum{["i,j"]=ref.pairs(I)}(Y[j]), "sum{i, j in pairs(I)}(Y[j])")
-    T:check_equal(E(sum{["i,j"]=ref.pairs(I)}(Y[j]), S), 20)
+    T:check_equal(sum{["i,j"]=interface.pairs(I)}(Y[j]), "sum{i, j in pairs(I)}(Y[j])")
+    T:check_equal(E(sum{["i,j"]=interface.pairs(I)}(Y[j]), S), 20)
 
-    T:check_equal(sum{["i,j"]=ref.pairs(I)}((i+1)*X[i]*Y[j]), "sum{i, j in pairs(I)}((1 + i)*X[i]*Y[j])")
-    T:check_equal(E(sum{["i,j"]=ref.pairs(I)}((i+1)*X[i]*Y[j]), S), 400)
+    T:check_equal(sum{["i,j"]=interface.pairs(I)}((i+1)*X[i]*Y[j]), "sum{i, j in pairs(I)}((1 + i)*X[i]*Y[j])")
+    T:check_equal(E(sum{["i,j"]=interface.pairs(I)}((i+1)*X[i]*Y[j]), S), 400)
   end
 
   do
@@ -74,18 +74,18 @@ return function(T)
   do
     local x, y, k, v = R"x, y, k, v"
     local S = { x = { 10, 20, 30 }, y = { 10, 20, 30, a = 10 } }
-    T:check_equal(sum{["k, v"]=ref.pairs(x)}(k + v), "sum{k, v in pairs(x)}(k + v)")
-    T:check_equal(E(sum{["k, v"]=ref.pairs(x)}(k + v), S), 66)
-    T:check_equal(E(sum{["k, v"]=ref.pairs(y)}(v), S), 70)
+    T:check_equal(sum{["k, v"]=interface.pairs(x)}(k + v), "sum{k, v in pairs(x)}(k + v)")
+    T:check_equal(E(sum{["k, v"]=interface.pairs(x)}(k + v), S), 66)
+    T:check_equal(E(sum{["k, v"]=interface.pairs(y)}(v), S), 70)
   end
 
   do
     local x, y, k, v = R"x, y, k, v"
     local S = { x = { 10, 20, 30 }, y = { 10, 20, 30, a = 10 } }
-    T:check_equal(sum{["k, v"]=ref.ipairs(x)}(k + v), "sum{k, v in ipairs(x)}(k + v)")
-    T:check_equal(E(sum{["k, v"]=ref.ipairs(x)}(k + v), S), 66)
-    T:check_equal(E(sum{["k, v"]=ref.ipairs(y)}(k + v), S), 66)
-    T:check_equal(E(sum{["k, v"]=ref.ipairs(y)}(v), S), 60)
+    T:check_equal(sum{["k, v"]=interface.ipairs(x)}(k + v), "sum{k, v in ipairs(x)}(k + v)")
+    T:check_equal(E(sum{["k, v"]=interface.ipairs(x)}(k + v), S), 66)
+    T:check_equal(E(sum{["k, v"]=interface.ipairs(y)}(k + v), S), 66)
+    T:check_equal(E(sum{["k, v"]=interface.ipairs(y)}(v), S), 60)
   end
 
   do
@@ -124,26 +124,26 @@ return function(T)
   do
     local t, v = R"t, v"
     local S = scope.new{ t={ {b=5} }}
-    T:check_equal(sum{["_, v"]=ref.ipairs(t)}(v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
-    T:check_equal(E(sum{["_, v"]=ref.ipairs(t)}(v.b), S), 5)
-    T:check_equal(E(sum{["_, v"]=ref.ipairs(t)}(v.a), S), "t[1].a")
-    T:check_equal(E(sum{["_, v"]=ref.ipairs(t)}(v.a * v.b), S), "5*t[1].a")
+    T:check_equal(sum{["_, v"]=interface.ipairs(t)}(v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
+    T:check_equal(E(sum{["_, v"]=interface.ipairs(t)}(v.b), S), 5)
+    T:check_equal(E(sum{["_, v"]=interface.ipairs(t)}(v.a), S), "t[1].a")
+    T:check_equal(E(sum{["_, v"]=interface.ipairs(t)}(v.a * v.b), S), "5*t[1].a")
   end
 
   do
     local t, v = R"t, v"
     local S = scope.new{ t={ {b=5}, {b=6}, {b=7} }}
-    T:check_equal(sum{["_, v"]=ref.ipairs(t)}(v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
-    T:check_equal(E(sum{["_, v"]=ref.ipairs(t)}(v.b), S), 18)
-    T:check_equal(E(sum{["_, v"]=ref.ipairs(t)}(v.a * v.b), S), "5*t[1].a + 6*t[2].a + 7*t[3].a")
+    T:check_equal(sum{["_, v"]=interface.ipairs(t)}(v.a * v.b), "sum{_, v in ipairs(t)}(v.a*v.b)")
+    T:check_equal(E(sum{["_, v"]=interface.ipairs(t)}(v.b), S), 18)
+    T:check_equal(E(sum{["_, v"]=interface.ipairs(t)}(v.a * v.b), S), "5*t[1].a + 6*t[2].a + 7*t[3].a")
   end
 
   do
     local x, X = R"x, X"
     local S = scope.new{ X = {a=1, b=2} }
-    T:check_equal(E(sum{["_, x"]=ref.pairs(X)}(x), S), 3)
+    T:check_equal(E(sum{["_, x"]=interface.pairs(X)}(x), S), 3)
     local S1 = scope.new(S, { X = {c=3, d=4} })
-    T:check_equal(E(sum{["_, x"]=ref.pairs(X)}(x), S1), 10)
+    T:check_equal(E(sum{["_, x"]=interface.pairs(X)}(x), S1), 10)
   end
 
   do

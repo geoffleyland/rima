@@ -288,17 +288,5 @@ function ref:fake_iterate(S)
 end
 
 
--- Building iterators ----------------------------------------------------------
-
-function pairs(exp)
-  return ref:new(exp, "", "pairs")
-end
-
-
-function ipairs(exp)
-  return ref:new(exp, "i", "pairs")
-end
-
-
 -- EOF -------------------------------------------------------------------------
 
