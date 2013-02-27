@@ -423,15 +423,20 @@ function read_ref.copy(s)
 end
 
 
-local function step_path(new_paths, parent, index)
+local function step_path(new_paths, parent, key)
   local used_prototype
 
   local pv = parent.value
-  if pv and core.defined(index) then
+  if pv and core.defined(key) then
     if typeinfo(pv).number_t then
       error("can't index a number", 0)
     end
-    local next_node = pv[index]
+    local next_node
+    if object.typename(pv) == "index" then
+      next_node = index:new(pv, key)
+    else
+      next_node = pv[key]
+    end
     if next_node then
       if not typeinfo(next_node)[node] then
         new_paths[#new_paths+1] = node:new({ scope=parent.scope, collected_indexes=parent.collected_indexes, value=next_node, parent=parent })
@@ -454,7 +459,7 @@ local function step_path(new_paths, parent, index)
   if default then
     local ci = {}
     if parent.collected_indexes then for i, c in ipairs(parent.collected_indexes) do ci[i] = c end end
-    ci[#ci+1] = index
+    ci[#ci+1] = key
     new_paths[#new_paths+1] = node:new({ scope=parent.scope, collected_indexes=ci, parent=parent }, default)
   end
 
@@ -462,7 +467,7 @@ local function step_path(new_paths, parent, index)
   if prototype and not used_prototype then
     local ci = {}
     if parent.collected_indexes then for i, c in ipairs(parent.collected_indexes) do ci[i] = c end end
-    ci[#ci+1] = index
+    ci[#ci+1] = key
     for _, n in ipairs(proxy.O(prototype)) do
       new_paths[#new_paths+1] = node:new(n, { collected_indexes=ci, parent=parent, prototype_=prototype, prefix_=new_paths.address })
     end
@@ -482,7 +487,7 @@ end
 
 local function step_paths(r, i)
   r = proxy.O(r)
-  local addr = r.address[i]
+  local addr = index:new(r.address, i)
   
   if r.prefix and not (type(i) == "string" and i:sub(1,1) == "$") then
     addr = index:new(r.prefix, proxy.O(addr).address)

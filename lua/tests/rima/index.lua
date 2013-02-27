@@ -26,18 +26,18 @@ return function(T)
 --  T:test(not index.is_identifier(N({}, "a")))
 
   -- indexing
-  T:check_equal(N().a.b, "a.b")
-  T:check_equal(N().a[1], "a[1]")
+  T:check_equal(N(nil, "a", "b"), "a.b")
+  T:check_equal(N(nil, "a", 1), "a[1]")
 
   -- resolving
-  T:check_equal(IE(N({a=1}).a), 1)
-  T:check_equal(IE(N().a, {a=3}), 3)
+  T:check_equal(IE(N({a=1}, "a")), 1)
+  T:check_equal(IE(N(nil, "a"), {a=3}), 3)
 
   -- setting
   local I = N{}
   T:expect_ok(function() I.a = 1 end)
   T:check_equal(IE(I.a), 1)
-  T:check_equal(IE(N().a, I), 1)
+  T:check_equal(IE(N(nil, "a"), I), 1)
   T:expect_ok(function() I.b.c.d = 3 end)
   T:check_equal(IE(I.b.c.d), 3)
   T:check_equal(IE(N().b.c.d, I), 3)

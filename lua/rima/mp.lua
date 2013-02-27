@@ -67,7 +67,7 @@ function find_constraints(S, callback)
         end
         set_index = set_index + 1
       end
-      r = r[current_index]
+      r = index:new(r, current_index)
     end
     return r
   end

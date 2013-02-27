@@ -1,7 +1,7 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local setmetatable = setmetatable
+local require, setmetatable = require, setmetatable
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
@@ -107,7 +107,12 @@ function element.__div(a, b) return ex(a) / ex(b) end
 function element.__pow(a, b) return ex(a) ^ ex(b) end
 
 function element:__unm() return -elements[self].value end
-function element:__index(i) return elements[self].exp[i] end
+
+local index
+function element:__index(i)
+  index = index or require"rima.index"
+  return index:new(elements[self].exp, i)
+end
 
 
 -- EOF -------------------------------------------------------------------------

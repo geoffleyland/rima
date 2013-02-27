@@ -205,7 +205,7 @@ local function set_ref_ipairs(state, i)
   i = i + 1
   local v = r.literal[i]
   if not v then return end
-  r:set_args(state.scope, i, r.set[i])
+  r:set_args(state.scope, i, index:new(r.set, i))
   return i
 end
 
@@ -225,7 +225,7 @@ local function set_ref_ielements(state, i)
   i = i + 1
   local v = l[i]
   if not v then return end
-  r:set_args(state.scope, element:new(r.set[i], i))
+  r:set_args(state.scope, element:new(index:new(r.set, i), i))
   return i
 end
 
