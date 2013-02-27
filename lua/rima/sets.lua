@@ -1,8 +1,6 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, type = error, type
-
 local object = require("rima.lib.object")
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
@@ -10,12 +8,10 @@ local core = require("rima.core")
 local element = require("rima.sets.element")
 local expression = require("rima.expression")
 
-module(...)
 
+------------------------------------------------------------------------------
 
--- Ord -------------------------------------------------------------------------
-
-ord = expression:new_type({}, "ord")
+local ord = expression:new_type({}, "ord")
 
 
 function ord.__eval(args_in, S)
@@ -38,7 +34,7 @@ function ord.__eval(args_in, S)
 end
 
 
--- Ranges ----------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 local range_type = object:new_class({}, "range_type")
 function range_type:new(l, h)
@@ -71,7 +67,7 @@ function range_type:__iterindex(i)
 end
 
 
-range = expression:new_type({}, "range")
+local range = expression:new_type({}, "range")
 function range.__eval(args_in, S)
   local args = proxy.O(args_in)
 
@@ -89,5 +85,10 @@ function range.__eval(args_in, S)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return { ord = ord, range = range }
+
+------------------------------------------------------------------------------
+
 
