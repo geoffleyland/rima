@@ -37,11 +37,6 @@ function index:new(base, ...)
 end
 
 
-function index:bind(base)
-  return index:new(base, proxy.O(self).address)
-end
-
-
 function index:set(base, value)
   local a = proxy.O(self).address
   local i = index:new(base, a:sub(1, -2))
