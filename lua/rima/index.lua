@@ -59,9 +59,9 @@ end
 ------------------------------------------------------------------------------
 
 proxy_mt.__tostring = lib.__tostring
-function proxy_mt.__repr(i, format)
-  local I = proxy.O(i)
-  local base, addr = I.base, I.address
+function proxy_mt:__repr(format)
+  self = proxy.O(self)
+  local base, addr = self.base, self.address
   local bt = typeinfo(base)
   if format.format == "dump" then
     if base then
@@ -214,10 +214,10 @@ local function newindex_set(current, i, value)
 end
 
 
-function index.newindex(r, i, value, depth)
+function index:newindex(i, value, depth)
   depth = depth or 0
-  local I = proxy.O(r)
-  local base, a = I.base, I.address
+  self = proxy.O(self)
+  local base, a = self.base, self.address
   if not base then
     local ar = lib.repr(a+i)
     error(("error setting '%s' to '%s': '%s' isn't bound to a table or scope"):format(ar, lib.repr(value), ar), 2 + depth)
@@ -248,17 +248,17 @@ end
 
 ------------------------------------------------------------------------------
 
-function index.resolve(r, s)
-  local I = proxy.O(r)
+function index:resolve(s)
+  self = proxy.O(self)
   local addr, base
-  addr = core.eval(I.address, s)
-  base = I.base
+  addr = core.eval(self.address, s)
+  base = self.base
 
   local b0 = base
 
   if base then
     local addr2
-    base, addr2 = core.eval_to_paths(I.base, s)
+    base, addr2 = core.eval_to_paths(self.base, s)
     if addr2 then base = addr2 end
   end
 
@@ -311,23 +311,23 @@ function index.resolve(r, s)
 end
 
 
-function proxy_mt.__eval(e, s)
-  return index.resolve(e, s)
+function proxy_mt:__eval(s)
+  return index.resolve(self, s)
 end
 
 
 ------------------------------------------------------------------------------
 
-function proxy_mt.__list_variables(i, s, list)
-  local I = proxy.O(i)
+function proxy_mt:__list_variables(s, list)
+  local I = proxy.O(self)
   local current, addr = I.base or s, I.address
   local read_f = lib.getmetamethod(current, "__read_ref")
   if read_f then current = read_f(current) end
   local query_f = lib.getmetamethod(current, "__is_set")
 
   if not query_f then
-    local name = lib.repr(i)
-    list[name] = { name=name, ref=i }
+    local name = lib.repr(self)
+    list[name] = { name = name, ref = self }
     return
   end
 
@@ -388,10 +388,10 @@ end
 
 ------------------------------------------------------------------------------
 
-function index.__diff(i, v)
-  local I = proxy.O(i)
-  local V = proxy.O(v)
-  if I.base == V.base and I.address == V.address then
+function index:__diff(v)
+  self = proxy.O(self)
+  v = proxy.O(v)
+  if self.base == v.base and self.address == v.address then
     return 1
   else
     return 0
