@@ -267,8 +267,8 @@ function index:resolve(s)
   if object.typename(current) == "index" then
     local I2 = proxy.O(current)
     base = I2.base
-    current = base or s
     addr = I2.address + addr
+    current = base or s
   end
 
   local f = lib.getmetamethod(current, "__read_ref")
