@@ -265,14 +265,18 @@ function node:new(...)
 end
 
 
-function node:create_element(index, ...)
+function node:create_element(k, ...)
   local v = self.value
   if not v then
     v = {}  -- scope table?
     self.value = v
   end
 
-  v[index] = node:new(v[index], ...)
+  if object.typename(v) == "index" then
+    index.newindex(v, k, node:new(index:new(v, k), ...))
+  else
+    v[k] = node:new(v[k], ...)
+  end
 end
 
 
