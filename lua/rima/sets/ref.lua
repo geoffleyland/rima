@@ -157,7 +157,7 @@ function ref:set_args(S, ...)
   for i = 1, math.min(#names, select('#', ...)) do
     local n = names[i]
     if n and n ~= "_" then
-      index.newindex(S, n, select(i, ...))
+      index.newindex(S, n, (select(i, ...)))
     end
   end
 end
@@ -193,7 +193,7 @@ function ref:index(S, Sn, i)
       error(("Index out of bounds when indexing %s as %s[%s]"):format(lib.repr(self), lib.repr(self.set), lib.repr(i)))
     end
     local value = v and v.value
-    self:set_args(Sn, element:new(self.set[i], i))
+    self:set_args(Sn, element:new(index:new(self.set, i), i))
   end
 end
 
@@ -214,7 +214,7 @@ local function set_ref_pairs(state, k)
   local r = state.ref
   k = next(r.literal, k)
   if not k then return end
-  r:set_args(state.scope, k, r.set[k])
+  r:set_args(state.scope, k, index:new(r.set, k))
   return k
 end
 
@@ -236,7 +236,7 @@ local function set_ref_elements(state, k)
   local v
   k, v = next(l, k)
   if not k then return end
-  r:set_args(state.scope, element:new(r.set[k], k))
+  r:set_args(state.scope, element:new(index:new(r.set, k), k))
   return k
 end
 
