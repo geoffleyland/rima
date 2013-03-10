@@ -32,7 +32,7 @@ end
 -- Solve tools -----------------------------------------------------------------
 
 local function sense(M)
-  local sense = core.eval(index:new().sense, M)
+  local sense = core.eval(index:new(nil, "sense"), M)
   local ti = object.typeinfo(sense)
   if ti.index then return end
     if not ti.string then
@@ -342,7 +342,7 @@ proxy_mt.__tostring = lib.__tostring
 function solve(M, ...)
   M = new(M, ...)
 
-  local objective = core.eval(index:new().objective, M)
+  local objective = core.eval(index:new(nil, "objective"), M)
   local objective_is_linear, objective_constant, linear_objective = pcall(linearise.linearise, objective, M)
 
   local constraints_are_linear, constraint_expressions, constraint_info = prepare_constraints(M)

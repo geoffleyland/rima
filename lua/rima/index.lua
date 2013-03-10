@@ -371,10 +371,10 @@ function proxy_mt.__list_variables(i, s, list)
     -- now run forwards through that creating an index
     for _, i in ipairs(addr2) do
       if typeinfo(i)["sets.ref"] then
-        result_index = result_index[index:new(nil, i.names[1])]
+        result_index = index:new(result_index, index:new(nil, i.names[1]))
         result_sets[#result_sets+1] = i
       else
-        result_index = result_index[i]
+        result_index = index:new(result_index, i)
       end
     end
   end
@@ -382,7 +382,7 @@ function proxy_mt.__list_variables(i, s, list)
   -- and if we need to, tag on any remaining indexes
   if last then
     for i = last, #addr do
-      result_index = result_index[addr:value(i)]
+      result_index = index:new(result_index, addr:value(i))
     end
   end
 
