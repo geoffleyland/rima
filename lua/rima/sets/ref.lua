@@ -281,9 +281,9 @@ end
 
 function ref:fake_iterate(S)
   if self.values == "pairs" then
-    self:set_args(S, nil, self.set[index:new(nil, self.names[2])])
+    self:set_args(S, nil, index:new(self.set, index:new(nil, self.names[2])))
   else
-    self:set_args(S, element:new(self.set[index:new(nil, self.names[1])], 0, 0))
+    self:set_args(S, element:new(index:new(self.set, index:new(nil, self.names[1])), 0, 0))
   end
 end
 
