@@ -1,9 +1,5 @@
--- Copyright (c) 2009-2011 Incremental IP Limited
+-- Copyright (c) 2009-2013 Incremental IP Limited
 -- see LICENSE for license information
-
-local error, getmetatable, ipairs, loadstring, pcall =
-      error, getmetatable, ipairs, loadstring, pcall
-local table = require("table")
 
 local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
@@ -11,10 +7,8 @@ local core = require("rima.core")
 local scope = require("rima.scope")
 local index = require("rima.index")
 
-module(...)
 
-
--- compiling expressions -------------------------------------------------------
+------------------------------------------------------------------------------
 
 local function build_scope(variables, arg_name)
   arg_name = arg_name or "args"
@@ -27,8 +21,7 @@ local function build_scope(variables, arg_name)
     end
     local a = proxy.O(v.ref).address
     if #a > 1 then
-      local v2 = index:new(S, a:sub(1, -2))
-      v2[a:value(-1)] = index:new(nil, arg_name, count)
+      index.newindex(index:new(S, a:sub(1, -2)), a:value(-1), index:new(nil, arg_name, count))
     else
       S[a:value(1)] = index:new(nil, arg_name, count)
     end
@@ -44,7 +37,7 @@ local function stringify(e, S)
 end
 
 
-function compile(expressions, variables, arg_names)
+local function compile(expressions, variables, arg_names)
   arg_names = arg_names or "args"
   local S = build_scope(variables)
 
@@ -69,4 +62,8 @@ function compile(expressions, variables, arg_names)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return { compile = compile }
+
+------------------------------------------------------------------------------
