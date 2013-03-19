@@ -7,6 +7,7 @@ local assert, getmetatable, ipairs, pcall = assert, getmetatable, ipairs, pcall
 local core = require("rima.core")
 local index = require("rima.index")
 local compiler = require("rima.compiler")
+local interface = require("rima.interface")
 
 local status, ipopt_core = pcall(require, "rima_ipopt_core")
 
@@ -54,8 +55,7 @@ end
 
 
 local function compile_hessian(objective, constraints, variables)
-  local sigma = index:new(nil, "sigma")
-  local lambda = index:new(nil, "lambda")
+  local sigma, lambda = interface.R"sigma, lambda"
 
   local sparsity = {}
   local e2 = {}
