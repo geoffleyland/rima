@@ -8,6 +8,7 @@ local core = require("rima.core")
 local mul = require("rima.operators.mul")
 local expression = require("rima.expression")
 local opmath = require("rima.operators.math")
+local ops = require("rima.operations")
 
 
 ------------------------------------------------------------------------------
@@ -78,14 +79,14 @@ function pow.__diff(args, v)
 
   if type(exponent) == "number" then
     if base_is_number then return 0 end
-    return core.diff(base, v) * exponent * base ^ (exponent - 1)
+    return core.eval(ops.mul(exponent, core.diff(base, v), ops.pow(base, exponent - 1)))
   end
 
   if base_is_number then
-    return core.diff(exponent, v) * math.log(base) * base ^ exponent
+    return core.eval(ops.mul(core.diff(exponent, v), math.log(base), ops.pow(base, exponent)))
   end
   
-  return core.diff(exponent * opmath.log(base), v) * base ^ exponent
+  return core.eval(ops.mul(core.diff(ops.mul(exponent, opmath.log(base)), v), ops.pow(base, exponent)))
 end
 
 

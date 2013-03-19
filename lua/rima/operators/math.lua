@@ -6,6 +6,7 @@ local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local expression = require("rima.expression")
+local ops = require("rima.operations")
 
 local rmath = {}
 
@@ -55,17 +56,17 @@ local function math_diff(args, v)
   if dadv == 0 then return 0 end
   
   if o == "exp" then
-    return dadv * rmath.exp(a)
+    return ops.mul(dadv, rmath.exp(a))
   elseif o == "log" then
-    return dadv / a 
+    return ops.div(dadv, a)
   elseif o == "log10" then
-    return dadv / (math.log(10) * a)
+    return ops.div(dadv, ops.mul(math.log(10), a))
   elseif o == "sin" then
-    return dadv * rmath.cos(a)
+    return ops.mul(dadv, rmath.cos(a))
   elseif o == "cos" then
-    return -dadv * rmath.sin(a)
+    return ops.mul(-1, dadv, rmath.sin(a))
   elseif o == "sqrt" then
-    return dadv * 0.5 * a ^ (-0.5)
+    return mul:new(dadv, 0.5, ops.pow(a, -0.5))
   else
     error("Can't differentiate "..o, 0)
   end

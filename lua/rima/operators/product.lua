@@ -9,6 +9,7 @@ local closure = require("rima.closure")
 local mul = require("rima.operators.mul")
 local expression = require("rima.expression")
 local set_list = require("rima.sets.list")
+local ops = require("rima.operations")
 
 
 ------------------------------------------------------------------------------
@@ -59,7 +60,7 @@ function product:__eval(S)
   -- undefined terms
   local defined_terms, undefined_terms = {}, {}
   for S2, undefined in cl:iterate(S) do
-    local z = core.eval(cl.exp+0, S2)  -- the +0 helps to "cast" e to a number (if it's a set element)
+    local z = core.eval(ops.add(0, cl.exp), S2)  -- the +0 helps to "cast" e to a number (if it's a set element)
     if undefined and undefined[1] then
       -- Undefined terms are stored in groups based on the undefined product
       -- indices (so we can group them back into products over the same indices)

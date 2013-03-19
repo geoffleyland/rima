@@ -8,6 +8,7 @@ local core = require("rima.core")
 local closure = require("rima.closure")
 local add = require("rima.operators.add")
 local expression = require("rima.expression")
+local ops = require("rima.operations")
 local set_list = require("rima.sets.list")
 
 
@@ -59,7 +60,7 @@ function sum:__eval(S)
   -- undefined terms
   local defined_terms, undefined_terms = {}, {}
   for S2, undefined in cl:iterate(S) do
-    local z = core.eval(cl.exp+0, S2)  -- the +0 helps to "cast" e to a number (if it's a set element)
+    local z = core.eval(ops.add(0, cl.exp), S2)  -- the +0 helps to "cast" e to a number (if it's a set element)
     if undefined and undefined[1] then
       -- Undefined terms are stored in groups based on the undefined sum
       -- indices (so we can group them back into sums over the same indices)

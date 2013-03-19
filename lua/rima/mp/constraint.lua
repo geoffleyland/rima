@@ -9,6 +9,7 @@ local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local linearise = require("rima.mp.linearise")
+local ops = require("rima.operations")
 local add_mul = require("rima.operators.add_mul")
 
 module(...)
@@ -36,7 +37,7 @@ end
 
 
 function constraint:characterise(S)
-  local e = core.eval(0 + self.lhs - self.rhs, S)
+  local e = core.eval(ops.add(0, self.lhs, ops.unm(self.rhs)), S)
   local rhs = 0
   if object.typeinfo(e).add then
     local constant, new_e = add_mul.extract_constant(e)
