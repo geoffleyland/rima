@@ -15,6 +15,7 @@ local closure = require("rima.closure")
 local constraint = require("rima.mp.constraint")
 local linearise = require("rima.mp.linearise")
 local solvers = require("rima.solvers")
+local ops = require("rima.operations")
 
 module(...)
 
@@ -308,7 +309,7 @@ function proxy_mt.__repr(M, format)
   -- Write variables
   local variables = {}
   for i, c in ipairs(constraints) do
-    c = core.eval(c.constraint.lhs - c.constraint.rhs, M)
+    c = core.eval(ops.sub(c.constraint.lhs, c.constraint.rhs), M)
     core.list_variables(c, M, variables)
   end
   local sorted_variables = {}
