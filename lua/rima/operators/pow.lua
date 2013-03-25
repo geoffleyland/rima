@@ -63,8 +63,10 @@ function pow:__eval(...)
   local base, exponent = core.eval(t1, ...), core.eval(t2, ...)
   if base == t1 and exponent == t2 then
     return self
-  else
+  elseif type(base) == "number" and type(exponent) == "number" then
     return base ^ exponent
+  else
+    return expression:new(pow, base, exponent)
   end
 end
 
