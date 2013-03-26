@@ -12,6 +12,7 @@ local sets = require"rima.sets"
 local ref = require"rima.sets.ref"
 local opmath = require"rima.operators.math"
 local expression = require"rima.expression"
+local core = require"rima.core"
 
 local interface = {}
 
@@ -110,6 +111,18 @@ end
 interface.math = {}
 for k, v in pairs(opmath) do
   interface.math[k] = function(e) return v(e) end
+end
+
+
+------------------------------------------------------------------------------
+
+function interface.eval(...)
+  return core.eval(...)
+end
+
+
+function interface.diff(e, v)
+  return (core.eval(core.diff(e, v)))
 end
 
 
