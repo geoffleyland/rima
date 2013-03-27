@@ -13,6 +13,7 @@ local ref = require"rima.sets.ref"
 local opmath = require"rima.operators.math"
 local expression = require"rima.expression"
 local core = require"rima.core"
+local compiler = require"rima.compiler"
 
 local interface = {}
 
@@ -127,6 +128,14 @@ end
 
 
 ------------------------------------------------------------------------------
+
+function interface.compile(expressions, variables, arg_names)
+  return compiler.compile(expressions, variables, arg_names)
+end
+
+
+------------------------------------------------------------------------------
+
 
 return interface
 

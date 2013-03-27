@@ -4,10 +4,8 @@
 local math = require("math")
 local assert, getmetatable, ipairs, pcall = assert, getmetatable, ipairs, pcall
 
-local core = require("rima.core")
-local index = require("rima.index")
-local compiler = require("rima.compiler")
 local interface = require("rima.interface")
+local ops = require("rima.operations")
 
 local status, ipopt_core = pcall(require, "rima_ipopt_core")
 
@@ -33,7 +31,7 @@ local function compile_jacobian(expressions, variables)
 
   local function add_expression(e, i)
     for j, v in ipairs(variables) do
-      local dedv = core.eval(core.diff(e, v.ref))
+      local dedv = interface.diff(e, v.ref)
       if dedv ~= 0 then
         sparsity[#sparsity+1] = {i, j}
         e2[#e2+1] = dedv
@@ -49,7 +47,7 @@ local function compile_jacobian(expressions, variables)
     end
   end
 
-  local f, function_string = compiler.compile(e2, variables)
+  local f, function_string = interface.compile(e2, variables)
   return f, function_string, sparsity
 end
 
@@ -63,14 +61,14 @@ local function compile_hessian(objective, constraints, variables)
   for i, v1 in ipairs(variables) do
     for j, v2 in ipairs(variables) do
       local exp, nonzero = 0, false
-      local do2dv1dv2 = core.eval(core.diff(core.diff(objective, v1.ref), v2.ref))
+      local do2dv1dv2 = interface.diff(interface.diff(objective, v1.ref), v2.ref)
       if do2dv1dv2 ~= 0 then
         exp = sigma * do2dv1dv2
         nonzero = true
       end
 
       for k, c in ipairs(constraints) do
-        local dc2dv1dv2 = core.eval(core.diff(core.diff(c, v1.ref), v2.ref))
+        local dc2dv1dv2 = interface.diff(interface.diff(c, v1.ref), v2.ref)
         if dc2dv1dv2 ~= 0 then
           exp = exp + lambda[k] * dc2dv1dv2
           nonzero = true
@@ -83,7 +81,7 @@ local function compile_hessian(objective, constraints, variables)
     end
   end
 
-  local f, function_string = compiler.compile(e2, variables, "args, sigma, lambda")
+  local f, function_string = interface.compile(e2, variables, "args, sigma, lambda")
   return f, function_string, sparsity
 end
 
@@ -105,14 +103,14 @@ local function solve_(options)
     end
   end
 
-  if options.sense == "maximise" then options.objective = -options.objective end
+  if options.sense == "maximise" then options.objective = ops.unm(options.objective) end
 
   local F =
   {
     variables = options.ordered_variables,
     constraint_bounds = options.constraint_info,
-    objective_function = compiler.compile(options.objective, options.ordered_variables),
-    constraint_function = compiler.compile(options.constraint_expressions, options.ordered_variables)
+    objective_function = interface.compile(options.objective, options.ordered_variables),
+    constraint_function = interface.compile(options.constraint_expressions, options.ordered_variables)
   }
   F.objective_jacobian, _, F.oj_sparsity = compile_jacobian(options.objective, options.ordered_variables)
   F.constraint_jacobian, _, F.cj_sparsity = compile_jacobian(options.constraint_expressions, options.ordered_variables)
