@@ -93,7 +93,7 @@ function find_constraints(S, callback)
           add_constraint(core.eval(v, S), build_ref(S))
         else
           for S2, undefined in current_sets:iterate(scope.new(S), "$mp") do
-            local ref = build_ref(S2["$mp"], current_sets, undefined)
+            local ref = build_ref(scope.index(S2, "$mp"), current_sets, undefined)
             add_constraint(core.eval(ref, S2), ref, undefined) 
           end
         end
