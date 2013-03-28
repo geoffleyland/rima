@@ -50,7 +50,7 @@ function pow:simplify()
   elseif exponent == 1 then
     return base
   elseif type(exponent) == "number" then
-    return expression:new(mul, {exponent, base})
+    return mul:new{{exponent, base}}
   else
     return self
   end
@@ -66,7 +66,7 @@ function pow:__eval(...)
   elseif type(base) == "number" and type(exponent) == "number" then
     return base ^ exponent
   else
-    return expression:new(pow, base, exponent)
+    return pow:new{base, exponent}
   end
 end
 

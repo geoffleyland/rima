@@ -52,8 +52,10 @@ function mod:__eval(...)
 
   if numerator == t1 and denominator == t2 then
     return self
-  else
+  elseif type(numerator) == "number" and type(denominator) == "number" then
     return numerator % denominator
+  else
+    return mod:new{ numerator, denominator }
   end
 end
 

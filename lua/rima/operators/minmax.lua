@@ -29,7 +29,7 @@ function min.__eval(args, ...)
   
   if a2[1] then
     a2[#a2+1] = m
-    return expression:new_table(min, a2)
+    return min:new(a2)
   else
     return m
   end
@@ -58,7 +58,7 @@ function max.__eval(args, ...)
   
   if a2[1] then
     a2[#a2+1] = m
-    return expression:new_table(max, a2)
+    return max:new(a2)
   else
     return m
   end

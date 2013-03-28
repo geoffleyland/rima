@@ -18,6 +18,11 @@ expression:copy_operators(call)
 
 ------------------------------------------------------------------------------
 
+function call:new(terms)
+  return expression.new(call, terms)
+end
+
+
 function call.__repr(args, format)
   args = proxy.O(args)
   if format.format == "dump" then
@@ -41,7 +46,7 @@ function call.__eval(args, S)
   end
 
   if not core.defined(f) then
-    return expression:new(call, f, unpack(fargs))
+    return call:new{f, unpack(fargs)}
   else
 
     local status, value, vtype, addr

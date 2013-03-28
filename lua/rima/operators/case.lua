@@ -76,9 +76,9 @@ function case.__eval(args, ...)
   -- only keep the default if we didn't find a match (we might be here if we
   -- did find a match, but earlier match values weren't defined)
   if found_match or not args[3] then
-    return expression:new(case, value, cases)
+    return case:new{value, cases}
   else
-    return expression:new(case, value, cases, eval_preserve(args[3], args[4], args[5], ...))
+    return case:new{value, cases, eval_preserve(args[3], args[4], args[5], ...)}
   end
 end
 

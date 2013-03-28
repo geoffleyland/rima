@@ -16,8 +16,8 @@ return function(T)
   local D = lib.dump
   local R = interface.R
 
-  T:test(object.typeinfo(expression:new(call)).call, "typeinfo(call).call")
-  T:check_equal(object.typename(expression:new(call)), "call")
+  T:test(object.typeinfo(call:new()).call, "typeinfo(call).call")
+  T:check_equal(object.typename(call:new()), "call")
 
   do
     local a, b = R"a, b"

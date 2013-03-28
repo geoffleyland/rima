@@ -27,7 +27,7 @@ function ord.__eval(args_in, S)
       if e == args[1] then
         return args_in
       else
-        return expression:new(ord, e)
+        return ord:new{e}
       end
     end
   end
@@ -79,7 +79,7 @@ function range.__eval(args_in, S)
     if l == args[1] and h == args[2] then
       return args_in
     else
-      return expression:new(range, l, h)
+      return range:new{l, h}
     end
   end
 end

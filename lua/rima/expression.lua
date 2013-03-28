@@ -34,20 +34,10 @@ function expression:new_type(t, typename)
 end
 
 
-function expression:_new(op, terms)
-  local e = proxy:new(terms, op)
-  if op.simplify then e = op.simplify(e) end
+function expression:new(terms)
+  local e = proxy:new(terms, self)
+  if self.simplify then e = self.simplify(e) end
   return e
-end
-
-
-function expression:new(op, ...)
-  return self:_new(op, {...})
-end
-
-
-function expression:new_table(op, terms)
-  return self:_new(op, terms)
 end
 
 
@@ -55,8 +45,6 @@ end
 
 expression_methods =
 {
-  new        = function(self, ...)    return expression:_new(self, {...}) end,
-  new_table  = function(self, t)      return expression:new_table(self, t) end,
   __tostring = lib.__tostring,
   __repr =
     function(self, format)
@@ -87,14 +75,14 @@ local index_mods = setmetatable({}, { __index = load_index })
 
 expression_ops =
 {
-  __add   = function(a, b) return expression:new(op_mods.add, { 1, a}, { 1, b}) end,
-  __sub   = function(a, b) return expression:new(op_mods.add, { 1, a}, {-1, b}) end,
-  __unm   = function(a)    return expression:new(op_mods.add, {-1, a}) end,
-  __mul   = function(a, b) return expression:new(op_mods.mul, { 1, a}, { 1, b}) end,
-  __div   = function(a, b) return expression:new(op_mods.mul, { 1, a}, {-1, b}) end,
-  __pow   = function(a, b) return expression:new(op_mods.pow, a, b) end,
-  __mod   = function(a, b) return expression:new(op_mods.mod, a, b) end,
-  __call  = function(...)  return expression:new(op_mods.call, ...) end,
+  __add   = function(a, b) return op_mods.add:new{{ 1, a}, { 1, b}} end,
+  __sub   = function(a, b) return op_mods.add:new{{ 1, a}, {-1, b}} end,
+  __unm   = function(a)    return op_mods.add:new{{-1, a}} end,
+  __mul   = function(a, b) return op_mods.mul:new{{ 1, a}, { 1, b}} end,
+  __div   = function(a, b) return op_mods.mul:new{{ 1, a}, {-1, b}} end,
+  __pow   = function(a, b) return op_mods.pow:new{a, b} end,
+  __mod   = function(a, b) return op_mods.mod:new{a, b} end,
+  __call  = function(...)  return op_mods.call:new{...} end,
   __index = function(...)  return index_mods.index:new(...) end,
   __newindex = function (t, k, v)
     local tt = object.typename(t)

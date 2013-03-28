@@ -131,7 +131,7 @@ function add:simplify()
   end
 
   if simplify_changed or sort_changed then
-    return expression:new_table(add, ordered_terms)
+    return add:new(ordered_terms)
   end
 
   return self
@@ -141,7 +141,7 @@ end
 function add:__eval(...)
   local terms = add_mul.evaluate_terms(proxy.O(self), ...)
   if not terms then return self end
-  return expression:new_table(add, terms)
+  return add:new(terms)
 end
 
 
@@ -157,7 +157,7 @@ function add:__diff(v)
     end
   end
   
-  return expression:new_table(add, diff_terms)
+  return add:new(diff_terms)
 end
 
 

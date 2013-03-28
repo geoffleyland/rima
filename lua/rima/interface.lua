@@ -11,7 +11,6 @@ local func = require"rima.func"
 local sets = require"rima.sets"
 local ref = require"rima.sets.ref"
 local opmath = require"rima.operators.math"
-local expression = require"rima.expression"
 local core = require"rima.core"
 local compiler = require"rima.compiler"
 local constraint = require"rima.mp.constraint"
@@ -48,7 +47,7 @@ function interface.sum(x)
     if object.typename(y) == "table" then
       return next_term
     else
-      return expression:new_table(sum, terms)
+      return sum:new(terms)
     end
   end
   return next_term
@@ -63,7 +62,7 @@ function interface.product(x)
     if object.typename(y) == "table" then
       return next_term
     else
-      return expression:new_table(product, terms)
+      return product:new(terms)
     end
   end
   return next_term
@@ -71,17 +70,17 @@ end
 
 
 function interface.case(value, cases, default)
-  return expression:new(case, value, cases, default)
+  return case:new{value, cases, default}
 end
 
 
 function interface.min(...)
-  return expression:new(minmax.min, ...)
+  return minmax.min:new{...}
 end
 
 
 function interface.max(...)
-  return expression:new(minmax.max, ...)
+  return minmax.max:new{...}
 end
 
 
@@ -91,12 +90,12 @@ end
 
 
 function interface.ord(e)
-  return expression:new(sets.ord, e)
+  return sets.ord:new{e}
 end
 
 
 function interface.range(l, h)
-  return expression:new(sets.range, l, h)
+  return sets.range:new{l, h}
 end
 
 

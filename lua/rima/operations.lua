@@ -1,8 +1,6 @@
 -- Copyright (c) 2013 Incremental IP Limited
 -- see LICENSE for license information
 
-local expression = require("rima.expression")
-
 ------------------------------------------------------------------------------
 -- The operators are lazy loaded to avoid a require conflict between
 -- the operators themselves (some of which use this module) and this module
@@ -28,17 +26,17 @@ function ops.add(...)
   for i = 1, select("#", ...) do
     t[i] = { 1, (select(i, ...)) }
   end
-  return expression:new_table(op_modules.add, t)
+  return op_modules.add:new(t)
 end
 
 
 function ops.sub(a, b)
-  return expression:new(op_modules.add, { 1, a }, { -1, b })
+  return op_modules.add:new{{ 1, a }, { -1, b }}
 end
 
 
 function ops.unm(a)
-  return expression:new(op_modules.add, { -1, a })
+  return op_modules.add:new{{ -1, a }}
 end
 
 
@@ -47,22 +45,22 @@ function ops.mul(...)
   for i = 1, select("#", ...) do
     t[i] = { 1, (select(i, ...)) }
   end
-  return expression:new_table(op_modules.mul, t)
+  return op_modules.mul:new(t)
 end
 
 
 function ops.div(a, b)
-  return expression:new(op_modules.mul, { 1, a }, { -1, b })
+  return op_modules.mul:new{{ 1, a }, { -1, b }}
 end
 
 
 function ops.pow(a, b)
-  return expression:new(op_modules.pow, a, b)
+  return op_modules.pow:new{ a, b }
 end
 
 
 function ops.mod(a, b)
-  return expression:new(op_modules.mod, a, b)
+  return op_modules.mod:new{ a, b }
 end
 
 

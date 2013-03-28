@@ -143,7 +143,7 @@ function mul:simplify()
   end
 
   if simplify_changed or sort_changed then
-    return expression:new_table(mul, ordered_terms)
+    return mul:new(ordered_terms)
   end
 
   return self
@@ -153,7 +153,7 @@ end
 function mul:__eval(...)
   local terms = add_mul.evaluate_terms(proxy.O(self), ...)
   if not terms then return self end
-  return expression:new_table(mul, terms)
+  return mul:new(terms)
 end
 
 
@@ -185,11 +185,11 @@ function mul:__diff(v)
       end
     end
     if t1 then
-      diff_terms[#diff_terms+1] = {1, expression:new_table(mul, t1)}
+      diff_terms[#diff_terms+1] = {1, mul:new(t1)}
     end
   end
-  
-  return expression:new_table(add, diff_terms)
+
+  return add:new(diff_terms)
 end
 
 

@@ -24,11 +24,11 @@ function product:simplify()
   if ti.closure then
     return self
   elseif ti["sets.list"] then
-    return expression:new_table(product, { closure:new(terms[2], terms[1]) })
+    return product:new{ closure:new(terms[2], terms[1]) }
   else
     local term_count = #terms
     local sets = set_list:read(terms, term_count-1)
-    return expression:new_table(product, { closure:new(terms[term_count], sets) })
+    return product:new{ closure:new(terms[term_count], sets) }
   end
 end
 
@@ -85,11 +85,11 @@ function product:__eval(S)
   for n, t in pairs(undefined_terms) do
     local z
     if #t.terms > 1 then
-      z = expression:new_table(mul, t.terms)
+      z = mul:new(t.terms)
     else
       z = t.terms[1][2]
     end
-    total_terms[#total_terms+1] = {1, expression:new(product, t.iterators, cl:undo(z, t.iterators)) }
+    total_terms[#total_terms+1] = {1, product:new{t.iterators, cl:undo(z, t.iterators)} }
   end
 
   -- Add the defined terms onto the end
@@ -100,7 +100,7 @@ function product:__eval(S)
   if #total_terms == 1 then
     return total_terms[1][2]
   else
-    return core.eval(expression:new_table(mul, total_terms), S)
+    return core.eval(mul:new(total_terms), S)
   end
 end
 

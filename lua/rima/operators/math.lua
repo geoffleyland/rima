@@ -90,14 +90,14 @@ local function make_math_function(name)
     local t1 = proxy.O(self)[1]
     local e = core.eval(t1, ...)
     if e == t1 then return self end
-    return expression:new(op, e)
+    return op:new{e}
   end
 
   op.__repr = math_repr
   op.__diff = math_diff
 
   rmath[name] = function(e)
-    return expression:new(op, e)
+    return op:new{e}
   end
 end
 

@@ -4,8 +4,6 @@
 local lib = require("rima.lib")
 local core = require("rima.core")
 local proxy = require("rima.lib.proxy")
-local expression = require("rima.expression")
-
 
 local add_mul = {}
 
@@ -111,7 +109,7 @@ function add_mul.extract_constant(e)
     for i = 2, term_count do
       new_terms[i-1] = terms[i]
     end
-    return constant, expression:new_table(getmetatable(e), new_terms)
+    return constant, getmetatable(e):new(new_terms)
   end
 end
 
