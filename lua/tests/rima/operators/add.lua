@@ -1,27 +1,25 @@
 -- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local add = require("rima.operators.add")
+local ops = require("rima.operations")
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local expression = require("rima.expression")
-local interface = require("rima.interface")
+local index = require("rima.index")
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local A = add:new({1,1}, {1, interface.R"a"})
+  local A = ops.add(1, index:new(nil, "a"))
 
   -- constructors
   T:test(object.typeinfo(A).add, "typeinfo(add).add")
   T:check_equal(object.typename(A), "add", "typename(add)=='add'")
-  T:test(lib.getmetamethod(A, "__add"))
 
-  local A2 = expression:new(add, {1,5}, {1,"a"})
+  local A2 = ops.add(5, "a")
   T:test(object.typeinfo(A2).add, "typeinfo(add).add")
   T:check_equal(object.typename(A2), "add", "typename(add)=='add'")
-  T:test(lib.getmetamethod(A2, "__add"))
   
   local A3 = 1 + A
   T:test(object.typeinfo(A3).add, "typeinfo(add).add")

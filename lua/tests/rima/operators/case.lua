@@ -5,14 +5,13 @@ local case = require("rima.operators.case")
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
-local core = require("rima.core")
 local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
-  local E = core.eval
+  local E = interface.eval
   local D = lib.dump
   local R = interface.R
 

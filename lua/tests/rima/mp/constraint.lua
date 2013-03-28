@@ -11,7 +11,7 @@ local interface = require("rima.interface")
 ------------------------------------------------------------------------------
 
 return function(T)
-  local E = core.eval
+  local E = interface.eval
   local R = interface.R
 
   local a, b, c, d = R"a, b, c, d"

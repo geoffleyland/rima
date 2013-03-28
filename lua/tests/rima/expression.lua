@@ -1,11 +1,8 @@
 -- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local expression = require("rima.expression")
-
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
-local core = require("rima.core")
 local interface = require("rima.interface")
 
 
@@ -31,7 +28,7 @@ local function equal(T, expected, got)
 end
 
 return function(T)
-  local E = core.eval
+  local E = interface.eval
   local D = lib.dump
   local R = interface.R
 

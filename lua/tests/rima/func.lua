@@ -5,7 +5,6 @@ local func = require("rima.func")
 
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
-local core = require("rima.core")
 local scope = require("rima.scope")
 local number_t = require("rima.types.number_t")
 local interface = require("rima.interface")
@@ -14,9 +13,10 @@ local interface = require("rima.interface")
 ------------------------------------------------------------------------------
 
 return function(T)
-  local E = core.eval
+  local E = interface.eval
   local D = lib.dump
   local R = interface.R
+  local F = interface.func
 
   T:test(object.typeinfo(func:new({"a"}, 3)).func, "typeinfo(func:new()).func")
   T:check_equal(object.typename(func:new({"a"}, 3)), "func", "typename(func:new()) == 'func'")
@@ -25,10 +25,10 @@ return function(T)
     "expected string or identifier, got '1' %(number%)")
   do
     local a = R"a"
-    T:expect_error(function() func:new({a[1]}, 1) end,
+    T:expect_error(function() F{a[1]}(1) end,
       "expected string or identifier, got 'a%[1%]' %(index%)")
     local S = scope.new{ b=number_t.free() }
-    T:expect_error(function() func:new({S.b}, 1) end,
+    T:expect_error(function() F{S.b}(1) end,
       "expected string or identifier, got 'b' %(index%)")
   end
 
@@ -36,7 +36,7 @@ return function(T)
     local a = R"a"
     local f
     T:expect_ok(function() f = func:new({"a"}, 3) end)
-    T:expect_ok(function() f = func:new({a}, 3) end)
+    T:expect_ok(function() f = F{a}(3) end)
     
     T:check_equal(f, "function(a) return 3")
     T:check_equal(f(5), 3)
@@ -46,7 +46,7 @@ return function(T)
     local a, x, y = R"a, x, y"
     local f
     T:expect_ok(function() f = func:new({"a"}, 3 + a) end)
-    T:expect_ok(function() f = func:new({a}, 3 + a) end)    
+    T:expect_ok(function() f = F{a}(3 + a) end)    
     
     -- repr
     T:check_equal(f, "function(a) return 3 + a")
@@ -73,7 +73,7 @@ return function(T)
     local a, b, x, y = R"a, b, x, y"
     local f
     T:expect_ok(function() f = func:new({"a"}, a + b) end)
-    T:expect_ok(function() f = func:new({a}, a + b) end)    
+    T:expect_ok(function() f = F{a}(a + b) end)    
 
     -- repr
     T:check_equal(f, "function(a) return a + b")
@@ -100,7 +100,7 @@ return function(T)
     local a, b, x, y = R"a, b, x, y"
     local f
     T:expect_ok(function() f = func:new({"a", "b"}, a + 3*b) end)
-    T:expect_ok(function() f = func:new({"a", b}, a + 3*b) end)    
+    T:expect_ok(function() f = F{"a", b}(a + 3*b) end)    
 
     -- repr
     T:check_equal(f, "function(a, b) return a + 3*b")

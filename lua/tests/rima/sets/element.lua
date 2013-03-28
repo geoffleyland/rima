@@ -6,14 +6,14 @@ local element = require("rima.sets.element")
 local object = require("rima.lib.object")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local index = require("rima.index")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
 
 return function(T)
   local function N(...) return element:new(...) end
-  local E = core.eval
+  local E = interface.eval
   local D = lib.dump
 
   -- Constructors
@@ -29,7 +29,7 @@ return function(T)
   end
 
   do
-    local a = index:new().a
+    local a = interface.R"a"
     local S = { a = N(nil, "key", 13) }
     T:check_equal(E(a + 19, S), 32)
     T:check_equal(D(E(a + 19, S)), 32)

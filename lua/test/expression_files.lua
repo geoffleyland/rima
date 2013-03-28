@@ -4,10 +4,10 @@
 local lfs = require("lfs")
 
 local lib = require("rima.lib")
-local index = require("rima.index")
 local scope = require("rima.scope")
 local core = require("rima.core")
 local rima = require("rima")
+local interface = require("rima.interface")
 
 
 --------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ end
 local function test_file(infile, outfile, infile_name)
   local tests, fails = 0, 0
 
-  local base_expression, expression
+  local base_exp, exp
   local was_scope_line
   local S
 
@@ -48,17 +48,17 @@ local function test_file(infile, outfile, infile_name)
     local key, line = l:match("^(.)%s*(.*)%s*$")
 
     if was_scope_line and (not key or key:upper() ~= "S") then
-      expression = core.eval(base_expression, S)
+      exp = interface.eval(base_exp, S)
     end
 
     if key == "E" then                          -- read a new expression
       local f = load_line(infile_name, line_number, l, line, "(rima) return ", "expression")
       if not f then
-        base_expression, expression = nil
+        base_exp, exp = nil
       else
         local ok
-        base_expression = f()(rima)
-        expression = base_expression
+        base_exp = f()(rima)
+        exp = base_exp
       end
       outfile:write(l, "\n")
 
@@ -69,7 +69,7 @@ local function test_file(infile, outfile, infile_name)
       if #line > 0 then
         local f = load_line(infile_name, line_number, l, line, "(rima, S) S.", "scope value")
         if not f then
-          base_expression, expression = nil
+          base_exp, exp = nil
         else
           f()(rima, S)
         end
@@ -78,8 +78,8 @@ local function test_file(infile, outfile, infile_name)
 
     elseif formats[key] then                    -- compare output
       tests = tests + 1
-      local r = expression and lib.repr(expression, formats[key].f)
-      if not expression or r == line then
+      local r = exp and lib.repr(exp, formats[key].f)
+      if not exp or r == line then
         outfile:write(l, "\n")
       else
         io.stderr:write(("%s:%d: %s output mismatch:\n  expected '%s'\n  got      '%s'\n"):

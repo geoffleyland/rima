@@ -4,7 +4,6 @@
 local ref = require("rima.sets.ref")
 
 local lib = require("rima.lib")
-local core = require("rima.core")
 local scope = require("rima.scope")
 local interface = require("rima.interface")
 
@@ -12,7 +11,7 @@ local interface = require("rima.interface")
 ------------------------------------------------------------------------------
 
 return function(T)
-  local E = core.eval
+  local E = interface.eval
   local D = lib.dump
   local R = interface.R
 

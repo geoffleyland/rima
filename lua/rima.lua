@@ -27,7 +27,7 @@ rima.define = interface.define
 
 --- Evaluate an expression
 function rima.E(e, S)
-  local status, r = xpcall(function() return core.eval(e, S) end, debug.traceback)
+  local status, r = xpcall(function() return interface.eval(e, S) end, debug.traceback)
   if status then
     return r
   else

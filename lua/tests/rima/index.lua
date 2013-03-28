@@ -4,7 +4,7 @@
 local index = require("rima.index")
 
 local object = require("rima.lib.object")
-local core = require("rima.core")
+local interface = require("rima.interface")
 
 
 ------------------------------------------------------------------------------
@@ -12,7 +12,7 @@ local core = require("rima.core")
 return function(T)
   local N = function(...) return index:new(...) end
   local IE = index.proxy_mt.__eval
-  local E = core.eval
+  local E = interface.eval
 
   -- constructors
   T:test(object.typeinfo(N()).index, "typeinfo(index:new()).index")

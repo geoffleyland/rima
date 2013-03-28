@@ -4,7 +4,6 @@
 local number_t = require("rima.types.number_t")
 
 local object = require("rima.lib.object")
-local core = require("rima.core")
 local undefined_t = require("rima.types.undefined_t")
 local interface = require("rima.interface")
 
@@ -12,7 +11,7 @@ local interface = require("rima.interface")
 ------------------------------------------------------------------------------
 
 return function(T)
-  local E = core.eval
+  local E = interface.eval
   local R = interface.R
   local sum = interface.sum
 
