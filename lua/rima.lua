@@ -7,10 +7,9 @@ local core = require("rima.core")
 local number_t = require("rima.types.number_t")
 local compiler = require("rima.compiler")
 local interface = require("rima.interface")
+local mp = require("rima.mp")
 
 
-rima = {}
-rima.mp = require("rima.mp")
 rima.scope = require("rima.scope")
 
 
@@ -77,6 +76,18 @@ rima.binary = number_t.binary
 
 
 ------------------------------------------------------------------------------
+
+rima.mp =
+{
+  C = interface.mp.constraint,
+  new = mp.new,
+  solve = mp.solve,
+  solve_with = mp.solve_with,
+}
+
+
+------------------------------------------------------------------------------
+
 
 return rima
 

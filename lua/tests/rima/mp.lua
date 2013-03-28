@@ -4,7 +4,6 @@
 local mp = require("rima.mp")
 
 local lib = require("rima.lib")
-local constraint = require("rima.mp.constraint")
 local number_t = require("rima.types.number_t")
 local interface = require("rima.interface")
 
@@ -18,8 +17,8 @@ return function(T)
   do
     local x, y = R"x, y"
     local S = mp.new()
-    S.c1 = constraint:new(x + 2*y, "<=", 3)
-    S.c2 = constraint:new(2*x + y, "<=", 3)
+    S.c1 = interface.mp.constraint(x + 2*y, "<=", 3)
+    S.c2 = interface.mp.constraint(2*x + y, "<=", 3)
     S.objective = x + y
     S.sense = "maximise"
     S.x = number_t.positive()
@@ -52,8 +51,8 @@ Subject to:
   do
     local x, i, j = R"x, i, j"
     local S = mp.new()
-    S.c1 = constraint:new(x[1][1].a + 2*x[1][2].a, "<=", 3)
-    S.c2 = constraint:new(2*x[1][1].a + x[1][2].a, "<=", 3)
+    S.c1 = interface.mp.constraint(x[1][1].a + 2*x[1][2].a, "<=", 3)
+    S.c2 = interface.mp.constraint(2*x[1][1].a + x[1][2].a, "<=", 3)
     S.objective = x[1][1].a + x[1][2].a
     S.sense = "maximise"
     S.x[i][j].a = number_t.positive()
@@ -82,7 +81,7 @@ Subject to:
     local m, M, n, N = R"m, M, n, N"
     local A, b, c, x = R"A, b, c, x"
     local S = mp.new()
-    S.constraint[{m=M}] = constraint:new(sum{n=N}(A[m][n] * x[n]), "<=", b[m])
+    S.constraint[{m=M}] = interface.mp.constraint(sum{n=N}(A[m][n] * x[n]), "<=", b[m])
     S.objective = sum{n=N}(c[n] * x[n])
     S.sense = "maximise"
     S.x[n] = number_t.positive()
@@ -116,8 +115,8 @@ Subject to:
   do
     local a, p, P, q, Q = R"a, p, P, q, Q"
     local S = mp.new()
-    S.constraint1[{p=P}][{q=P[p].Q}] = constraint:new(a, "<=", P[p].Q[q])
-    S.constraint2[{p=P}][{q=p.Q}] = constraint:new(a, "<=", q)
+    S.constraint1[{p=P}][{q=P[p].Q}] = interface.mp.constraint(a, "<=", P[p].Q[q])
+    S.constraint2[{p=P}][{q=p.Q}] = interface.mp.constraint(a, "<=", q)
     T:check_equal(S,
 [[
 No objective defined

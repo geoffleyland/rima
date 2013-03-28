@@ -14,6 +14,7 @@ local opmath = require"rima.operators.math"
 local expression = require"rima.expression"
 local core = require"rima.core"
 local compiler = require"rima.compiler"
+local constraint = require"rima.mp.constraint"
 
 local interface = {}
 
@@ -131,6 +132,15 @@ end
 
 function interface.compile(expressions, variables, arg_names)
   return compiler.compile(expressions, variables, arg_names)
+end
+
+
+------------------------------------------------------------------------------
+
+interface.mp = {}
+
+function interface.mp.constraint(lhs, rel, rhs)
+  return constraint:new(lhs, rel, rhs)
 end
 
 
