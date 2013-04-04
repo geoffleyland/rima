@@ -43,7 +43,8 @@ static int rima_new(lua_State *L)
   try
   {
     model = (lprec**)lua_newuserdata(L, sizeof(lprec*));
-    *model = make_lp(rows, columns);
+    *model = make_lp(0, columns);
+    resize_lp(*model, rows, columns);
     luaL_getmetatable(L, metatable_name);
     lua_setmetatable(L, -2);
     set_verbose(*model, 0);
