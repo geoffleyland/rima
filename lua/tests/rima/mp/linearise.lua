@@ -16,13 +16,14 @@ local interface = require("rima.interface")
 return function(T)
   local R = interface.R
   local sum = interface.sum
+  local U = interface.unwrap
 
   local a, b, c, d = R"a, b, c, d"
   local S = scope.new{ a = number_t.free(), b = number_t.free(), c=undefined_t:new() }
   S.d = { number_t.free(), number_t.free() }
   
-  local L = function(e, _S) return linearise.linearise(e, _S or S) end
-  local LF = function(e, _S) return function() linearise.linearise(e, _S or S) end end
+  local L = function(e, _S) return linearise.linearise(U(e), _S or S) end
+  local LF = function(e, _S) return function() linearise.linearise(U(e), _S or S) end end
 
   T:expect_ok(LF(a))
   T:expect_ok(LF(1 + a))
@@ -36,11 +37,11 @@ return function(T)
   T:expect_ok(LF(d[2]), "d[2] is an index")
 
   local function check_nonlinear(e, S)
-    T:expect_error(function() linearise.linearise(e, S) end, "linear form:")
+    T:expect_error(function() linearise.linearise(U(e), S) end, "linear form:")
   end
 
   local function check_linear(e, expected_constant, expected_terms, S)
-    local pass, got_constant, got_terms = pcall(linearise.linearise, e, S)
+    local pass, got_constant, got_terms = pcall(linearise.linearise, U(e), S)
 
     if not pass then
       local s = ("error linearising %s:\n  %s"):

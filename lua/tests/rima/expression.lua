@@ -15,7 +15,7 @@ local function equal(T, expected, got)
       for i = 3, #z do
         local arg = z[2]
         arg = (arg ~= "" and arg) or nil
-        e = z[i](e, arg)
+        e = interface.unwrap(z[i](interface.unwrap(e), arg))
       end
       return e
     else

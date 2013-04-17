@@ -21,18 +21,18 @@ return function(T)
   local a, b = R"a, b"
   local S = { a = 5 }
 
-  T:check_equal(D(a^2), '*(index(address{"a"})^2)')
+  T:check_equal(D(a^2), 'expression(*(index(address{"a"})^2))')
   T:check_equal(a^2, "a^2")
   T:check_equal(a^b, "a^b")
   T:check_equal(E(a^2, S), 25)
-  T:check_equal(D(2^a), '^(2, index(address{"a"}))')
+  T:check_equal(D(2^a), 'expression(^(2, index(address{"a"})))')
   T:check_equal(E(2^a, S), 32)
 
   -- Identities
   T:check_equal(E(0^b, S), 0)
   T:check_equal(E(1^b, S), 1)
   T:check_equal(E(b^0, S), 1)
-  T:check_equal(D(E(b^1, S)), 'index(address{"b"})')
+  T:check_equal(D(E(b^1, S)), 'expression(index(address{"b"}))')
 
   -- Tests including add and mul are in rima.expression
 end

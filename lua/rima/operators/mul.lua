@@ -2,35 +2,33 @@
 -- see LICENSE for license information
 
 local object = require("rima.lib.object")
-local proxy = require("rima.lib.proxy")
+local operator = require("rima.operator")
 local lib = require("rima.lib")
-local core = require("rima.core")
-local expression = require("rima.expression")
+local core = require("rima.core")--local expression = require("rima.expression")
 local add_mul = require("rima.operators.add_mul")
 local add = require("rima.operators.add")
 
 
 ------------------------------------------------------------------------------
 
-local mul = expression:new_type({}, "mul")
+local mul = operator:new_class({}, "mul")
 mul.precedence = 3
 
 
 ------------------------------------------------------------------------------
 
 function mul:__repr(format)
-  local terms = proxy.O(self)
   local ff = format.format
 
   if ff == "dump" then
     return "*("..
-      lib.concat(terms, ", ",
+      lib.concat(self, ", ",
         function(t) return lib.repr(t[2], format).."^"..lib.simple_repr(t[1], format) end)..
       ")"
   end
 
   local s = ""
-  for i, t in ipairs(terms) do
+  for i, t in ipairs(self) do
     local c, e = t[1], t[2]
     
     -- If it's the first argument and it's 1/something, put a "1/" out front
@@ -74,20 +72,19 @@ local function _simplify(new_terms, term_map, exponent, e, id, sort)
     coeff = e ^ exponent
   else
     local ti = object.typeinfo(e)
-    local terms = proxy.O(e)
     if ti.mul then                              -- if the term is another product, hoist its terms
       local _
-      _, coeff = product(new_terms, term_map, exponent, terms)
+      _, coeff = product(new_terms, term_map, exponent, e)
       changed = true
-    elseif ti.add and #terms == 1 then          -- if the term is a sum with a single term, hoist it
-      local t1 = terms[1]
+    elseif ti.add and #e == 1 then              -- if the term is a sum with a single term, hoist it
+      local t1 = e[1]
       coeff = t1[1] ^ exponent
       local _, c2 = _simplify(new_terms, term_map, exponent, t1[2], t1.id, t1.sort)
       coeff = coeff * c2
       changed = true
-    elseif ti.pow and core.arithmetic(terms[2]) then
+    elseif ti.pow and core.arithmetic(e[2]) then
       -- if the term is an exponentiation to a constant power, hoist it
-      _, coeff = _simplify(new_terms, term_map, exponent * terms[2], terms[1])
+      _, coeff = _simplify(new_terms, term_map, exponent * e[2], e[1])
       changed = true
     else                                          -- if there's nothing else to do, add the term
       local e2 = lib.convert(e, "extract")
@@ -117,9 +114,8 @@ end
 
 
 function mul:simplify()
-  local terms = proxy.O(self)
   local ordered_terms, term_map = {}, {}
-  local simplify_changed, coeff = product(ordered_terms, term_map, 1, terms)
+  local simplify_changed, coeff = product(ordered_terms, term_map, 1, self)
 
   if coeff == 0 then return 0 end
 
@@ -151,7 +147,7 @@ end
 
 
 function mul:__eval(...)
-  local terms = add_mul.evaluate_terms(proxy.O(self), ...)
+  local terms = add_mul.evaluate_terms(self, ...)
   if not terms then return self end
   return mul:new(terms)
 end
@@ -160,11 +156,10 @@ end
 ------------------------------------------------------------------------------
 
 function mul:__diff(v)
-  local terms = proxy.O(self)
   local diff_terms = {}
-  for i in ipairs(terms) do
+  for i in ipairs(self) do
     local t1 = {}
-    for j, t2 in ipairs(terms) do
+    for j, t2 in ipairs(self) do
       local exponent, expression = t2[1], t2[2]
       if i == j then
         local d = core.diff(expression, v)
@@ -185,7 +180,7 @@ function mul:__diff(v)
       end
     end
     if t1 then
-      diff_terms[#diff_terms+1] = {1, mul:new(t1)}
+      diff_terms[#diff_terms+1] = { 1, mul:new(t1) }
     end
   end
 

@@ -17,6 +17,7 @@ module(...)
 local set_list = require("rima.sets.list")
 local set_ref = require("rima.sets.ref")
 local closure = require("rima.closure")
+local expression = require("rima.expression")
 
 
 --- Constructor ----------------------------------------------------------------
@@ -84,7 +85,7 @@ function scope.real_new(mt, top_node, parent, ...)
 
   if v1 then
     for k, v in pairs(v1) do
-      scope.newindex(S, k, v)
+      scope.newindex(S, expression.unwrap(k), expression.unwrap(v))
     end
   end
 
@@ -92,7 +93,7 @@ function scope.real_new(mt, top_node, parent, ...)
     local values = select(i, ...)
     if values then
       for k, v in pairs(values) do
-        scope.newindex(S, k, v)
+        scope.newindex(S, expression.unwrap(k), expression.unwrap(v))
       end
     end
   end
@@ -129,12 +130,12 @@ end
 
 
 function proxy_mt.__index(t, k)
-  return scope.index(t, k)
+  return expression.wrap(scope.index(t, k))
 end
 
 
 function proxy_mt.__newindex(t, k, v)
-  scope.newindex(t, k, v)
+  scope.newindex(t, expression.unwrap(k), expression.unwrap(v))  
 end
 
 

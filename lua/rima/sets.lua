@@ -2,21 +2,19 @@
 -- see LICENSE for license information
 
 local object = require("rima.lib.object")
-local proxy = require("rima.lib.proxy")
+local operator = require("rima.operator")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local element = require("rima.sets.element")
-local expression = require("rima.expression")
 
 
 ------------------------------------------------------------------------------
 
-local ord = expression:new_type({}, "ord")
+local ord = operator:new_class({}, "ord")
 
 
-function ord.__eval(args_in, S)
-  local args = proxy.O(args_in)
-  local e = core.eval(args[1], S)
+function ord:__eval(...)
+  local e = core.eval(self[1], ...)
 
   if object.typeinfo(e).element then
     return element.key(e)
@@ -24,8 +22,8 @@ function ord.__eval(args_in, S)
     if core.defined(e) then
       error("ord can only be applied to elements")
     else
-      if e == args[1] then
-        return args_in
+      if e == self[1] then
+        return self
       else
         return ord:new{e}
       end
@@ -67,17 +65,18 @@ function range_type:__iterindex(i)
 end
 
 
-local range = expression:new_type({}, "range")
-function range.__eval(args_in, S)
-  local args = proxy.O(args_in)
+local range = operator:new_class({}, "range")
 
-  local l, h = core.eval(args[1], S), core.eval(args[2], S)
+
+function range:__eval(...)
+
+  local l, h = core.eval(self[1], ...), core.eval(self[2], ...)
   
   if core.defined(l) and core.defined(h) then
     return range_type:new(l, h)
   else
-    if l == args[1] and h == args[2] then
-      return args_in
+    if l == self[1] and h == self[2] then
+      return self
     else
       return range:new{l, h}
     end
@@ -90,5 +89,4 @@ end
 return { ord = ord, range = range }
 
 ------------------------------------------------------------------------------
-
 

@@ -49,8 +49,8 @@ return function(T)
     T:check_equal(E(sum{y=x}(x[y]), S), "x[1]")
     T:check_equal(E(sum{y=z}(z[y]), S), "z.a")
     T:check_equal(E(sum{y=Q}(x[y]), S), "x[1]")
-    T:check_equal(lib.dump(E(sum{y=Q}(x[y]), S)), "index(address{\"x\", 1})")
-    T:check_equal(lib.dump(E(sum{y=Q}(z[y]), S)), "index(address{\"z\", \"a\"})")
+    T:check_equal(lib.dump(E(sum{y=Q}(x[y]), S)), "expression(index(address{\"x\", 1}))")
+    T:check_equal(lib.dump(E(sum{y=Q}(z[y]), S)), "expression(index(address{\"z\", \"a\"}))")
     T:check_equal(E(sum{y=Q}(x[y] + z[y]), S), "x[1] + z.a")
   end
 
@@ -175,6 +175,7 @@ return function(T)
     T:check_equal(E(sum{d=D}(d^2), scope.new{D={a}}), "a^2")
   end
 end
+
 
 ------------------------------------------------------------------------------
 

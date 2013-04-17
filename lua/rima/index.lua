@@ -10,7 +10,6 @@ local core = require("rima.core")
 local element = require("rima.sets.element")
 local undefined_t = require("rima.types.undefined_t")
 local number_t = require("rima.types.number_t")
-local expression = require("rima.expression")
 
 local typeinfo = object.typeinfo
 
@@ -18,49 +17,42 @@ local typeinfo = object.typeinfo
 ------------------------------------------------------------------------------
 
 local index = object:new_class(_M, "index")
-local proxy_mt = setmetatable({}, index)
-index.proxy_mt = proxy_mt
-expression:copy_operators(proxy_mt)
 
 
 function index:new(base, ...)
   local a
   if typeinfo(base).index then
-    base = proxy.O(base)
     a = address:new(base.address, ...)
     base = base.base
   else
     a = address:new(...)
   end
 
-  return proxy:new(object.new(self, { base=base, address=a }), proxy_mt)
+  return object.new(self, { base = base, address = a })
 end
 
 
 function index:set(base, value)
-  local a = proxy.O(self).address
+  local a = self.address
   local i = index:new(base, a:sub(1, -2))
   index.newindex(i, a:value(-1), value)
 end
 
 
 function index:is_identifier(i)
-  local I = proxy.O(i)
-  return not I.base and I.address:is_identifier()
+  return not i.base and i.address:is_identifier()
 end
 
 
 function index:identifier(i)
-  local I = proxy.O(i)
-  return lib.repr(I.address:sub(1,1))
+  return lib.repr(i.address:sub(1,1))
 end
 
 
 ------------------------------------------------------------------------------
 
-proxy_mt.__tostring = lib.__tostring
-function proxy_mt:__repr(format)
-  self = proxy.O(self)
+index.__tostring = lib.__tostring
+function index:__repr(format)
   local base, addr = self.base, self.address
   local bt = typeinfo(base)
   if format.format == "dump" then
@@ -135,8 +127,7 @@ local function safe_index(t, i, base, address, length, depth, allow_undefined)
   end
   if not t then return end
   local value, vtype, vaddr
---  local status, message = xpcall(function() value, vtype, vaddr = do_index(t, i, length, address) end, debug.traceback)
-  local status, message = pcall(function() value, vtype, vaddr = do_index(t, i, length, address) end)
+  local status, message = xpcall(function() value, vtype, vaddr = do_index(t, i, length, address) end, debug.traceback)
   if not status then
     local a2 = address:sub(1, length)
     if base then
@@ -168,7 +159,7 @@ end
 local function newindex_check(t, i, value, base, a, depth)
   if typeinfo(i).index and not index:is_identifier(i) then
     local a2 = address:new(a)
-    for j, v in proxy.O(i).address:values() do
+    for j, v in i.address:values() do
       a2:append(v)
       t = safe_index(t, v, base, a2, -1, depth+1)
     end
@@ -193,9 +184,12 @@ local function create_table_element(current, i)
 end
 
 
+local interface
 local function newindex_set(current, i, value)
+  interface = interface or require("rima.interface")
+  i = interface.unwrap(i)
   if typeinfo(i).index and not index:is_identifier(i) then
-    local a2 = proxy.O(i).address
+    local a2 = i.address
     local a = a2:sub(1,-2)
     i = a2:value(-1)
     for j, v in a:values() do
@@ -209,14 +203,13 @@ local function newindex_set(current, i, value)
       newindex_set(current, k, v)
     end
   else
-    current[i] = value
+    current[i] = interface.unwrap(value)
   end
 end
 
 
 function index:newindex(i, value, depth)
   depth = depth or 0
-  self = proxy.O(self)
   local base, a = self.base, self.address
   if not base then
     local ar = lib.repr(a+i)
@@ -249,7 +242,6 @@ end
 ------------------------------------------------------------------------------
 
 function index:resolve(s)
-  self = proxy.O(self)
   local addr, base
   addr = core.eval(self.address, s)
   base = self.base
@@ -265,9 +257,8 @@ function index:resolve(s)
   local current, ctype = base or s
 
   if object.typename(current) == "index" then
-    local I2 = proxy.O(current)
-    base = I2.base
-    addr = I2.address + addr
+    base = current.base
+    addr = current.address + addr
     current = base or s
   end
 
@@ -296,9 +287,8 @@ function index:resolve(s)
       j = 0
     end
     if object.typename(current) == "index" then
-      local I2 = proxy.O(current)
-      base = I2.base
-      addr = I2.address + addr:sub(j+1)
+      base = current.base
+      addr = current.address + addr:sub(j+1)
       current = nil
     end
 
@@ -311,16 +301,15 @@ function index:resolve(s)
 end
 
 
-function proxy_mt:__eval(s)
-  return index.resolve(self, s)
+function index:__eval(s)
+  return self:resolve(s)
 end
 
 
 ------------------------------------------------------------------------------
 
-function proxy_mt:__list_variables(s, list)
-  local I = proxy.O(self)
-  local current, addr = I.base or s, I.address
+function index:__list_variables(s, list)
+  local current, addr = self.base or s, self.address
   local read_f = lib.getmetamethod(current, "__read_ref")
   if read_f then current = read_f(current) end
   local query_f = lib.getmetamethod(current, "__is_set")
@@ -389,8 +378,6 @@ end
 ------------------------------------------------------------------------------
 
 function index:__diff(v)
-  self = proxy.O(self)
-  v = proxy.O(v)
   if self.base == v.base and self.address == v.address then
     return 1
   else

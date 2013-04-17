@@ -2,35 +2,33 @@
 -- see LICENSE for license information
 
 local object = require("rima.lib.object")
-local proxy = require("rima.lib.proxy")
+local operator = require("rima.operator")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local expression = require("rima.expression")
 local add_mul = require("rima.operators.add_mul")
 local ops = require("rima.operations")
 
 
 ------------------------------------------------------------------------------
 
-local add = expression:new_type({}, "add")
+local add = operator:new_class({}, "add")
 add.precedence = 5
 
 
 ------------------------------------------------------------------------------
 
 function add:__repr(format)
-  local terms = proxy.O(self)
   local ff = format.format
 
   if ff == "dump" then
     return "+("..
-      lib.concat(terms, ", ",
+      lib.concat(self, ", ",
         function(t) return lib.simple_repr(t[1], format).."*"..lib.repr(t[2], format) end)..
       ")"
   end
 
   local s = ""
-  for i, t in ipairs(terms) do
+  for i, t in ipairs(self) do
     local c, e = t[1], t[2]
     
     -- If it's the first argument and it's negative, put a "-" out front
@@ -71,7 +69,7 @@ local function _simplify(new_terms, term_map, coeff, e, id, sort)
   else
     local ti = object.typeinfo(e)
     if ti.add then                              -- if the term is another sum, hoist its terms
-      sum(new_terms, term_map, coeff, proxy.O(e))
+      sum(new_terms, term_map, coeff, e)
       changed = true
     elseif ti.mul then                          -- if the term is a multiplication, try to hoist any constant
       local new_c, new_e = add_mul.extract_constant(e)
@@ -109,9 +107,8 @@ end
 
 
 function add:simplify()
-  local terms = proxy.O(self)
   local ordered_terms, term_map = {}, {}
-  local simplify_changed = sum(ordered_terms, term_map, 1, terms)
+  local simplify_changed = sum(ordered_terms, term_map, 1, self)
 
   local term_count, sort_changed = add_mul.sort_terms(ordered_terms)
 
@@ -139,7 +136,7 @@ end
 
 
 function add:__eval(...)
-  local terms = add_mul.evaluate_terms(proxy.O(self), ...)
+  local terms = add_mul.evaluate_terms(self, ...)
   if not terms then return self end
   return add:new(terms)
 end
@@ -149,7 +146,7 @@ end
 
 function add:__diff(v)
   local diff_terms = {}
-  for _, t in ipairs(proxy.O(self)) do
+  for _, t in ipairs(self) do
     local c, e = t[1], t[2]
     local dedv = core.diff(e, v)
     if dedv ~= 0 then

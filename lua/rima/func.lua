@@ -92,8 +92,10 @@ end
 
 ------------------------------------------------------------------------------
 
+local expression = require"rima.expression"
+
 function func:__call(...)
-  return self:call{...}
+  return self:call(expression.vtunwrap(...))
 end
 
 

@@ -78,7 +78,7 @@ local function test_file(infile, outfile, infile_name)
 
     elseif formats[key] then                    -- compare output
       tests = tests + 1
-      local r = exp and lib.repr(exp, formats[key].f)
+      local r = exp and lib.repr(interface.unwrap(exp), formats[key].f)
       if not exp or r == line then
         outfile:write(l, "\n")
       else

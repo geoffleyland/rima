@@ -3,9 +3,9 @@
 
 local lib = require("rima.lib")
 local core = require("rima.core")
-local proxy = require("rima.lib.proxy")
 
 local add_mul = {}
+
 
 ------------------------------------------------------------------------------
 
@@ -89,25 +89,24 @@ end
 ------------------------------------------------------------------------------
 
 function add_mul.extract_constant(e)
-  local terms = proxy.O(e)
-  local constant = terms[1][2]
+  local constant = e[1][2]
 
   if type(constant) == "number" then
-    local term_count = #terms
+    local term_count = #e
 
     if term_count == 1 then
       return constant                           -- There was just a constant
     end
 
-    if term_count == 2 and terms[2][1] == 1 then
+    if term_count == 2 and e[2][1] == 1 then
       -- there's a constant and only one other argument with a
       -- coefficient/exponent of 1 - hoist the other argument
-      return constant, terms[2][2]
+      return constant, e[2][2]
     end
             
     local new_terms = {}
     for i = 2, term_count do
-      new_terms[i-1] = terms[i]
+      new_terms[i-1] = e[i]
     end
     return constant, getmetatable(e):new(new_terms)
   end
@@ -117,10 +116,8 @@ end
 ------------------------------------------------------------------------------
 
 function add_mul.list_variables(op, S, list)
-  local terms = proxy.O(op)
-  for i = 1, #terms do
-    local t = terms[i]
-    core.list_variables(t[2], S, list)
+  for i = 1, #op do
+    core.list_variables(op[i][2], S, list)
   end
 end
 

@@ -27,7 +27,7 @@ return function(T)
   do
     local S = N()
     T:expect_ok(function() S.a = 1 end)
-    T:check_equal(D(S.a), 'index(scope{ 1 = { a = 1 } }, address{"a"})')
+    T:check_equal(D(S.a), 'expression(index(scope{ 1 = { a = 1 } }, address{"a"}))')
     T:expect_error(function() S.a.b = 1 end, "%L: error indexing 'a' as 'a.b': can't index a number")
     T:expect_error(function() S.a.b.c = 1 end, "%L: error indexing 'a' as 'a.b': can't index a number")
     T:expect_ok(function() S.b.c = 1 end)
@@ -452,13 +452,13 @@ return function(T)
     local S = N()
     S.a[{i=I}].b = 10
     local list = {}
-    index.proxy_mt.__list_variables(a[1].b, S, list)
-    index.proxy_mt.__list_variables(a[2].b, S, list)
+    core.list_variables(a[1].b, S, list)
+    core.list_variables(a[2].b, S, list)
     T:check_equal(list["a[i].b"].ref, "a[i].b")
     T:check_equal(list["a[i].b"].sets[1], "i in I")
     
     list = {}
-    index.proxy_mt.__list_variables(a[i.j].b, S, list)
+    core.list_variables(a[i.j].b, S, list)
     T:check_equal(list["a[i].b"].ref, "a[i].b")
 
     list = core.list_variables(a[1].b + a[2].b + a[3].c, S)

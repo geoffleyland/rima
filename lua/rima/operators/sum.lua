@@ -2,33 +2,31 @@
 -- see LICENSE for license information
 
 local object = require("rima.lib.object")
-local proxy = require("rima.lib.proxy")
+local operator = require("rima.operator")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local closure = require("rima.closure")
 local add = require("rima.operators.add")
-local expression = require("rima.expression")
 local ops = require("rima.operations")
 local set_list = require("rima.sets.list")
 
 
 ------------------------------------------------------------------------------
 
-local sum = expression:new_type({}, "sum")
+local sum = operator:new_class({}, "sum")
 sum.precedence = 1
 
 
 function sum:simplify()
-  local terms = proxy.O(self)
-  local ti = object.typeinfo(terms[1])
+  local ti = object.typeinfo(self[1])
   if ti.closure then
     return self
   elseif ti["sets.list"] then
-    return sum:new{ closure:new(terms[2], terms[1]) }
+    return sum:new{ closure:new(self[2], self[1]) }
   else
-    local term_count = #terms
-    local sets = set_list:read(terms, term_count-1)
-    return sum:new{ closure:new(terms[term_count], sets) }
+    local term_count = #self
+    local sets = set_list:read(self, term_count-1)
+    return sum:new{ closure:new(self[term_count], sets) }
   end
 end
 
@@ -45,16 +43,14 @@ local formats =
 
 function sum:__repr(format)
   local f = formats[format.format] or formats.other
-  local terms = proxy.O(self)
-  return f:format(lib.repr(terms[1], format))
+  return f:format(lib.repr(self[1], format))
 end
 
 
 ------------------------------------------------------------------------------
 
 function sum:__eval(S)
-  local terms = proxy.O(self)
-  local cl = terms[1]
+  local cl = self[1]
 
   -- Iterate through all the elements of the sets, collecting defined and
   -- undefined terms
@@ -89,7 +85,7 @@ function sum:__eval(S)
     else
       z = t.terms[1][2]
     end
-    total_terms[#total_terms+1] = {1, sum:new{t.iterators, cl:undo(z, t.iterators)} }
+    total_terms[#total_terms+1] = {1, sum:new{ t.iterators, cl:undo(z, t.iterators) }}
   end
 
   -- Add the defined terms onto the end
@@ -108,7 +104,7 @@ end
 ------------------------------------------------------------------------------
 
 function sum:__list_variables(S, list)
-  local cl = proxy.O(self)[1]
+  local cl = self[1]
   for S2, undefined in cl:iterate(S) do
     local S3 = cl:fake_iterate(S2, undefined)
     core.list_variables(core.eval(cl, S3), S3, list)

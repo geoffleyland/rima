@@ -1,22 +1,19 @@
 -- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local object = require("rima.lib.object")
-local proxy = require("rima.lib.proxy")
+local operator = require("rima.operator")
 local core = require("rima.core")
-local expression = require("rima.expression")
 
 
 ------------------------------------------------------------------------------
 
-min = expression:new_type({}, "min")
+min = operator:new_class({}, "min")
 min.precedence = 0
 
-function min.__eval(args, ...)
-  args = proxy.O(args)
+function min:__eval(...)
   local a2 = {}
   local m = math.huge
-  for _, a in ipairs(args) do
+  for _, a in ipairs(self) do
     a = core.eval(a, ...)
     if type(a) == "number" then
       if a < m then
@@ -38,14 +35,13 @@ end
 
 ------------------------------------------------------------------------------
 
-max = expression:new_type({}, "max")
+max = operator:new_class({}, "max")
 max.precedence = 0
 
-function max.__eval(args, ...)
-  args = proxy.O(args)
+function max:__eval(...)
   local a2 = {}
   local m = -math.huge
-  for _, a in ipairs(args) do
+  for _, a in ipairs(self) do
     a = core.eval(a, ...)
     if type(a) == "number" then
       if a > m then

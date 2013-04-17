@@ -17,6 +17,7 @@ return function(T)
   local D = lib.dump
   local R = interface.R
   local F = interface.func
+  local U = interface.unwrap
 
   T:test(object.typeinfo(func:new({"a"}, 3)).func, "typeinfo(func:new()).func")
   T:check_equal(object.typename(func:new({"a"}, 3)), "func", "typename(func:new()) == 'func'")
@@ -37,7 +38,7 @@ return function(T)
     local f
     T:expect_ok(function() f = func:new({"a"}, 3) end)
     T:expect_ok(function() f = F{a}(3) end)
-    
+
     T:check_equal(f, "function(a) return 3")
     T:check_equal(f(5), 3)
   end
@@ -47,7 +48,7 @@ return function(T)
     local f
     T:expect_ok(function() f = func:new({"a"}, 3 + a) end)
     T:expect_ok(function() f = F{a}(3 + a) end)    
-    
+
     -- repr
     T:check_equal(f, "function(a) return 3 + a")
 
@@ -56,12 +57,12 @@ return function(T)
     T:check_equal(f(5), 8)
     T:check_equal(f:call({x}, {x=10}), 13)
     T:check_equal(f(x + y), "3 + x + y")
-    T:check_equal(f:call({x + y}, {x=10}), "13 + y")
-    
+    T:check_equal(f:call({U(x + y)}, {x=10}), "13 + y")
+
     -- partial evaluation
     T:check_equal(f(), "function(a) return 3 + a")
     T:check_equal(f()(x), "3 + x")
-    
+
     -- name overloading
     T:check_equal(D(f(x)), "+(1*3, 1*index(address{\"x\"}))")
     T:check_equal(E(f(x), {x=10}), 13)
@@ -82,7 +83,7 @@ return function(T)
     T:check_equal(f(x), "b + x")
     T:check_equal(f(5), "5 + b")
     T:check_equal(f(1 + a), "1 + a + b")
-    T:check_equal(f(1 + b), "1 + 2*b")
+    T:check_equal(f(U(1 + b)), "1 + 2*b")
     T:check_equal(f:call({x}, {b=20}), "20 + x")
     T:check_equal(f:call({5}, {b=20}), 25)
     T:check_equal(f:call({x}, {b=20,x=100}), 120)
@@ -108,7 +109,7 @@ return function(T)
     -- simple evaluation
     T:check_equal(f(x, y), "x + 3*y")
     T:check_equal(f(5, 7), 26)
-    T:check_equal(f(1+a, 2*b), "1 + a + 6*b")
+    T:check_equal(f(U(1+a), U(2*b)), "1 + a + 6*b")
     T:check_equal(f(b, b), "4*b")
     T:check_equal(f:call({x, y}, {x=1}), "1 + 3*y")
     T:check_equal(f:call({5, y}, {y=10, b=1000}), 35)
@@ -128,13 +129,13 @@ return function(T)
       s=interface.func{b}(a.w[b].y),
       u=interface.func{b}(a.q[b].y) }
 
-    T:check_equal(D(t(1)), "call(index(address{\"t\"}), 1)")
+    T:check_equal(D(t(1)), "expression(call(index(address{\"t\"}), 1))")
     T:check_equal(t(1), "t(1)")
     T:expect_ok(function() E(t(1), S) end, "eval")
     T:check_equal(E(t(1), S), 10)
     T:check_equal(E(t(2), S), 20)
 
-    T:check_equal(D(s(1).z), "index(call(index(address{\"s\"}), 1), address{\"z\"})")
+    T:check_equal(D(s(1).z), "expression(index(call(index(address{\"s\"}), 1), address{\"z\"}))")
     T:check_equal(s(1).z, "s(1).z")
     T:expect_ok(function() E(s(1).z, S) end, "eval")
     T:check_equal(E(s(1).z, S), 100)

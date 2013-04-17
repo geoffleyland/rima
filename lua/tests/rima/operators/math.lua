@@ -17,7 +17,7 @@ return function(T)
 
   T:check_equal(opmath.exp(1), math.exp(1))
 
-  T:check_equal(D(opmath.exp(a)), 'exp(index(address{"a"}))')
+  T:check_equal(D(opmath.exp(a)), 'expression(exp(index(address{"a"})))')
   local S = {}
   T:check_equal(E(opmath.exp(a), S), "exp(a)")
   S.a = 4

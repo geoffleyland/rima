@@ -1,19 +1,13 @@
 -- Copyright (c) 2009-2011 Incremental IP Limited
 -- see LICENSE for license information
 
-local error, ipairs, pcall =
-      error, ipairs, pcall
-
 local object = require("rima.lib.object")
-local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 local element = require("rima.sets.element")
 
-module(...)
 
-
--- Getting a linear form -------------------------------------------------------
+------------------------------------------------------------------------------
 
 local function add_variable(terms, ref, coeff)
   local name = lib.repr(ref)
@@ -24,7 +18,7 @@ local function add_variable(terms, ref, coeff)
 end
 
 
-function _linearise(l)
+local function _linearise(l)
   local constant, terms = 0, {}
   local fail = false
 
@@ -38,7 +32,7 @@ function _linearise(l)
     local exp = element.expression(l)
     add_variable(terms, exp, 1)
   elseif lti.add then
-    for i, a in ipairs(proxy.O(l)) do
+    for i, a in ipairs(l) do
       local c, x = a[1], a[2]
 
       local xti = object.typeinfo(x)
@@ -70,7 +64,7 @@ function _linearise(l)
 end
 
 
-function linearise(e, ...)
+local function linearise(e, ...)
   local l = core.eval(e, ...)
   local status, constant, terms = pcall(_linearise, l)
   if not status then
@@ -80,5 +74,9 @@ function linearise(e, ...)
 end
 
 
--- EOF -------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+return { linearise = linearise }
+
+------------------------------------------------------------------------------
 

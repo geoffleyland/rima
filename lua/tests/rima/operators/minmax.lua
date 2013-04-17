@@ -14,10 +14,11 @@ return function(T)
   local E = interface.eval
   local D = lib.dump
   local R = interface.R
+  local U = interface.unwrap
 
   -- min
-  T:test(object.typeinfo(interface.min(1, {1, 1})).min, "typeinfo(min).min")
-  T:check_equal(object.typename(interface.min(1, {1, 1})), "min", "typename(min) == 'min'")
+  T:test(object.typeinfo(U(interface.min(1, {1, 1}))).min, "typeinfo(min).min")
+  T:check_equal(object.typename(U(interface.min(1, {1, 1}))), "min", "typename(min) == 'min'")
   
   do
     local a, b, c, d = R"a, b, c, d"
@@ -30,8 +31,8 @@ return function(T)
   end
 
   -- max
-  T:test(object.typeinfo(interface.max(1, {1, 1})).max, "typeinfo(max).max")
-  T:check_equal(object.typename(interface.max(1, {1, 1})), "max", "typename(max) == 'max'")
+  T:test(object.typeinfo(U(interface.max(1, {1, 1}))).max, "typeinfo(max).max")
+  T:check_equal(object.typename(U(interface.max(1, {1, 1}))), "max", "typename(max) == 'max'")
   
   do
     local a, b, c, d = R"a, b, c, d"

@@ -2,7 +2,6 @@
 -- see LICENSE for license information
 
 local object = require("rima.lib.object")
-local proxy = require("rima.lib.proxy")
 local lib = require("rima.lib")
 local core = require("rima.core")
 
@@ -10,89 +9,145 @@ local core = require("rima.core")
 ------------------------------------------------------------------------------
 
 local expression = object:new_class({}, "expression")
-local expression_methods, expression_ops
+local expressions = setmetatable({}, { __mode = "k" })
 
 
-local function copy_methods(m, t)
-  for k, v in pairs(m) do
-    if not rawget(t, k) then
-      rawset(t, k, v)
-    end
+local function wrap(op)
+  if type(op) ~= "table" then return op end 
+
+  local top = object.typeinfo(op)
+  if top.index or top.operator then
+    local e = setmetatable({}, expression)
+    expressions[e] = op
+    return e
+  else
+    return op
   end
 end
 
 
-function expression:copy_operators(t)
-  copy_methods(expression_ops, t)
+local function vtwrap(...)
+  local r = {}
+  for i = 1, select("#", ...) do
+    r[i] = wrap(select(i, ...))
+  end
+  return r
 end
 
 
-function expression:new_type(t, typename)
-  copy_methods(expression_methods, t)
-  self:copy_operators(t)
-  return self:new_class(t, typename)
+local function vwrap(...)
+  return unpack(vtwrap(...))
 end
 
 
-function expression:new(terms)
-  local e = proxy:new(terms, self)
-  if self.simplify then e = self.simplify(e) end
-  return e
+local function unwrap(e)
+  return expressions[e] or e
 end
+
+
+local function tunwrap(t)
+  local r = {}
+  for k, v in pairs(t) do
+    r[k] = unwrap(v)
+  end
+  return r
+end
+
+
+local function vtunwrap(...)
+  local r = {}
+  for i = 1, select("#", ...) do
+    r[i] = unwrap(select(i, ...))
+  end
+  return r
+end
+
+
+local function vunwrap(...)
+  return unpack(vtunwrap(...))
+end
+
+
+expression.wrap = wrap
+expression.vtwrap = vtwrap
+expression.vwrap = vwrap
+expression.unwrap = unwrap
+expression.tunwrap = tunwrap
+expression.vtunwrap = vtunwrap
+expression.vunwrap = vunwrap
 
 
 ------------------------------------------------------------------------------
 
-expression_methods =
-{
-  __tostring = lib.__tostring,
-  __repr =
-    function(self, format)
-      return object.typename(self).."("..lib.concat_repr(proxy.O(self), format)..")"
-    end,
-}
+local W, U = wrap, unwrap
 
 
-function expression_methods:__list_variables(S, list)
-  local terms = proxy.O(self)
-  for i = 1, #terms do
-    core.list_variables(terms[i], S, list)
+function expression:__list_variables(S, list)
+  return core.list_variables(U(self), S, list)
+end
+
+
+function expression:__repr(format, ...)
+  local s = lib.repr(unwrap(self), format, ...) 
+  if format.format == "dump" then
+    return "expression("..s..")"
+  else
+    return s
   end
 end
+expression.__tostring = lib.__tostring
 
 
 ------------------------------------------------------------------------------
 
--- The expression operators are lazy loaded to avoid a require conflict between
--- the operators (which require expression) and expression (which requires
--- operators).  It would be nice if there was a better workaround.
+local ops = require"rima.operations"
+local call = require"rima.operators.call"
+local index = require"rima.index"
 
-local function load_op(t, k) t[k] = require("rima.operators."..k) return t[k] end
-local op_mods = setmetatable({}, { __index = load_op })
 
-local function load_index(t, k) t[k] = require("rima."..k) return t[k] end
-local index_mods = setmetatable({}, { __index = load_index })
+function expression.__add  (a, b) return W(ops.add(U(a), U(b))) end
+function expression.__sub  (a, b) return W(ops.sub(U(a), U(b))) end
+function expression.__unm  (a)    return W(ops.unm(U(a))) end
+function expression.__mul  (a, b) return W(ops.mul(U(a), U(b))) end
+function expression.__div  (a, b) return W(ops.div(U(a), U(b))) end
+function expression.__pow  (a, b) return W(ops.pow(U(a), U(b))) end
+function expression.__mod  (a, b) return W(ops.mod(U(a), U(b))) end
+function expression.__call (...)  return W(call:new(vtunwrap(...))) end
 
-expression_ops =
-{
-  __add   = function(a, b) return op_mods.add:new{{ 1, a}, { 1, b}} end,
-  __sub   = function(a, b) return op_mods.add:new{{ 1, a}, {-1, b}} end,
-  __unm   = function(a)    return op_mods.add:new{{-1, a}} end,
-  __mul   = function(a, b) return op_mods.mul:new{{ 1, a}, { 1, b}} end,
-  __div   = function(a, b) return op_mods.mul:new{{ 1, a}, {-1, b}} end,
-  __pow   = function(a, b) return op_mods.pow:new{a, b} end,
-  __mod   = function(a, b) return op_mods.mod:new{a, b} end,
-  __call  = function(...)  return op_mods.call:new{...} end,
-  __index = function(...)  return index_mods.index:new(...) end,
-  __newindex = function (t, k, v)
-    local tt = object.typename(t)
-    if tt == "index" then
-      return index_mods.index.newindex(t, k, v, 1)
-    else
-      error("Can't index an "..object.typename(tt))
+
+function expression.__index(t, k, ...)
+  if type(k) == "table" and not getmetatable(k) then
+    local k2 = {}
+    for k, v in pairs(k) do
+      k2[U(k)] = U(v)
     end
+    k = k2
+  else
+    k = U(k)
   end
-}
+  return W(index:new(U(t), k, vunwrap(...)))
+end
+
+
+function expression.__newindex(e, k, v)
+  e = U(e)
+
+  if type(k) == "table" and not getmetatable(k) then
+    local k2 = {}
+    for k, v in pairs(k) do
+      k2[U(k)] = U(v)
+    end
+    k = k2
+  else
+    k = U(k)
+  end
+
+  if object.typename(e) == "index" then
+    index.newindex(e, k, U(v), 1)
+  else
+    error("You can't do that!")
+  end
+end
 
 
 ------------------------------------------------------------------------------

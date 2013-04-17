@@ -1,30 +1,27 @@
 -- Copyright (c) 2009-2012 Incremental IP Limited
 -- see LICENSE for license information
 
-local object = require("rima.lib.object")
-local proxy = require("rima.lib.proxy")
+local operator = require("rima.operator")
 local lib = require("rima.lib")
 local core = require("rima.core")
-local expression = require("rima.expression")
 local undefined_t = require("rima.types.undefined_t")
 
 
 ------------------------------------------------------------------------------
 
-local case = expression:new_type({}, "case")
+local case = operator:new_class({}, "case")
 case.precedence = 1
 
 
 ------------------------------------------------------------------------------
 
-function case.__repr(args, format)
-  args = proxy.O(args)
-  local s = ("case %s ("):format(lib.repr(args[1], format))
-  for _, v in ipairs(args[2]) do
+function case:__repr(format)
+  local s = ("case %s ("):format(lib.repr(self[1], format))
+  for _, v in ipairs(self[2]) do
     s = s..("%s: %s; "):format(lib.repr(v[1], format), lib.repr(v[2], format))
   end
-  if rawget(args, 3) then
-    s = s..("default: %s; "):format(lib.repr(args[3]))
+  if rawget(self, 3) then
+    s = s..("default: %s; "):format(lib.repr(self[3]))
   end
   s = s..")"
   return s
@@ -40,17 +37,15 @@ local function eval_preserve(value, type, addr, ...)
 end
 
 
-function case.__eval(args, ...)
-  args = proxy.O(args)
-
+function case:__eval(...)
   -- Evaluate the test value
-  local value = core.eval(args[1], ...)
+  local value = core.eval(self[1], ...)
   local value_defined = core.defined(value)
 
   -- Run through evaluating all the case values, seeing if we get a match
   local cases = {}
   local found_match
-  for i, v in ipairs(args[2]) do
+  for i, v in ipairs(self[2]) do
     local match_value = core.eval(v[1], ...)
     if value_defined and core.defined(match_value) then
       if value == match_value then
@@ -69,16 +64,16 @@ function case.__eval(args, ...)
     end
   end
   -- if no cases matched, return the default (if there is one)
-  if #cases == 0 and args[3] then
-    return eval_preserve(args[3], args[4], args[5], ...)
+  if #cases == 0 and self[3] then
+    return eval_preserve(self[3], self[4], self[5], ...)
   end
 
   -- only keep the default if we didn't find a match (we might be here if we
   -- did find a match, but earlier match values weren't defined)
-  if found_match or not args[3] then
+  if found_match or not self[3] then
     return case:new{value, cases}
   else
-    return case:new{value, cases, eval_preserve(args[3], args[4], args[5], ...)}
+    return case:new{value, cases, eval_preserve(self[3], self[4], self[5], ...)}
   end
 end
 
