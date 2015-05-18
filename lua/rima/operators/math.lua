@@ -39,6 +39,8 @@ local function math_repr(args, format)
         return "\\"..object.type(args).." "..core.parenthise(args[1], format, 1)
       end
     end
+  elseif ff == "lua" then
+    return "math."..o.."("..lib.concat_repr(args, format)..")"
   else
     return o.."("..lib.concat_repr(args, format)..")"
   end
